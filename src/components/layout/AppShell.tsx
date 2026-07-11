@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, Menu, Search, X, Crown, LogOut, ChevronRight, AlertCircle } from "lucide-react";
+import { Bell, Menu, Search, X, Crown, LogOut, ChevronRight, AlertCircle, Settings } from "lucide-react";
 
 import { buildAppNav } from "@/lib/navigation/app-nav";
+import { createClient } from "@/lib/supabase/client";
 
 export type Notification = {
   id: string;
@@ -60,6 +61,99 @@ export function AppShell({
   const [searching, setSearching] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
+
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
+  const [currentName, setCurrentName] = useState(memberName);
+  const [email, setEmail] = useState("");
+  const [newName, setNewName] = useState(memberName);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
+
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    async function loadUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setEmail(user.email || "");
+      }
+    }
+    loadUser();
+  }, [supabase]);
+
+  useEffect(() => {
+    setCurrentName(memberName);
+    setNewName(memberName);
+  }, [memberName]);
+
+  const handleUpdateName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsLoading(true);
+    setSettingsError(null);
+    setSettingsSuccess(null);
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) throw new Error("Not authenticated");
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ full_name: newName })
+        .eq("id", user.id);
+
+      if (updateError) throw updateError;
+
+      setCurrentName(newName);
+      setSettingsSuccess("Username updated successfully.");
+    } catch (err: any) {
+      setSettingsError(err.message || "Failed to update username");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setSettingsError("Passwords do not match");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setSettingsError("Password must be at least 8 characters");
+      return;
+    }
+    setSettingsLoading(true);
+    setSettingsError(null);
+    setSettingsSuccess(null);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+
+      setNewPassword("");
+      setConfirmPassword("");
+      setSettingsSuccess("Password updated successfully.");
+    } catch (err: any) {
+      setSettingsError(err.message || "Failed to update password");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setSettingsLoading(true);
+    setSettingsError(null);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setSettingsOpen(false);
+      window.location.href = "/login";
+    } catch (err: any) {
+      setSettingsError(err.message || "Failed to sign out");
+      setSettingsLoading(false);
+    }
+  };
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
   const navItems = useMemo(() => buildAppNav({ isMaster }), [isMaster]);
@@ -156,14 +250,23 @@ export function AppShell({
         })}
       </nav>
       <div className="border-t border-sidebar-border p-4 space-y-4 bg-sidebar/80">
-        <div className="flex items-center gap-3 px-2">
-          <div className="size-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary border border-sidebar-border font-bold">
-            {memberName[0]}
+        <div className="flex items-center justify-between gap-2 px-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="size-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary border border-sidebar-border font-bold shrink-0">
+              {currentName[0]?.toUpperCase() || "P"}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-bold text-white">{currentName}</p>
+              <p className="truncate text-[10px] text-fog-muted capitalize font-label">{roleName(platformRole)}</p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-bold text-white">{memberName}</p>
-            <p className="truncate text-[10px] text-fog-muted capitalize font-label">{roleName(platformRole)}</p>
-          </div>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Open settings"
+            className="grid size-8 shrink-0 place-items-center rounded-full text-sidebar-foreground hover:text-white hover:bg-sidebar-accent transition-colors group"
+          >
+            <Settings size={15} className="transition-transform duration-500 group-hover:rotate-90" />
+          </button>
         </div>
         <Link href="/subscription" className="flex w-full items-center justify-center gap-2 rounded-full bg-sidebar-primary hover:bg-opacity-90 py-3 font-label text-xs text-on-primary-fixed uppercase tracking-wider transition duration-200 shadow-md hover:brightness-105">
           <Crown size={14} />
@@ -320,6 +423,148 @@ export function AppShell({
             </div>
           </div>
         </Modal>
+      )}
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in" onMouseDown={() => {
+          setSettingsOpen(false);
+          setSettingsError(null);
+          setSettingsSuccess(null);
+        }}>
+          <div className="relative w-full max-w-md overflow-hidden rounded-lg border border-surgical-steel bg-surface-container-low text-on-surface shadow-2xl animate-in zoom-in-95 duration-200" onMouseDown={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-surgical-steel px-6 py-4">
+              <h2 className="font-headline text-lg font-bold text-white flex items-center gap-2">
+                <Settings className="text-primary-container transition-transform duration-500 hover:rotate-90" size={18} />
+                Account Settings
+              </h2>
+              <button
+                onClick={() => {
+                  setSettingsOpen(false);
+                  setSettingsError(null);
+                  setSettingsSuccess(null);
+                }}
+                className="text-on-surface-variant hover:text-white transition-colors"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Scrollable Container */}
+            <div className="max-h-[70vh] overflow-y-auto px-6 py-6 space-y-6">
+              {settingsSuccess && (
+                <div className="flex items-center gap-2 rounded bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-400">
+                  <span>{settingsSuccess}</span>
+                </div>
+              )}
+
+              {settingsError && (
+                <div className="flex items-center gap-2 rounded bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+                  <AlertCircle size={16} className="shrink-0" />
+                  <span>{settingsError}</span>
+                </div>
+              )}
+
+              {/* Read-Only Details */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block font-label text-[10px] uppercase tracking-wider text-fog-muted">Email Address</label>
+                  <p className="mt-1 font-body text-sm text-white select-all">{email || "Retrieving session email..."}</p>
+                </div>
+                <div>
+                  <label className="block font-label text-[10px] uppercase tracking-wider text-fog-muted">Access Tier</label>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="border border-surgical-steel bg-surface-container-high px-2.5 py-1 rounded-full font-label text-[10px] text-primary-container uppercase">
+                      Level 0{currentTier} • {isMaster ? "Master" : "Practitioner"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <hr className="border-surgical-steel" />
+
+              {/* Username Update Form */}
+              <form onSubmit={handleUpdateName} className="space-y-3">
+                <h3 className="font-headline text-sm font-semibold text-white">Update Profile</h3>
+                <div>
+                  <label htmlFor="settings-username" className="block font-label text-[10px] uppercase tracking-wider text-fog-muted mb-1.5">Full Name</label>
+                  <input
+                    id="settings-username"
+                    type="text"
+                    required
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="w-full rounded border border-surgical-steel bg-surface-container-lowest px-4 py-2.5 text-sm text-white outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={settingsLoading || newName === currentName}
+                  className="flex min-h-10 items-center justify-center rounded-full bg-primary-container px-5 font-label text-xs uppercase tracking-wider text-on-primary-fixed transition-all hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Save Profile
+                </button>
+              </form>
+
+              <hr className="border-surgical-steel" />
+
+              {/* Password Update Form */}
+              <form onSubmit={handleUpdatePassword} className="space-y-3">
+                <h3 className="font-headline text-sm font-semibold text-white">Change Password</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="settings-new-password" className="block font-label text-[10px] uppercase tracking-wider text-fog-muted mb-1.5">New Password</label>
+                    <input
+                      id="settings-new-password"
+                      type="password"
+                      required
+                      placeholder="Minimum 8 characters"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full rounded border border-surgical-steel bg-surface-container-lowest px-4 py-2.5 text-sm text-white outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all placeholder:text-fog-muted"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="settings-confirm-password" className="block font-label text-[10px] uppercase tracking-wider text-fog-muted mb-1.5">Confirm New Password</label>
+                    <input
+                      id="settings-confirm-password"
+                      type="password"
+                      required
+                      placeholder="Verify new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full rounded border border-surgical-steel bg-surface-container-lowest px-4 py-2.5 text-sm text-white outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all placeholder:text-fog-muted"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={settingsLoading || !newPassword}
+                  className="flex min-h-10 items-center justify-center rounded-full border border-primary-container px-5 font-label text-xs uppercase tracking-wider text-primary-container transition-all hover:bg-primary-container/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Update Password
+                </button>
+              </form>
+
+              <hr className="border-surgical-steel" />
+
+              {/* Logout Button */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={settingsLoading}
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 font-label-md text-label-md text-red-400 uppercase tracking-wider transition hover:bg-red-500/20 active:scale-[0.98] disabled:opacity-50"
+                >
+                  <LogOut size={16} />
+                  Log Out Session
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
