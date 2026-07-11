@@ -21,8 +21,8 @@ export default async function CheckoutPage({
     redirect("/login?next=/checkout");
   }
 
-  // If we are checking out membership (default), check if already active
-  if (product !== "mentorship") {
+  // If we are checking out standard membership (default), check if already active
+  if (product !== "mentorship" && product !== "annual") {
     const cookieStore = await cookies();
     const hasLocalActive = cookieStore.get("stoicverse_membership_active")?.value === "true";
 

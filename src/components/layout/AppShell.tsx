@@ -310,7 +310,7 @@ export function AppShell({
       </aside>
 
       {/* Desktop Sidebar (Fixed) */}
-      <aside className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar md:flex md:min-h-screen md:flex-col">
+      <aside className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar md:flex md:h-screen md:sticky md:top-0 md:flex-col">
         {renderSidebar()}
       </aside>
 
