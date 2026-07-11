@@ -39,6 +39,8 @@ export interface AppShellProps {
 const roleName = (role: string) => role.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 
+const EMPTY_NOTIFICATIONS: Notification[] = [];
+
 export function AppShell({
   active,
   title,
@@ -46,7 +48,7 @@ export function AppShell({
   memberName = "Practitioner",
   platformRole = "member",
   currentTier = 1,
-  notifications: initialNotifications = [],
+  notifications: initialNotifications = EMPTY_NOTIFICATIONS,
   children,
 }: AppShellProps) {
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
@@ -63,10 +65,16 @@ export function AppShell({
   const navItems = useMemo(() => buildAppNav({ isMaster }), [isMaster]);
   const visibleResults = query.trim().length >= 2 ? results : [];
 
-  // Sync notifications prop changes
+  // Sync notifications prop changes safely
   useEffect(() => {
-    setNotifications(initialNotifications);
-  }, [initialNotifications]);
+    const hasChanged =
+      initialNotifications.length !== notifications.length ||
+      initialNotifications.some((n, idx) => n.id !== notifications[idx]?.id || n.is_read !== notifications[idx]?.is_read);
+
+    if (hasChanged) {
+      setNotifications(initialNotifications);
+    }
+  }, [initialNotifications, notifications]);
 
   useEffect(() => {
     if (isSearchOpen) searchInput.current?.focus();
