@@ -13,6 +13,6 @@ export function buildAppNav({ isMaster }: { isMaster: boolean }): AppNavItem[] {
     { href: "/community", label: "Community", icon: MessageSquare },
     { href: "/events", label: "Events", icon: CalendarDays },
     ...(isMaster ? [{ href: "/master", label: "Master Zone", icon: Crown }] : []),
-    { href: "/subscription", label: "Mentorship", icon: BookOpen },
+    { href: "/mentorship", label: "Mentorship", icon: BookOpen },
   ];
 }

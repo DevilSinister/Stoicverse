@@ -1,6 +1,8 @@
-
+"use client";
 
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useState } from "react";
 import { ArrowRight, CalendarDays, Check, ChevronRight, CreditCard, Crown, Gauge, Image as ImageIcon, Lock, LogIn, MessageSquare, MoreVertical, Play, Plus, Send, Shield, Video } from "lucide-react";
 import { AppShell as SharedAppShell } from "@/components/layout/AppShell";
 
@@ -639,6 +641,34 @@ export function CommunitySelectionScreen() {
 }
 
 export function CheckoutScreen() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const product = searchParams.get("product");
+  const isMentorship = product === "mentorship";
+
+  const [loading, setLoading] = useState(false);
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    if (isMentorship) {
+      // Set mentorship active cookie (expires in 60 days)
+      document.cookie = "stoicverse_mentorship_active=true; path=/; max-age=5184000; SameSite=Lax";
+      // Also write to local storage as fallback
+      localStorage.setItem("stoicverse_mentorship_active", "true");
+      router.push("/mentorship");
+    } else {
+      // Set membership active cookie (expires in 1 year)
+      document.cookie = "stoicverse_membership_active=true; path=/; max-age=31536000; SameSite=Lax";
+      localStorage.setItem("stoicverse_membership_active", "true");
+      router.push("/dashboard");
+    }
+  };
+
   return (
     <main className="grid min-h-screen lg:grid-cols-[1fr_32rem] bg-surface-container-lowest">
       <section className="p-8 md:p-12 lg:p-16 flex flex-col justify-between relative overflow-hidden bg-surface-container-low border-r border-surgical-steel">
@@ -652,34 +682,64 @@ export function CheckoutScreen() {
         <div className="relative z-10 my-auto max-w-2xl border-l-2 border-primary-container pl-8 py-4">
           <p className="font-label-sm text-label-sm uppercase tracking-[0.16em] text-primary-container">Checkout</p>
           <h1 className="mt-3 font-headline text-3xl font-extrabold text-white leading-tight md:text-4xl">
-            Activate membership.
+            {isMentorship ? "Secure Mentorship." : "Activate membership."}
           </h1>
           <p className="mt-4 font-body text-base text-on-surface-variant leading-relaxed">
-            Unlock the complete operating surface for disciplined study, interactive feedback, and community reflection.
+            {isMentorship
+              ? "Accelerate your training with dedicated 1-on-1 private logs reviews and private reflection slots with a Master Stoic."
+              : "Unlock the complete operating surface for disciplined study, interactive feedback, and community reflection."}
           </p>
 
           <div className="mt-8 space-y-5">
-            <div className="flex items-start gap-4">
-              <Check className="mt-1 size-5 text-primary-container shrink-0" />
-              <div>
-                <h4 className="font-headline text-sm text-white font-semibold">Full Curriculum Access</h4>
-                <p className="mt-1 font-body text-xs text-on-surface-variant">All 4 structural stages of Stoic practice, complete with video lessons and progress tracking.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <MessageSquare className="mt-1 size-5 text-primary-container shrink-0" />
-              <div>
-                <h4 className="font-headline text-sm text-white font-semibold">Interactive Community Channels</h4>
-                <p className="mt-1 font-body text-xs text-on-surface-variant">Reflect and study daily with other dedicated practitioners inside curated network spaces.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <CalendarDays className="mt-1 size-5 text-primary-container shrink-0" />
-              <div>
-                <h4 className="font-headline text-sm text-white font-semibold">Live Monthly Workshops</h4>
-                <p className="mt-1 font-body text-xs text-on-surface-variant">Attend gated video sessions, monthly reflection rooms, and live lectures.</p>
-              </div>
-            </div>
+            {isMentorship ? (
+              <>
+                <div className="flex items-start gap-4">
+                  <Check className="mt-1 size-5 text-primary-container shrink-0" />
+                  <div>
+                    <h4 className="font-headline text-sm text-white font-semibold">1-on-1 Private Log Review</h4>
+                    <p className="mt-1 font-body text-xs text-on-surface-variant">Direct feedback and deep alignment on your daily Stoic journals from an experienced mentor.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <Check className="mt-1 size-5 text-primary-container shrink-0" />
+                  <div>
+                    <h4 className="font-headline text-sm text-white font-semibold">Bi-Weekly Private Calls</h4>
+                    <p className="mt-1 font-body text-xs text-on-surface-variant">Two private 60-minute video reflection calls per month to calibrate your practice.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <Check className="mt-1 size-5 text-primary-container shrink-0" />
+                  <div>
+                    <h4 className="font-headline text-sm text-white font-semibold">Custom Curriculum Plan</h4>
+                    <p className="mt-1 font-body text-xs text-on-surface-variant">A tailored reading and exercise path targeting your specific Stoic hurdles.</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-start gap-4">
+                  <Check className="mt-1 size-5 text-primary-container shrink-0" />
+                  <div>
+                    <h4 className="font-headline text-sm text-white font-semibold">Full Curriculum Access</h4>
+                    <p className="mt-1 font-body text-xs text-on-surface-variant">All 4 structural stages of Stoic practice, complete with video lessons and progress tracking.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <MessageSquare className="mt-1 size-5 text-primary-container shrink-0" />
+                  <div>
+                    <h4 className="font-headline text-sm text-white font-semibold">Interactive Community Channels</h4>
+                    <p className="mt-1 font-body text-xs text-on-surface-variant">Reflect and study daily with other dedicated practitioners inside curated network spaces.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <CalendarDays className="mt-1 size-5 text-primary-container shrink-0" />
+                  <div>
+                    <h4 className="font-headline text-sm text-white font-semibold">Live Monthly Workshops</h4>
+                    <p className="mt-1 font-body text-xs text-on-surface-variant">Attend gated video sessions, monthly reflection rooms, and live lectures.</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -690,12 +750,18 @@ export function CheckoutScreen() {
 
       <section className="relative flex items-center justify-center p-6 md:p-8 overflow-hidden bg-surface">
         <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(#334155_1px,transparent_1px),linear-gradient(90deg,#334155_1px,transparent_1px)] [background-size:60px_60px]" />
-        <div className="relative z-10 w-full max-w-md border-t-2 border-t-primary-container border-x border-b border-surgical-steel bg-monolith-surface p-6 md:p-8 rounded-lg shadow-xl">
+        <form onSubmit={handlePay} className="relative z-10 w-full max-w-md border-t-2 border-t-primary-container border-x border-b border-surgical-steel bg-monolith-surface p-6 md:p-8 rounded-lg shadow-xl">
           <div className="flex justify-between items-center pb-4 mb-4 border-b border-surgical-steel">
             <h2 className="font-headline text-lg font-bold text-white">Payment Summary</h2>
-            <span className="font-headline text-lg font-bold text-primary-container">$10.00<span className="text-xs text-fog-muted lowercase font-normal">/mo</span></span>
+            <span className="font-headline text-lg font-bold text-primary-container">
+              {isMentorship ? (
+                <span>$1,000.00<span className="text-xs text-fog-muted lowercase font-normal">/2mo</span></span>
+              ) : (
+                <span>$10.00<span className="text-xs text-fog-muted lowercase font-normal">/mo</span></span>
+              )}
+            </span>
           </div>
-          
+
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <Field label="Email address" placeholder="you@example.com" />
@@ -716,12 +782,16 @@ export function CheckoutScreen() {
               <Field label="ZIP" placeholder="12345" />
             </div>
             <Field label="Country" placeholder="United States" />
-            <button className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition">
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <CreditCard size={16} />
-              Pay $10.00
+              {loading ? "Processing..." : isMentorship ? "Pay $1,000.00" : "Pay $10.00"}
             </button>
           </div>
-        </div>
+        </form>
       </section>
     </main>
   );

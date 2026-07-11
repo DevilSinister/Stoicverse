@@ -1,9 +1,17 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { CheckoutScreen } from "@/components/screens/AskStoicScreens";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function CheckoutPage() {
+export default async function CheckoutPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const product = params.product;
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -13,20 +21,30 @@ export default async function CheckoutPage() {
     redirect("/login?next=/checkout");
   }
 
-  const { data: membership, error } = await supabase
-    .from("memberships")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
+  // If we are checking out membership (default), check if already active
+  if (product !== "mentorship") {
+    const cookieStore = await cookies();
+    const hasLocalActive = cookieStore.get("stoicverse_membership_active")?.value === "true";
 
-  if (error) {
-    throw new Error("Unable to validate membership.");
-  }
+    if (hasLocalActive) {
+      redirect("/dashboard");
+    }
 
-  if (membership) {
-    redirect("/dashboard");
+    const { data: membership, error } = await supabase
+      .from("memberships")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error("Unable to validate membership.");
+    }
+
+    if (membership) {
+      redirect("/dashboard");
+    }
   }
 
   return <CheckoutScreen />;

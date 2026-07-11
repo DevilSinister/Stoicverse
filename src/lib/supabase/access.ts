@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
@@ -10,6 +11,13 @@ export async function requireActiveMembership(nextPath: string) {
 
   if (!user) {
     redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+  }
+
+  const cookieStore = await cookies();
+  const hasLocalActive = cookieStore.get("stoicverse_membership_active")?.value === "true";
+
+  if (hasLocalActive) {
+    return { supabase, user };
   }
 
   const { data: membership, error } = await supabase

@@ -63,6 +63,7 @@ export function AppShell({
   const pathname = usePathname();
 
   const [isSettingsOpen, setSettingsOpen] = useState(false);
+  const [isUpgradeOpen, setUpgradeOpen] = useState(false);
   const [currentName, setCurrentName] = useState(memberName);
   const [email, setEmail] = useState("");
   const [newName, setNewName] = useState(memberName);
@@ -268,10 +269,13 @@ export function AppShell({
             <Settings size={15} className="transition-transform duration-500 group-hover:rotate-90" />
           </button>
         </div>
-        <Link href="/subscription" className="flex w-full items-center justify-center gap-2 rounded-full bg-sidebar-primary hover:bg-opacity-90 py-3 font-label text-xs text-on-primary-fixed uppercase tracking-wider transition duration-200 shadow-md hover:brightness-105">
+        <button
+          onClick={() => setUpgradeOpen(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-sidebar-primary hover:bg-opacity-90 py-3 font-label text-xs text-on-primary-fixed uppercase tracking-wider transition duration-200 shadow-md hover:brightness-105"
+        >
           <Crown size={14} />
           <span>Upgrade Plan</span>
-        </Link>
+        </button>
       </div>
     </>
   );
@@ -561,6 +565,88 @@ export function AppShell({
                   <LogOut size={16} />
                   Log Out Session
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upgrade Plan Modal */}
+      {isUpgradeOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in" onMouseDown={() => setUpgradeOpen(false)}>
+          <div className="relative w-full max-w-xl overflow-hidden rounded-lg border border-surgical-steel bg-surface-container-low text-on-surface shadow-2xl animate-in zoom-in-95 duration-200" onMouseDown={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-surgical-steel px-6 py-4">
+              <h2 className="font-headline text-lg font-bold text-white flex items-center gap-2">
+                <Crown className="text-primary-container" size={18} />
+                Upgrade Membership
+              </h2>
+              <button onClick={() => setUpgradeOpen(false)} className="text-on-surface-variant hover:text-white transition-colors" aria-label="Close">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Content Container */}
+            <div className="p-6 space-y-6">
+              {/* Current Active Plan */}
+              <div className="border border-surgical-steel bg-surface-container-high/30 p-4 rounded-lg space-y-2">
+                <span className="font-label text-[9px] uppercase tracking-wider text-fog-muted">Current Plan</span>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-headline text-base font-bold text-white">Platform Membership</h3>
+                    <p className="font-body text-xs text-on-surface-variant">Level 0{currentTier} • Practitioner Access</p>
+                  </div>
+                  <span className="font-headline text-sm font-bold text-emerald-400">ACTIVE • $10.00/mo</span>
+                </div>
+              </div>
+
+              {/* Available Plans */}
+              <div className="space-y-4">
+                <h4 className="font-label text-[10px] uppercase tracking-wider text-fog-muted border-b border-surgical-steel pb-2">Available Plans</h4>
+                
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Annual Membership Card */}
+                  <div className="border border-surgical-steel bg-surface-container-high/10 p-5 rounded-lg flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-headline text-sm font-bold text-white">Annual Membership</h4>
+                        <span className="border border-primary-container/20 bg-primary-container/10 px-2 py-0.5 rounded-full font-label text-[8px] text-primary-container uppercase font-semibold">Save 16%</span>
+                      </div>
+                      <p className="font-body text-xs text-on-surface-variant">Lock in a full year of Stoic study, reflections, events, and curriculum progression.</p>
+                    </div>
+                    <div>
+                      <div className="font-headline text-lg font-bold text-primary-container mb-3">$100.00<span className="text-xs font-normal text-fog-muted">/yr</span></div>
+                      <Link
+                        href="/checkout?product=annual"
+                        onClick={() => setUpgradeOpen(false)}
+                        className="flex min-h-9 w-full items-center justify-center rounded-full bg-primary-container font-label text-xs uppercase tracking-wider text-on-primary-fixed hover:brightness-105 active:scale-[0.98] transition"
+                      >
+                        Upgrade Now
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Mentorship Card */}
+                  <div className="border border-surgical-steel bg-surface-container-high/10 p-5 rounded-lg flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-headline text-sm font-bold text-white">Private Mentorship</h4>
+                        <span className="border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 rounded-full font-label text-[8px] text-emerald-400 uppercase font-semibold">1-on-1 Slots</span>
+                      </div>
+                      <p className="font-body text-xs text-on-surface-variant">Work directly with a Master Stoic. Daily log reviews, bi-weekly private reflection calls.</p>
+                    </div>
+                    <div>
+                      <div className="font-headline text-lg font-bold text-emerald-400 mb-3">$1,000.00<span className="text-xs font-normal text-fog-muted">/2mo</span></div>
+                      <Link
+                        href="/checkout?product=mentorship"
+                        onClick={() => setUpgradeOpen(false)}
+                        className="flex min-h-9 w-full items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 font-label text-xs uppercase tracking-wider text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.98] transition"
+                      >
+                        Enroll Now
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
