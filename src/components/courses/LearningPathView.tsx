@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import { BookOpen, CalendarDays, CheckCircle2, ChevronRight, Clock, Crown, GraduationCap, LayoutDashboard, Lock, LockKeyhole, LogOut, Menu, MessageSquare, Play, PlayCircle, Search, User } from "lucide-react";
-import { buildAppNav } from "@/lib/navigation/app-nav";
+import { CheckCircle2, ChevronRight, Clock, GraduationCap, Lock, PlayCircle } from "lucide-react";
+import { AppShell } from "@/components/layout/AppShell";
 
 export type LessonProgressItem = {
   id: string;
@@ -39,9 +39,6 @@ type FilterType = "all" | "in-progress" | "available" | "completed" | "locked";
 
 export function LearningPathView({ data }: { data: LearningPathData }) {
   const [filter, setFilter] = useState<FilterType>("all");
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const navItems = useMemo(() => buildAppNav({ isMaster: data.isMaster }), [data.isMaster]);
 
   // Aggregate all lessons across all tiers
   const allLessons = useMemo(() => {
@@ -84,74 +81,20 @@ export function LearningPathView({ data }: { data: LearningPathData }) {
   }, [data.isMaster, data.currentTier]);
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface md:flex">
-      {/* Mobile Header */}
-      <header className="flex h-16 items-center justify-between border-b border-surgical-steel bg-surface px-4 md:hidden">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setMobileMenuOpen(true)} className="text-on-surface-variant hover:text-primary-container" aria-label="Open menu">
-            <Menu size={24} />
-          </button>
-          <span className="font-headline-sm text-headline-sm font-bold text-primary tracking-tight">Stoicverse</span>
-        </div>
-        <span className="font-label-sm text-label-sm bg-primary-container/10 text-primary-container px-3 py-1 rounded">
-          T{activeTier}
-        </span>
-      </header>
-
-      {/* Mobile Menu Backdrop */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-black/80 md:hidden" onClick={() => setMobileMenuOpen(false)} />
-      )}
-
-      {/* Sidebar Navigation */}
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-surgical-steel bg-surface-container-low transition-transform duration-300 md:static md:translate-x-0 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="border-b border-surgical-steel p-4 flex items-center justify-between">
-          <Link href="/" className="block">
-            <div className="font-headline-sm text-headline-sm text-primary font-bold">Stoicverse</div>
-            <div className="mt-1 font-label-sm text-label-sm text-fog-muted uppercase tracking-[0.1em]">Community Hub</div>
-          </Link>
-        </div>
-        <nav className="flex-1 py-4 px-2 space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = item.href === "/courses";
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex min-h-11 items-center gap-3 px-3 py-2 rounded-lg font-label-md text-label-md transition ${isActive ? "bg-surface-container-high text-primary-container border-r-2 border-primary-container" : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container"}`}
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="border-t border-surgical-steel p-4 space-y-4">
-          <div className="flex items-center gap-3 px-2">
-            <div className="size-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary-container border border-surgical-steel font-bold">
-              {data.memberName[0]}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{data.memberName}</p>
-              <p className="truncate text-xs text-fog-muted capitalize">{data.platformRole}</p>
-            </div>
-          </div>
-          <Link href="/subscription" className="flex w-full items-center justify-center gap-2 rounded bg-primary-container hover:bg-opacity-90 py-3 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider transition">
-            <Crown size={16} />
-            <span>Upgrade to Master</span>
-          </Link>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 min-w-0 min-h-screen px-4 md:px-8 py-8 max-w-[1440px] mx-auto space-y-8">
+    <AppShell
+      active="Learning"
+      title="Learning Path"
+      isMaster={data.isMaster}
+      memberName={data.memberName}
+      platformRole={data.platformRole}
+      currentTier={data.currentTier}
+    >
+      <div className="px-4 md:px-8 py-8 max-w-[1440px] mx-auto space-y-8">
         {/* Header & Overall Progress */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-surgical-steel">
           <div>
-            <h1 className="font-display text-4xl font-bold tracking-tight text-white">Learning Path</h1>
-            <p className="font-body text-body-lg text-on-surface-variant mt-2 max-w-lg">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-white">Curriculum Path</h2>
+            <p className="font-body text-sm text-on-surface-variant mt-2 max-w-lg">
               A rigorous curriculum designed for disciplined capital management and psychological fortitude.
             </p>
           </div>
@@ -175,7 +118,7 @@ export function LearningPathView({ data }: { data: LearningPathData }) {
             return (
               <div
                 key={tier.level}
-                className={`relative p-5 rounded-lg border transition-all duration-300 flex flex-col justify-between min-h-[140px] ${tier.isLocked ? "bg-surface-container-low/40 border-surgical-steel/40 opacity-50" : isActive ? "bg-monolith-surface border-primary-container/50 emerald-glow ring-1 ring-primary-container/20" : "bg-monolith-surface border-surgical-steel hover:border-primary-container/30"}`}
+                className={`relative p-5 rounded border transition-all duration-300 flex flex-col justify-between min-h-[140px] ${tier.isLocked ? "bg-surface-container-low/40 border-surgical-steel/40 opacity-50" : isActive ? "bg-monolith-surface border-primary-container/50 emerald-glow ring-1 ring-primary-container/20" : "bg-monolith-surface border-surgical-steel hover:border-primary-container/30"}`}
               >
                 <div className="flex justify-between items-start mb-4">
                   <span className="font-label text-xs font-semibold text-primary-container uppercase tracking-wider">Tier 0{tier.level}</span>
@@ -228,7 +171,7 @@ export function LearningPathView({ data }: { data: LearningPathData }) {
             return (
               <div
                 key={lesson.id}
-                className={`p-5 rounded-lg border transition-all duration-300 flex flex-col md:flex-row gap-5 ${isLocked ? "bg-surface-container-low/40 border-surgical-steel/40 opacity-40" : "bg-monolith-surface border-surgical-steel hover:border-primary-container/40"}`}
+                className={`p-5 rounded border transition-all duration-300 flex flex-col md:flex-row gap-5 ${isLocked ? "bg-surface-container-low/40 border-surgical-steel/40 opacity-40" : "bg-monolith-surface border-surgical-steel hover:border-primary-container/40"}`}
               >
                 {/* Thumbnail Block */}
                 <div className="w-full md:w-36 aspect-video md:aspect-auto md:h-28 shrink-0 bg-surface-container-lowest border border-surgical-steel rounded overflow-hidden relative flex items-center justify-center group">
@@ -293,14 +236,14 @@ export function LearningPathView({ data }: { data: LearningPathData }) {
             );
           })}
           {filteredLessons.length === 0 && (
-            <div className="col-span-full py-16 text-center border border-dashed border-surgical-steel rounded-lg bg-surface-container-low/20">
+            <div className="col-span-full py-16 text-center border border-dashed border-surgical-steel rounded bg-surface-container-low/20">
               <GraduationCap size={48} className="mx-auto text-fog-muted mb-4" />
               <p className="font-headline text-lg font-semibold text-white">No lessons found</p>
               <p className="font-body text-sm text-on-surface-variant mt-1">Try changing your filter options above.</p>
             </div>
           )}
         </section>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

@@ -1,7 +1,9 @@
+
+
 import Link from "next/link";
 import { ArrowRight, Bell, CalendarDays, Check, ChevronRight, CircleDollarSign, CreditCard, Crown, Gauge, GraduationCap, Image as ImageIcon, Lock, LogIn, Menu, MessageSquare, MoreVertical, Play, Plus, Search, Send, Shield, Video } from "lucide-react";
-
 import { buildAppNav } from "@/lib/navigation/app-nav";
+import { AppShell as SharedAppShell } from "@/components/layout/AppShell";
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(" ");
 
@@ -56,65 +58,17 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 function AppShell({ active, title, isMaster = false, children }: { active: string; title: string; isMaster?: boolean; children: React.ReactNode }) {
-  const navItems = buildAppNav({ isMaster });
-
   return (
-    <div className="min-h-screen bg-surface text-on-surface md:flex">
-      <aside className="hidden w-64 shrink-0 border-r border-surgical-steel bg-surface-container-low md:flex md:min-h-screen md:flex-col">
-        <Link href="/" className="border-b border-surgical-steel p-4 block">
-          <div className="font-headline-sm text-headline-sm text-primary font-bold">Stoicverse</div>
-          <div className="mt-1 font-label-sm text-label-sm text-fog-muted uppercase tracking-[0.1em]">Community Hub</div>
-        </Link>
-        <nav className="flex-1 py-4 px-2 space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const on = active === item.label;
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cx(
-                  "flex min-h-11 items-center gap-3 px-3 py-2 rounded-lg font-label-md text-label-md transition focus-ring",
-                  on
-                    ? "border-r-2 border-primary-container bg-surface-container-high text-primary-container"
-                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container"
-                )}
-              >
-                <Icon size={18} strokeWidth={1.5} />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="border-t border-surgical-steel p-4">
-          <ButtonLink href="/subscription" variant="outline">
-            <CircleDollarSign size={16} />
-            Upgrade Plan
-          </ButtonLink>
-        </div>
-      </aside>
-      <div className="min-w-0 flex-1 flex flex-col">
-        <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b border-surgical-steel bg-surface px-4 md:px-8">
-          <div className="flex items-center gap-3">
-            <button className="md:hidden text-on-surface-variant hover:text-primary-container" type="button" aria-label="Open navigation">
-              <Menu size={22} />
-            </button>
-            <h1 className="font-headline-sm text-headline-sm text-white font-bold">{title}</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <IconButton label="Search">
-              <Search size={18} />
-            </IconButton>
-            <IconButton label="Notifications">
-              <Bell size={18} />
-            </IconButton>
-          </div>
-        </header>
-        <div className="flex-1 bg-surface relative">
-          {children}
-        </div>
-      </div>
-    </div>
+    <SharedAppShell
+      active={active}
+      title={title}
+      isMaster={isMaster}
+      memberName="Marcus Aurelius"
+      platformRole={isMaster ? "influencer" : "member"}
+      currentTier={isMaster ? 4 : 2}
+    >
+      {children}
+    </SharedAppShell>
   );
 }
 
