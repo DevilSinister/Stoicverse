@@ -12,7 +12,7 @@ This document outlines the visual identity, UX guidelines, and interaction princ
 - **NO Generic Light Themes:** Avoid warm AI-default cream/sand/beige entirely.
 - **NO "Hero-Metric" Clichés:** Avoid the standard SaaS oversized numbers with gradients.
 - **NO Ghost Cards:** No combining `border: 1px solid` with `box-shadow: 0 16px...` on the same element.
-- **NO Over-rounding:** Strict systematic feel. Border radius should be `4px` (rounded-sm) for CTAs and small controls, and maximum `8px` (rounded-lg) for cards/panels.
+- **NO Over-rounding on Containers:** Strict systematic feel. Card/panel structures top out at `8px` (rounded-lg). All interactive CTAs, action buttons, and small tags should be fully round (`rounded-full`) to feel like tactile coins or control knobs contrasting with the grid.
 
 ## 2. Color Palette
 A deep navy canvas divided by clean slate-gray borders, with a single emerald accent representing execution, active states, progress, and primary actions.

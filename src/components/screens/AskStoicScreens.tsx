@@ -12,7 +12,7 @@ function ButtonLink({ href, children, variant = "primary" }: { href: string; chi
     <Link
       href={href}
       className={cx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded px-5 py-2 font-label-md text-label-md transition focus-ring",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 font-label-md text-label-md transition focus-ring",
         variant === "primary"
           ? "bg-primary-container text-on-primary-fixed hover:bg-opacity-95 hover:brightness-105 active:scale-[0.98] duration-150 emerald-glow"
           : "border border-surgical-steel text-on-surface hover:border-primary-container hover:text-primary-container"
@@ -29,7 +29,7 @@ function IconButton({ children, label, onClick }: { children: React.ReactNode; l
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="grid size-10 place-items-center rounded border border-surgical-steel text-on-surface-variant transition hover:border-primary-container hover:text-primary-container focus-ring"
+      className="grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant transition hover:border-primary-container hover:text-primary-container focus-ring"
     >
       {children}
     </button>
@@ -297,7 +297,7 @@ export function FeedScreen({ master = false, isMaster = false, canCreateChannels
       <main className="grid min-h-[calc(100vh-4rem)] md:grid-cols-[18rem_1fr]">
         <aside className="border-b border-surgical-steel bg-surface-container-low p-4 md:border-b-0 md:border-r">
           {canCreateChannels && (
-            <button className="mb-4 flex min-h-11 w-full items-center justify-center gap-2 rounded bg-primary-container px-4 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider transition hover:brightness-105 active:scale-[0.98]">
+            <button className="mb-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary-container px-4 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider transition hover:brightness-105 active:scale-[0.98]">
               <Plus size={16} />
               New Channel
             </button>
@@ -515,7 +515,7 @@ export function CreatorScreen() {
             {["Create channel", "Add lesson", "Schedule event", "Assign moderator"].map((item) => (
               <button
                 key={item}
-                className="flex min-h-11 w-full items-center justify-between rounded border border-surgical-steel bg-surface-container-low px-4 py-2 text-left font-label text-xs uppercase tracking-wider transition hover:border-primary-container hover:text-primary-container"
+                className="flex min-h-11 w-full items-center justify-between rounded-full border border-surgical-steel bg-surface-container-low px-4 py-2 text-left font-label text-xs uppercase tracking-wider transition hover:border-primary-container hover:text-primary-container"
               >
                 {item}
                 <ChevronRight size={16} />
@@ -564,7 +564,7 @@ export function AuthScreen({ mode }: { mode: "login" | "signup" }) {
             <Field label="Email" placeholder="you@example.com" />
             <Field label="Password" placeholder="Minimum 8 characters" type="password" />
           </div>
-          <button className="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all duration-300" type="button">
+          <button className="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all duration-300" type="button">
             {isSignup ? "Create account" : "Enter platform"}
             <ArrowRight size={16} />
           </button>
@@ -688,7 +688,7 @@ export function CheckoutScreen() {
               <Field label="ZIP" placeholder="12345" />
             </div>
             <Field label="Country" placeholder="United States" />
-            <button className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition">
+            <button className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition">
               <CreditCard size={16} />
               Pay $10.00
             </button>

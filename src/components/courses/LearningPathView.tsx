@@ -224,7 +224,7 @@ export function LearningPathView({ data }: { data: LearningPathData }) {
                     <div className="pt-2">
                       <Link
                         href={`/courses/lesson/${lesson.id}`}
-                        className={`inline-flex items-center gap-2 rounded px-4 py-2 font-label text-xs uppercase tracking-wider transition ${isCompleted ? "border border-surgical-steel text-on-surface-variant hover:text-white hover:border-primary-container/50" : inProgress ? "bg-primary-container text-on-primary-fixed hover:bg-opacity-90" : "border border-primary-container text-primary-container hover:bg-primary-container/10"}`}
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-label text-xs uppercase tracking-wider transition ${isCompleted ? "border border-surgical-steel text-on-surface-variant hover:text-white hover:border-primary-container/50" : inProgress ? "bg-primary-container text-on-primary-fixed hover:bg-opacity-90" : "border border-primary-container text-primary-container hover:bg-primary-container/10"}`}
                       >
                         {isCompleted ? "Review" : inProgress ? "Resume" : "Start"}
                         <ChevronRight size={14} />

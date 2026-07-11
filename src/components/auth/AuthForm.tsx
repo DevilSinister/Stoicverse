@@ -159,7 +159,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           </div>
 
           <button
-            className="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-70 emerald-glow"
+            className="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-70 emerald-glow"
             type="submit"
             disabled={loading}
           >

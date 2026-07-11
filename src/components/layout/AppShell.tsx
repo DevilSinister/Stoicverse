@@ -158,7 +158,7 @@ export function AppShell({
             <p className="truncate text-[10px] text-fog-muted capitalize font-label">{roleName(platformRole)}</p>
           </div>
         </div>
-        <Link href="/subscription" className="flex w-full items-center justify-center gap-2 rounded bg-sidebar-primary hover:bg-opacity-90 py-3 font-label text-xs text-on-primary-fixed uppercase tracking-wider transition duration-200 shadow-md hover:brightness-105">
+        <Link href="/subscription" className="flex w-full items-center justify-center gap-2 rounded-full bg-sidebar-primary hover:bg-opacity-90 py-3 font-label text-xs text-on-primary-fixed uppercase tracking-wider transition duration-200 shadow-md hover:brightness-105">
           <Crown size={14} />
           <span>Upgrade Plan</span>
         </Link>
@@ -209,10 +209,10 @@ export function AppShell({
             <p className="font-label text-[10px] text-fog-muted uppercase tracking-wider">Level 0{currentTier} • {isMaster ? "Master Account" : "Practitioner Access"}</p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setSearchOpen(true)} aria-label="Search lessons and events" className="grid size-10 place-items-center rounded border border-surgical-steel text-on-surface-variant hover:border-primary-container hover:text-primary-container focus-ring transition-colors">
+            <button onClick={() => setSearchOpen(true)} aria-label="Search lessons and events" className="grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant hover:border-primary-container hover:text-primary-container focus-ring transition-colors">
               <Search size={18} />
             </button>
-            <button onClick={openNotifications} aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} className="relative grid size-10 place-items-center rounded border border-surgical-steel text-on-surface-variant hover:border-primary-container hover:text-primary-container focus-ring transition-colors">
+            <button onClick={openNotifications} aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} className="relative grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant hover:border-primary-container hover:text-primary-container focus-ring transition-colors">
               <Bell size={18} />
               {unreadCount > 0 && <span className="absolute -right-1 -top-1 grid min-w-5 size-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>}
             </button>

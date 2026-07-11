@@ -68,7 +68,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
                     <p className="max-w-xl font-body text-sm text-on-surface-variant">{data.activeLesson.description || "Continue your current lesson."}</p>
                     <p className="font-label text-xs text-primary-container font-semibold uppercase tracking-wider">{Math.round(data.activeLesson.progress)}% complete</p>
                   </div>
-                  <Link href={`/courses/lesson/${data.activeLesson.id}`} className="inline-flex min-h-11 items-center justify-center rounded bg-primary-container px-6 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all emerald-glow shrink-0">
+                  <Link href={`/courses/lesson/${data.activeLesson.id}`} className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-container px-6 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all emerald-glow shrink-0">
                     Resume lesson
                     <ArrowRight size={16} className="ml-1.5" />
                   </Link>
