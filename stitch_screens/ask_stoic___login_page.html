@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login | AskStoic - Institutional Grade Education</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-container-low": "#051c33", "on-primary-fixed": "#131b2e", "on-tertiary-fixed-variant": "#00531a", "on-secondary-fixed": "#111c2e", "surface-container-high": "#162b42", "on-tertiary-fixed": "#002106", "on-secondary-fixed-variant": "#3d475b", "on-tertiary-container": "#009536", "surface-tint": "#bec6e0", outline: "#909097", "surface-variant": "#22364e", "on-tertiary": "#003910", background: "#001429", "on-primary-fixed-variant": "#3f465c", "secondary-container": "#3f495e", "on-surface-variant": "#c6c6cd", "on-secondary-container": "#aeb8d1", "on-error-container": "#ffdad6", "error-container": "#93000a", primary: "#bec6e0", "surface-dim": "#001429", "surface-container-highest": "#22364e", "primary-fixed": "#dae2fd", "tertiary-fixed": "#6cff81", "surface-container-lowest": "#000f21", surface: "#001429", "on-surface": "#d2e4ff", "primary-fixed-dim": "#bec6e0", "on-primary-container": "#798098", "secondary-fixed-dim": "#bcc6df", "primary-container": "#0f172a", "outline-variant": "#45464d", "inverse-primary": "#565e74", "on-error": "#690005", error: "#ffb4ab", "inverse-surface": "#d2e4ff", "tertiary-fixed-dim": "#46e265", "surface-bright": "#263a52", secondary: "#bcc6df", "secondary-fixed": "#d8e2fc", "on-secondary": "#273044", "surface-container": "#0a2137", "on-background": "#d2e4ff", "inverse-on-surface": "#1d3249", "tertiary-container": "#001d05", "on-primary": "#283044", tertiary: "#46e265"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-xl": "64px", "stack-sm": "8px", "margin-desktop": "64px", gutter: "24px", "margin-mobile": "20px", "stack-md": "16px", "stack-lg": "32px", "container-max": "1280px"}, fontFamily: {"data-point": ["JetBrains Mono"], "body-md": ["Inter"], "label-caps": ["JetBrains Mono"], "body-lg": ["Inter"], "headline-xl": ["Inter"], "headline-lg": ["Inter"], "headline-lg-mobile": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}]}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-active:focus-within {
+            box-shadow: 0px 0px 15px rgba(78, 222, 163, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+        .loader {
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-tertiary selection:text-on-tertiary custom-scrollbar overflow-x-hidden">
+<!-- Main Content Wrapper -->
+<main class="min-h-screen flex flex-col md:flex-row">
+<!-- Left Side: Branding & Value Props (Hidden on mobile stack) -->
+<section class="hidden md:flex md:w-1/2 relative overflow-hidden bg-surface-container-lowest border-r border-outline-variant items-center justify-center p-margin-desktop">
+<!-- Background Image Motif -->
+<div class="absolute inset-0 opacity-10 pointer-events-none grayscale" style="background-image: url('https://lh3.googleusercontent.com/aida/AP1WRLs0kdCxoGEDuiY0DM5DlbryOi3pg3zYUtZWlGDZ_3856xIru-Q18D8nD3v2GJaD0J76_QuqWi4M-1OaSr3MajFOqQneQiB5s33j_X47LYpNqQJjzX6mi85f__A_J5A2ohd8GK3PxA72h8JxSJV3GCAQBePU3qhYcigiG5aJ-u58WegAcCl_jVOHqt673HrlWOrXWsBLTPnmjjqdQhxs_o7-1BvX0mv8KBGVobJ1LU6OaGxyzCOWSRoux7LY'); background-size: cover; background-position: center;"></div>
+<div class="relative z-10 max-w-md space-y-stack-xl">
+<div class="space-y-stack-md">
+<img alt="AskStoic Logo" class="w-24 h-24 mb-stack-lg" src="https://lh3.googleusercontent.com/aida/AP1WRLtpjAD0mEA1PNoJCoCJvvxG3USNkXHH4yM923dvuoj8b3klNqhlAY3uJgH0sxdzeF04iunLR3s63Kk5Bom-U6OCP_kBQaU9VmIugR8uAkhRNzvTzOO6EwP96Tvu_vFexU-Wvi1UYDcILEaJFX-8Kn6gD5PsB2CQmA1fTSsqYqN6j86pAgAnpDfkl6y425vudJMyn_RnGwVDe1HLbwqUvRtSSEmMIJ6e_kIHE__o_glGP-nNnojp8MIFdaXs"/>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tighter">
+                        Elite Financial <span class="text-tertiary">Mentorship.</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-sm">
+                        Master the markets with institutional-grade discipline and direct access to veteran floor traders.
+                    </p>
+</div>
+<div class="space-y-stack-lg">
+<div class="flex items-start gap-gutter">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<div>
+<h3 class="font-headline-lg text-body-md font-bold text-on-surface">Access institutional-grade tools</h3>
+<p class="text-on-surface-variant font-body-md">Advanced data visualization and proprietary analytics used by pros.</p>
+</div>
+</div>
+<div class="flex items-start gap-gutter">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">groups</span>
+<div>
+<h3 class="font-headline-lg text-body-md font-bold text-on-surface">Connect with veteran mentors</h3>
+<p class="text-on-surface-variant font-body-md">Live guidance and trade reviews from mentors with 15+ years experience.</p>
+</div>
+</div>
+</div>
+<div class="pt-stack-lg border-t border-outline-variant/30">
+<p class="font-label-caps text-label-caps text-on-surface-variant/50">ESTABLISHED IN DISCIPLINE. GUIDED BY LOGIC.</p>
+</div>
+</div>
+</section>
+<!-- Right Side: Login Form -->
+<section class="flex-1 flex flex-col justify-center items-center px-margin-mobile md:px-margin-desktop py-stack-xl relative">
+<!-- Mobile Logo Header -->
+<div class="md:hidden w-full flex justify-center mb-stack-xl">
+<img alt="AskStoic Logo" class="w-16 h-16" src="https://lh3.googleusercontent.com/aida/AP1WRLtpjAD0mEA1PNoJCoCJvvxG3USNkXHH4yM923dvuoj8b3klNqhlAY3uJgH0sxdzeF04iunLR3s63Kk5Bom-U6OCP_kBQaU9VmIugR8uAkhRNzvTzOO6EwP96Tvu_vFexU-Wvi1UYDcILEaJFX-8Kn6gD5PsB2CQmA1fTSsqYqN6j86pAgAnpDfkl6y425vudJMyn_RnGwVDe1HLbwqUvRtSSEmMIJ6e_kIHE__o_glGP-nNnojp8MIFdaXs"/>
+</div>
+<!-- Login Card -->
+<div class="w-full max-w-[440px] bg-surface-container-low border border-outline-variant p-stack-lg md:p-stack-xl rounded-lg shadow-2xl relative">
+<div class="mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Welcome Back</h2>
+<p class="text-on-surface-variant font-body-md">Enter your credentials to access the terminal.</p>
+</div>
+<!-- Global Error Message (Hidden by default) -->
+<div class="hidden mb-stack-md p-stack-md bg-error-container/20 border border-error-container text-error rounded-lg flex items-start gap-2" id="global-error">
+<span class="material-symbols-outlined text-[20px]">report</span>
+<span class="text-[14px]" id="error-message-text">Invalid credentials provided.</span>
+</div>
+<form class="space-y-stack-md" id="login-form" onsubmit="return false;">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant ml-1" for="email">Email or Phone</label>
+<div class="relative glow-active">
+<input class="w-full bg-background border border-outline-variant focus:border-tertiary focus:ring-0 text-on-surface font-data-point p-3 rounded-lg transition-all" id="email" placeholder="name@institutional.com" type="text"/>
+</div>
+<p class="hidden text-error text-[12px] font-medium ml-1" id="email-error">Please enter a valid email address.</p>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface-variant ml-1" for="password">Password</label>
+<a class="text-[12px] text-tertiary hover:underline font-medium" href="#">Forgot password?</a>
+</div>
+<div class="relative glow-active">
+<input class="w-full bg-background border border-outline-variant focus:border-tertiary focus:ring-0 text-on-surface font-data-point p-3 pr-12 rounded-lg transition-all" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-tertiary transition-colors" onclick="togglePassword()" type="button">
+<span class="material-symbols-outlined" id="visibility-icon">visibility</span>
+</button>
+</div>
+<p class="hidden text-error text-[12px] font-medium ml-1" id="password-error">Password must be at least 8 characters.</p>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center gap-2 pt-2">
+<input class="w-4 h-4 rounded border-outline-variant bg-background text-tertiary focus:ring-tertiary/20 focus:ring-offset-background cursor-pointer" id="remember" type="checkbox"/>
+<label class="text-[14px] text-on-surface-variant cursor-pointer select-none" for="remember">Remember this device for 30 days</label>
+</div>
+<!-- Actions -->
+<div class="pt-stack-md space-y-stack-md">
+<button class="w-full h-12 bg-tertiary hover:bg-tertiary-fixed-dim text-on-tertiary font-label-caps text-label-caps flex items-center justify-center gap-2 transition-all active:scale-[0.98]" id="submit-btn" onclick="simulateLogin()" type="submit">
+<span id="btn-text">LOG IN</span>
+<div class="hidden loader" id="btn-spinner"></div>
+</button>
+<div class="relative flex items-center py-4">
+<div class="flex-grow border-t border-outline-variant"></div>
+<span class="flex-shrink mx-4 text-on-surface-variant text-[12px] font-label-caps">OR CONTINUE WITH</span>
+<div class="flex-grow border-t border-outline-variant"></div>
+</div>
+<button class="w-full h-12 border border-outline-variant hover:border-tertiary hover:bg-surface-container-high text-on-surface font-label-caps text-label-caps flex items-center justify-center gap-3 transition-all" type="button">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="currentColor"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="currentColor"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="currentColor"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="currentColor"></path>
+</svg>
+                            GOOGLE
+                        </button>
+</div>
+</form>
+<div class="mt-stack-lg text-center">
+<p class="text-on-surface-variant text-[14px]">
+                        Don't have an account? <a class="text-tertiary hover:underline font-bold" href="#">Create account</a>
+</p>
+</div>
+</div>
+<!-- Demo Controls (Purely for showing states as requested) -->
+<div class="mt-stack-xl flex flex-wrap gap-2 justify-center max-w-lg opacity-40 hover:opacity-100 transition-opacity">
+<button class="text-[10px] px-2 py-1 border border-outline-variant rounded hover:bg-surface-container-high transition-colors" onclick="triggerError('incorrect')">ERR: PASSWORD</button>
+<button class="text-[10px] px-2 py-1 border border-outline-variant rounded hover:bg-surface-container-high transition-colors" onclick="triggerError('unverified')">ERR: UNVERIFIED</button>
+<button class="text-[10px] px-2 py-1 border border-outline-variant rounded hover:bg-surface-container-high transition-colors" onclick="triggerError('locked')">ERR: LOCKED</button>
+<button class="text-[10px] px-2 py-1 border border-outline-variant rounded hover:bg-surface-container-high transition-colors" onclick="triggerError('suspended')">ERR: SUSPENDED</button>
+<button class="text-[10px] px-2 py-1 border border-outline-variant rounded hover:bg-surface-container-high transition-colors" onclick="triggerError('server')">ERR: SERVER</button>
+<button class="text-[10px] px-2 py-1 border border-tertiary/50 text-tertiary rounded hover:bg-tertiary/10 transition-colors" onclick="resetDemo()">RESET UI</button>
+</div>
+</section>
+</main>
+<!-- Shared Footer -->
+<footer class="w-full py-stack-md px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-gutter border-t border-outline-variant bg-surface-container-lowest z-10">
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">AskStoic</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant flex gap-gutter">
+<a class="hover:text-tertiary underline transition-opacity duration-300" href="#">Terms of Service</a>
+<a class="hover:text-tertiary underline transition-opacity duration-300" href="#">Privacy Policy</a>
+<a class="hover:text-tertiary underline transition-opacity duration-300" href="#">Risk Disclosure</a>
+</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant/70">
+            © 2024 AskStoic. Institutional Grade Education.
+        </div>
+</footer>
+<script>
+        function togglePassword() {
+            const pwd = document.getElementById('password');
+            const icon = document.getElementById('visibility-icon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                pwd.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+
+        function simulateLogin() {
+            const btn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const spinner = document.getElementById('btn-spinner');
+            const email = document.getElementById('email');
+            const emailErr = document.getElementById('email-error');
+
+            // Reset
+            emailErr.classList.add('hidden');
+            document.getElementById('global-error').classList.add('hidden');
+
+            if (!email.value || !email.value.includes('@')) {
+                emailErr.classList.remove('hidden');
+                return;
+            }
+
+            // Start Loading
+            btn.disabled = true;
+            btnText.classList.add('opacity-0');
+            spinner.classList.remove('hidden');
+
+            // Fake success/delay
+            setTimeout(() => {
+                btn.disabled = false;
+                btnText.classList.remove('opacity-0');
+                spinner.classList.add('hidden');
+                triggerError('incorrect');
+            }, 1500);
+        }
+
+        function triggerError(type) {
+            const container = document.getElementById('global-error');
+            const text = document.getElementById('error-message-text');
+            container.classList.remove('hidden');
+
+            switch(type) {
+                case 'incorrect':
+                    text.innerText = "Incorrect password. Please verify your credentials.";
+                    break;
+                case 'unverified':
+                    text.innerText = "Your email is unverified. Please check your inbox for the activation link.";
+                    break;
+                case 'locked':
+                    text.innerText = "Account locked due to multiple failed attempts. Try again in 30 minutes.";
+                    break;
+                case 'suspended':
+                    text.innerText = "This account has been suspended for violating terms of service.";
+                    break;
+                case 'server':
+                    text.innerText = "Institutional terminal unavailable. Server error 503. Retrying...";
+                    break;
+                default:
+                    container.classList.add('hidden');
+            }
+        }
+
+        function resetDemo() {
+            document.getElementById('global-error').classList.add('hidden');
+            document.getElementById('email-error').classList.add('hidden');
+            document.getElementById('password-error').classList.add('hidden');
+            document.getElementById('email').value = "";
+            document.getElementById('password').value = "";
+        }
+    </script>
+</body></html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AskStoic | Advanced Position Sizing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+        .emerald-glow {
+            box-shadow: 0px 0px 15px rgba(16, 185, 129, 0.15);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4adea3;
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-surface": "#d2e4ff", surface: "#001429", "tertiary-fixed": "#6cff81", "surface-container-lowest": "#000f21", "inverse-primary": "#565e74", "primary-container": "#0f172a", "outline-variant": "#45464d", "secondary-fixed-dim": "#bcc6df", "primary-fixed-dim": "#bec6e0", "on-primary-container": "#798098", "inverse-on-surface": "#1d3249", "surface-container": "#0a2137", "on-background": "#d2e4ff", "secondary-fixed": "#d8e2fc", "on-secondary": "#273044", "surface-bright": "#263a52", secondary: "#bcc6df", "tertiary-fixed-dim": "#46e265", "inverse-surface": "#d2e4ff", "on-error": "#690005", error: "#ffb4ab", tertiary: "#46e265", "on-primary": "#283044", "tertiary-container": "#001d05", "on-tertiary-fixed-variant": "#00531a", "on-secondary-fixed": "#111c2e", "on-primary-fixed": "#131b2e", "surface-container-low": "#051c33", outline: "#909097", "surface-tint": "#bec6e0", "on-tertiary-container": "#009536", "on-tertiary-fixed": "#002106", "on-secondary-fixed-variant": "#3d475b", "surface-container-high": "#162b42", "on-error-container": "#ffdad6", "on-secondary-container": "#aeb8d1", "secondary-container": "#3f495e", "on-surface-variant": "#c6c6cd", "on-primary-fixed-variant": "#3f465c", "surface-variant": "#22364e", "on-tertiary": "#003910", background: "#001429", "surface-container-highest": "#22364e", "primary-fixed": "#dae2fd", "surface-dim": "#001429", primary: "#bec6e0", "error-container": "#93000a"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-sm": "8px", "stack-xl": "64px", "margin-desktop": "64px", gutter: "24px", "stack-md": "16px", "margin-mobile": "20px", "stack-lg": "32px", "container-max": "1280px"}, fontFamily: {"headline-xl": ["Inter"], "headline-lg": ["Inter"], "body-lg": ["Inter"], "headline-lg-mobile": ["Inter"], "label-caps": ["JetBrains Mono"], "data-point": ["JetBrains Mono"], "body-md": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}]}}}};</script>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-x-hidden selection:bg-tertiary selection:text-surface">
+<!-- TopNavBar -->
+<nav class="bg-surface text-primary font-body-md border-b border-outline-variant fixed top-0 w-full z-50 flex justify-between items-center px-margin-desktop h-20">
+<div class="flex items-center gap-stack-xl">
+<span class="font-headline-lg text-headline-lg font-black text-on-surface">AskStoic</span>
+<div class="hidden md:flex gap-stack-lg items-center">
+<a class="text-on-surface-variant hover:text-tertiary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Dashboard</a>
+<a class="text-tertiary font-bold border-b-2 border-tertiary pb-1 cursor-pointer active:opacity-80" href="#">Curriculum</a>
+<a class="text-on-surface-variant hover:text-tertiary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Mentors</a>
+<a class="text-on-surface-variant hover:text-tertiary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Terminal</a>
+</div>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-tertiary p-2 transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-tertiary p-2 transition-colors">settings</button>
+<div class="w-10 h-10 rounded-full border border-outline bg-surface-variant flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a high-level executive trader in a dark, minimalist office. The lighting is dramatic and moody, emphasizing a sharp suit and a focused, disciplined expression. The color palette is composed of deep navy blues and slate grays, maintaining a corporate yet elite institutional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmD3NjtY1bhHkHLIAfkLh35lmqc6LYWlrQUdL4SuIH7H3BntnHIFYpwquTJ6LMppdCk-JUURTdT5F7aw63zchoVLTBpz4kdEZA5ytn5Qm1LPHt6Yr9Cj-n-295UNg2ZUMs9rSC2DfF7gUEPL0Gk2vl4zTgveJB5NKWBua-zr6P7vkphIaQfWQ6rOB8WaMR839Y2vLm2UzZy6jpNpOPiMQJbGtivuNOAZ6gD3qCtmaH9IiIbyIQaXsNZKclYm1q5Bxih5o8B8Er9Ckc"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Grid -->
+<main class="max-w-screen-2xl mx-auto px-margin-desktop pt-32 pb-stack-xl grid grid-cols-12 gap-gutter">
+<!-- Left: Lesson Area -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-stack-md">
+<!-- Watch Progress -->
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[65%] emerald-glow transition-all duration-700"></div>
+</div>
+<!-- Video Player Terminal -->
+<div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden border border-outline-variant shadow-2xl group">
+<!-- Video Image Placeholder -->
+<img class="w-full h-full object-cover opacity-80" data-alt="A cinematic screen capture of a professional financial terminal displaying complex algorithmic trading charts. The screen is filled with emerald green candlestick patterns and white data overlays against a deep navy background. The atmosphere is quiet, focused, and institutional, reflecting a high-stakes trading floor environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYyOOfFbK3k6AcS7Kg2s6rMYkf4Ovul7IHjMx5GY5ToHFv3Ayle4zcq5Aga3t83dQ7Adjs_0ll3r6dy53Ps19fZE-wl7QVH6kza8HxuJh7E09WkVRGifwtovGJrS2D1ByV35z6ZTcnO7J4vauYV1e-od17YPiVIh0_HEmiuUWnUPNNd-xpRi7Rn8HvvvRKCrCREemGvBfpQQ1_t0cuvMLyZCU0Yh99-LzVutIfEgU5aBEXJjC71WvdKB6Z-ENnwxpPDHPPa_Ae-Boc"/>
+<!-- Terminal Overlay Layer -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<!-- Custom Terminal Controls -->
+<div class="absolute bottom-0 left-0 w-full p-stack-md flex flex-col gap-stack-sm opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+<!-- Seek Bar -->
+<div class="w-full h-1 bg-white/20 relative cursor-pointer rounded-full overflow-hidden">
+<div class="absolute h-full w-[65%] bg-tertiary"></div>
+</div>
+<div class="flex items-center justify-between font-label-caps text-label-caps text-white">
+<div class="flex items-center gap-stack-md">
+<button class="material-symbols-outlined hover:text-tertiary transition-colors" style="font-variation-settings: 'FILL' 1;">play_arrow</button>
+<button class="material-symbols-outlined hover:text-tertiary transition-colors">replay_10</button>
+<button class="material-symbols-outlined hover:text-tertiary transition-colors">forward_10</button>
+<span class="text-[11px] tracking-widest opacity-80">14:22 / 22:10</span>
+</div>
+<div class="flex items-center gap-stack-md">
+<div class="flex items-center gap-2 group/vol">
+<button class="material-symbols-outlined hover:text-tertiary transition-colors">volume_up</button>
+<div class="w-0 group-hover/vol:w-16 h-1 bg-white/20 rounded-full transition-all duration-300 overflow-hidden">
+<div class="h-full w-[80%] bg-white"></div>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="px-2 py-0.5 border border-white/20 hover:border-tertiary hover:text-tertiary rounded transition-colors">1x</button>
+<button class="px-2 py-0.5 border border-white/20 hover:border-tertiary hover:text-tertiary rounded transition-colors text-tertiary border-tertiary">1.5x</button>
+</div>
+<button class="material-symbols-outlined hover:text-tertiary transition-colors">closed_caption</button>
+<button class="material-symbols-outlined hover:text-tertiary transition-colors">fullscreen</button>
+</div>
+</div>
+</div>
+<!-- Play Central Hint (Visible only on hover) -->
+<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="w-16 h-16 bg-tertiary/20 backdrop-blur-md border border-tertiary/40 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-tertiary text-3xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+</div>
+<!-- Lesson Info -->
+<div class="mt-stack-md">
+<div class="flex items-center gap-stack-sm mb-2">
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container font-label-caps text-[10px] rounded">TIER 2: ADVANCED</span>
+<span class="text-tertiary font-label-caps text-[10px]">RISK MITIGATION MODULE</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-stack-md">Advanced Position Sizing</h1>
+<p class="font-body-md text-on-surface-variant max-w-3xl mb-stack-lg leading-relaxed">
+                    This session deconstructs institutional-grade position sizing methodologies used by top-tier liquidity providers and hedge fund desks. We move beyond simple percentage risk, exploring dynamic volatility adjustments (ATR-based) and correlation-weighted allocations to ensure capital preservation in multi-asset regimes.
+                </p>
+<!-- Resources Section -->
+<div class="border-t border-outline-variant pt-stack-lg">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-stack-md">Lesson Resources</h3>
+<div class="flex flex-wrap gap-stack-md">
+<button class="flex items-center gap-3 px-stack-md py-stack-sm bg-surface-container border border-outline-variant hover:border-tertiary transition-all rounded group">
+<span class="material-symbols-outlined text-tertiary">table_chart</span>
+<div class="text-left">
+<div class="text-on-surface font-medium text-sm">Position Sizing Spreadsheet</div>
+<div class="text-on-surface-variant text-[11px] font-label-caps">XLSX • 1.2MB</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-tertiary transition-colors ml-2">download</span>
+</button>
+<button class="flex items-center gap-3 px-stack-md py-stack-sm bg-surface-container border border-outline-variant hover:border-tertiary transition-all rounded group">
+<span class="material-symbols-outlined text-tertiary">description</span>
+<div class="text-left">
+<div class="text-on-surface font-medium text-sm">Risk Management PDF</div>
+<div class="text-on-surface-variant text-[11px] font-label-caps">PDF • 4.5MB</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-tertiary transition-colors ml-2">download</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Sidebar Playlist -->
+<aside class="col-span-12 lg:col-span-4 flex flex-col gap-stack-md">
+<div class="glass-panel rounded-xl p-stack-lg sticky top-32">
+<div class="flex justify-between items-end mb-stack-lg">
+<div>
+<span class="font-label-caps text-[10px] text-tertiary block mb-1">CURRENT MODULE</span>
+<h2 class="font-headline-lg text-2xl text-on-surface leading-tight">Module 4: Risk Mitigation</h2>
+</div>
+<span class="font-data-point text-on-surface-variant text-xs mb-1">65% Done</span>
+</div>
+<!-- Playlist Items -->
+<div class="flex flex-col gap-1 overflow-y-auto max-h-[614px] pr-2">
+<!-- Done -->
+<div class="p-stack-md bg-surface-container-lowest/50 border border-transparent rounded-lg flex items-center justify-between group cursor-pointer hover:bg-surface-container">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-tertiary font-bold">check_circle</span>
+<div>
+<h4 class="text-on-surface-variant text-sm font-medium">1. Introduction to Portfolio Risk</h4>
+<span class="font-data-point text-[10px] text-outline opacity-60">12:45</span>
+</div>
+</div>
+</div>
+<!-- Done -->
+<div class="p-stack-md bg-surface-container-lowest/50 border border-transparent rounded-lg flex items-center justify-between group cursor-pointer hover:bg-surface-container">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-tertiary font-bold">check_circle</span>
+<div>
+<h4 class="text-on-surface-variant text-sm font-medium">2. Defining Stop-Loss Hierarchies</h4>
+<span class="font-data-point text-[10px] text-outline opacity-60">18:10</span>
+</div>
+</div>
+</div>
+<!-- Active -->
+<div class="p-stack-md bg-primary-container border-l-4 border-tertiary rounded-r-lg flex items-center justify-between shadow-lg">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<div>
+<h4 class="text-tertiary text-sm font-bold">3. Advanced Position Sizing</h4>
+<span class="font-data-point text-[10px] text-tertiary/60">22:10 • Watching</span>
+</div>
+</div>
+</div>
+<!-- Next -->
+<div class="p-stack-md bg-transparent hover:bg-surface-container-high border border-transparent rounded-lg flex items-center justify-between transition-colors cursor-pointer group">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-surface">play_circle</span>
+<div>
+<h4 class="text-on-surface-variant text-sm font-medium group-hover:text-on-surface">4. Correlation &amp; Diversification</h4>
+<span class="font-data-point text-[10px] text-outline">15:30</span>
+</div>
+</div>
+</div>
+<!-- Locked -->
+<div class="p-stack-md bg-transparent opacity-40 border border-transparent rounded-lg flex items-center justify-between cursor-not-allowed">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-outline">lock</span>
+<div>
+<h4 class="text-outline text-sm font-medium">5. Drawdown Recovery Strategies</h4>
+<span class="font-data-point text-[10px] text-outline/50">25:15</span>
+</div>
+</div>
+</div>
+<!-- Locked -->
+<div class="p-stack-md bg-transparent opacity-40 border border-transparent rounded-lg flex items-center justify-between cursor-not-allowed">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-outline">lock</span>
+<div>
+<h4 class="text-outline text-sm font-medium">6. Final Assessment: Risk Mitigation</h4>
+<span class="font-data-point text-[10px] text-outline/50">Exam</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-stack-lg py-stack-md bg-tertiary text-on-tertiary font-label-caps text-xs tracking-widest font-bold rounded-lg hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    UPGRADE TO ELITE
+                </button>
+</div>
+</aside>
+</main>
+<!-- State Mocks Section -->
+<section class="max-w-screen-2xl mx-auto px-margin-desktop py-stack-xl border-t border-outline-variant">
+<h2 class="font-label-caps text-on-surface-variant mb-stack-lg">System Status &amp; Error States</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-stack-md">
+<!-- Locked Video Card -->
+<div class="glass-panel p-stack-md rounded-lg flex flex-col gap-stack-sm relative overflow-hidden">
+<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+<div class="relative z-10">
+<span class="material-symbols-outlined text-tertiary mb-2">lock</span>
+<h5 class="text-sm font-bold text-on-surface">Content Locked</h5>
+<p class="text-xs text-on-surface-variant">Complete 'Defining Stop-Loss Hierarchies' to unlock this session.</p>
+</div>
+</div>
+<!-- Processing Card -->
+<div class="glass-panel p-stack-md rounded-lg flex flex-col gap-stack-sm items-center justify-center text-center">
+<div class="w-8 h-8 border-2 border-tertiary/20 border-t-tertiary rounded-full animate-spin mb-2"></div>
+<h5 class="text-sm font-bold text-on-surface">Optimizing Playback</h5>
+<p class="text-xs text-on-surface-variant">Institutional servers are preparing high-bitrate stream.</p>
+</div>
+<!-- Offline Card -->
+<div class="glass-panel p-stack-md rounded-lg border-error/30 flex flex-col gap-stack-sm">
+<span class="material-symbols-outlined text-error mb-2">wifi_off</span>
+<h5 class="text-sm font-bold text-on-surface">Offline Mode</h5>
+<p class="text-xs text-on-surface-variant">Connection lost. Re-establishing secure handshake...</p>
+</div>
+<!-- Playback Failed -->
+<div class="glass-panel p-stack-md rounded-lg flex flex-col gap-stack-sm">
+<span class="material-symbols-outlined text-error mb-2">error</span>
+<h5 class="text-sm font-bold text-on-surface">Playback Failed</h5>
+<p class="text-xs text-on-surface-variant">A fatal error occurred during decryption. [Error: 0x442]</p>
+<button class="mt-2 text-xs font-label-caps text-tertiary text-left hover:underline">RETRY STREAM</button>
+</div>
+<!-- Unsupported Browser -->
+<div class="glass-panel p-stack-md rounded-lg flex flex-col gap-stack-sm">
+<span class="material-symbols-outlined text-on-surface-variant mb-2">browser_updated</span>
+<h5 class="text-sm font-bold text-on-surface">Unsupported Client</h5>
+<p class="text-xs text-on-surface-variant">Legacy browser detected. DRM security requires Chromium or Webkit 16+.</p>
+</div>
+<!-- Progress Save Failed -->
+<div class="glass-panel p-stack-md rounded-lg flex flex-col gap-stack-sm border-warning/30 bg-orange-950/10">
+<span class="material-symbols-outlined text-orange-400 mb-2">cloud_sync</span>
+<h5 class="text-sm font-bold text-on-surface">Sync Error</h5>
+<p class="text-xs text-on-surface-variant">Progress not saved to cloud. Retrying in background...</p>
+</div>
+<!-- Session Expired Overlay Mock -->
+<div class="col-span-1 md:col-span-2 glass-panel p-stack-md rounded-lg flex items-center gap-stack-md border-error/50 bg-error-container/10">
+<div class="bg-error/20 p-stack-sm rounded">
+<span class="material-symbols-outlined text-error">timer_off</span>
+</div>
+<div class="flex-1">
+<h5 class="text-sm font-bold text-on-surface">Secure Session Expired</h5>
+<p class="text-xs text-on-surface-variant">For your protection, institutional accounts auto-lock after inactivity.</p>
+</div>
+<button class="px-stack-md py-stack-sm bg-error text-on-error font-label-caps text-[10px] font-bold rounded">RE-AUTHENTICATE</button>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest text-on-surface-variant font-data-point text-data-point border-t border-outline-variant py-stack-lg px-margin-desktop mt-stack-xl flex flex-col md:flex-row justify-between items-center gap-stack-md">
+<div class="font-headline-xl text-headline-xl opacity-20 select-none">AskStoic</div>
+<div class="flex flex-col items-center md:items-end gap-stack-sm">
+<div class="flex gap-stack-md">
+<a class="hover:text-tertiary underline transition-opacity" href="#">Terms of Service</a>
+<a class="hover:text-tertiary underline transition-opacity" href="#">Privacy Policy</a>
+<a class="hover:text-tertiary underline transition-opacity" href="#">Risk Disclosure</a>
+</div>
+<p>© 2024 AskStoic Institutional. All rights reserved.</p>
+</div>
+</footer>
+<script>
+        // Simple micro-interactions for the "terminal" feel
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => btn.classList.add('opacity-70'));
+            btn.addEventListener('mouseup', () => btn.classList.remove('opacity-70'));
+            btn.addEventListener('mouseleave', () => btn.classList.remove('opacity-70'));
+        });
+
+        // Simulating the volume bar
+        const volContainer = document.querySelector('.group\\/vol');
+        if(volContainer) {
+            volContainer.addEventListener('mouseenter', () => {
+                // Expanding logic handled by CSS group-hover
+            });
+        }
+    </script>
+</body></html>

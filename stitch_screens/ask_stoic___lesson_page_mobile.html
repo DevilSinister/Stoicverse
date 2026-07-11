@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AskStoic | Lesson Page</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+        .emerald-glow {
+            box-shadow: 0px 0px 15px rgba(16, 185, 129, 0.15);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-surface": "#d2e4ff", surface: "#001429", "tertiary-fixed": "#6cff81", "surface-container-lowest": "#000f21", "inverse-primary": "#565e74", "primary-container": "#0f172a", "outline-variant": "#45464d", "secondary-fixed-dim": "#bcc6df", "primary-fixed-dim": "#bec6e0", "on-primary-container": "#798098", "inverse-on-surface": "#1d3249", "surface-container": "#0a2137", "on-background": "#d2e4ff", "secondary-fixed": "#d8e2fc", "on-secondary": "#273044", "surface-bright": "#263a52", secondary: "#bcc6df", "tertiary-fixed-dim": "#46e265", "inverse-surface": "#d2e4ff", "on-error": "#690005", error: "#ffb4ab", tertiary: "#46e265", "on-primary": "#283044", "tertiary-container": "#001d05", "on-tertiary-fixed-variant": "#00531a", "on-secondary-fixed": "#111c2e", "on-primary-fixed": "#131b2e", "surface-container-low": "#051c33", outline: "#909097", "surface-tint": "#bec6e0", "on-tertiary-container": "#009536", "on-tertiary-fixed": "#002106", "on-secondary-fixed-variant": "#3d475b", "surface-container-high": "#162b42", "on-error-container": "#ffdad6", "on-secondary-container": "#aeb8d1", "secondary-container": "#3f495e", "on-surface-variant": "#c6c6cd", "on-primary-fixed-variant": "#3f465c", "surface-variant": "#22364e", "on-tertiary": "#003910", background: "#001429", "surface-container-highest": "#22364e", "primary-fixed": "#dae2fd", "surface-dim": "#001429", primary: "#bec6e0", "error-container": "#93000a"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-sm": "8px", "stack-xl": "64px", "margin-desktop": "64px", gutter: "24px", "stack-md": "16px", "margin-mobile": "20px", "stack-lg": "32px", "container-max": "1280px"}, fontFamily: {"headline-xl": ["Inter"], "headline-lg": ["Inter"], "body-lg": ["Inter"], "headline-lg-mobile": ["Inter"], "label-caps": ["JetBrains Mono"], "data-point": ["JetBrains Mono"], "body-md": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}]}}}};</script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md text-body-md overflow-x-hidden selection:bg-tertiary selection:text-on-tertiary">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 left-0 right-0 z-[60] bg-surface h-16 flex items-center justify-between px-margin-mobile border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary cursor-pointer">arrow_back</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile font-black tracking-tighter">AskStoic</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+<div class="w-8 h-8 rounded-full bg-primary-container border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a high-level executive with sharp features, wearing a dark navy suit and looking directly into the camera with a confident, stoic expression. The lighting is dramatic and institutional, with deep shadows and cool tones, fitting an elite financial mentorship platform's premium dark mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdh7oWiE7ViP31qF4B1HjCTHgn_E7mPcyiwH1f3jAKueUYdRvgkf5PuP1IbpYq_1uaZ0Y6mPcZZnQMB0Dfquh35exWn274qadUaG_VjdQoBkZzVVlQNiuoF3JFZ8R9If2UK6mp7wOoeVFXTn2FwITjjUjvC70375ldWgsFGDxJxmDK-sIxW8xW6GfSbN4tGJr1kdrNjxIT_LvTWmHgT7_I4vVG2oYv7wjqOeFSNyTUERcj9Be5ySeVLK8E7arE6efp2X5nwWJRqX0C"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-16 pb-24 flex flex-col min-h-screen">
+<!-- Video Player Section (Sticky Top) -->
+<section class="sticky top-16 z-50 w-full bg-black aspect-video relative group overflow-hidden">
+<!-- Loading Overlay (State: Processing) -->
+<div class="absolute inset-0 z-10 bg-surface flex flex-col items-center justify-center hidden" id="video-processing">
+<div class="w-12 h-12 border-4 border-tertiary border-t-transparent rounded-full animate-spin"></div>
+<p class="mt-4 font-label-caps text-label-caps text-tertiary">ENCRYPTING STREAM...</p>
+</div>
+<!-- Error Overlay (State: Playback Failed) -->
+<div class="absolute inset-0 z-20 bg-surface-container flex flex-col items-center justify-center p-6 text-center hidden" id="video-error">
+<span class="material-symbols-outlined text-error text-5xl mb-3">error</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-error-container">Playback Failure</h3>
+<p class="mt-2 text-on-surface-variant text-sm">Our institutional servers are currently undergoing maintenance or your connection is unstable.</p>
+<button class="mt-6 px-6 py-2 bg-tertiary text-on-tertiary font-label-caps text-label-caps rounded-lg emerald-glow">RETRY EXECUTION</button>
+</div>
+<!-- Locked Overlay (State: Tier Locked) -->
+<div class="absolute inset-0 z-30 bg-surface-container-highest/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center" id="video-locked">
+<span class="material-symbols-outlined text-tertiary text-5xl mb-3">lock</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-tertiary">ELITE TIER REQUIRED</h3>
+<p class="mt-2 text-on-surface-variant text-sm max-w-xs">Module 4: Risk Mitigation is reserved for institutional partners. Upgrade to access elite proprietary strategies.</p>
+<button class="mt-6 px-8 py-3 bg-tertiary text-on-tertiary font-label-caps text-label-caps rounded-lg emerald-glow font-bold">UPGRADE TO ELITE</button>
+</div>
+<!-- Placeholder for Video -->
+<div class="w-full h-full flex items-center justify-center bg-surface-container">
+<img class="w-full h-full object-cover opacity-40" data-alt="A high-definition cinematic still from a professional trading course. The screen shows a sophisticated financial dashboard with emerald green line charts against a dark navy background. A professional mentor's hands are visible pointing at a complex data pattern. The atmosphere is clinical, high-stakes, and elite, following a corporate modern design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCf52XT_ndrInQQXl222V0FoYDkfXVK3DUT9CwL4WksPPIf3mi4eTvefN9p5hSppl9p_f-AmTFqQaoLBCLeUq2c75bzEhAqi3-Li93368bNp2cxPkYlWOT3PNE1VphGk6g__tETDT_u09xDXdsHrgMZXx2vtzSg-czONG-ng-AR3n3WXis6QIGASIZw0Zh4WiMPel2aIGsPLC9Zxc-t5jHeVSlwty3SZ7n7JQIOffe4vSyeM9Ob70FsXbg0bnFshvf06l6_RGagrVtA"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-white text-4xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+</div>
+<!-- Video Progress Bar -->
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-surface-variant">
+<div class="h-full bg-tertiary w-1/3 shadow-[0_0_8px_rgba(78,222,163,0.8)]"></div>
+</div>
+</section>
+<!-- Offline Alert (Inline Alert State) -->
+<div class="bg-error-container/20 border-b border-error/30 px-margin-mobile py-3 flex items-center gap-3 hidden" id="offline-alert">
+<span class="material-symbols-outlined text-error">wifi_off</span>
+<span class="text-xs font-label-caps text-error">OFFLINE MODE: CONTENT MAY BE OUTDATED</span>
+</div>
+<!-- Lesson Details -->
+<section class="px-margin-mobile pt-stack-lg pb-stack-md">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-tertiary/10 text-tertiary text-[10px] font-label-caps border border-tertiary/30 rounded">ELITE TIER</span>
+<span class="text-on-surface-variant font-data-point text-data-point">MODULE 4 • 24:15</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight mb-3">Institutional Risk Mitigation: The Stoic Framework</h1>
+<p class="text-on-surface-variant text-body-md leading-relaxed mb-6">
+                Learn the methodologies used by top-tier firms to hedge volatility without sacrificing upside. We strip away retail sentiment and focus on the cold math of capital preservation.
+            </p>
+<!-- Progress Save Failed Alert -->
+<div class="flex items-center gap-3 p-3 bg-surface-container-high border border-error/50 rounded-lg mb-6 hidden" id="save-failed">
+<span class="material-symbols-outlined text-error">sync_problem</span>
+<div class="flex-1">
+<p class="text-xs font-bold text-on-surface">SYNC FAILURE</p>
+<p class="text-[10px] text-on-surface-variant">Progress not saved to cloud.</p>
+</div>
+<button class="text-tertiary text-[10px] font-label-caps underline">RETRY</button>
+</div>
+</section>
+<!-- Resources Section -->
+<section class="px-margin-mobile mb-stack-xl">
+<div class="flex items-center justify-between mb-stack-md">
+<h2 class="font-label-caps text-label-caps text-on-surface tracking-widest">RESOURCES</h2>
+<span class="text-on-surface-variant text-[10px] font-data-point">3 FILES</span>
+</div>
+<div class="space-y-3">
+<!-- Resource Item -->
+<div class="glass-panel p-4 flex items-center justify-between group active:bg-surface-variant">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded bg-primary-container flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-tertiary">description</span>
+</div>
+<div>
+<p class="text-sm font-semibold text-on-surface">Risk_Matrix_V4.pdf</p>
+<p class="text-[10px] text-on-surface-variant font-data-point uppercase">2.4 MB • PDF Document</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-active:text-tertiary">download</span>
+</div>
+<!-- Resource Item -->
+<div class="glass-panel p-4 flex items-center justify-between group active:bg-surface-variant">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded bg-primary-container flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-tertiary">table_chart</span>
+</div>
+<div>
+<p class="text-sm font-semibold text-on-surface">Portfolio_Hedge_Calc.xlsx</p>
+<p class="text-[10px] text-on-surface-variant font-data-point uppercase">1.1 MB • Spreadsheet</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-active:text-tertiary">download</span>
+</div>
+</div>
+</section>
+<!-- Up Next Playlist -->
+<section class="bg-surface-container-lowest pt-stack-lg pb-10 border-t border-outline-variant">
+<div class="px-margin-mobile flex items-center justify-between mb-stack-md">
+<h2 class="font-label-caps text-label-caps text-on-surface tracking-widest">UP NEXT</h2>
+<div class="flex items-center gap-2">
+<span class="text-[10px] text-on-surface-variant font-data-point">AUTOPLAY</span>
+<div class="w-8 h-4 bg-tertiary rounded-full relative">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-on-tertiary rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="space-y-1">
+<!-- Playlist Item: Active -->
+<div class="px-margin-mobile py-4 flex gap-4 bg-primary-container/40 border-l-2 border-tertiary">
+<div class="w-24 h-16 rounded overflow-hidden relative flex-shrink-0 border border-tertiary/30">
+<img class="w-full h-full object-cover opacity-80" data-alt="A dark-themed educational video thumbnail for a finance course. It displays a clean, minimalist UI of a terminal with glowing emerald green text against a deep navy background. The text reads 'Risk Mitigation' in a sharp monospaced font. The style is institutional and premium." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3XAEVVxBwm3IwOK3CDxQJReelhz8N-WJHHXtdxqVZlxgN7Q0SE4oSaRkg6qwtZ8XWC0oXagSmPZkcHf8SF1PlK2dDuzltCReoSVXDqcPbgiPZEMjB6JENCPKd2Wp0thiDlfRuBB9w8PKNnK4NeIDbBAnVNGHpx6YapjU56KosDf5wXu2tey1C2e6wXAJJYghpFZ1-v-Z_89v0tQTBpjeWCGbHX-zAbgaCx0sq9Szm7aTqhj9yY2ITiftT6a0dkFHKRIIdmP-mhiGb"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-[10px] text-tertiary font-label-caps mb-1">CURRENTLY PLAYING</p>
+<h4 class="text-sm font-bold text-on-surface line-clamp-1 leading-tight">Institutional Risk Mitigation</h4>
+<p class="text-[10px] text-on-surface-variant font-data-point">LESSON 04 • 24:15</p>
+</div>
+</div>
+<!-- Playlist Item -->
+<div class="px-margin-mobile py-4 flex gap-4 hover:bg-surface-container-high transition-colors">
+<div class="w-24 h-16 rounded overflow-hidden relative flex-shrink-0 bg-black">
+<img class="w-full h-full object-cover opacity-50" data-alt="A professional trading workstation thumbnail with three vertical monitors showing complex data streams and candlestick charts in dark mode. The room is dimly lit with a cool blue ambient light, creating a focused, high-performance atmosphere. The composition is sleek and corporate." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9VGY3dc7-kejd_rvS1JFFmzm6r_nBO6VEV9bIWmR2RrYkm8GNa0vAMIKqdOvsC5E0AIbTLrDrQ0NpNX38tF-GW6_9prdhYujbAM-5NcShVYjO8wYDWQjKUHMoOhW-TDj-UdxJ5mJz2XeNzf_G9-J70SJPcNuGVGZ4PDPNgwhlj2aiLuNWZtcGAPC2FXOKFuAJBNb-dkNQkIheeEfx4JH-A9Z37fglMDphUBmbw6LbEcGo94Pfo_QbeVHCkI6run6tWXj7jeI5g-_K"/>
+</div>
+<div class="flex flex-col justify-center">
+<h4 class="text-sm font-bold text-on-surface-variant line-clamp-1 leading-tight">Advanced Volatility Scalping</h4>
+<p class="text-[10px] text-on-surface-variant font-data-point">LESSON 05 • 18:42</p>
+</div>
+</div>
+<!-- Playlist Item -->
+<div class="px-margin-mobile py-4 flex gap-4 hover:bg-surface-container-high transition-colors">
+<div class="w-24 h-16 rounded overflow-hidden relative flex-shrink-0 bg-black">
+<img class="w-full h-full object-cover opacity-50" data-alt="A minimalist architectural visualization of a high-end corporate boardroom. Large glass windows overlook a dark city skyline at night. The interior is monochrome with sharp lines and expensive textures. The feeling is one of immense power and stoic discipline." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAh8wRTAfSRSXMTw0FaKhhEkBTCnUrS9T2mh90THnlOAU1RweBVOEg-C9xU2l4_TNkHokXOKxqWytayVCogZhNFMfT_qpZRqOfGfbNEYTOF3KK0mNDbYI8j6qHNx9QM0TviKPFkEIYAHRhUNhMsgEQ-MiDjDjSF19EMF6Sou60tY_lch7scG1e31bQyhD_38mXuntk9h7nw54h6tvPg8VjlwLJjSNpctfBG14-1_Kburk7RIf19kjqKbNKKiCPxkcb52GZmREfP2vj"/>
+</div>
+<div class="flex flex-col justify-center">
+<h4 class="text-sm font-bold text-on-surface-variant line-clamp-1 leading-tight">Terminal Execution Protocols</h4>
+<p class="text-[10px] text-on-surface-variant font-data-point">LESSON 06 • 15:10</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Shared Component Anchor) -->
+<nav class="fixed bottom-0 left-0 right-0 h-16 bg-surface-container flex items-center justify-around px-2 z-[60]">
+<div class="flex flex-col items-center justify-center text-on-surface-variant gap-1">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[9px] font-label-caps">OVERVIEW</span>
+</div>
+<div class="flex flex-col items-center justify-center text-tertiary gap-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="text-[9px] font-label-caps">MODULES</span>
+</div>
+<div class="relative -top-3">
+<div class="w-12 h-12 bg-tertiary rounded-full flex items-center justify-center text-on-tertiary emerald-glow">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'wght' 700;">terminal</span>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant gap-1">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="text-[9px] font-label-caps">NOTES</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant gap-1">
+<span class="material-symbols-outlined">groups</span>
+<span class="text-[9px] font-label-caps">COMMUNITY</span>
+</div>
+</nav>
+<!-- Full-Screen Overlay: Session Expired (State: Session Expired) -->
+<div class="fixed inset-0 z-[100] bg-surface/95 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center hidden" id="session-expired-overlay">
+<div class="w-20 h-20 rounded-full bg-error-container/20 border border-error/50 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-error text-4xl">timer_off</span>
+</div>
+<h2 class="font-headline-xl text-headline-lg-mobile text-on-surface mb-3 tracking-tight">Session Expired</h2>
+<p class="text-on-surface-variant mb-8 max-w-xs">For your security, elite terminal access sessions are limited. Please re-authenticate to continue your training.</p>
+<button class="w-full max-w-xs py-4 bg-tertiary text-on-tertiary font-label-caps text-label-caps rounded-lg emerald-glow font-bold tracking-widest active:opacity-80 transition-opacity">RE-AUTHENTICATE</button>
+</div>
+<!-- Full-Screen Overlay: Unsupported Browser -->
+<div class="fixed inset-0 z-[100] bg-surface-container flex flex-col items-center justify-center p-8 text-center hidden" id="unsupported-overlay">
+<span class="material-symbols-outlined text-on-surface-variant text-6xl mb-4">browser_updated</span>
+<h2 class="font-headline-lg-mobile text-on-surface mb-2">Legacy Browser Detected</h2>
+<p class="text-on-surface-variant text-sm mb-6">AskStoic Institutional requires modern cryptographic and streaming protocols. Please update your terminal software.</p>
+<div class="flex gap-4">
+<div class="p-3 border border-outline-variant rounded-lg"><span class="material-symbols-outlined">public</span></div>
+<div class="p-3 border border-outline-variant rounded-lg"><span class="material-symbols-outlined">language</span></div>
+</div>
+</div>
+<script>
+        // Simple state demonstration triggers
+        function toggleState(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden');
+        }
+
+        // Example: Simulated background check showing "Locked" state by default
+        // In a real app, this would be tied to user permissions.
+        
+        // Example logic for Session Expired simulation (can be called from console)
+        window.showSessionExpired = () => {
+            document.getElementById('session-expired-overlay').classList.remove('hidden');
+        };
+
+        window.showOffline = (status) => {
+            const alert = document.getElementById('offline-alert');
+            if(status) alert.classList.remove('hidden');
+            else alert.classList.add('hidden');
+        };
+    </script>
+</body></html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AskStoic | Executive Trading Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-secondary-fixed": "#111c2e", surface: "#001429", outline: "#909097", "on-primary": "#283044", background: "#001429", "primary-fixed": "#dae2fd", "on-secondary": "#273044", "secondary-container": "#3f495e", "on-tertiary-fixed-variant": "#00531a", "primary-container": "#0f172a", "on-background": "#d2e4ff", "secondary-fixed-dim": "#bcc6df", "on-error": "#690005", tertiary: "#46e265", "outline-variant": "#45464d", "tertiary-fixed": "#6cff81", "on-primary-container": "#798098", "surface-container": "#0a2137", "on-error-container": "#ffdad6", "inverse-primary": "#565e74", "secondary-fixed": "#d8e2fc", "surface-container-highest": "#22364e", "on-tertiary-fixed": "#002106", secondary: "#bcc6df", "surface-container-high": "#162b42", primary: "#bec6e0", "surface-bright": "#263a52", "error-container": "#93000a", "inverse-surface": "#d2e4ff", "surface-container-low": "#051c33", "primary-fixed-dim": "#bec6e0", "inverse-on-surface": "#1d3249", "surface-dim": "#001429", "surface-container-lowest": "#000f21", "on-surface-variant": "#c6c6cd", "on-tertiary-container": "#009536", "tertiary-container": "#001d05", "surface-variant": "#22364e", error: "#ffb4ab", "surface-tint": "#bec6e0", "on-primary-fixed": "#131b2e", "on-surface": "#d2e4ff", "on-primary-fixed-variant": "#3f465c", "on-tertiary": "#003910", "on-secondary-container": "#aeb8d1", "tertiary-fixed-dim": "#46e265", "on-secondary-fixed-variant": "#3d475b"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-lg": "32px", "margin-desktop": "64px", "stack-xl": "64px", "margin-mobile": "20px", gutter: "24px", "stack-sm": "8px", "stack-md": "16px", "container-max": "1280px"}, fontFamily: {"label-caps": ["JetBrains Mono"], "data-point": ["JetBrains Mono"], "headline-lg": ["Inter"], "body-lg": ["Inter"], "headline-xl": ["Inter"], "body-md": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}]}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-emerald {
+            box-shadow: 0 0 15px rgba(78, 222, 163, 0.15);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-x-hidden selection:bg-tertiary selection:text-on-tertiary">
+<!-- NavigationDrawer Shell -->
+<aside class="h-full w-64 fixed left-0 top-0 bg-surface border-r border-outline-variant flex flex-col py-stack-md z-50">
+<div class="px-6 mb-stack-xl">
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-black tracking-tight uppercase">AskStoic</h1>
+</div>
+<div class="px-4 flex items-center gap-3 mb-stack-lg">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a male executive trader in his early 30s, Alex Sterling, with a neutral expression, clean-cut appearance, wearing a dark navy tailored suit. The lighting is dramatic and moody, reflecting a high-stakes institutional environment, with a dark slate-gray studio background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZpsT4ha_XcTMg212Wm1_ZXrQRNx9dgw2wco0ZSaYGIDJVNirNuFabnvf53n5L3a_a0r6O16Zn2bT6OUN4qD2CQWiasIOgYa6n00LbRv6HNZQ4e-g9us8BbkfLNU2pixLU43z-_ZtHX3LueTcCfwmM0BmPwD8oU9S1pvgw8xdEMk3P7EEwFDRZMotcKithbe3ZC2KS-nHYvRDDfPuk6HW57_MN4LC8QOigU8lPuLivBxOVTW1NmuYCqrBqK5zh8mco20hdGSw2gdsk"/>
+</div>
+<div>
+<p class="font-body-md text-on-surface font-bold">Alex Sterling</p>
+<p class="text-xs text-on-surface-variant font-label-caps">Tier 2: Executive</p>
+</div>
+</div>
+<nav class="flex-1 px-2 space-y-1">
+<!-- Curriculum is Active -->
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-tertiary rounded-lg shadow-[0_0_15px_rgba(78,222,163,0.1)] group transition-transform scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-body-md">Curriculum</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-lg group" href="#">
+<span class="material-symbols-outlined">live_tv</span>
+<span class="font-body-md">Live Sessions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-lg group" href="#">
+<span class="material-symbols-outlined">record_voice_over</span>
+<span class="font-body-md">Mentors</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-lg group" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md">Insights</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-lg group" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md">Settings</span>
+</a>
+</nav>
+<div class="px-4 mt-auto">
+<div class="p-4 rounded-xl border border-tertiary/20 bg-tertiary/5 text-center">
+<span class="material-symbols-outlined text-tertiary mb-2">workspace_premium</span>
+<p class="text-xs font-label-caps text-on-surface mb-2">Upgrade Status</p>
+<button class="w-full py-2 bg-tertiary text-on-tertiary text-[10px] font-label-caps font-black rounded hover:brightness-110 transition-all">UNLOOCK MENTORSHIP</button>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="ml-64 min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-16 px-margin-desktop bg-surface-container border-b border-outline-variant sticky top-0 z-40">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="w-full bg-surface-dim border border-outline-variant rounded-full py-2 pl-10 pr-4 text-sm font-data-point focus:ring-1 focus:ring-tertiary focus:border-tertiary transition-all" placeholder="Search curriculum, assets, or tools..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 px-3 py-1 bg-tertiary/10 border border-tertiary/20 rounded-full">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="text-xs font-label-caps text-tertiary">LIVE NOW</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined">terminal</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<main class="flex-1 p-margin-desktop max-w-container-max mx-auto w-full">
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Welcome Section -->
+<div class="col-span-12 mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg mb-2">Terminal Overview</h2>
+<p class="text-on-surface-variant font-body-md">Good morning, Alex. Market liquidity is peaking in the London session.</p>
+</div>
+<!-- Bento Row 1: Quick Stats & Progress -->
+<div class="col-span-12 md:col-span-4 glass-panel p-6 rounded-xl relative overflow-hidden group">
+<div class="flex justify-between items-start mb-6">
+<div>
+<p class="text-xs font-label-caps text-on-surface-variant mb-1">CURRENT TIER</p>
+<h3 class="font-headline-lg text-2xl">Technical Mastery</h3>
+</div>
+<div class="relative flex items-center justify-center">
+<svg class="w-20 h-20">
+<circle class="text-surface-container-highest" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" stroke-width="6"></circle>
+<circle class="text-tertiary progress-ring-circle" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" stroke-dasharray="213.6" stroke-dashoffset="123.9" stroke-linecap="round" stroke-width="6"></circle>
+</svg>
+<span class="absolute font-data-point text-sm">42%</span>
+</div>
+</div>
+<div class="flex gap-4 items-center">
+<div class="flex-1 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[42%]"></div>
+</div>
+<span class="text-xs font-label-caps text-tertiary">EXP +450</span>
+</div>
+</div>
+<div class="col-span-12 md:col-span-4 glass-panel p-6 rounded-xl flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-tertiary bg-tertiary/10 p-2 rounded-lg" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-xs font-label-caps text-on-surface-variant">LEARNING STREAK</span>
+</div>
+<div class="mt-4">
+<span class="font-headline-xl text-headline-xl leading-none">12 Days</span>
+<p class="text-on-surface-variant text-sm mt-2">Consistent focus is the edge.</p>
+</div>
+</div>
+<div class="col-span-12 md:col-span-4 glass-panel p-6 rounded-xl border-t-2 border-t-tertiary">
+<p class="text-xs font-label-caps text-tertiary mb-2">ANNOUNCEMENT</p>
+<h4 class="font-body-md font-bold text-on-surface mb-3">Institutional Flow Tool Available</h4>
+<p class="text-sm text-on-surface-variant mb-4">Track large order block imbalances directly within your Terminal view. Access Tier 2 data nodes now.</p>
+<button class="flex items-center gap-2 text-tertiary text-xs font-label-caps hover:gap-3 transition-all">
+                        EXPLORE TOOL <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<!-- Row 2: Featured Content & Schedule -->
+<div class="col-span-12 md:col-span-8 glass-panel rounded-xl overflow-hidden flex flex-col md:flex-row min-h-[320px]">
+<div class="md:w-1/2 p-8 flex flex-col justify-center">
+<p class="text-xs font-label-caps text-on-surface-variant mb-2">CONTINUE LEARNING</p>
+<h3 class="font-headline-lg text-2xl mb-4">Module 3: Liquidity Zones &amp; Order Blocks</h3>
+<p class="text-on-surface-variant text-sm mb-8">Master the mechanics of market manipulation and identify where the big players hide their orders.</p>
+<button class="w-fit px-8 py-3 bg-tertiary text-on-tertiary font-label-caps font-black rounded hover:shadow-[0_0_20px_rgba(78,222,163,0.3)] transition-all uppercase">
+                            RESUME SESSION
+                        </button>
+</div>
+<div class="md:w-1/2 relative bg-surface-container-highest">
+<img class="w-full h-full object-cover mix-blend-lighten opacity-80" data-alt="A high-fidelity dashboard mockup showing professional financial trading charts with green and red candlestick patterns on a dark blue background. The UI elements are sleek, with precise grid lines, emerald green data highlights, and multiple time-frame indicators. The perspective is slightly angled to show depth and the complexity of institutional-grade trading software." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDflg-4ZSEJKUHkYLYodUIL3ANvEdYQCzd5frmoNZkotwuyF1fWz9vCp3p-ZbhnQdFmLxxUqWZnjZYJuwwaaaWYnM043irsMGUXZDnOEM52y899MILIsS9gUf1IsfG9ZX8PlLd7MOlmKkxYrJU6nDlrUTzRxa-t56n9onODexYZJ4Wa68XCqg6KWtcOBmPqHXhyF2BNxvYCxkMFdL5HjCpKaPYeON0W69t6txHo6LNH-Z7W-yQ0SS1GDFdAts6igwIzUjs4ISrPXkZh"/>
+<div class="absolute inset-0 bg-gradient-to-r from-surface-container via-transparent to-transparent"></div>
+</div>
+</div>
+<div class="col-span-12 md:col-span-4 glass-panel p-8 rounded-xl flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-label-caps text-xs">UPCOMING LIVE</h4>
+<span class="text-xs font-data-point text-on-surface-variant">Starts in 45m</span>
+</div>
+<div class="mb-auto">
+<h3 class="font-headline-lg text-xl mb-2">NY Open Strategy with Marcus</h3>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-8 h-8 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A close-up portrait of Marcus, a professional senior trading mentor, with a sharp jawline and focused expression. He is wearing a minimalist black polo shirt against a background of blurred trading screens displaying financial data. The overall mood is sophisticated, institutional, and highly professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB066vfGF2ZDyY3QihytPlktH6MeuHFG0bsQUTRE0ZzwgVUmFfuiiKWDxm46EYaIPmjKV0V5H7an9UgtrOqdvFuO_xz4Qd_z5a1Rq_ZesgnjwQtP0AwqXnoL1om0H1J4WS9q9gicC0mwsMYm4VD5hA2tnJNSqfi0IN8BXtoFCAKY1YdRMlnAMiz25Mn97OCIt4cm74lRgGVoTwNxxWWMfT7SsbTUMKDQmks5_WFrWVkQwTr6xxB2oTx3DMmE1MfwtQazhKr6D22wshZ"/>
+</div>
+<span class="text-sm font-body-md text-on-surface-variant">Lead Mentor: Marcus K.</span>
+</div>
+</div>
+<button class="w-full py-4 border border-outline-variant hover:bg-surface-bright hover:border-tertiary transition-all rounded font-label-caps text-xs uppercase flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span> SET REMINDER
+                    </button>
+</div>
+<!-- Row 3: History & Mentorship -->
+<div class="col-span-12 md:col-span-7 glass-panel p-6 rounded-xl">
+<h4 class="font-label-caps text-xs mb-6">RECORDED SESSION PROGRESS</h4>
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<div class="w-24 h-14 bg-surface-dim rounded border border-outline-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">play_circle</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-xs mb-2">
+<span class="font-bold">Introduction to Smart Money</span>
+<span class="text-on-surface-variant font-data-point">85% Complete</span>
+</div>
+<div class="h-1 bg-surface-container-highest rounded-full">
+<div class="h-full bg-tertiary w-[85%]"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-24 h-14 bg-surface-dim rounded border border-outline-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">play_circle</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-xs mb-2">
+<span class="font-bold">Risk Management in Volatility</span>
+<span class="text-on-surface-variant font-data-point">12% Complete</span>
+</div>
+<div class="h-1 bg-surface-container-highest rounded-full">
+<div class="h-full bg-tertiary w-[12%]"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4 opacity-50">
+<div class="w-24 h-14 bg-surface-dim rounded border border-outline-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">lock</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-xs mb-2">
+<span class="font-bold">Tier 3: Prop Firm Strategy</span>
+<span class="text-on-surface-variant font-data-point">Locked</span>
+</div>
+<div class="h-1 bg-surface-container-highest rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-12 md:col-span-5 glass-panel p-6 rounded-xl flex flex-col justify-center items-center text-center relative overflow-hidden">
+<div class="absolute inset-0 bg-tertiary/5"></div>
+<div class="relative z-10">
+<div class="w-16 h-16 bg-tertiary/10 rounded-full flex items-center justify-center mb-6 border border-tertiary/30">
+<span class="material-symbols-outlined text-tertiary text-3xl">verified_user</span>
+</div>
+<h3 class="font-headline-lg text-xl mb-2">Elite Mentorship</h3>
+<p class="text-sm text-on-surface-variant mb-6 px-4">Fast-track your path to funding with personalized reviews of your trade journal.</p>
+<button class="px-10 py-4 bg-on-surface text-background font-label-caps font-black rounded hover:bg-tertiary hover:text-on-tertiary transition-all uppercase">
+                            BOOK 1-ON-1 CALL
+                        </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Subtle Footer -->
+<footer class="p-stack-md text-center">
+<p class="text-[10px] font-label-caps text-on-surface-variant/40">OFFICIAL STOIC INSTITUTIONAL TERMINAL v.2.4.0 • CONNECTION SECURED via END-TO-END QUANTUM NODES</p>
+</footer>
+</div>
+<!-- Floating Micro-Interaction Scripts -->
+<script>
+        // Progress ring logic (Simple animation simulation)
+        document.addEventListener('DOMContentLoaded', () => {
+            const circle = document.querySelector('.progress-ring-circle');
+            if(circle) {
+                const radius = circle.r.baseVal.value;
+                const circumference = radius * 2 * Math.PI;
+                circle.style.strokeDasharray = `${circumference} ${circumference}`;
+                
+                // Set to 42%
+                const offset = circumference - (42 / 100 * circumference);
+                circle.style.strokeDashoffset = offset;
+            }
+        });
+
+        // Hover Glow Effect
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('glow-emerald');
+            });
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('glow-emerald');
+            });
+        });
+    </script>
+</body></html>

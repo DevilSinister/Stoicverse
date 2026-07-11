@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AskStoic Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-secondary-fixed": "#111c2e", surface: "#001429", outline: "#909097", "on-primary": "#283044", background: "#001429", "primary-fixed": "#dae2fd", "on-secondary": "#273044", "secondary-container": "#3f495e", "on-tertiary-fixed-variant": "#00531a", "primary-container": "#0f172a", "on-background": "#d2e4ff", "secondary-fixed-dim": "#bcc6df", "on-error": "#690005", tertiary: "#46e265", "outline-variant": "#45464d", "tertiary-fixed": "#6cff81", "on-primary-container": "#798098", "surface-container": "#0a2137", "on-error-container": "#ffdad6", "inverse-primary": "#565e74", "secondary-fixed": "#d8e2fc", "surface-container-highest": "#22364e", "on-tertiary-fixed": "#002106", secondary: "#bcc6df", "surface-container-high": "#162b42", primary: "#bec6e0", "surface-bright": "#263a52", "error-container": "#93000a", "inverse-surface": "#d2e4ff", "surface-container-low": "#051c33", "primary-fixed-dim": "#bec6e0", "inverse-on-surface": "#1d3249", "surface-dim": "#001429", "surface-container-lowest": "#000f21", "on-surface-variant": "#c6c6cd", "on-tertiary-container": "#009536", "tertiary-fixed-dim": "#46e265", "on-secondary-fixed-variant": "#3d475b", "tertiary-container": "#001d05", "surface-variant": "#22364e", error: "#ffb4ab", "surface-tint": "#bec6e0", "on-primary-fixed": "#131b2e", "on-surface": "#d2e4ff", "on-primary-fixed-variant": "#3f465c", "on-tertiary": "#003910", "on-secondary-container": "#aeb8d1"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-lg": "32px", "margin-desktop": "64px", "stack-xl": "64px", "margin-mobile": "20px", gutter: "24px", "stack-sm": "8px", "stack-md": "16px", "container-max": "1280px"}, fontFamily: {"label-caps": ["JetBrains Mono"], "data-point": ["JetBrains Mono"], "headline-lg": ["Inter"], "body-lg": ["Inter"], "headline-xl": ["Inter"], "headline-lg-mobile": ["Inter"], "body-md": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}]}}}};</script>
+<style>
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-emerald {
+            box-shadow: 0 0 15px rgba(78, 222, 163, 0.15);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background min-h-screen flex flex-col">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 bg-surface-container flex justify-between items-center h-16 px-margin-mobile border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<button class="p-2 -ml-2 text-on-surface-variant hover:text-tertiary transition-colors" id="menu-toggle">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-black tracking-tight">AskStoic</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-tertiary">search</span>
+<div class="flex items-center gap-1 px-3 py-1 bg-error-container/20 rounded-full">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-error">Live</span>
+</div>
+</div>
+</header>
+<!-- Navigation Drawer Overlay -->
+<div class="fixed inset-0 bg-black/60 z-[60] hidden opacity-0 transition-opacity duration-300" id="drawer-overlay"></div>
+<!-- Navigation Drawer -->
+<aside class="fixed left-0 top-0 h-full w-72 bg-surface border-r border-outline-variant z-[70] -translate-x-full transition-transform duration-300 ease-in-out py-stack-md flex flex-col" id="nav-drawer">
+<div class="px-6 pb-stack-lg">
+<div class="flex items-center gap-4 mb-stack-lg">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest overflow-hidden flex items-center justify-center">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a high-tier executive financial trader, male, in a sharp dark suit, cinematic lighting, studio background, shallow depth of field, monochromatic professional aesthetic with a subtle emerald green rim light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBFhXmvmT0kkjMEpbNOvA65sYtBPlA6hanilwD6Tl9C9W-gLTZvggqLV58nm2myIJpMvfIhfUx3mbjWj5mGF4TgA4Sx3x9pNkoyiUdVCFL62HBscB6AxIWg73R2Ca5ForH6LoMQzsYY8rbmu79q377V0JEdkseTVR9Gdk4Iu5Ny5lZ8Q46eBiEDcsYPsCOYKQZg-AJ0kDcHCs9RSjM0lZKSv54BtqeCo9OvigCS4OQNEvBLFO09-E82SBliNFbWGYTKVBShrTDhX2o"/>
+</div>
+<div>
+<h3 class="font-body-md text-body-md font-bold text-on-surface">Alex Sterling</h3>
+<p class="font-label-caps text-[10px] text-tertiary">Tier 1 Executive</p>
+</div>
+</div>
+<nav class="space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-tertiary rounded-lg glow-emerald" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md text-body-md font-medium">Insights</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-body-md text-body-md">Curriculum</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">live_tv</span>
+<span class="font-body-md text-body-md">Live Sessions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">record_voice_over</span>
+<span class="font-body-md text-body-md">Mentors</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto px-6">
+<button class="w-full flex items-center justify-center gap-2 py-3 bg-tertiary text-on-tertiary font-label-caps text-label-caps font-bold rounded-lg active:scale-95 transition-transform">
+                LOGOUT
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin-mobile py-stack-lg space-y-stack-lg max-w-lg mx-auto w-full">
+<!-- Tier & Progress Card -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant">YOUR STATUS</h2>
+<span class="font-data-point text-data-point text-tertiary">TIER 2</span>
+</div>
+<div class="bg-surface-container border border-outline-variant p-5 rounded-xl">
+<div class="flex justify-between mb-3">
+<span class="font-body-md text-body-md font-semibold">Overall Mastery</span>
+<span class="font-data-point text-data-point text-tertiary">42%</span>
+</div>
+<div class="w-full h-2 bg-background rounded-full overflow-hidden">
+<div class="h-full bg-tertiary glow-emerald transition-all duration-1000" style="width: 42%;"></div>
+</div>
+<p class="mt-4 font-body-md text-sm text-on-surface-variant leading-relaxed">
+                    You're 8% away from unlocking the <span class="text-on-surface font-bold italic">Institutional Liquidity</span> workshop.
+                </p>
+</div>
+</section>
+<!-- Continue Learning -->
+<section class="space-y-4">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant">RESUME TRACK</h2>
+<div class="relative overflow-hidden group bg-surface-container-highest border border-outline-variant rounded-xl aspect-[16/10] flex flex-col justify-end">
+<img class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700" data-alt="A cinematic, low-angle shot of multiple financial screens displaying complex liquidity maps and candlestick charts in a dark, high-tech trading room. The ambient light is a deep emerald green, reflecting off sleek glass surfaces and black metallic hardware, creating an atmosphere of intense institutional focus and professional mastery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAFzm53BVtdZihp0gGPEQxR6hn-CgCle6bp9lRtW5FMehY9UimJ1zeqkIafo_o8CmSXr_0mA5XeNvo-2tsGPrV-IKPc7aNuL1xTYISvB9DVXsJ3zMxiSJmR9DQXzRen3Mx2cEn_jlweKQ_jNdjVaQgj-hLVQuRKu1fI8EnJqyz1yegpaX1RSz9wONxhchs61E_tAxMA3cKNbN2OY0igmco383YqInNyvaZL6L0_LcdPxO6GA2Nbp77vxWeIysRbcPePsK3kNRGCBae"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-highest via-transparent to-transparent"></div>
+<div class="relative p-6 space-y-3">
+<span class="px-2 py-1 bg-tertiary/10 border border-tertiary/20 text-tertiary font-label-caps text-[10px] rounded">MODULE 3</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-white leading-tight">Liquidity Zones &amp; Market Hooks</h3>
+<button class="flex items-center gap-2 bg-tertiary text-on-tertiary px-6 py-3 rounded-lg font-label-caps text-label-caps font-bold w-fit group-active:scale-95 transition-transform">
+<span class="material-symbols-outlined !text-[18px]">play_arrow</span>
+                        RESUME SESSION
+                    </button>
+</div>
+</div>
+</section>
+<!-- Next Live Session Alert -->
+<div class="bg-tertiary-container border-l-4 border-tertiary p-5 flex items-start gap-4">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+<div class="space-y-1">
+<p class="font-label-caps text-[10px] text-tertiary/80 uppercase">Upcoming Live</p>
+<h4 class="font-body-md text-body-md font-bold text-tertiary">NY Open Session: Range Breakers</h4>
+<p class="font-data-point text-data-point text-on-tertiary-container/80">Starting in 42 minutes • <span class="italic">Host: Marco V.</span></p>
+</div>
+</div>
+<!-- Latest Announcement -->
+<div class="bg-surface-container-low p-4 rounded-lg flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">campaign</span>
+<p class="font-body-md text-sm text-on-surface-variant">The Q4 Institutional Outlook report is now available in Mentorship Insights.</p>
+</div>
+<!-- Progress Metrics -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container border border-outline-variant p-5 rounded-xl space-y-2">
+<div class="flex items-center gap-2 text-on-surface-variant mb-2">
+<span class="material-symbols-outlined !text-[20px]">history</span>
+<span class="font-label-caps text-[11px]">RECORDED</span>
+</div>
+<div class="font-headline-lg-mobile text-headline-lg-mobile font-black text-on-surface">148<span class="text-lg font-normal text-on-surface-variant">hrs</span></div>
+<p class="font-data-point text-[12px] text-tertiary">+12.4% vs last mo</p>
+</div>
+<div class="bg-surface-container border border-outline-variant p-5 rounded-xl space-y-2 relative overflow-hidden">
+<div class="flex items-center gap-2 text-on-surface-variant mb-2">
+<span class="material-symbols-outlined !text-[20px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="font-label-caps text-[11px]">STREAK</span>
+</div>
+<div class="font-headline-lg-mobile text-headline-lg-mobile font-black text-tertiary">12<span class="text-lg font-normal text-on-surface-variant italic ml-1">Days</span></div>
+<div class="absolute bottom-[-10px] right-[-10px] opacity-10 rotate-12">
+<span class="material-symbols-outlined !text-[80px]">trending_up</span>
+</div>
+</div>
+</div>
+<!-- Mentorship Banner -->
+<section class="relative rounded-2xl overflow-hidden p-8 flex flex-col items-center text-center gap-4 bg-[#0A1A2F] border border-outline-variant mb-12">
+<!-- Decorative shader element -->
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-tertiary/20 via-transparent to-transparent"></div>
+</div>
+<div class="relative z-10 space-y-4">
+<span class="font-label-caps text-[11px] px-3 py-1 bg-white/5 border border-white/10 rounded-full text-on-surface-variant">EXCLUSIVE ACCESS</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile font-black tracking-tight text-white">Elite 1-on-1 Mentorship</h3>
+<p class="font-body-md text-on-surface-variant max-w-[280px]">Personalized trade reviews and direct wire to our lead institutional analysts.</p>
+<button class="mt-4 w-full bg-white text-on-secondary-fixed py-4 rounded-xl font-label-caps text-label-caps font-black tracking-widest hover:bg-tertiary transition-colors">
+                    UPGRADE NOW
+                </button>
+</div>
+</section>
+</main>
+<!-- Bottom Action Bar (Contextual FAB replacement for focus) -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-4 bg-surface-container-high/80 backdrop-blur-xl border border-outline-variant rounded-full shadow-2xl z-40 md:hidden">
+<button class="flex items-center justify-center w-10 h-10 rounded-full text-on-surface-variant hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined">chat_bubble</span>
+</button>
+<div class="w-[1px] h-6 bg-outline-variant"></div>
+<button class="flex items-center justify-center px-4 py-2 bg-tertiary rounded-full text-on-tertiary font-label-caps text-label-caps font-bold">
+            ASK STOIC AI
+        </button>
+</div>
+<script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const navDrawer = document.getElementById('nav-drawer');
+        const drawerOverlay = document.getElementById('drawer-overlay');
+
+        function toggleMenu() {
+            const isOpen = !navDrawer.classList.contains('-translate-x-full');
+            if (isOpen) {
+                navDrawer.classList.add('-translate-x-full');
+                drawerOverlay.classList.add('hidden');
+                drawerOverlay.classList.remove('opacity-100');
+            } else {
+                navDrawer.classList.remove('-translate-x-full');
+                drawerOverlay.classList.remove('hidden');
+                setTimeout(() => drawerOverlay.classList.add('opacity-100'), 10);
+            }
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+        drawerOverlay.addEventListener('click', toggleMenu);
+
+        // Micro-interactions for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', () => btn.classList.add('scale-95'));
+            btn.addEventListener('touchend', () => btn.classList.remove('scale-95'));
+        });
+    </script>
+</body></html>

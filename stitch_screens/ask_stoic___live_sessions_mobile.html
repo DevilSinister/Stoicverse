@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AskStoic | Live Sessions</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+        .emerald-glow {
+            box-shadow: 0px 0px 15px rgba(16, 185, 129, 0.15);
+        }
+        .emerald-glow-active:active {
+            box-shadow: 0px 0px 20px rgba(16, 185, 129, 0.3);
+        }
+        /* Custom scrollbar for terminal feel */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4edea3;
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-tertiary-container": "#009536", outline: "#909097", "surface-tint": "#bec6e0", "on-tertiary-fixed": "#002106", "on-secondary-fixed-variant": "#3d475b", "surface-container-high": "#162b42", "on-tertiary-fixed-variant": "#00531a", "on-secondary-fixed": "#111c2e", "surface-container-low": "#051c33", "on-primary-fixed": "#131b2e", "surface-container-highest": "#22364e", "primary-fixed": "#dae2fd", primary: "#bec6e0", "error-container": "#93000a", "surface-dim": "#001429", "secondary-container": "#3f495e", "on-surface-variant": "#c6c6cd", "on-primary-fixed-variant": "#3f465c", "on-error-container": "#ffdad6", "on-secondary-container": "#aeb8d1", "surface-variant": "#22364e", "on-tertiary": "#003910", background: "#001429", "inverse-primary": "#565e74", "primary-fixed-dim": "#bec6e0", "on-primary-container": "#798098", "primary-container": "#0f172a", "outline-variant": "#45464d", "secondary-fixed-dim": "#bcc6df", surface: "#001429", "tertiary-fixed": "#6cff81", "surface-container-lowest": "#000f21", "on-surface": "#d2e4ff", "on-primary": "#283044", "tertiary-container": "#001d05", tertiary: "#46e265", "secondary-fixed": "#d8e2fc", "on-secondary": "#273044", "surface-bright": "#263a52", secondary: "#bcc6df", "inverse-on-surface": "#1d3249", "surface-container": "#0a2137", "on-background": "#d2e4ff", "on-error": "#690005", error: "#ffb4ab", "tertiary-fixed-dim": "#46e265", "inverse-surface": "#d2e4ff"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"margin-mobile": "20px", "stack-md": "16px", "stack-lg": "32px", "container-max": "1280px", "stack-xl": "64px", "stack-sm": "8px", "margin-desktop": "64px", gutter: "24px"}, fontFamily: {"headline-xl": ["Inter"], "headline-lg": ["Inter"], "body-lg": ["Inter"], "headline-lg-mobile": ["Inter"], "label-caps": ["JetBrains Mono"], "data-point": ["JetBrains Mono"], "body-md": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}]}}}};</script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-50 bg-background border-b border-outline-variant">
+<div class="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="flex items-center gap-stack-md">
+<span class="font-headline-lg-mobile md:font-headline-lg text-tertiary font-bold tracking-tight">AskStoic</span>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="material-symbols-outlined text-on-surface-variant cursor-pointer">notifications</button>
+<div class="w-8 h-8 rounded-full border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of an executive mentor in a high-contrast cinematic setting with deep shadows and sharp focus, matching the dark premium AskStoic brand aesthetic of deep navy and emerald accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrHL0hbm_KOvgfOCGWY7xjoWRfUQB-QZ1zqTt6I9vBL0K7Kg_KqP66p7jk6uQ14EcGRudQPSGafuTtWYxVEIC6MmVmizCdaALqr7a0Rz0TKRWyPiK_ysUMgr7rfdVQTclNNAZoTsb-TQI4IGwPG7O6YxBJuhUShhCe563rtZtf3hJhSXXcUnNE41GyLRmKOC8PyyrYZiIQToBCXMFAn32C0VOgoUdfEWmKENz6WSYt7OUKNWmZ549y_qzvxBtBdatYhFm192vkShkV"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow flex flex-col pb-stack-xl">
+<!-- Dashboard Header / Welcome Section -->
+<section class="px-margin-mobile pt-stack-lg pb-stack-md max-w-container-max mx-auto w-full">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Live Sessions</h1>
+<p class="text-on-surface-variant font-body-md">Refine your strategy with real-time institutional insights.</p>
+</section>
+<!-- Navigation Tabs -->
+<nav class="sticky top-16 z-40 bg-background border-b border-outline-variant">
+<div class="flex justify-between md:justify-start md:gap-stack-xl px-margin-mobile max-w-container-max mx-auto">
+<button class="py-stack-md font-label-caps text-label-caps border-b-2 border-tertiary text-tertiary transition-all" id="tab-live" onclick="switchTab('live')">Live Now</button>
+<button class="py-stack-md font-label-caps text-label-caps border-b-2 border-transparent text-outline hover:text-on-surface transition-all" id="tab-upcoming" onclick="switchTab('upcoming')">Upcoming</button>
+<button class="py-stack-md font-label-caps text-label-caps border-b-2 border-transparent text-outline hover:text-on-surface transition-all" id="tab-past" onclick="switchTab('past')">Past</button>
+</div>
+</nav>
+<!-- Session Content Container -->
+<div class="px-margin-mobile mt-stack-lg space-y-stack-md max-w-container-max mx-auto w-full" id="session-container">
+<!-- LIVE NOW SECTION -->
+<div class="space-y-stack-md" id="section-live">
+<div class="glass-panel p-stack-md rounded-lg flex flex-col gap-stack-md border-l-4 border-l-tertiary emerald-glow">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-tertiary flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+                                IN PROGRESS
+                            </span>
+<h3 class="font-headline-lg-mobile text-on-surface mt-1">Global Macro Analysis</h3>
+</div>
+<div class="bg-surface-variant px-3 py-1 rounded">
+<span class="font-data-point text-data-point text-on-surface">1.2k Watching</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-tertiary/30">
+<img class="w-full h-full rounded-full object-cover" data-alt="A portrait of a senior financial analyst with graying hair and a sharp suit, lit by dramatic office lighting with a deep navy background and soft emerald rim light, embodying the AskStoic mentorship style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJELAl-RXrMk0sZyq3MEsUQpVJtuncL794E4NJAbWrutODyH2NZavKpLHqHZKXD-ouRqa8jlPm5dT3a3tbqFa4WnrS6TM7BzOCnDeDJURzQr1zoJHIscjwQTUyFQA7F4lUJAXX4mNzc9ydvjKTkJ2d0hZkoD-rn06Y-CxkWUA_XIOsEArr93nrStMWsyz0iKoPMPkpDySL3fLDGFONj9ayL16sj0MyPGAMFkQbNC3UaZy9Dw5jI5b8TUIxYWpB53PsB6r1pNPDEm8u"/>
+</div>
+<div>
+<p class="text-on-surface font-semibold text-sm">Marcus Aurelius</p>
+<p class="text-outline text-xs">Chief Strategist</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-stack-md mt-2">
+<button class="w-full py-3 bg-tertiary text-on-tertiary font-label-caps text-label-caps tracking-wider rounded-lg font-bold emerald-glow-active" onclick="showStatusModal('full')">JOIN ZOOM</button>
+<button class="w-full py-3 border border-outline-variant text-on-surface font-label-caps text-label-caps tracking-wider rounded-lg hover:bg-surface-variant">VIEW DETAILS</button>
+</div>
+</div>
+</div>
+<!-- UPCOMING SECTION (Hidden by default, shown via JS) -->
+<div class="hidden space-y-stack-md" id="section-upcoming">
+<!-- Session 1: Normal -->
+<div class="glass-panel p-stack-md rounded-lg flex flex-col gap-stack-md">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline">OCT 24 • 14:00 GMT</span>
+<h3 class="font-headline-lg-mobile text-on-surface mt-1">Quantitative Risk Frameworks</h3>
+</div>
+<div class="bg-primary-container text-tertiary px-3 py-2 rounded-lg text-center min-w-[80px]">
+<p class="font-data-point text-[10px] uppercase text-outline">Starts In</p>
+<p class="font-data-point text-data-point">04:12:05</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-outline-variant">
+<img class="w-full h-full rounded-full object-cover" data-alt="A high-end professional avatar of a female data scientist looking focused, wearing a headset, in a dark studio setting with emerald green backlighting, conveying professional authority." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgUgxGpxJWJZZ4JuJU02WQtTrKEJU_fjj5Kt_t6VAvE0l8WZdurZ64MWfj10J9rvNASZwHmCMkU0MVA-erCKodSamh5P-17cUmRY7LnZ0c122WHfYCEBSB_H96SEA88LR6wFNA70j_It-PviA2L7Nw2tVjn1p3gkyUBASs6a1JdHyvDyPY8XLfIQmwUzATPfRo1YK66UppNrPV_yhXgJT6VWhibUvDK4D-aMt4d5zO0YAHhBYDchHdwjFlsZ_xii4tUx8Yt7pC8RiD"/>
+</div>
+<div>
+<p class="text-on-surface font-semibold text-sm">Dr. Elena Thorne</p>
+<p class="text-outline text-xs">Head of Quant Research</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-stack-md mt-2">
+<button class="w-full py-3 bg-surface-container-highest text-outline font-label-caps text-label-caps tracking-wider rounded-lg cursor-not-allowed" onclick="showStatusModal('not-started')">JOIN ZOOM</button>
+<button class="w-full py-3 border border-outline-variant text-on-surface font-label-caps text-label-caps tracking-wider rounded-lg hover:bg-surface-variant">VIEW DETAILS</button>
+</div>
+</div>
+<!-- Session 2: Rescheduled -->
+<div class="glass-panel p-stack-md rounded-lg flex flex-col gap-stack-md relative overflow-hidden">
+<div class="absolute top-0 right-0 bg-secondary-container px-4 py-1 rounded-bl-lg">
+<span class="font-label-caps text-[10px] text-tertiary">RESCHEDULED</span>
+</div>
+<div class="flex justify-between items-start pr-16">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline line-through opacity-50">OCT 25 • 09:00 GMT</span>
+<span class="font-label-caps text-label-caps text-tertiary">OCT 26 • 10:00 GMT</span>
+<h3 class="font-headline-lg-mobile text-on-surface mt-1">Crypto Asset Custody</h3>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-outline-variant">
+<img class="w-full h-full rounded-full object-cover" data-alt="A portrait of a tech-savvy executive in a dark minimalist room, subtly illuminated by high-tech monitor glow in emerald and white tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-ui7BrS4Wei9pqs-uwqF0_o6cDgMNgJBRGqRBhyUf53dX2xZB7peMliPbNsFu_JZEFHfUKdaRfUZcMQsxGD2X2EasJnhh5beGv5kiQQ_6qY53sby-7O3tf0vAW2PfqwMkK2JRRzSKgtYc94y_0ye2rBgVnGXAh9faQBpU2g163ySTai6XEcDDLwJW2RjM-gyRHGkTlmFOtUrCPspYQj96XMUzVlr6i1S0-DU1UNIhDPWzAjhDSKYk_dhBlKk15jtXS2Vh6iGK5OjR"/>
+</div>
+<div>
+<p class="text-on-surface font-semibold text-sm">Cyrus Vance</p>
+<p class="text-outline text-xs">Blockchain Lead</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-stack-md mt-2">
+<button class="w-full py-3 border border-tertiary/50 text-tertiary font-label-caps text-label-caps tracking-wider rounded-lg" onclick="showStatusModal('rescheduled')">REMIND ME</button>
+<button class="w-full py-3 border border-outline-variant text-on-surface font-label-caps text-label-caps tracking-wider rounded-lg hover:bg-surface-variant">VIEW DETAILS</button>
+</div>
+</div>
+</div>
+<!-- PAST SECTION (Hidden by default) -->
+<div class="hidden space-y-stack-md" id="section-past">
+<div class="glass-panel p-stack-md rounded-lg flex flex-col gap-stack-md opacity-70">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline">OCT 20 • COMPLETED</span>
+<h3 class="font-headline-lg-mobile text-on-surface mt-1">Fed Interest Rate Pivot</h3>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-outline-variant grayscale">
+<img class="w-full h-full rounded-full object-cover" data-alt="A black and white high-contrast portrait of a financial professor, maintaining a scholarly and elite atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcAAVau0g4B_q5n79h-KnUdxtrIybQhRv0-iQmFoKqf_wcfRVv7J_9VDEmtpa9apZNfDWeQBVqdSB028KM6_KiaJHq9-WbK7SYaTFn28jUqJhHmkOqU1mySLD31gzNehYX16kobgJ48XoJeooqbf_eGFjDJuwTXJYNuBLB8sDWwGjBYInuBW_sOGf_p3mSBUEeNSHiEzEVRAIonnQOUEdlOoSKouFOx_bO_Ge6oDiikSMuMQKDAHNYKiqk_BiQTSwkiT5mSO1hZkHb"/>
+</div>
+<div>
+<p class="text-on-surface font-semibold text-sm">Marcus Aurelius</p>
+<p class="text-outline text-xs">Chief Strategist</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-stack-md mt-2">
+<button class="w-full py-3 bg-surface-container-highest text-outline font-label-caps text-label-caps tracking-wider rounded-lg" onclick="showStatusModal('ended')">ENDED</button>
+<button class="w-full py-3 border border-outline-variant text-on-surface font-label-caps text-label-caps tracking-wider rounded-lg hover:bg-surface-variant">VIEW RECORDING</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Action Button (FAB) - For adding reminders -->
+<button class="fixed bottom-24 right-6 w-14 h-14 bg-tertiary text-on-tertiary rounded-full shadow-lg emerald-glow flex items-center justify-center z-30 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">calendar_add_on</span>
+</button>
+</main>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container border-t border-outline-variant z-50">
+<div class="flex justify-around items-center h-16">
+<button class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-label-caps">Overview</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-tertiary transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">live_tv</span>
+<span class="text-[10px] font-label-caps">Live Sessions</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined">school</span>
+<span class="text-[10px] font-label-caps">Curriculum</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined">account_balance</span>
+<span class="text-[10px] font-label-caps">Vault</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined">group</span>
+<span class="text-[10px] font-label-caps">Mentorship</span>
+</button>
+</div>
+</nav>
+<!-- Modal System for Session Statuses -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-background/80 backdrop-blur-sm p-margin-mobile" id="status-modal">
+<div class="glass-panel w-full max-w-sm rounded-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+<div class="p-stack-lg flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center mb-stack-md" id="modal-icon-container">
+<span class="material-symbols-outlined text-4xl text-tertiary" id="modal-icon">info</span>
+</div>
+<h2 class="font-headline-lg-mobile text-on-surface mb-2" id="modal-title">Session Notice</h2>
+<p class="text-on-surface-variant mb-stack-lg" id="modal-message">This action is currently unavailable.</p>
+<button class="w-full py-3 border border-outline-variant text-on-surface font-label-caps text-label-caps tracking-wider rounded-lg hover:bg-surface-variant transition-colors" onclick="hideStatusModal()">
+                    ACKNOWLEDGE
+                </button>
+</div>
+</div>
+</div>
+<script>
+        function switchTab(tabId) {
+            // Sections
+            document.getElementById('section-live').classList.add('hidden');
+            document.getElementById('section-upcoming').classList.add('hidden');
+            document.getElementById('section-past').classList.add('hidden');
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+
+            // Tab styling
+            const tabs = ['live', 'upcoming', 'past'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('tab-' + t);
+                btn.classList.remove('border-tertiary', 'text-tertiary');
+                btn.classList.add('border-transparent', 'text-outline');
+            });
+            const activeBtn = document.getElementById('tab-' + tabId);
+            activeBtn.classList.remove('border-transparent', 'text-outline');
+            activeBtn.classList.add('border-tertiary', 'text-tertiary');
+        }
+
+        const statuses = {
+            'cancelled': {
+                icon: 'cancel',
+                title: 'Session Cancelled',
+                message: 'Due to unexpected volatility, this session has been cancelled. Please check your email for the summary brief.',
+                color: 'text-error'
+            },
+            'rescheduled': {
+                icon: 'event_repeat',
+                title: 'Rescheduled',
+                message: 'This session has been moved to align with market opening times. A new calendar invite has been sent.',
+                color: 'text-tertiary'
+            },
+            'full': {
+                icon: 'group_off',
+                title: 'Capacity Reached',
+                message: 'This session is currently at full institutional capacity. Access the recording in the Strategy Vault in 2 hours.',
+                color: 'text-error'
+            },
+            'expired': {
+                icon: 'link_off',
+                title: 'Link Expired',
+                message: 'The security handshake for this Zoom link has expired. Generate a new token in your profile settings.',
+                color: 'text-outline'
+            },
+            'not-eligible': {
+                icon: 'lock',
+                title: 'Access Restricted',
+                message: 'This session requires a Professional Tier membership. Upgrade to Pro to join elite strategy sessions.',
+                color: 'text-secondary'
+            },
+            'not-started': {
+                icon: 'timer',
+                title: 'Not Started',
+                message: 'The room will open 10 minutes prior to the scheduled start time. Please prepare your terminal.',
+                color: 'text-tertiary'
+            },
+            'ended': {
+                icon: 'history',
+                title: 'Session Concluded',
+                message: 'This live session has ended. The interactive Q&A transcript and recording are now being processed.',
+                color: 'text-outline'
+            }
+        };
+
+        function showStatusModal(type) {
+            const config = statuses[type];
+            if (!config) return;
+
+            document.getElementById('modal-icon').innerText = config.icon;
+            document.getElementById('modal-icon').className = `material-symbols-outlined text-4xl ${config.color}`;
+            document.getElementById('modal-title').innerText = config.title;
+            document.getElementById('modal-message').innerText = config.message;
+            
+            const modal = document.getElementById('status-modal');
+            modal.classList.remove('hidden');
+        }
+
+        function hideStatusModal() {
+            document.getElementById('status-modal').classList.add('hidden');
+        }
+
+        // Close modal on background click
+        document.getElementById('status-modal').addEventListener('click', (e) => {
+            if(e.target === document.getElementById('status-modal')) hideStatusModal();
+        });
+    </script>
+</body></html>

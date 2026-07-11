@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Secure Checkout | ASKSTOIC</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-tint": "#bec6e0", "on-secondary-fixed-variant": "#3d475b", "inverse-on-surface": "#1d3249", "primary-fixed-dim": "#bec6e0", "on-background": "#d2e4ff", "on-tertiary-fixed": "#002106", "tertiary-fixed-dim": "#46e265", "on-secondary-fixed": "#111c2e", "inverse-surface": "#d2e4ff", "on-primary-container": "#798098", "error-container": "#93000a", "outline-variant": "#45464d", "tertiary-container": "#001d05", error: "#ffb4ab", "surface-container-high": "#162b42", "on-surface-variant": "#c6c6cd", "surface-container-highest": "#22364e", "surface-container-low": "#051c33", "on-secondary-container": "#aeb8d1", "surface-bright": "#263a52", "on-primary-fixed": "#131b2e", "surface-container-lowest": "#000f21", primary: "#bec6e0", outline: "#909097", background: "#001429", "secondary-fixed-dim": "#bcc6df", "on-tertiary-container": "#009536", "tertiary-fixed": "#6cff81", "secondary-container": "#3f495e", "on-secondary": "#273044", surface: "#001429", secondary: "#bcc6df", "on-tertiary-fixed-variant": "#00531a", "on-surface": "#d2e4ff", "on-tertiary": "#003910", "on-error-container": "#ffdad6", "on-error": "#690005", "surface-variant": "#22364e", "on-primary-fixed-variant": "#3f465c", "primary-fixed": "#dae2fd", "primary-container": "#0f172a", "surface-dim": "#001429", tertiary: "#46e265", "surface-container": "#0a2137", "secondary-fixed": "#d8e2fc", "on-primary": "#283044", "inverse-primary": "#565e74"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-sm": "8px", gutter: "24px", "margin-desktop": "64px", "stack-lg": "32px", "stack-xl": "64px", "container-max": "1280px", "margin-mobile": "20px", "stack-md": "16px"}, fontFamily: {"data-point": ["JetBrains Mono"], "label-caps": ["JetBrains Mono"], "headline-xl": ["Inter"], "body-md": ["Inter"], "headline-lg-mobile": ["Inter"], "headline-lg": ["Inter"], "body-lg": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}]}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .emerald-glow:focus {
+            box-shadow: 0px 0px 15px rgba(16, 185, 129, 0.2);
+            border-color: #4edea3 !important;
+        }
+        .status-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(5, 20, 36, 0.85);
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #051424; }
+        ::-webkit-scrollbar-thumb { background: #334155; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- Top Navigation (Shell suppressed for Transactional focus, but Brand identity remains) -->
+<header class="bg-background border-b border-outline-variant h-20 flex items-center">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="font-headline-lg text-headline-lg font-bold tracking-tighter text-on-surface">ASKSTOIC</div>
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-tertiary">lock</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">SECURE CHECKOUT</span>
+</div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter lg:gap-stack-xl relative">
+<!-- Left Column: Checkout Form -->
+<div class="lg:col-span-7 space-y-stack-xl">
+<!-- Wallet Options -->
+<section class="space-y-stack-md">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant">EXPRESS CHECKOUT</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-stack-md">
+<button class="bg-white text-black h-12 flex items-center justify-center gap-2 rounded-lg hover:opacity-90 transition-opacity font-bold">
+<span class="material-symbols-outlined">apps</span> Apple Pay
+                        </button>
+<button class="bg-white text-black h-12 flex items-center justify-center gap-2 rounded-lg hover:opacity-90 transition-opacity font-bold">
+<span class="material-symbols-outlined">google</span> Google Pay
+                        </button>
+</div>
+</section>
+<div class="flex items-center gap-stack-md">
+<hr class="flex-grow border-outline-variant"/>
+<span class="font-label-caps text-label-caps text-on-surface-variant">OR PAY WITH CARD</span>
+<hr class="flex-grow border-outline-variant"/>
+</div>
+<!-- Payment Form -->
+<form class="space-y-stack-lg" id="checkoutForm">
+<div class="space-y-stack-md">
+<label class="block font-label-caps text-label-caps text-on-surface-variant">EMAIL ADDRESS</label>
+<input class="w-full h-14 bg-surface-container-lowest border border-outline-variant px-4 text-on-surface font-data-point emerald-glow outline-none transition-all" placeholder="executive@domain.com" type="email"/>
+</div>
+<div class="space-y-stack-md">
+<label class="block font-label-caps text-label-caps text-on-surface-variant">BILLING COUNTRY</label>
+<select class="w-full h-14 bg-surface-container-lowest border border-outline-variant px-4 text-on-surface emerald-glow outline-none appearance-none">
+<option>United States</option>
+<option>United Kingdom</option>
+<option>Singapore</option>
+<option>Switzerland</option>
+</select>
+</div>
+<div class="space-y-stack-md p-gutter bg-surface-container-low border border-outline-variant rounded-lg">
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-stack-sm">CARD INFORMATION</label>
+<div class="space-y-4">
+<div class="relative">
+<input class="w-full h-14 bg-surface-container-lowest border border-outline-variant px-4 text-on-surface font-data-point emerald-glow outline-none" placeholder="Card number" type="text"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">credit_card</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<input class="h-14 bg-surface-container-lowest border border-outline-variant px-4 text-on-surface font-data-point emerald-glow outline-none" placeholder="MM / YY" type="text"/>
+<input class="h-14 bg-surface-container-lowest border border-outline-variant px-4 text-on-surface font-data-point emerald-glow outline-none" placeholder="CVC" type="text"/>
+</div>
+</div>
+</div>
+<div class="space-y-stack-md">
+<label class="block font-label-caps text-label-caps text-on-surface-variant">COUPON CODE</label>
+<div class="flex gap-2">
+<input class="flex-grow h-14 bg-surface-container-lowest border border-outline-variant px-4 text-on-surface font-data-point emerald-glow outline-none" placeholder="ENTER CODE" type="text"/>
+<button class="px-6 h-14 border border-outline-variant text-on-surface font-label-caps hover:bg-surface-variant transition-colors" type="button">APPLY</button>
+</div>
+</div>
+<div class="flex items-start gap-3 py-stack-md">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant bg-surface-container-lowest text-tertiary focus:ring-tertiary" id="terms" type="checkbox"/>
+<label class="text-on-surface-variant text-body-md" for="terms">
+                            I agree to the <a class="text-tertiary hover:underline" href="#">Terms of Service</a> and acknowledge the <a class="text-tertiary hover:underline" href="#">Risk Disclaimer</a> associated with institutional trading access.
+                        </label>
+</div>
+<button class="w-full h-16 bg-tertiary text-on-tertiary font-label-caps text-lg font-bold tracking-widest hover:opacity-90 active:scale-95 transition-all" onclick="showStatus('processing')" type="button">
+                        EXECUTE PAYMENT — $10.00
+                    </button>
+<div class="flex items-center justify-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">lock</span>
+<span class="text-sm font-label-caps">STRICT ENCRYPTION: AES-256 BIT PROTECTED</span>
+</div>
+</form>
+</div>
+<!-- Right Column: Order Summary (Sticky) -->
+<div class="lg:col-span-5">
+<div class="sticky top-stack-xl space-y-gutter">
+<div class="bg-surface-container border border-outline-variant p-stack-lg overflow-hidden relative">
+<!-- Background Pattern Decor -->
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-8xl">account_balance</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-stack-lg">Order Summary</h3>
+<div class="space-y-4 mb-stack-xl">
+<div class="flex justify-between items-start">
+<div>
+<p class="font-bold text-on-surface">AskStoic Community Access</p>
+<p class="text-on-surface-variant text-sm italic">Institutional Grade Membership</p>
+</div>
+<span class="font-data-point text-on-surface">$10.00</span>
+</div>
+<ul class="space-y-2 py-4 border-y border-outline-variant">
+<li class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Elite Mentorship Access
+                                </li>
+<li class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Live Trading Rooms (24/5)
+                                </li>
+<li class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Stoic Methodology Terminal
+                                </li>
+<li class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Real-time Insight Engine
+                                </li>
+</ul>
+<div class="space-y-2">
+<div class="flex justify-between text-on-surface-variant">
+<span>Subtotal</span>
+<span class="font-data-point">$10.00</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Discount</span>
+<span class="font-data-point">—</span>
+</div>
+<div class="flex justify-between text-on-surface pt-4 border-t border-outline-variant">
+<span class="font-bold">TOTAL DUE</span>
+<span class="font-data-point text-xl text-tertiary">$10.00</span>
+</div>
+</div>
+</div>
+<div class="w-full h-32 bg-cover bg-center mb-4" data-alt="A professional dark-themed office background with subtle financial data overlays, very dark navy and slate tones, institutional minimalist aesthetic, featuring a soft emerald green light streak." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBVh4HkBT4C_ecvU1mooBRIf8cV4fN_gcWUlM9laPcYi9FMhy11h1yGxduWI3uG5wO1-aw47r2yxPHoBIbhgevGLD6wrjQpAaGOKBFRK2w7VrfqftMu4gpU-s6goq26uCeSL78Zy2zFqR0KOf6OGIxoZhTPxrrkQ_i4Av-4VFqcRoo6LZXpACKn0k9ZWVt17fdz5weENEvpKFBmYsAevi6xW1oluMUXdi3TAYURW2tfnMnKgYoABnk2dpjyWA1AObK_YXfucHYj0ia4')"></div>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                            Payment will be processed through our secure institutional provider. Access to the curriculum and mentors will be provisioned immediately upon successful verification.
+                        </p>
+</div>
+<!-- Functional State Demo Controls (Dashboard) -->
+<div class="bg-surface-container-low border border-outline-variant p-gutter">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">settings_input_component</span>
+                            SIMULATOR: TEST STATES
+                        </h4>
+<div class="grid grid-cols-2 gap-2 text-[10px]">
+<button class="p-2 border border-outline-variant hover:bg-surface-variant transition-colors text-left" onclick="showStatus('processing')">PROCESSING</button>
+<button class="p-2 border border-outline-variant hover:bg-surface-variant transition-colors text-left" onclick="showStatus('success')">SUCCESS</button>
+<button class="p-2 border border-outline-variant hover:bg-surface-variant transition-colors text-left" onclick="showStatus('declined')">DECLINED</button>
+<button class="p-2 border border-outline-variant hover:bg-surface-variant transition-colors text-left" onclick="showStatus('expired')">EXPIRED CARD</button>
+<button class="p-2 border border-outline-variant hover:bg-surface-variant transition-colors text-left" onclick="showStatus('insufficient')">INSUFFICIENT FUNDS</button>
+<button class="p-2 border border-outline-variant hover:bg-surface-variant transition-colors text-left" onclick="showStatus('3ds')">AUTHENTICATION REQ.</button>
+<button class="p-2 border border-outline-variant hover:bg-surface-variant transition-colors text-left" onclick="showStatus('duplicate')">DUPLICATE PMT</button>
+<button class="p-2 border border-outline-variant hover:bg-surface-variant transition-colors text-left" onclick="showStatus('invalid_coupon')">INVALID COUPON</button>
+<button class="p-2 border border-outline-variant hover:bg-surface-variant transition-colors text-left" onclick="showStatus('delayed')">DELAYED ACT.</button>
+<button class="p-2 border border-outline-variant hover:bg-surface-variant transition-colors text-left" onclick="showStatus('unavailable')">PROVIDER ERROR</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low border-t border-outline-variant">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-stack-lg max-w-container-max mx-auto gap-stack-md">
+<div class="font-label-caps text-label-caps text-on-surface-variant text-center md:text-left">
+                © 2024 ASKSTOIC INSTITUTIONAL. ALL RIGHTS RESERVED.
+            </div>
+<div class="flex flex-wrap justify-center gap-gutter">
+<a class="font-label-caps text-label-caps text-tertiary hover:text-on-surface transition-colors" href="#">Refund Policy</a>
+<a class="font-label-caps text-label-caps text-tertiary hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-caps text-label-caps text-tertiary hover:text-on-surface transition-colors" href="#">Terms of Service</a>
+<a class="font-label-caps text-label-caps text-tertiary hover:text-on-surface transition-colors" href="#">Risk Disclaimer</a>
+</div>
+</div>
+</footer>
+<!-- Status Overlays Container -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-gutter status-overlay" id="overlay-container">
+<div class="bg-surface-container border border-outline-variant w-full max-w-md p-stack-xl relative text-center">
+<button class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface" onclick="closeOverlay()">
+<span class="material-symbols-outlined">close</span>
+</button>
+<div id="status-content">
+<!-- Content injected via JS -->
+</div>
+</div>
+</div>
+<script>
+        const states = {
+            processing: {
+                icon: 'sync',
+                iconColor: 'text-primary',
+                title: 'PROCESSING TRANSACTION',
+                msg: 'Verifying your credentials and securing institutional ledger space. Please do not refresh.',
+                btn: null,
+                spin: true
+            },
+            success: {
+                icon: 'check_circle',
+                iconColor: 'text-tertiary',
+                title: 'TRANSACTION SUCCESSFUL',
+                msg: 'Your payment was executed flawlessly. Access to AskStoic Terminal has been provisioned.',
+                btn: 'CONTINUE TO TERMINAL',
+                spin: false
+            },
+            declined: {
+                icon: 'error',
+                iconColor: 'text-error',
+                title: 'TRANSACTION DECLINED',
+                msg: 'The bank has refused this transaction. Contact your issuing institution or provide an alternative method.',
+                btn: 'TRY AGAIN',
+                spin: false
+            },
+            expired: {
+                icon: 'event_busy',
+                iconColor: 'text-error',
+                title: 'CARD EXPIRED',
+                msg: 'The card provided has passed its validity date. Use a valid executive-tier payment method.',
+                btn: 'UPDATE CARD',
+                spin: false
+            },
+            insufficient: {
+                icon: 'account_balance_wallet',
+                iconColor: 'text-error',
+                title: 'INSUFFICIENT FUNDS',
+                msg: 'Balance verification failed. Transaction cannot be executed at current account level.',
+                btn: 'TRY DIFFERENT CARD',
+                spin: false
+            },
+            '3ds': {
+                icon: 'shield_person',
+                iconColor: 'text-tertiary',
+                title: 'AUTHENTICATION REQUIRED',
+                msg: 'Your bank requires 3D Secure verification. Check your mobile device for the verification prompt.',
+                btn: 'OPEN VERIFICATION',
+                spin: false
+            },
+            duplicate: {
+                icon: 'content_copy',
+                iconColor: 'text-on-surface-variant',
+                title: 'DUPLICATE PAYMENT',
+                msg: 'A similar transaction was detected within the last 5 minutes. Operation halted to prevent double-billing.',
+                btn: 'VIEW DASHBOARD',
+                spin: false
+            },
+            invalid_coupon: {
+                icon: 'confirmation_number',
+                iconColor: 'text-error',
+                title: 'INVALID COUPON',
+                msg: 'The entered promotion code is expired or unrecognized in our institutional database.',
+                btn: 'DISMISS',
+                spin: false
+            },
+            delayed: {
+                icon: 'schedule',
+                iconColor: 'text-on-secondary-fixed-variant',
+                title: 'DELAYED ACTIVATION',
+                msg: 'Payment received. Account provisioning is taking longer than expected due to high volume.',
+                btn: 'NOTIFY ME VIA EMAIL',
+                spin: false
+            },
+            unavailable: {
+                icon: 'cloud_off',
+                iconColor: 'text-error',
+                title: 'PROVIDER UNAVAILABLE',
+                msg: 'External banking gateways are currently unresponsive. We are monitoring the situation.',
+                btn: 'RETRY IN 5 MIN',
+                spin: false
+            }
+        };
+
+        function showStatus(stateKey) {
+            const container = document.getElementById('overlay-container');
+            const content = document.getElementById('status-content');
+            const state = states[stateKey];
+
+            content.innerHTML = `
+                <div class="mb-stack-lg">
+                    <span class="material-symbols-outlined text-6xl ${state.iconColor} ${state.spin ? 'animate-spin' : ''}" style="font-size: 64px;">
+                        ${state.icon}
+                    </span>
+                </div>
+                <h2 class="font-label-caps text-lg mb-4 text-on-surface">${state.title}</h2>
+                <p class="text-on-surface-variant mb-stack-xl leading-relaxed">
+                    ${state.msg}
+                </p>
+                ${state.btn ? `
+                    <button onclick="closeOverlay()" class="w-full h-14 bg-tertiary text-on-tertiary font-label-caps font-bold hover:opacity-90 transition-all">
+                        ${state.btn}
+                    </button>
+                ` : ''}
+            `;
+            
+            container.classList.remove('hidden');
+        }
+
+        function closeOverlay() {
+            document.getElementById('overlay-container').classList.add('hidden');
+        }
+    </script>
+</body></html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AskStoic | Master Trading Through Structure and Discipline</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --emerald-glow: 0px 0px 15px rgba(16, 185, 129, 0.2);
+        }
+        .glow-hover:hover {
+            box-shadow: var(--emerald-glow);
+        }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid #334155;
+        }
+        .timeline-line {
+            background: linear-gradient(to bottom, #4edea3 0%, rgba(78, 222, 163, 0) 100%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-glow {
+            box-shadow: 0px 0px 20px rgba(78, 222, 163, 0.15);
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-container-highest": "#22364e", "inverse-on-surface": "#1d3249", "surface-bright": "#263a52", "on-tertiary-fixed-variant": "#00531a", "on-primary-container": "#798098", "primary-fixed": "#dae2fd", "on-surface-variant": "#c6c6cd", "surface-variant": "#22364e", "surface-container-high": "#162b42", "surface-container-low": "#051c33", "on-error": "#690005", "secondary-fixed": "#d8e2fc", "surface-container": "#0a2137", "surface-tint": "#bec6e0", "error-container": "#93000a", "on-tertiary-fixed": "#002106", "on-primary-fixed-variant": "#3f465c", "on-secondary-fixed": "#111c2e", secondary: "#bcc6df", "surface-container-lowest": "#000f21", "secondary-container": "#3f495e", "on-surface": "#d2e4ff", "surface-dim": "#001429", "tertiary-container": "#001d05", outline: "#909097", "inverse-primary": "#565e74", "primary-fixed-dim": "#bec6e0", background: "#001429", "on-primary": "#283044", "on-tertiary-container": "#009536", "secondary-fixed-dim": "#bcc6df", primary: "#bec6e0", surface: "#001429", "on-primary-fixed": "#131b2e", error: "#ffb4ab", "on-secondary-fixed-variant": "#3d475b", "on-secondary": "#273044", "outline-variant": "#45464d", "inverse-surface": "#d2e4ff", "on-background": "#d2e4ff", tertiary: "#46e265", "tertiary-fixed": "#6cff81", "tertiary-fixed-dim": "#46e265", "on-secondary-container": "#aeb8d1", "primary-container": "#0f172a", "on-tertiary": "#003910", "on-error-container": "#ffdad6"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"container-max": "1280px", "stack-sm": "8px", "stack-lg": "32px", "margin-mobile": "20px", "margin-desktop": "64px", "stack-md": "16px", gutter: "24px", "stack-xl": "64px"}, fontFamily: {"body-md": ["Inter"], "body-lg": ["Inter"], "label-caps": ["JetBrains Mono"], "headline-lg-mobile": ["Inter"], "headline-lg": ["Inter"], "data-point": ["JetBrains Mono"], "headline-xl": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}]}}}};</script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface selection:bg-tertiary selection:text-on-tertiary">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-50 bg-surface border-b border-outline-variant flex justify-between items-center px-5 md:px-margin-desktop py-4 max-w-container-max mx-auto">
+<div class="flex items-center gap-3">
+<img alt="AskStoic Logo" class="w-10 h-10 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFaXBavF3AlsVXZKU3D0LU4cSIUOzkSidSKJcqil9CxN_8O5kcBNwhTRpj7wD7FvMNh02CHa6QXvBa1pydrEFqLOXaWJKUpCGalyhfSgyp25F8HEQAKCRNFRRERfDbvqR3SLUTBLZ0CLAldfL10WRnJiMYDF26XIl5eNcjQ-uB5IwKoNtqrRGhFaAJ5O0KD5aSBFRp7qlGU3yCix9K5ULWSwATXI8H4LrIIdNXoEDkAZ_vJNa6U-EYZd4B2fur5BEX7W5LEFS-kPcI"/>
+<span class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold text-on-surface tracking-tight">AskStoic</span>
+</div>
+<div class="hidden md:flex items-center gap-stack-lg">
+<a class="font-body-md text-body-md text-tertiary font-bold border-b-2 border-tertiary pb-1" href="#">Home</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">How It Works</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Pricing</a>
+<button class="bg-tertiary text-on-tertiary font-label-caps text-label-caps px-6 py-3 rounded-DEFAULT hover:opacity-80 active:scale-95 transition-all">JOIN NOW</button>
+</div>
+<button class="md:hidden text-on-surface p-2" onclick="toggleDrawer()">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<!-- NavigationDrawer (Mobile) -->
+<div class="fixed inset-y-0 left-0 z-[60] flex flex-col h-full w-80 rounded-r-xl bg-surface-container shadow-xl -translate-x-full transition-transform duration-300 ease-in-out md:hidden" id="drawer">
+<div class="p-6 flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-tertiary">AskStoic Menu</span>
+<button class="text-on-surface-variant" onclick="toggleDrawer()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<nav class="flex flex-col p-4 gap-2">
+<a class="flex items-center gap-4 bg-tertiary-container text-on-tertiary-container rounded-full px-4 py-3 font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">info</span> How It Works
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">route</span> Learning Path
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">video_call</span> Live Sessions
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">groups</span> Mentorship
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">payments</span> Pricing
+            </a>
+<div class="mt-8 pt-8 border-t border-outline-variant">
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">login</span> Log In
+                </a>
+</div>
+</nav>
+</div>
+<div class="fixed inset-0 bg-black/60 z-[55] hidden transition-opacity opacity-0" id="drawer-overlay" onclick="toggleDrawer()"></div>
+<main>
+<!-- Hero Section -->
+<section class="relative py-stack-xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-stack-xl items-center relative z-10">
+<div class="space-y-stack-md">
+<span class="font-label-caps text-label-caps text-tertiary bg-tertiary/10 px-3 py-1 rounded-sm">INSTITUTIONAL GRADE</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-xl md:text-headline-xl text-on-surface font-bold">
+                        Master Trading Through Structure and Discipline.
+                    </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+                        Achieve consistent market performance through our methodical, stoic-inspired financial education framework. Built for professionals, executed with precision.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4 pt-stack-md">
+<button class="bg-tertiary text-on-tertiary font-label-caps text-label-caps px-8 py-5 rounded-DEFAULT font-bold tracking-widest glow-hover transition-all active:scale-95">JOIN ASKSTOIC FOR $10</button>
+<button class="border border-outline text-on-surface font-label-caps text-label-caps px-8 py-5 rounded-DEFAULT hover:bg-surface-container transition-all">EXPLORE THE PROGRAM</button>
+</div>
+</div>
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-tertiary to-transparent opacity-20 blur-xl"></div>
+<div class="relative rounded-xl overflow-hidden glass-panel active-glow">
+<img class="w-full aspect-[16/10] object-cover" data-alt="A premium high-fidelity dashboard interface of a professional trading platform in dark mode. The UI features deep navy backgrounds, slate gray panels, and sharp emerald green line charts showing positive growth. Detailed candlestick data, institutional order flow panels, and sleek typography from the Inter and JetBrains Mono families are visible. The mood is clinical, authoritative, and sophisticated." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuj23DTmMsp4fSy2aoqsO7S4NGWUQTRX8mqY2IZ1jDFxvbrNce9WtnH9fqW8A0CBVKx8gP_CVjYHxrCaZTCfvz5xOupE7BfMq3KMk-rltMtdADOr9-xphIm3yiE1RbyRwshaa5pp4KUHIu4IU-xe78pft2mf1jxNd6O2XmvaukIWikvj5vgi6MVfpCNZqCcMFIuPIB_ho57Wj-sD5oV4ThQVJ0TPVx3hFVRVmvTsJNf72lYTcZqiO2dMo1J_u5P1O3QtnIPFq3im4U"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Platform Benefits -->
+<section class="py-stack-xl bg-surface-container-low">
+<div class="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="mb-stack-lg border-l-4 border-tertiary pl-6">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">The Institutional Advantage</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Core pillars of the AskStoic methodology.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Card 1 -->
+<div class="glass-panel p-stack-md hover:border-tertiary transition-colors group">
+<span class="material-symbols-outlined text-tertiary text-4xl mb-4">account_balance</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Institutional Insights</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Trade with the clarity of a professional desk, understanding the mechanics behind the move.</p>
+</div>
+<!-- Card 2 -->
+<div class="glass-panel p-stack-md hover:border-tertiary transition-colors group">
+<span class="material-symbols-outlined text-tertiary text-4xl mb-4">route</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Structured Path</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">A linear progression system designed to eliminate overwhelm and focus on mastery.</p>
+</div>
+<!-- Card 3 -->
+<div class="glass-panel p-stack-md hover:border-tertiary transition-colors group">
+<span class="material-symbols-outlined text-tertiary text-4xl mb-4">video_chat</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Real-time Mentorship</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Direct access to veteran traders who translate complex markets into actionable steps.</p>
+</div>
+<!-- Card 4 -->
+<div class="glass-panel p-stack-md hover:border-tertiary transition-colors group">
+<span class="material-symbols-outlined text-tertiary text-4xl mb-4">diversity_3</span>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Disciplined Community</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Surround yourself with a network of high-performers committed to the stoic process.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Four-Tier Learning Roadmap -->
+<section class="py-stack-xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="text-center mb-stack-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">The Learning Roadmap</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">From novice to professional execution in four strategic tiers.</p>
+</div>
+<div class="relative max-w-3xl mx-auto space-y-12">
+<div class="absolute left-6 md:left-1/2 top-0 bottom-0 w-0.5 timeline-line -translate-x-1/2"></div>
+<!-- Tier 1 -->
+<div class="relative flex flex-col md:flex-row md:items-center gap-8 md:gap-0">
+<div class="md:w-1/2 md:pr-12 md:text-right order-2 md:order-1">
+<h4 class="font-label-caps text-label-caps text-tertiary mb-2">TIER 1</h4>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Foundations &amp; Market Mechanics</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Deconstructing price delivery and internal market structure.</p>
+</div>
+<div class="absolute left-6 md:left-1/2 w-8 h-8 rounded-full bg-surface border-4 border-tertiary -translate-x-1/2 z-10 order-1 md:order-2 shadow-[0_0_10px_rgba(78,222,163,0.5)]"></div>
+<div class="md:w-1/2 md:pl-12 order-3"></div>
+</div>
+<!-- Tier 2 -->
+<div class="relative flex flex-col md:flex-row md:items-center gap-8 md:gap-0">
+<div class="md:w-1/2 md:pr-12 order-2 md:order-1"></div>
+<div class="absolute left-6 md:left-1/2 w-8 h-8 rounded-full bg-surface border-4 border-tertiary -translate-x-1/2 z-10 order-1 md:order-2 shadow-[0_0_10px_rgba(78,222,163,0.5)]"></div>
+<div class="md:w-1/2 md:pl-12 order-3">
+<h4 class="font-label-caps text-label-caps text-tertiary mb-2">TIER 2</h4>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Technical Mastery &amp; Strategy</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Building a high-probability playbook tailored to institutional liquidity.</p>
+</div>
+</div>
+<!-- Tier 3 -->
+<div class="relative flex flex-col md:flex-row md:items-center gap-8 md:gap-0">
+<div class="md:w-1/2 md:pr-12 md:text-right order-2 md:order-1">
+<h4 class="font-label-caps text-label-caps text-tertiary mb-2">TIER 3</h4>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Risk Management &amp; Stoic Psychology</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Protecting capital and maintaining emotional neutrality during volatile cycles.</p>
+</div>
+<div class="absolute left-6 md:left-1/2 w-8 h-8 rounded-full bg-surface border-4 border-tertiary -translate-x-1/2 z-10 order-1 md:order-2 shadow-[0_0_10px_rgba(78,222,163,0.5)]"></div>
+<div class="md:w-1/2 md:pl-12 order-3"></div>
+</div>
+<!-- Tier 4 -->
+<div class="relative flex flex-col md:flex-row md:items-center gap-8 md:gap-0">
+<div class="md:w-1/2 md:pr-12 order-2 md:order-1"></div>
+<div class="absolute left-6 md:left-1/2 w-8 h-8 rounded-full bg-surface border-4 border-tertiary -translate-x-1/2 z-10 order-1 md:order-2 shadow-[0_0_10px_rgba(78,222,163,0.5)]"></div>
+<div class="md:w-1/2 md:pl-12 order-3">
+<h4 class="font-label-caps text-label-caps text-tertiary mb-2">TIER 4</h4>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Live Execution &amp; Mentorship</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Applying the methodology in real-time under senior trader supervision.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Live & Recorded Sessions -->
+<section class="py-stack-xl bg-surface-container-high relative overflow-hidden">
+<div class="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-tertiary/5 to-transparent"></div>
+<div class="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-2 gap-stack-xl items-center">
+<div class="order-2 lg:order-1">
+<div class="aspect-video glass-panel rounded-xl flex items-center justify-center p-4">
+<div class="w-full h-full relative rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional live trading room setup. Multi-monitor workstation displaying complex charts, order books, and real-time news feeds. The lighting is low and cinematic with emerald green accent lights. A professional microphone is in the foreground, suggesting a recording session. The atmosphere is quiet, intense, and focused." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvElD5B95epNtyroNjFjGkrBT_JyPLV5XXO6RsfJGcrBiJVYJ-riXyIiFQ5u-5yJDdOIkFhHysMTBdpBNS1ENwbesgjXOejwOjtb8cemFDflwl2SvJHL9q05r7CYN9KXz5Y5RR9BtcBWizwqClzB5mKCzpOiadKXTWspoMbt0_1VKmiEtmIGAiDPsUzeA0U0oZE89t032MZ_nGcInzKwcM0AcEAFoZrhrvp1HdmfspxZTNSzTNJXvMnyL9o9_NJBlrBP6kmTasHsTk"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center group cursor-pointer hover:bg-black/20 transition-all">
+<div class="w-16 h-16 rounded-full bg-tertiary flex items-center justify-center text-on-tertiary shadow-lg group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl">play_arrow</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="order-1 lg:order-2 space-y-stack-md">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Live &amp; Recorded Sessions</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                        Gain entry to weekly live trading rooms where we analyze current conditions, execute setups, and field questions in real-time. Can't make it live? Access our extensive on-demand library with 500+ hours of institutional content.
+                    </p>
+<ul class="space-y-4">
+<li class="flex items-center gap-3 text-on-surface">
+<span class="material-symbols-outlined text-tertiary">check_circle</span>
+<span class="font-body-md text-body-md">Daily Pre-Market Forecasts</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface">
+<span class="material-symbols-outlined text-tertiary">check_circle</span>
+<span class="font-body-md text-body-md">Live New York &amp; London Sessions</span>
+</li>
+<li class="flex items-center gap-3 text-on-surface">
+<span class="material-symbols-outlined text-tertiary">check_circle</span>
+<span class="font-body-md text-body-md">On-Demand Strategy Deep Dives</span>
+</li>
+</ul>
+</div>
+</div>
+</section>
+<!-- Mentorship Section -->
+<section class="py-stack-xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="text-center mb-stack-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Mentorship from Veterans</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Professional guidance is the bridge between theory and profitability.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="glass-panel p-stack-lg border-t-2 border-tertiary">
+<span class="font-label-caps text-label-caps text-tertiary block mb-4">ELITE ACCESS</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-stack-md">1-on-1 Mentorship</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-stack-md">Personalized roadmap and weekly performance reviews with a dedicated senior trader to sharpen your edge and correct errors immediately.</p>
+<button class="w-full font-label-caps text-label-caps border border-tertiary text-tertiary py-4 hover:bg-tertiary hover:text-on-tertiary transition-all">APPLY FOR 1-ON-1</button>
+</div>
+<div class="glass-panel p-stack-lg">
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-4">COMMUNITY GROWTH</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-stack-md">Group Mentorship</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-stack-md">Join dynamic group sessions focused on peer-review and case studies. Learn from the diverse experiences of a collective of disciplined traders.</p>
+<button class="w-full font-label-caps text-label-caps border border-outline text-on-surface py-4 hover:bg-surface-container transition-all">VIEW GROUP OPTIONS</button>
+</div>
+</div>
+</section>
+<!-- How Progression Works -->
+<section class="py-stack-xl bg-surface-container-lowest">
+<div class="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="text-center mb-stack-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">How Progression Works</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">The 'Learn, Apply, Master' feedback loop.</p>
+</div>
+<div class="flex flex-col md:flex-row items-start justify-center gap-12">
+<div class="flex-1 text-center group">
+<div class="w-20 h-20 mx-auto rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center mb-6 group-hover:border-tertiary transition-all">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-tertiary">menu_book</span>
+</div>
+<h4 class="font-label-caps text-label-caps text-on-surface mb-2">LEARN</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Absorb the theoretical framework through high-definition curriculum modules.</p>
+</div>
+<div class="hidden md:flex items-center pt-8 text-outline-variant">
+<span class="material-symbols-outlined">arrow_forward</span>
+</div>
+<div class="flex-1 text-center group">
+<div class="w-20 h-20 mx-auto rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center mb-6 group-hover:border-tertiary transition-all">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-tertiary">bolt</span>
+</div>
+<h4 class="font-label-caps text-label-caps text-on-surface mb-2">APPLY</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Execute the strategy in live market simulations and supervised trading rooms.</p>
+</div>
+<div class="hidden md:flex items-center pt-8 text-outline-variant">
+<span class="material-symbols-outlined">arrow_forward</span>
+</div>
+<div class="flex-1 text-center group">
+<div class="w-20 h-20 mx-auto rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center mb-6 group-hover:border-tertiary transition-all">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-tertiary">military_tech</span>
+</div>
+<h4 class="font-label-caps text-label-caps text-on-surface mb-2">MASTER</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Iterate and refine your personal performance with institutional data analytics.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- FAQ -->
+<section class="py-stack-xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="max-w-2xl mx-auto">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-stack-lg text-center">Frequently Asked Questions</h2>
+<div class="space-y-4">
+<div class="glass-panel rounded-lg overflow-hidden">
+<button class="w-full flex justify-between items-center p-6 text-left hover:bg-surface-container transition-colors" onclick="toggleFaq(this)">
+<span class="font-body-lg text-body-lg text-on-surface">Is this for beginners?</span>
+<span class="material-symbols-outlined transition-transform">expand_more</span>
+</button>
+<div class="hidden p-6 pt-0 text-on-surface-variant font-body-md text-body-md">
+                            Yes, our Tier 1 curriculum is specifically designed to build the foundational knowledge required for professional trading, assuming no prior experience.
+                        </div>
+</div>
+<div class="glass-panel rounded-lg overflow-hidden">
+<button class="w-full flex justify-between items-center p-6 text-left hover:bg-surface-container transition-colors" onclick="toggleFaq(this)">
+<span class="font-body-lg text-body-lg text-on-surface">How long does the program take?</span>
+<span class="material-symbols-outlined transition-transform">expand_more</span>
+</button>
+<div class="hidden p-6 pt-0 text-on-surface-variant font-body-md text-body-md">
+                            While the path is self-paced, most students achieve technical proficiency within 6-12 months of consistent study and live participation.
+                        </div>
+</div>
+<div class="glass-panel rounded-lg overflow-hidden">
+<button class="w-full flex justify-between items-center p-6 text-left hover:bg-surface-container transition-colors" onclick="toggleFaq(this)">
+<span class="font-body-lg text-body-lg text-on-surface">What makes AskStoic different?</span>
+<span class="material-symbols-outlined transition-transform">expand_more</span>
+</button>
+<div class="hidden p-6 pt-0 text-on-surface-variant font-body-md text-body-md">
+                            We focus on institutional market mechanics and emotional discipline (Stoicism) rather than retail signals. We teach you how markets actually work.
+                        </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Risk Disclaimer -->
+<section class="py-stack-xl bg-surface-container-low px-margin-mobile md:px-margin-desktop">
+<div class="max-w-container-max mx-auto">
+<div class="bg-error-container/10 border-l-4 border-error p-stack-lg">
+<div class="flex items-center gap-3 mb-4 text-error">
+<span class="material-symbols-outlined">warning</span>
+<h4 class="font-label-caps text-label-caps font-bold">HIGH RISK WARNING</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                        Trading financial instruments involves substantial risk and is not suitable for every investor. The high degree of leverage can work against you as well as for you. Before deciding to trade, you should carefully consider your investment objectives, level of experience, and risk appetite. Past performance is not indicative of future results. AskStoic provides education, not financial advice.
+                    </p>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest w-full py-stack-xl border-t border-outline-variant">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="col-span-1 md:col-span-1">
+<div class="flex items-center gap-3 mb-6">
+<img alt="AskStoic Logo" class="w-8 h-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFaXBavF3AlsVXZKU3D0LU4cSIUOzkSidSKJcqil9CxN_8O5kcBNwhTRpj7wD7FvMNh02CHa6QXvBa1pydrEFqLOXaWJKUpCGalyhfSgyp25F8HEQAKCRNFRRERfDbvqR3SLUTBLZ0CLAldfL10WRnJiMYDF26XIl5eNcjQ-uB5IwKoNtqrRGhFaAJ5O0KD5aSBFRp7qlGU3yCix9K5ULWSwATXI8H4LrIIdNXoEDkAZ_vJNa6U-EYZd4B2fur5BEX7W5LEFS-kPcI"/>
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">AskStoic</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Institutional-grade financial education built on the principles of structure, discipline, and stoic focus.</p>
+</div>
+<div>
+<h5 class="font-label-caps text-label-caps text-tertiary mb-6">PROGRAM</h5>
+<ul class="space-y-4">
+<li><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">How It Works</a></li>
+<li><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Learning Path</a></li>
+<li><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Live Sessions</a></li>
+<li><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Mentorship</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-caps text-label-caps text-tertiary mb-6">LEGAL</h5>
+<ul class="space-y-4">
+<li><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms of Service</a></li>
+<li><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Risk Disclaimer</a></li>
+<li><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Institutional Access</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-caps text-label-caps text-tertiary mb-6">SUPPORT</h5>
+<ul class="space-y-4">
+<li><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Contact Support</a></li>
+<li class="flex gap-4 mt-6">
+<a class="text-on-surface-variant hover:text-tertiary" href="#"><span class="material-symbols-outlined">public</span></a>
+<a class="text-on-surface-variant hover:text-tertiary" href="#"><span class="material-symbols-outlined">share</span></a>
+<a class="text-on-surface-variant hover:text-tertiary" href="#"><span class="material-symbols-outlined">mail</span></a>
+</li>
+</ul>
+</div>
+</div>
+<div class="mt-stack-xl pt-stack-md border-t border-outline-variant px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-center">
+<p class="font-body-md text-body-md text-on-surface-variant">© 2024 AskStoic Financial Education. All Rights Reserved.</p>
+</div>
+</footer>
+<script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            const isOpen = !drawer.classList.contains('-translate-x-full');
+            
+            if (isOpen) {
+                drawer.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                overlay.classList.remove('opacity-100');
+            } else {
+                drawer.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.add('opacity-100'), 10);
+            }
+        }
+
+        function toggleFaq(btn) {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('.material-symbols-outlined');
+            const isHidden = content.classList.contains('hidden');
+            
+            if (isHidden) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
+</body></html>

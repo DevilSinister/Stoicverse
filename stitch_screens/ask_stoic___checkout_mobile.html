@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Secure Checkout | ASKSTOIC</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-tint": "#bec6e0", "on-secondary-fixed-variant": "#3d475b", "inverse-on-surface": "#1d3249", "primary-fixed-dim": "#bec6e0", "on-background": "#d2e4ff", "on-tertiary-fixed": "#002106", "tertiary-fixed-dim": "#46e265", "on-secondary-fixed": "#111c2e", "inverse-surface": "#d2e4ff", "on-primary-container": "#798098", "error-container": "#93000a", "outline-variant": "#45464d", "tertiary-container": "#001d05", error: "#ffb4ab", "surface-container-high": "#162b42", "on-surface-variant": "#c6c6cd", "surface-container-highest": "#22364e", "surface-container-low": "#051c33", "on-secondary-container": "#aeb8d1", "surface-bright": "#263a52", "on-primary-fixed": "#131b2e", "surface-container-lowest": "#000f21", primary: "#bec6e0", outline: "#909097", background: "#001429", "secondary-fixed-dim": "#bcc6df", "on-tertiary-container": "#009536", "tertiary-fixed": "#6cff81", "secondary-container": "#3f495e", "on-secondary": "#273044", surface: "#001429", secondary: "#bcc6df", "on-tertiary-fixed-variant": "#00531a", "on-surface": "#d2e4ff", "on-tertiary": "#003910", "on-error-container": "#ffdad6", "on-error": "#690005", "surface-variant": "#22364e", "on-primary-fixed-variant": "#3f465c", "primary-fixed": "#dae2fd", "primary-container": "#0f172a", "surface-dim": "#001429", tertiary: "#46e265", "surface-container": "#0a2137", "secondary-fixed": "#d8e2fc", "on-primary": "#283044", "inverse-primary": "#565e74"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-sm": "8px", gutter: "24px", "margin-desktop": "64px", "stack-lg": "32px", "stack-xl": "64px", "container-max": "1280px", "margin-mobile": "20px", "stack-md": "16px"}, fontFamily: {"data-point": ["JetBrains Mono"], "label-caps": ["JetBrains Mono"], "headline-xl": ["Inter"], "body-md": ["Inter"], "headline-lg-mobile": ["Inter"], "headline-lg": ["Inter"], "body-lg": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}]}}}};</script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid #334155;
+      }
+      .emerald-glow:focus {
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        border-color: #10B981;
+      }
+      ::-webkit-scrollbar { width: 4px; }
+      ::-webkit-scrollbar-track { background: #051424; }
+      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md selection:bg-tertiary selection:text-on-tertiary min-h-screen overflow-x-hidden">
+<!-- Top Navigation Anchor (Suppressing links for checkout flow) -->
+<header class="bg-background border-b border-outline-variant fixed top-0 w-full z-50">
+<div class="flex justify-between items-center w-full px-margin-mobile h-20 max-w-container-max mx-auto">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold tracking-tighter text-on-surface">ASKSTOIC</h1>
+<div class="flex items-center gap-2 text-tertiary">
+<span class="material-symbols-outlined text-sm">lock</span>
+<span class="font-label-caps text-label-caps">SECURE CHECKOUT</span>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-stack-xl px-margin-mobile max-w-lg mx-auto flex flex-col gap-stack-md">
+<!-- Summary Alert (Initial State: Success/Warning etc placeholders) -->
+<div class="hidden animate-in fade-in slide-in-from-top-4 duration-300" id="inline-alert">
+<!-- Alert content dynamically injected -->
+</div>
+<!-- Order Summary (Collapsed/Summary) -->
+<section class="glass-card rounded-xl p-stack-md transition-all duration-300" id="order-summary">
+<button class="flex justify-between items-center w-full" onclick="toggleSummary()">
+<div class="flex flex-col items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ORDER SUMMARY</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-tertiary">$10.00</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant font-body-md">Details</span>
+<span class="material-symbols-outlined transition-transform duration-300" id="summary-icon">expand_more</span>
+</div>
+</button>
+<div class="hidden mt-stack-md border-t border-outline-variant pt-stack-md space-y-stack-sm" id="summary-details">
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant">Institutional Entry Pass</span>
+<span class="font-data-point text-data-point text-on-surface">$10.00</span>
+</div>
+<ul class="space-y-2 text-sm text-on-surface-variant opacity-80">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-xs">check_circle</span>
+                        24/7 Mentorship Terminal Access
+                    </li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-xs">check_circle</span>
+                        Executive Data Stream
+                    </li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-xs">check_circle</span>
+                        Priority Algorithm Queue
+                    </li>
+</ul>
+</div>
+</section>
+<!-- Checkout Form -->
+<form class="space-y-stack-md" id="checkout-form">
+<!-- Email -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant ml-1">CONTACT EMAIL</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg p-stack-md text-on-surface placeholder:text-outline emerald-glow transition-all font-data-point" placeholder="executive@institution.com" required="" type="email"/>
+</div>
+<!-- Payment Methods (Wallets) -->
+<div class="grid grid-cols-2 gap-stack-sm">
+<button class="bg-[#0070BA] h-12 rounded-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-all" type="button">
+<div class="h-6 w-20 bg-center bg-no-repeat bg-contain" data-alt="The blue and white PayPal corporate logo rendered cleanly on a high-contrast background for a professional financial transaction interface." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBaU88CcaDpypr6FAFOlJN9A8TeVUsZEY9lfshVqVV9-HV9KJ4uUmT1g_u_PV6z7P0rXYnIwVi-V_D3Gzt8AULVY02AX1ptengVSBbJcBovm0zlONTP7Mf4ShWOOzCiV_QaieIbnrJKjQwnHV-E9OYzrBV4kgqathLV1vxeqBazlktOTuFe_qDGG6LYJLC5DuuXzWGkQQS6ETCpfyqFekjAJ33NgabROPHUUgTnr8yAa8pjrLn1fXw3tBZb77G_QcaVaxXg_2UKWAKY')"></div>
+</button>
+<button class="bg-black h-12 rounded-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-all" type="button">
+<div class="h-6 w-20 bg-center bg-no-repeat bg-contain" data-alt="The sleek white Apple Pay logo centered on a solid black button, representing premium mobile payment integration for an executive software platform." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBKuhwFgPztjSHYy0I0BttVirKJ8T3N-lqU9WYnT1pyBQTbOuyE-H9CkHZbma77WN64fL584wb-u3vn8nmJg4KLocemtiLA6QAxQhR6qq6mufeWf8FSps5-WQCHhYQ-XT-V2WC9KPl3pmqQtEPzcC69-75iKFAXUbyBuCjS6PUzF0P7Gaqva4-XsGxwN2iax0T3VDQiAbzcXGgu_PXx-mo8tqXrgH5bsOoTXAaoBtiMDwR_JrzmE5Ahe13zidsovyXIEHQyMHXkwZnT')"></div>
+</button>
+</div>
+<div class="relative flex py-4 items-center">
+<div class="flex-grow border-t border-outline-variant"></div>
+<span class="flex-shrink mx-4 text-on-surface-variant font-label-caps text-[10px]">OR CREDIT CARD</span>
+<div class="flex-grow border-t border-outline-variant"></div>
+</div>
+<!-- Card Details -->
+<div class="glass-card rounded-xl p-stack-md space-y-stack-md">
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">CARD NUMBER</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg p-stack-md text-on-surface placeholder:text-outline emerald-glow transition-all font-data-point pr-12" maxlength="19" placeholder="0000 0000 0000 0000" required="" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline">credit_card</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-stack-md">
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">EXPIRY</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg p-stack-md text-on-surface placeholder:text-outline emerald-glow transition-all font-data-point" maxlength="5" placeholder="MM/YY" required="" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">CVC</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg p-stack-md text-on-surface placeholder:text-outline emerald-glow transition-all font-data-point" maxlength="3" placeholder="123" required="" type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">BILLING COUNTRY</label>
+<select class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg p-stack-md text-on-surface emerald-glow transition-all">
+<option>United States</option>
+<option>United Kingdom</option>
+<option>European Union</option>
+<option>Singapore</option>
+</select>
+</div>
+</div>
+<!-- Coupon -->
+<div class="flex gap-2">
+<input class="flex-grow bg-surface-container-lowest border border-outline-variant rounded-lg p-stack-md text-on-surface placeholder:text-outline emerald-glow transition-all font-label-caps text-label-caps" id="coupon-input" placeholder="COUPON CODE" type="text"/>
+<button class="bg-surface-container-high px-6 rounded-lg text-on-surface font-label-caps text-label-caps border border-outline-variant active:scale-95 transition-transform" onclick="applyCoupon()" type="button">APPLY</button>
+</div>
+<!-- Terms -->
+<label class="flex items-start gap-3 cursor-pointer group">
+<div class="relative flex items-center mt-1">
+<input class="peer h-5 w-5 rounded border-outline-variant bg-surface-container-lowest text-tertiary focus:ring-tertiary" required="" type="checkbox"/>
+</div>
+<span class="text-xs text-on-surface-variant leading-relaxed">
+                    I AGREE TO THE <a class="text-tertiary underline" href="#">TERMS OF SERVICE</a> AND UNDERSTAND THE <a class="text-tertiary underline" href="#">RISK DISCLAIMER</a>.
+                </span>
+</label>
+<!-- Submit -->
+<button class="w-full bg-tertiary text-on-tertiary py-5 rounded-lg font-bold tracking-widest text-label-caps hover:opacity-90 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(78,222,163,0.15)]" type="submit">
+                EXECUTE PAYMENT $10.00
+            </button>
+<!-- Security Badge -->
+<div class="flex flex-col items-center justify-center pt-stack-md gap-2 opacity-60">
+<div class="flex items-center gap-1 text-on-surface-variant font-label-caps text-[10px]">
+<span class="material-symbols-outlined text-xs">verified_user</span>
+                    PCI-DSS COMPLIANT 256-BIT ENCRYPTION
+                </div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-xl">payments</span>
+<span class="material-symbols-outlined text-xl">lock</span>
+<span class="material-symbols-outlined text-xl">shield</span>
+</div>
+</div>
+</form>
+</main>
+<!-- Overlays -->
+<div class="fixed inset-0 z-[100] bg-background/90 backdrop-blur-md hidden flex-col items-center justify-center p-margin-mobile text-center" id="full-overlay">
+<!-- Content injected via JS -->
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-low border-t border-outline-variant py-stack-lg mt-auto">
+<div class="flex flex-col items-center w-full px-margin-mobile max-w-container-max mx-auto text-center gap-stack-md">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface opacity-80">ASKSTOIC</h2>
+<div class="flex flex-wrap justify-center gap-4 text-label-caps font-label-caps text-on-surface-variant">
+<a class="hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-on-surface transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-on-surface transition-colors" href="#">Risk Disclaimer</a>
+</div>
+<p class="font-label-caps text-[10px] text-outline">© 2024 ASKSTOIC INSTITUTIONAL. ALL RIGHTS RESERVED.</p>
+</div>
+</footer>
+<script>
+        function toggleSummary() {
+            const details = document.getElementById('summary-details');
+            const icon = document.getElementById('summary-icon');
+            const isHidden = details.classList.contains('hidden');
+            
+            if (isHidden) {
+                details.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                details.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        const overlay = document.getElementById('full-overlay');
+        const alertBox = document.getElementById('inline-alert');
+
+        function showOverlay(type, title, message, showButton = true) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            
+            let icon = 'sync';
+            let iconClass = 'animate-spin';
+            let colorClass = 'text-tertiary';
+
+            if (type === 'success') { icon = 'check_circle'; iconClass = ''; colorClass = 'text-tertiary'; }
+            if (type === 'error') { icon = 'error'; iconClass = ''; colorClass = 'text-error'; }
+            if (type === 'auth') { icon = 'security'; iconClass = 'animate-pulse'; colorClass = 'text-primary'; }
+
+            overlay.innerHTML = `
+                <div class="max-w-xs space-y-6">
+                    <span class="material-symbols-outlined text-6xl ${colorClass} ${iconClass}">${icon}</span>
+                    <div class="space-y-2">
+                        <h3 class="font-headline-lg-mobile ${colorClass}">${title}</h3>
+                        <p class="text-on-surface-variant text-sm">${message}</p>
+                    </div>
+                    ${showButton ? `<button onclick="closeOverlay()" class="w-full bg-surface-container-high py-3 rounded-lg font-label-caps text-label-caps text-on-surface border border-outline-variant">DISMISS</button>` : ''}
+                </div>
+            `;
+        }
+
+        function closeOverlay() {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
+
+        function showAlert(type, message) {
+            alertBox.classList.remove('hidden');
+            const bgColor = type === 'error' ? 'bg-error-container/20 border-error/30' : 'bg-tertiary-container/20 border-tertiary/30';
+            const textColor = type === 'error' ? 'text-error' : 'text-tertiary';
+            const icon = type === 'error' ? 'warning' : 'info';
+
+            alertBox.innerHTML = `
+                <div class="flex items-center gap-3 p-4 rounded-lg border ${bgColor} ${textColor} mb-4">
+                    <span class="material-symbols-outlined">${icon}</span>
+                    <span class="text-xs font-medium uppercase tracking-wider">${message}</span>
+                </div>
+            `;
+            setTimeout(() => {
+                alertBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        function applyCoupon() {
+            const input = document.getElementById('coupon-input').value;
+            if (input.toUpperCase() === 'STOIC') {
+                showAlert('success', 'COUPON APPLIED: 10% DISCOUNT');
+            } else {
+                showAlert('error', 'INVALID COUPON CODE');
+            }
+        }
+
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Simulation of various states (Sequence for demo)
+            showOverlay('processing', 'EXECUTING...', 'Securing institutional ledger allocation.', false);
+            
+            setTimeout(() => {
+                showOverlay('auth', '3D SECURE', 'Authenticating transaction with your provider...', false);
+            }, 2000);
+
+            setTimeout(() => {
+                // Here we pick a random outcome for the demo
+                const outcomes = [
+                    { type: 'success', title: 'SUCCESS', msg: 'Allocation complete. Welcome to the terminal.' },
+                    { type: 'error', title: 'DECLINED', msg: 'Transaction refused by issuing bank.' },
+                    { type: 'error', title: 'EXPIRED CARD', msg: 'The credentials provided are out of date.' },
+                    { type: 'error', title: 'INSUFFICIENT FUNDS', msg: 'Capital reserves insufficient for this execution.' },
+                    { type: 'error', title: 'DUPLICATE', msg: 'A matching transaction was recently logged.' },
+                    { type: 'error', title: 'UNAVAILABLE', msg: 'Provider connectivity lost. Retry in 60s.' }
+                ];
+                const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+                showOverlay(outcome.type, outcome.title, outcome.msg);
+            }, 4500);
+        });
+
+        // Demo special states from query or triggers
+        window.onload = () => {
+            // Simulated delay activation alert if needed
+            // showAlert('success', 'DELAYED ACTIVATION: TERMINAL ACCESS PENDING BLOCKCHAIN CONFIRMATION');
+        };
+    </script>
+</body></html>

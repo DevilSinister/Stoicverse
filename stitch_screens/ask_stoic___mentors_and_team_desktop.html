@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mentors &amp; Team | AskStoic Institutional</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+        .emerald-glow:hover {
+            box-shadow: 0px 0px 15px rgba(78, 222, 163, 0.2);
+        }
+        .mentor-card:hover .mentor-border {
+            border-top-color: #4edea3;
+        }
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-tertiary": "#003910", "secondary-container": "#3f495e", "surface-container-lowest": "#000f21", "error-container": "#93000a", background: "#001429", "primary-fixed": "#dae2fd", "tertiary-container": "#001d05", "surface-container-low": "#051c33", "on-tertiary-container": "#009536", "surface-dim": "#001429", "surface-container": "#0a2137", tertiary: "#46e265", "surface-tint": "#bec6e0", "on-primary-fixed": "#131b2e", "primary-fixed-dim": "#bec6e0", "on-tertiary-fixed-variant": "#00531a", "on-secondary": "#273044", "secondary-fixed": "#d8e2fc", "on-error-container": "#ffdad6", primary: "#bec6e0", "on-secondary-fixed": "#111c2e", "tertiary-fixed-dim": "#46e265", "secondary-fixed-dim": "#bcc6df", "inverse-on-surface": "#1d3249", secondary: "#bcc6df", "surface-container-highest": "#22364e", "on-secondary-container": "#aeb8d1", "on-background": "#d2e4ff", "surface-bright": "#263a52", "on-primary-container": "#798098", "surface-variant": "#22364e", surface: "#001429", "outline-variant": "#45464d", error: "#ffb4ab", "on-primary": "#283044", "on-tertiary-fixed": "#002106", "on-surface": "#d2e4ff", "inverse-surface": "#d2e4ff", outline: "#909097", "on-primary-fixed-variant": "#3f465c", "inverse-primary": "#565e74", "surface-container-high": "#162b42", "on-surface-variant": "#c6c6cd", "on-error": "#690005", "primary-container": "#0f172a", "tertiary-fixed": "#6cff81", "on-secondary-fixed-variant": "#3d475b"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"margin-mobile": "20px", "container-max": "1280px", "stack-sm": "8px", "stack-lg": "32px", "stack-xl": "64px", "margin-desktop": "64px", "stack-md": "16px", gutter: "24px"}, fontFamily: {"headline-xl": ["Inter"], "headline-lg": ["Inter"], "body-lg": ["Inter"], "data-point": ["JetBrains Mono"], "body-md": ["Inter"], "label-caps": ["JetBrains Mono"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}]}}}};</script>
+</head>
+<body class="font-body-md text-on-background selection:bg-tertiary selection:text-on-tertiary">
+<!-- TopNavBar -->
+<nav class="bg-surface text-primary font-body-md docked full-width top-0 border-b border-outline-variant flat no shadows flex justify-between items-center px-margin-desktop h-20 w-full z-50 fixed">
+<div class="flex items-center gap-stack-lg">
+<span class="font-headline-lg text-headline-lg font-black text-on-surface">AskStoic</span>
+<div class="hidden md:flex items-center gap-stack-md ml-stack-xl">
+<a class="text-on-surface-variant hover:text-tertiary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-tertiary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Curriculum</a>
+<a class="text-tertiary font-bold border-b-2 border-tertiary pb-1 cursor-pointer active:opacity-80" href="#">Mentors</a>
+<a class="text-on-surface-variant hover:text-tertiary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Terminal</a>
+</div>
+</div>
+<div class="flex items-center gap-stack-md">
+<div class="relative group">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-tertiary transition-colors">notifications</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-tertiary rounded-full"></span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-tertiary transition-colors">settings</span>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a corporate executive in a dark navy suit against a minimalist slate gray background. The lighting is dramatic and institutional, reflecting an elite financial environment. The aesthetic is sharp, high-contrast, and authoritative, matching a dark terminal UI theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSWXOEgpMOydOM7uiyLVyg3FONS_9YPDSZNXitAEO3mL53oqbOK_Sep43UgODIOQBLV2032mXqonjLGpZDUufULKrhBk40DhNteb1u33QcGAYoHAwl39gowX2-OXxa1OYNWshz8caGOW6E5mo2nN58p9xtxkOt-5PbQU8mhgca9H41STQS3kZEvHfct7uoubHudoGvfyC-vuBOoK4QkCPWItsZaIUgRKI2kWh6-dr-aHAhho3ZQQVFmnWcmpP_UwQ6w1VJUoqAuRgO"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="hidden lg:flex flex-col py-stack-md bg-surface-container text-label-caps h-full w-64 fixed left-0 top-20 border-r border-outline-variant flat no shadows z-40">
+<div class="px-6 mb-stack-xl mt-4">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 bg-tertiary flex items-center justify-center rounded-sm">
+<span class="material-symbols-outlined text-on-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<div class="flex flex-col">
+<span class="text-on-surface font-bold">Pro Trader Track</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-widest">Module 4: Risk Mitigation</span>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span>Modules</span>
+</a>
+<a class="flex items-center gap-4 bg-primary-container text-tertiary border-l-4 border-tertiary px-4 py-3 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
+<span>Mentors</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span>Notes</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant hover:text-on-surface transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">download</span>
+<span>Resources</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<div class="bg-surface-container-highest p-4 border border-outline-variant rounded-lg mb-stack-md">
+<p class="text-on-surface text-[10px] mb-2 uppercase tracking-tighter">Elite Access Required</p>
+<button class="w-full bg-tertiary text-on-tertiary font-bold py-2 text-xs uppercase tracking-widest hover:brightness-110 transition-all">Upgrade to Elite</button>
+</div>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant hover:text-on-surface transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="lg:ml-64 pt-20 min-h-screen">
+<!-- Hero Section -->
+<section class="relative px-margin-desktop py-stack-xl overflow-hidden">
+<div class="relative z-10 max-w-4xl">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-tertiary/10 border border-tertiary/20 text-tertiary font-data-point text-xs uppercase tracking-widest mb-stack-md">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-tertiary"></span>
+</span>
+                    Institutional Desk Access
+                </div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface mb-stack-md">Institutional Mentorship</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
+                    Access the collective intelligence of veteran desk traders who have navigated every market regime since the dot-com era. This is not retail instruction; this is the transfer of institutional discipline.
+                </p>
+</div>
+</section>
+<!-- Mentor Directory -->
+<section class="px-margin-desktop py-stack-lg border-t border-outline-variant">
+<div class="flex justify-between items-end mb-stack-xl">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Lead Strategists</h2>
+<p class="font-body-md text-on-surface-variant">The core architects of the AskStoic methodology.</p>
+</div>
+<div class="flex gap-stack-sm font-data-point text-xs">
+<span class="text-tertiary border-b border-tertiary pb-1 cursor-pointer">All Specialties</span>
+<span class="text-on-surface-variant hover:text-on-surface cursor-pointer">Macro</span>
+<span class="text-on-surface-variant hover:text-on-surface cursor-pointer">Quant</span>
+<span class="text-on-surface-variant hover:text-on-surface cursor-pointer">Derivatives</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter">
+<!-- Marcus Aurelius -->
+<div class="mentor-card glass-panel p-6 relative group emerald-glow transition-all duration-300">
+<div class="mentor-border absolute top-0 left-0 w-full h-1 border-t-2 border-transparent transition-colors duration-300"></div>
+<div class="flex gap-6 items-start">
+<div class="w-24 h-32 bg-surface-container-highest border border-outline-variant overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="A dignified man in his late 50s with grey-streaked hair, wearing a charcoal turtleneck and tailored blazer. He looks direct at the camera with a calm, stoic expression. The background is a dimly lit, high-end library with dark wood tones and subtle emerald backlighting. Professional executive photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJ-XhQRkxJWj71yRQ6M3gKLXSPri6fCq-H4ZLCG6itfpGYeMle98FT4j3HCq64O_VbHm_Hy_3xvYPAlbuuSUNc_9MQXIH8HIT4oRDhez7QukV6ROevrkRAwT7TxHFDDTHARtUufcIl9oy-D7lfx0CZpm0D6GjBCFxzLAo1vRVkmmxiIit1_7NRi9UbvJNXCMuDdLKHx8XJBai4uAzoFzBOw8EkVukpk7GPmWlDuuUnDYrwZe9h2g8ymhCTc8x6NS2uN6nyIj7Mz8j1"/>
+</div>
+<div class="flex-1">
+<h3 class="font-headline-lg text-2xl text-on-surface mb-1">Marcus Aurelius</h3>
+<p class="font-label-caps text-tertiary mb-stack-md">Chief Strategist</p>
+<div class="flex flex-wrap gap-2 mb-stack-lg">
+<span class="bg-surface-container px-2 py-1 border border-outline-variant text-[10px] text-on-surface-variant uppercase tracking-tighter">Global Macro</span>
+<span class="bg-surface-container px-2 py-1 border border-outline-variant text-[10px] text-on-surface-variant uppercase tracking-tighter">Yield Curves</span>
+</div>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant mb-stack-lg leading-relaxed line-clamp-3">
+                        Former head of Global Macro at a top-tier sovereign wealth fund. Marcus specializes in long-term capital preservation and cycle-based positioning.
+                    </p>
+<button class="w-full py-3 border border-outline text-on-surface font-label-caps hover:bg-on-surface hover:text-background transition-colors flex items-center justify-center gap-2">
+                        View Track <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<!-- Seneca the Younger -->
+<div class="mentor-card glass-panel p-6 relative group emerald-glow transition-all duration-300">
+<div class="mentor-border absolute top-0 left-0 w-full h-1 border-t-2 border-transparent transition-colors duration-300"></div>
+<div class="flex gap-6 items-start">
+<div class="w-24 h-32 bg-surface-container-highest border border-outline-variant overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="A sharp-featured professional woman in her 40s with glasses, wearing a sleek black suit. She is examining data on a monitor, captured in a candid, high-end corporate office shot. Lighting is cool blue and deep slate, reflecting a rigorous risk management setting. High-fidelity cinematic photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWnBguHVlhEpt1IKXIcLOOzVxIBd3pHslDf-Laz0CvAa5WOI7dQos_Sd8r0d6Lydv6dA0XPuBzH4vi1IK0OblNqg7D76Tf6mCU5NOOw4j1id_4qyv6moBp9t1eCGTmBAGbum4ickR1upc4Ksx0ht-ST1ht_uM0kCCRYMeMFWMw6KcqdOIcoXv7DbBW5FWQleXEE-fk3V1Y49yGophO04YtCLYUTBurEh--EKwq0s2Cibfu7zQqO79IeKigN31w6BAKC1M8Hqj6rgaI"/>
+</div>
+<div class="flex-1">
+<h3 class="font-headline-lg text-2xl text-on-surface mb-1">Seneca</h3>
+<p class="font-label-caps text-tertiary mb-stack-md">Risk Management</p>
+<div class="flex flex-wrap gap-2 mb-stack-md">
+<span class="bg-surface-container px-2 py-1 border border-outline-variant text-[10px] text-on-surface-variant uppercase tracking-tighter">Tail Hedging</span>
+<span class="bg-surface-container px-2 py-1 border border-outline-variant text-[10px] text-on-surface-variant uppercase tracking-tighter">Volatility</span>
+</div>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant mb-stack-lg leading-relaxed line-clamp-3">
+                        Seneca manages the proprietary risk models for AskStoic Institutional. Expert in asymmetric downside protection and market fragility analysis.
+                    </p>
+<button class="w-full py-3 border border-outline text-on-surface font-label-caps hover:bg-on-surface hover:text-background transition-colors flex items-center justify-center gap-2">
+                        View Track <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<!-- Epictetus -->
+<div class="mentor-card glass-panel p-6 relative group emerald-glow transition-all duration-300">
+<div class="mentor-border absolute top-0 left-0 w-full h-1 border-t-2 border-transparent transition-colors duration-300"></div>
+<div class="flex gap-6 items-start">
+<div class="w-24 h-32 bg-surface-container-highest border border-outline-variant overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="A younger man in his mid-30s with short hair, wearing a white oxford shirt with rolled sleeves. He is focused intently on multiple screens showing complex algorithmic charts. Warm skin tones contrasted against the cold blue light of trading monitors. Minimalist, intense, and modern." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQ3Qf-l285E75euWCAxHCBjDTlOmPQBm8mb0IBV7ticTdzFALiXkfxjPbmpLOW1DOYySoq5eUVSeqygm0IufslAWabN2QYyZoTKFyq4P4g0YilTFUqIQXBlSOKBTnuD_YAwYEPB6mXDAUXmez4cyeLVgPCQhImjk3REqpWcZ1KWu_BIF9C6jswdKMQ8lS2NrrFL9pr8aYkcaRv2wTK9jH3WnXgrsT5nKWe0ahqW2P43Edua6_sJPUc5XqloEahOPy4WQOAnjVCmn1X"/>
+</div>
+<div class="flex-1">
+<h3 class="font-headline-lg text-2xl text-on-surface mb-1">Epictetus</h3>
+<p class="font-label-caps text-tertiary mb-stack-md">Execution Specialist</p>
+<div class="flex flex-wrap gap-2 mb-stack-md">
+<span class="bg-surface-container px-2 py-1 border border-outline-variant text-[10px] text-on-surface-variant uppercase tracking-tighter">Algos</span>
+<span class="bg-surface-container px-2 py-1 border border-outline-variant text-[10px] text-on-surface-variant uppercase tracking-tighter">Liquidity</span>
+</div>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant mb-stack-lg leading-relaxed line-clamp-3">
+                        The 'Master of Flow'. Epictetus teaches the art of invisible execution, order-slicing, and navigating dark pools for high-volume traders.
+                    </p>
+<button class="w-full py-3 border border-outline text-on-surface font-label-caps hover:bg-on-surface hover:text-background transition-colors flex items-center justify-center gap-2">
+                        View Track <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Team Section -->
+<section class="px-margin-desktop py-stack-xl bg-surface-container-low border-t border-outline-variant">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-stack-lg">Institutional Support</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
+<div class="flex items-center gap-4 group">
+<div class="w-12 h-12 bg-surface-container-highest border border-outline-variant rounded-full overflow-hidden">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Close up portrait of a young professional analyst, focused expression, soft lighting in a modern workspace. Dark background with emerald accents. Corporate professional style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXWftya0HY0wKJdcT5C1Pi_e17EBBLWczDe9Czg22RM3ollJwD2vgaf6POkGoaOW4Wp3dsAqdWMFYpihpnDuORdmYnscwGA2Q0u57B8kwIHdnH3cmCfplS7qWbIUlI2iFrdMbZes2wvg5ugvjp4zqDTriRIvy0PVC2UabeJ4oYFo-qC21rB8b3PkbRveF0Yv7PBwAgFBbxKkeudzbloewjliPcXMimOXZc7usVmXU9jonvVJMcOl2C4SuOU2lUhdiPuFEU-XJyunCZ"/>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Elena Vance</p>
+<p class="text-[10px] font-data-point text-on-surface-variant uppercase">Senior Quant Analyst</p>
+</div>
+</div>
+<div class="flex items-center gap-4 group">
+<div class="w-12 h-12 bg-surface-container-highest border border-outline-variant rounded-full overflow-hidden">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Portrait of a male data engineer in a high-tech office environment. Cinematic lighting, sharp focus on subject, blurred technical backgrounds. Professional and sleek aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvVVz4yAbpuBzclIE2TczyEXz5SdK3EXcq-fJ5xbF-rf-t2Dcga1Ma2QJB6x8mQClbewVEIhzpsTKPi20HvUti-9siGj5LncHuMrA6qhm-o_Hprf3q4X6Epyc1OF3-3Yeyop1EnGa2lT9wffhtoZ6fxl-GB8Q6CGHhf363deW4XyhYfHKCCxmwVOS5wjI80OHlU7cdq7t9ES8GIzf29cSppuypNyFw1i08dg2hIu3EDNT1WbJKM7-j6sLgCZEpPUL8qHHV6ywegPOq"/>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">David Chen</p>
+<p class="text-[10px] font-data-point text-on-surface-variant uppercase">Platform Engineer</p>
+</div>
+</div>
+<div class="flex items-center gap-4 group">
+<div class="w-12 h-12 bg-surface-container-highest border border-outline-variant rounded-full overflow-hidden">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Headshot of a middle-aged woman with a confident smile, business formal attire, minimalist grey background. Corporate leader visual style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnL4RJl4jR-uajI5Lnz4g7AfSNqT0s-NRSjGaTh6DnF874FormhS-5A2sLXlLTtY-LQf52JFyxlHdG0KW-sVzu6PRCxkJV-34w_0eNLb8MWsuPssS8eo7e90-4v-Ocx8XK6C4kWbUWAve7KYYReE1hDCRzaRvQqrcVANxyKFnwJZVuSURFmD70WVxfO2N_X_J3VYJEUruERVK-MN_sb0WMZxhH8-h-bFEu1iH2YK6ZrbTCKnAN59x7v40RN3zaOGd5dphel-fTDTS9"/>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Sarah Miller</p>
+<p class="text-[10px] font-data-point text-on-surface-variant uppercase">Compliance Lead</p>
+</div>
+</div>
+<div class="flex items-center gap-4 group">
+<div class="w-12 h-12 bg-surface-container-highest border border-outline-variant rounded-full overflow-hidden">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Portrait of a young male trading systems architect, modern office lighting, dark navy and grey color palette. Institutional professional style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCS9dmeYN-PW2L31j0fYoSRem8jiph6aNblGhJZIidK_DA74OQKHJCbZeICtellDQsSRFCKON1yDbqjyiX15kPh4HaqY050ABsvkgoAn1cyRjqUy0ESl0Na6poekaogVS5b-e53MLlNE7JmlJCtqb6LDeJqHm78HiJNKzDuR79vieoQlcdL2M0ZagCU6jfw2W_97x-QGdSC9XHjYToNPb2PPAxecYO2vhR55UTib-oDakDyk1JnjkOqMkeveqTRwD2G5bjkbbbT3dZO"/>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Aris Thorne</p>
+<p class="text-[10px] font-data-point text-on-surface-variant uppercase">Systems Architect</p>
+</div>
+</div>
+</div>
+<!-- Stats / Trust Banner -->
+<div class="mt-stack-xl p-8 border border-outline-variant bg-surface relative overflow-hidden">
+<div class="flex flex-col md:flex-row justify-around items-center gap-stack-lg relative z-10 text-center">
+<div>
+<p class="font-data-point text-3xl text-tertiary mb-1">142+</p>
+<p class="font-label-caps text-[10px] text-on-surface-variant">Combined Years of Desk Exp</p>
+</div>
+<div class="h-10 w-px bg-outline-variant hidden md:block"></div>
+<div>
+<p class="font-data-point text-3xl text-tertiary mb-1">$4.2B</p>
+<p class="font-label-caps text-[10px] text-on-surface-variant">AUM Managed Collectively</p>
+</div>
+<div class="h-10 w-px bg-outline-variant hidden md:block"></div>
+<div>
+<p class="font-data-point text-3xl text-tertiary mb-1">08</p>
+<p class="font-label-caps text-[10px] text-on-surface-variant">Tier-1 Institutional Alums</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest text-on-surface-variant font-data-point text-data-point w-full py-stack-lg border-t border-outline-variant flat no shadows flex flex-col md:flex-row justify-between items-center px-margin-desktop mt-stack-xl">
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="font-headline-xl text-2xl text-on-surface font-black">AskStoic</span>
+<span>© 2024 AskStoic Institutional. All rights reserved.</span>
+</div>
+<div class="flex gap-stack-md mt-stack-md md:mt-0">
+<a class="hover:text-tertiary underline transition-opacity duration-200" href="#">Terms of Service</a>
+<a class="hover:text-tertiary underline transition-opacity duration-200" href="#">Privacy Policy</a>
+<a class="hover:text-tertiary underline transition-opacity duration-200" href="#">Risk Disclosure</a>
+</div>
+</footer>
+</main>
+<script>
+        // Micro-interactions for the cards
+        document.querySelectorAll('.mentor-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>

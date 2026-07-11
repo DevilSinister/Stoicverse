@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AskStoic | Learning Path</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {secondary: "#bcc6df", "on-secondary-fixed": "#111c2e", "on-error": "#690005", "on-secondary-fixed-variant": "#3d475b", "tertiary-fixed-dim": "#46e265", "surface-container-lowest": "#000f21", "tertiary-fixed": "#6cff81", "tertiary-container": "#001d05", "surface-container-highest": "#22364e", "surface-bright": "#263a52", "surface-dim": "#001429", "on-surface": "#d2e4ff", "surface-container-low": "#051c33", "surface-container": "#0a2137", "surface-variant": "#22364e", "secondary-fixed": "#d8e2fc", "on-primary-fixed-variant": "#3f465c", tertiary: "#46e265", "primary-fixed-dim": "#bec6e0", outline: "#909097", "inverse-surface": "#d2e4ff", "on-secondary": "#273044", "secondary-container": "#3f495e", "inverse-on-surface": "#1d3249", "on-primary": "#283044", "on-tertiary-fixed-variant": "#00531a", error: "#ffb4ab", "surface-container-high": "#162b42", background: "#001429", "surface-tint": "#bec6e0", "outline-variant": "#45464d", surface: "#001429", "secondary-fixed-dim": "#bcc6df", "on-tertiary": "#003910", "on-tertiary-container": "#009536", "on-error-container": "#ffdad6", "primary-container": "#0f172a", "on-tertiary-fixed": "#002106", "on-primary-container": "#798098", "on-primary-fixed": "#131b2e", primary: "#bec6e0", "primary-fixed": "#dae2fd", "on-background": "#d2e4ff", "on-secondary-container": "#aeb8d1", "on-surface-variant": "#c6c6cd", "inverse-primary": "#565e74", "error-container": "#93000a"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-lg": "32px", "stack-xl": "64px", "stack-sm": "8px", "margin-mobile": "20px", "margin-desktop": "64px", "stack-md": "16px", gutter: "24px", "container-max": "1280px"}, fontFamily: {"headline-lg-mobile": ["Inter"], "data-point": ["JetBrains Mono"], "headline-xl": ["Inter"], "headline-lg": ["Inter"], "body-md": ["Inter"], "label-caps": ["JetBrains Mono"], "body-lg": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}]}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .emerald-glow {
+            box-shadow: 0px 0px 20px rgba(16, 185, 129, 0.15);
+        }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(51, 65, 85, 1);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #051424;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4edea3;
+        }
+
+        /* Discord Inspired Styles */
+        .sidebar-rail {
+            width: 72px;
+            background-color: #010f1f;
+        }
+        .nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            margin: 8px auto;
+            border-radius: 50%;
+            transition: all 0.2s ease-in-out;
+            color: #d4e4fa;
+            background-color: #122131;
+        }
+        .nav-item:hover {
+            border-radius: 16px;
+            background-color: #4edea3;
+            color: #003824;
+        }
+        .nav-item.active {
+            border-radius: 16px;
+            background-color: #4edea3;
+            color: #003824;
+        }
+        .active-pill {
+            position: absolute;
+            left: -12px;
+            width: 4px;
+            height: 8px;
+            background-color: #d4e4fa;
+            border-radius: 0 4px 4px 0;
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-item:hover .active-pill {
+            height: 20px;
+        }
+        .nav-item.active .active-pill {
+            height: 40px;
+            background-color: #4edea3;
+        }
+        .tooltip {
+            position: absolute;
+            left: 80px;
+            background: #1c2b3c;
+            color: #d4e4fa;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .nav-item:hover .tooltip {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-tertiary selection:text-on-tertiary overflow-x-hidden">
+<!-- Discord-inspired Sidebar Rail -->
+<nav class="hidden lg:flex flex-col sidebar-rail h-screen fixed left-0 top-0 z-50 py-3 border-r border-outline-variant/20">
+<!-- Brand Icon -->
+<div class="mb-4 flex flex-col items-center">
+<div class="w-12 h-12 bg-tertiary rounded-2xl flex items-center justify-center mb-2 shadow-lg shadow-tertiary/20">
+<span class="font-bold text-on-tertiary text-xl">S</span>
+</div>
+<div class="w-8 h-[2px] bg-outline-variant/30 rounded-full"></div>
+</div>
+<!-- Main Icons -->
+<div class="flex-grow space-y-2">
+<a class="nav-item group" href="#" title="Dashboard">
+<div class="active-pill opacity-0 group-hover:opacity-100"></div>
+<span class="material-symbols-outlined">dashboard</span>
+<div class="tooltip">DASHBOARD</div>
+</a>
+<a class="nav-item active group" href="#" title="Learning">
+<div class="active-pill"></div>
+<span class="material-symbols-outlined">school</span>
+<div class="tooltip">CURRICULUM</div>
+</a>
+<a class="nav-item group" href="#" title="Mentors">
+<div class="active-pill opacity-0 group-hover:opacity-100"></div>
+<span class="material-symbols-outlined">groups</span>
+<div class="tooltip">MENTORS</div>
+</a>
+<a class="nav-item group" href="#" title="Insights">
+<div class="active-pill opacity-0 group-hover:opacity-100"></div>
+<span class="material-symbols-outlined">insights</span>
+<div class="tooltip">INSIGHTS</div>
+</a>
+<a class="nav-item group" href="#" title="Terminal">
+<div class="active-pill opacity-0 group-hover:opacity-100"></div>
+<span class="material-symbols-outlined">terminal</span>
+<div class="tooltip">TERMINAL</div>
+</a>
+</div>
+<!-- Bottom Actions -->
+<div class="mt-auto space-y-2 flex flex-col items-center pb-4">
+<div class="w-8 h-[2px] bg-outline-variant/30 rounded-full mb-2"></div>
+<a class="nav-item group text-tertiary" href="#" title="Upgrade">
+<div class="active-pill opacity-0 group-hover:opacity-100"></div>
+<span class="material-symbols-outlined">workspace_premium</span>
+<div class="tooltip">UPGRADE</div>
+</a>
+<a class="nav-item group text-on-surface-variant" href="#" title="Logout">
+<div class="active-pill opacity-0 group-hover:opacity-100"></div>
+<span class="material-symbols-outlined">logout</span>
+<div class="tooltip">LOGOUT</div>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="lg:ml-[72px] min-h-screen px-margin-mobile md:px-margin-desktop py-stack-lg max-w-[1440px] mx-auto">
+<!-- Header & Progress Section -->
+<header class="flex flex-col md:flex-row md:items-end justify-between mb-stack-xl gap-stack-md">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface">Learning Path</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-lg">
+                A rigorous curriculum designed for disciplined capital management and psychological fortitude.
+            </p>
+</div>
+<div class="w-full md:w-80">
+<div class="flex justify-between items-end mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Overall Progress</span>
+<span class="font-data-point text-data-point text-tertiary">42% Mastery</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary rounded-full w-[42%] emerald-glow"></div>
+</div>
+</div>
+</header>
+<!-- Tier Overview Grid -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-stack-xl">
+<!-- Tier 1 -->
+<div class="glass-panel p-6 rounded-xl relative overflow-hidden group border-tertiary/20">
+<div class="flex justify-between items-start mb-stack-md">
+<span class="font-label-caps text-label-caps text-tertiary">Tier 01</span>
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg-mobile text-on-surface mb-2">Basic to Beginner</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Foundational concepts of market dynamics and terminal setup.</p>
+<div class="absolute top-0 left-0 w-full h-1 bg-tertiary/50"></div>
+</div>
+<!-- Tier 2 - Active -->
+<div class="glass-panel p-6 rounded-xl relative overflow-hidden emerald-glow border-tertiary/60 ring-1 ring-tertiary/30">
+<div class="flex justify-between items-start mb-stack-md">
+<span class="font-label-caps text-label-caps text-tertiary">Tier 02</span>
+<span class="font-label-caps text-label-caps text-tertiary bg-tertiary/10 px-2 py-0.5 rounded">ACTIVE</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg-mobile text-on-surface mb-2">Beginner to Intermediate</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Advanced technical analysis and introduction to order flow.</p>
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-tertiary to-transparent"></div>
+</div>
+<!-- Tier 3 - Locked -->
+<div class="bg-surface-container p-6 rounded-xl relative overflow-hidden opacity-50 border border-outline-variant/30">
+<div class="flex justify-between items-start mb-stack-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Tier 03</span>
+<span class="material-symbols-outlined text-on-surface-variant">lock</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg-mobile text-on-surface mb-2">Intermediate to Advanced</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Algorithmic logic, institutional liquidity sweeps, and hedging.</p>
+</div>
+<!-- Tier 4 - Locked -->
+<div class="bg-surface-container p-6 rounded-xl relative overflow-hidden opacity-50 border border-outline-variant/30">
+<div class="flex justify-between items-start mb-stack-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Tier 04</span>
+<span class="material-symbols-outlined text-on-surface-variant">lock</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg-mobile text-on-surface mb-2">Advanced to Master</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">The psychology of elite performance and portfolio scaling.</p>
+</div>
+</section>
+<!-- Filters Section -->
+<div class="flex flex-wrap items-center gap-stack-md mb-stack-md border-b border-outline-variant/30 pb-4">
+<button class="px-6 py-2 rounded-full font-label-caps text-label-caps bg-surface-container-highest text-tertiary border border-tertiary/30">All Lessons</button>
+<button class="px-6 py-2 rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors">In Progress</button>
+<button class="px-6 py-2 rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors">Available</button>
+<button class="px-6 py-2 rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors">Completed</button>
+<button class="px-6 py-2 rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors">Locked</button>
+</div>
+<!-- Lesson Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Lesson 1 (In Progress) -->
+<div class="glass-panel p-6 rounded-xl flex items-start gap-stack-md group hover:border-tertiary transition-all duration-300">
+<div class="relative w-32 h-24 flex-shrink-0 bg-surface-container-lowest rounded overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-tertiary/20 to-transparent"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-4xl">play_circle</span>
+</div>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-tertiary bg-tertiary/10 px-2 py-0.5 rounded">IN PROGRESS</span>
+<span class="font-data-point text-data-point text-on-surface-variant">45m</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg-mobile text-on-surface mt-2">Market Structure I: The Core Framework</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Understanding fractal market dynamics across timeframes.</p>
+<button class="mt-stack-md w-full md:w-auto bg-tertiary text-on-tertiary px-6 py-2 font-label-caps text-label-caps rounded hover:brightness-110">RESUME</button>
+</div>
+</div>
+<!-- Lesson 2 (Available) -->
+<div class="glass-panel p-6 rounded-xl flex items-start gap-stack-md group hover:border-tertiary/50 transition-all duration-300">
+<div class="relative w-32 h-24 flex-shrink-0 bg-surface-container-lowest rounded overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-4xl">play_arrow</span>
+</div>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-secondary bg-secondary/10 px-2 py-0.5 rounded">AVAILABLE</span>
+<span class="font-data-point text-data-point text-on-surface-variant">32m</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg-mobile text-on-surface mt-2">Order Flow Liquidity Basics</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Identifying where the money rests and where it's hunting.</p>
+<button class="mt-stack-md w-full md:w-auto border border-tertiary text-tertiary px-6 py-2 font-label-caps text-label-caps rounded hover:bg-tertiary/10 transition-colors">START</button>
+</div>
+</div>
+<!-- Lesson 3 (Completed) -->
+<div class="glass-panel p-6 rounded-xl flex items-start gap-stack-md group opacity-70">
+<div class="relative w-32 h-24 flex-shrink-0 bg-surface-container-lowest rounded overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-tertiary/5 to-transparent"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-4xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-tertiary bg-tertiary/5 px-2 py-0.5 rounded">COMPLETED</span>
+<span class="font-data-point text-data-point text-on-surface-variant">28m</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg-mobile text-on-surface mt-2">Risk Parameters: The Shield</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Mathematical foundations for preserving capital in all weather.</p>
+<button class="mt-stack-md w-full md:w-auto border border-outline text-on-surface-variant px-6 py-2 font-label-caps text-label-caps rounded hover:text-on-surface hover:border-on-surface transition-colors">REVIEW</button>
+</div>
+</div>
+<!-- Lesson 4 (Available) -->
+<div class="glass-panel p-6 rounded-xl flex items-start gap-stack-md group hover:border-tertiary/50 transition-all duration-300">
+<div class="relative w-32 h-24 flex-shrink-0 bg-surface-container-lowest rounded overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-4xl">play_arrow</span>
+</div>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-secondary bg-secondary/10 px-2 py-0.5 rounded">AVAILABLE</span>
+<span class="font-data-point text-data-point text-on-surface-variant">55m</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg-mobile text-on-surface mt-2">Supply and Demand Imbalances</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Detecting institutional footprints through price action.</p>
+<button class="mt-stack-md w-full md:w-auto border border-tertiary text-tertiary px-6 py-2 font-label-caps text-label-caps rounded hover:bg-tertiary/10 transition-colors">START</button>
+</div>
+</div>
+<!-- Lesson 5 (Locked) -->
+<div class="bg-surface-container/50 p-6 rounded-xl flex items-start gap-stack-md group opacity-40 border border-outline-variant/20">
+<div class="relative w-32 h-24 flex-shrink-0 bg-background rounded overflow-hidden">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-4xl">lock</span>
+</div>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container-highest px-2 py-0.5 rounded">LOCKED</span>
+<span class="font-data-point text-data-point text-on-surface-variant">1h 10m</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg-mobile text-on-surface mt-2">Session Interdependence</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">The link between London open and NY close manipulation.</p>
+</div>
+</div>
+<!-- Lesson 6 (Locked) -->
+<div class="bg-surface-container/50 p-6 rounded-xl flex items-start gap-stack-md group opacity-40 border border-outline-variant/20">
+<div class="relative w-32 h-24 flex-shrink-0 bg-background rounded overflow-hidden">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-4xl">lock</span>
+</div>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container-highest px-2 py-0.5 rounded">LOCKED</span>
+<span class="font-data-point text-data-point text-on-surface-variant">42m</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg-mobile text-on-surface mt-2">Economic Calendar Arbitrage</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">How high-impact news acts as a fuel for existing trends.</p>
+</div>
+</div>
+<!-- Lesson 7 (Locked) -->
+<div class="bg-surface-container/50 p-6 rounded-xl flex items-start gap-stack-md group opacity-40 border border-outline-variant/20">
+<div class="relative w-32 h-24 flex-shrink-0 bg-background rounded overflow-hidden">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-4xl">lock</span>
+</div>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container-highest px-2 py-0.5 rounded">LOCKED</span>
+<span class="font-data-point text-data-point text-on-surface-variant">1h 05m</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg-mobile text-on-surface mt-2">The Fibonacci Ratio in Time</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Predicting cyclical reversals using temporal geometry.</p>
+</div>
+</div>
+<!-- Lesson 8 (Locked) -->
+<div class="bg-surface-container/50 p-6 rounded-xl flex items-start gap-stack-md group opacity-40 border border-outline-variant/20">
+<div class="relative w-32 h-24 flex-shrink-0 bg-background rounded overflow-hidden">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-4xl">lock</span>
+</div>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container-highest px-2 py-0.5 rounded">LOCKED</span>
+<span class="font-data-point text-data-point text-on-surface-variant">38m</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg-mobile text-on-surface mt-2">Terminal Execution Mastery</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Optimizing order entry for minimum slippage and maximum precision.</p>
+</div>
+</div>
+</div>
+<!-- Footer Pagination -->
+<footer class="mt-stack-xl flex flex-col items-center justify-center py-stack-lg border-t border-outline-variant/30">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">You have 5 lessons remaining in this tier</p>
+<div class="flex gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded border border-outline-variant text-on-surface-variant hover:text-on-surface hover:border-on-surface transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded bg-tertiary/10 text-tertiary border border-tertiary/30">1</button>
+<button class="w-10 h-10 flex items-center justify-center rounded border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all">2</button>
+<button class="w-10 h-10 flex items-center justify-center rounded border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</footer>
+</main>
+<!-- Mobile Bottom Navigation -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface-container-high border-t border-outline-variant shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-tertiary-container text-tertiary rounded-xl p-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-label-caps text-label-caps">Learn</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-caps text-label-caps">Trade</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-caps text-label-caps">Profile</span>
+</a>
+</nav>
+<script>
+    // Micro-interactions for buttons
+    document.querySelectorAll('button, a').forEach(el => {
+        el.addEventListener('mousedown', () => {
+            el.style.transform = 'scale(0.98)';
+        });
+        el.addEventListener('mouseup', () => {
+            el.style.transform = 'scale(1)';
+        });
+    });
+
+    // Hover glow effect logic for active tier
+    const activeTier = document.querySelector('.emerald-glow');
+    if(activeTier) {
+        document.addEventListener('mousemove', (e) => {
+            const rect = activeTier.getBoundingClientRect();
+            if (e.clientX > rect.left && e.clientX < rect.right && e.clientY > rect.top && e.clientY < rect.bottom) {
+                // Inside rect
+            }
+        });
+    }
+</script>
+</body></html>

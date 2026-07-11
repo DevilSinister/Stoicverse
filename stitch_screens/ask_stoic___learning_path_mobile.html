@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AskStoic | Learning Path</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+        .emerald-glow {
+            box-shadow: 0px 0px 15px rgba(16, 185, 129, 0.2);
+        }
+        /* Hide scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {secondary: "#bcc6df", "on-secondary-fixed": "#111c2e", "on-error": "#690005", "on-secondary-fixed-variant": "#3d475b", "tertiary-fixed-dim": "#46e265", "surface-container-lowest": "#000f21", "tertiary-fixed": "#6cff81", "tertiary-container": "#001d05", "surface-container-highest": "#22364e", "surface-bright": "#263a52", "surface-dim": "#001429", "on-surface": "#d2e4ff", "surface-container-low": "#051c33", "surface-container": "#0a2137", "surface-variant": "#22364e", "secondary-fixed": "#d8e2fc", "on-primary-fixed-variant": "#3f465c", tertiary: "#46e265", "primary-fixed-dim": "#bec6e0", outline: "#909097", "inverse-surface": "#d2e4ff", "on-secondary": "#273044", "secondary-container": "#3f495e", "inverse-on-surface": "#1d3249", "on-primary": "#283044", "on-tertiary-fixed-variant": "#00531a", error: "#ffb4ab", "surface-container-high": "#162b42", background: "#001429", "surface-tint": "#bec6e0", "outline-variant": "#45464d", surface: "#001429", "secondary-fixed-dim": "#bcc6df", "on-tertiary": "#003910", "on-tertiary-container": "#009536", "on-error-container": "#ffdad6", "primary-container": "#0f172a", "on-tertiary-fixed": "#002106", "on-primary-container": "#798098", "on-primary-fixed": "#131b2e", primary: "#bec6e0", "primary-fixed": "#dae2fd", "on-background": "#d2e4ff", "on-secondary-container": "#aeb8d1", "on-surface-variant": "#c6c6cd", "inverse-primary": "#565e74", "error-container": "#93000a"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-lg": "32px", "stack-xl": "64px", "stack-sm": "8px", "margin-mobile": "20px", "margin-desktop": "64px", "stack-md": "16px", gutter: "24px", "container-max": "1280px"}, fontFamily: {"headline-lg-mobile": ["Inter"], "data-point": ["JetBrains Mono"], "headline-xl": ["Inter"], "headline-lg": ["Inter"], "body-md": ["Inter"], "label-caps": ["JetBrains Mono"], "body-lg": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}]}}}};</script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen pb-24">
+<!-- Header Section -->
+<header class="pt-stack-lg px-margin-mobile pb-stack-md bg-background sticky top-0 z-40">
+<div class="flex justify-between items-end mb-stack-sm">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Learning Path</h1>
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-on-tertiary-container mb-1">Total Progress</span>
+<span class="font-data-point text-headline-lg-mobile text-tertiary">38%</span>
+</div>
+</div>
+<!-- Progress Bar Background -->
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary emerald-glow" style="width: 38%"></div>
+</div>
+</header>
+<!-- Tier Overview (Horizontal Scroll) -->
+<section class="mt-stack-md">
+<div class="flex overflow-x-auto no-scrollbar gap-gutter px-margin-mobile">
+<!-- Completed Tier -->
+<div class="flex-shrink-0 w-48 p-stack-md rounded-xl bg-surface-container-low border border-outline-variant opacity-60">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-caps text-[10px] text-tertiary bg-tertiary/10 px-2 py-0.5 rounded">DONE</span>
+</div>
+<h3 class="font-label-caps text-on-surface mb-1">Basic to Beginner</h3>
+<p class="font-data-point text-[11px] text-on-surface-variant">8/8 Lessons</p>
+</div>
+<!-- Active Tier -->
+<div class="flex-shrink-0 w-48 p-stack-md rounded-xl bg-surface-container-high border-2 border-tertiary emerald-glow">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-tertiary">parking_valet</span>
+<span class="font-label-caps text-[10px] text-on-tertiary bg-tertiary px-2 py-0.5 rounded">ACTIVE</span>
+</div>
+<h3 class="font-label-caps text-on-surface mb-1">Beginner to Intermediate</h3>
+<p class="font-data-point text-[11px] text-on-surface-variant">3/8 Lessons</p>
+</div>
+<!-- Locked Tier 1 -->
+<div class="flex-shrink-0 w-48 p-stack-md rounded-xl bg-surface-container-low border border-outline-variant opacity-40">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-on-surface-variant">lock</span>
+</div>
+<h3 class="font-label-caps text-on-surface-variant mb-1">Intermediate to Advanced</h3>
+<p class="font-data-point text-[11px] text-on-surface-variant">Locked</p>
+</div>
+<!-- Locked Tier 2 -->
+<div class="flex-shrink-0 w-48 p-stack-md rounded-xl bg-surface-container-low border border-outline-variant opacity-40">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-on-surface-variant">lock</span>
+</div>
+<h3 class="font-label-caps text-on-surface-variant mb-1">Advanced to Master</h3>
+<p class="font-data-point text-[11px] text-on-surface-variant">Locked</p>
+</div>
+</div>
+</section>
+<!-- Filter Bar -->
+<nav class="mt-stack-lg px-margin-mobile overflow-x-auto no-scrollbar flex gap-2">
+<button class="whitespace-nowrap px-4 py-2 bg-tertiary text-on-tertiary rounded-full font-label-caps text-[11px]">All Lessons</button>
+<button class="whitespace-nowrap px-4 py-2 bg-surface-container-highest text-on-surface-variant rounded-full font-label-caps text-[11px]">In Progress</button>
+<button class="whitespace-nowrap px-4 py-2 bg-surface-container-highest text-on-surface-variant rounded-full font-label-caps text-[11px]">Completed</button>
+<button class="whitespace-nowrap px-4 py-2 bg-surface-container-highest text-on-surface-variant rounded-full font-label-caps text-[11px]">Locked</button>
+</nav>
+<!-- Lesson List -->
+<main class="mt-stack-md px-margin-mobile space-y-3">
+<!-- Completed Lesson -->
+<div class="glass-panel p-stack-md rounded-xl flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-label-caps text-[10px] text-tertiary">CORE</span>
+<span class="font-data-point text-[10px] text-on-surface-variant">• EASY</span>
+</div>
+<h4 class="font-body-md font-semibold text-on-surface">Foundations of Risk</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<!-- In Progress Lesson -->
+<div class="glass-panel p-stack-md rounded-xl border-l-4 border-tertiary">
+<div class="flex items-center gap-4 mb-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-lg">play_arrow</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-label-caps text-[10px] text-tertiary">TECHNICAL</span>
+<span class="font-data-point text-[10px] text-on-surface-variant">• MEDIUM</span>
+</div>
+<h4 class="font-body-md font-semibold text-on-surface">Mean Reversion Logic</h4>
+</div>
+<div class="text-right">
+<span class="font-data-point text-xs text-tertiary block">65%</span>
+</div>
+</div>
+<div class="w-full h-1 bg-surface-container-lowest rounded-full overflow-hidden mb-3">
+<div class="h-full bg-tertiary" style="width: 65%"></div>
+</div>
+<button class="w-full py-3 bg-tertiary text-on-tertiary font-label-caps text-center rounded-lg active:scale-95 transition-transform">RESUME LESSON</button>
+</div>
+<!-- Next Lesson -->
+<div class="glass-panel p-stack-md rounded-xl flex items-center gap-4 opacity-90">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">schedule</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-label-caps text-[10px] text-secondary">STRATEGY</span>
+<span class="font-data-point text-[10px] text-on-surface-variant">• MEDIUM</span>
+</div>
+<h4 class="font-body-md font-semibold text-on-surface">Psychology of the Pivot</h4>
+</div>
+<button class="px-4 py-2 border border-tertiary text-tertiary font-label-caps text-[11px] rounded-lg">START</button>
+</div>
+<!-- Locked Lesson -->
+<div class="glass-panel p-stack-md rounded-xl flex items-center gap-4 opacity-50">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">lock</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-label-caps text-[10px] text-on-surface-variant">QUANTITATIVE</span>
+<span class="font-data-point text-[10px] text-on-surface-variant">• HARD</span>
+</div>
+<h4 class="font-body-md font-semibold text-on-surface">Volatility Arbitrage</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">lock</span>
+</div>
+<!-- Locked Lesson -->
+<div class="glass-panel p-stack-md rounded-xl flex items-center gap-4 opacity-50">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">lock</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-label-caps text-[10px] text-on-surface-variant">MARKETS</span>
+<span class="font-data-point text-[10px] text-on-surface-variant">• HARD</span>
+</div>
+<h4 class="font-body-md font-semibold text-on-surface">Bond Yield Correlation</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">lock</span>
+</div>
+<!-- Locked Lesson -->
+<div class="glass-panel p-stack-md rounded-xl flex items-center gap-4 opacity-50">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">lock</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-label-caps text-[10px] text-on-surface-variant">PHILOSOPHY</span>
+<span class="font-data-point text-[10px] text-on-surface-variant">• MEDIUM</span>
+</div>
+<h4 class="font-body-md font-semibold text-on-surface">Stoicism in High Leverage</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">lock</span>
+</div>
+<!-- Locked Lesson -->
+<div class="glass-panel p-stack-md rounded-xl flex items-center gap-4 opacity-50">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">lock</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-label-caps text-[10px] text-on-surface-variant">EXECUTION</span>
+<span class="font-data-point text-[10px] text-on-surface-variant">• HARD</span>
+</div>
+<h4 class="font-body-md font-semibold text-on-surface">Slippage Management</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">lock</span>
+</div>
+<!-- Locked Lesson -->
+<div class="glass-panel p-stack-md rounded-xl flex items-center gap-4 opacity-50">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">lock</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-label-caps text-[10px] text-on-surface-variant">TECHNICAL</span>
+<span class="font-data-point text-[10px] text-on-surface-variant">• ELITE</span>
+</div>
+<h4 class="font-body-md font-semibold text-on-surface">Order Flow Imbalance</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">lock</span>
+</div>
+</main>
+<!-- Bottom Navigation Component (Transcribed from JSON) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface-container-high border-t border-outline-variant shadow-lg rounded-t-xl">
+<!-- Learn Tab (Active) -->
+<a class="flex flex-col items-center justify-center bg-tertiary-container text-tertiary rounded-xl p-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+<span class="font-label-caps text-label-caps mt-1">Learn</span>
+</a>
+<!-- Trade Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-highest active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-label-caps text-label-caps mt-1">Trade</span>
+</a>
+<!-- Social Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-highest active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+<span class="font-label-caps text-label-caps mt-1">Social</span>
+</a>
+<!-- Profile Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-highest active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+<!-- Floating Action Button (FAB) - Contextual Context: Learning -->
+<button class="fixed right-6 bottom-24 w-14 h-14 bg-tertiary text-on-tertiary rounded-full shadow-xl flex items-center justify-center emerald-glow active:scale-90 transition-transform z-40 lg:hidden">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</button>
+<script>
+        // Micro-interaction for lesson items
+        document.querySelectorAll('.glass-panel').forEach(panel => {
+            panel.addEventListener('touchstart', () => {
+                panel.style.transform = 'scale(0.98)';
+                panel.style.transition = 'transform 0.1s ease';
+            });
+            panel.addEventListener('touchend', () => {
+                panel.style.transform = 'scale(1)';
+            });
+        });
+
+        // Material Symbol handling
+        document.querySelectorAll('.material-symbols-outlined').forEach(icon => {
+            const iconName = icon.getAttribute('data-icon');
+            if (iconName) {
+                icon.textContent = iconName;
+            }
+        });
+    </script>
+</body></html>

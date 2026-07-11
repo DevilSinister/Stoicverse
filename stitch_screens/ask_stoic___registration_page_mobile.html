@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Register | AskStoic</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-input {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            transition: all 0.2s ease-in-out;
+        }
+        .glass-input:focus {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+        /* Custom Checkbox Style */
+        input[type="checkbox"]:checked {
+            background-color: #4edea3;
+            border-color: #4edea3;
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-variant": "#22364e", "surface-container": "#0a2137", "on-primary-fixed-variant": "#3f465c", "on-secondary-container": "#aeb8d1", "secondary-fixed": "#d8e2fc", "surface-tint": "#bec6e0", secondary: "#bcc6df", "on-primary": "#283044", "on-primary-fixed": "#131b2e", "tertiary-fixed-dim": "#46e265", "tertiary-container": "#001d05", "on-background": "#d2e4ff", "inverse-surface": "#d2e4ff", outline: "#909097", "surface-dim": "#001429", "primary-fixed-dim": "#bec6e0", "on-tertiary-container": "#009536", "on-primary-container": "#798098", error: "#ffb4ab", "secondary-container": "#3f495e", "surface-container-lowest": "#000f21", "on-error-container": "#ffdad6", "on-tertiary": "#003910", "surface-bright": "#263a52", "on-secondary-fixed": "#111c2e", "tertiary-fixed": "#6cff81", "on-secondary": "#273044", "primary-container": "#0f172a", "on-tertiary-fixed": "#002106", background: "#001429", "surface-container-high": "#162b42", "on-surface": "#d2e4ff", "secondary-fixed-dim": "#bcc6df", "on-surface-variant": "#c6c6cd", "outline-variant": "#45464d", tertiary: "#46e265", "surface-container-highest": "#22364e", "on-secondary-fixed-variant": "#3d475b", "inverse-primary": "#565e74", "error-container": "#93000a", surface: "#001429", "on-error": "#690005", "surface-container-low": "#051c33", "primary-fixed": "#dae2fd", "inverse-on-surface": "#1d3249", primary: "#bec6e0", "on-tertiary-fixed-variant": "#00531a"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-lg": "32px", "margin-mobile": "20px", "container-max": "1280px", gutter: "24px", "stack-sm": "8px", "stack-xl": "64px", "stack-md": "16px", "margin-desktop": "64px"}, fontFamily: {"body-lg": ["Inter"], "headline-xl": ["Inter"], "headline-lg": ["Inter"], "body-md": ["Inter"], "label-caps": ["JetBrains Mono"], "headline-lg-mobile": ["Inter"], "data-point": ["JetBrains Mono"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}]}}}};</script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased overflow-x-hidden">
+<!-- TopNavBar (Shared Component) -->
+<header class="fixed top-0 w-full z-50 bg-background border-b border-outline-variant">
+<nav class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-stack-md max-w-container-max mx-auto">
+<div class="flex items-center gap-2">
+<img alt="AskStoic Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLtpjAD0mEA1PNoJCoCJvvxG3USNkXHH4yM923dvuoj8b3klNqhlAY3uJgH0sxdzeF04iunLR3s63Kk5Bom-U6OCP_kBQaU9VmIugR8uAkhRNzvTzOO6EwP96Tvu_vFexU-Wvi1UYDcILEaJFX-8Kn6gD5PsB2CQmA1fTSsqYqN6j86pAgAnpDfkl6y425vudJMyn_RnGwVDe1HLbwqUvRtSSEmMIJ6e_kIHE__o_glGP-nNnojp8MIFdaXs"/>
+<span class="font-headline-lg text-headline-lg font-bold text-primary tracking-tighter">AskStoic</span>
+</div>
+<div class="flex items-center">
+<a class="text-primary font-body-md text-body-md font-medium cursor-pointer active:opacity-80" href="#">Sign In</a>
+</div>
+</nav>
+</header>
+<!-- Main Registration Content -->
+<main class="flex-grow pt-24 pb-stack-xl px-margin-mobile flex flex-col items-center">
+<div class="w-full max-w-md space-y-stack-lg">
+<!-- Hero Header -->
+<section class="text-center space-y-2">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface">Create Your Account</h1>
+<p class="text-on-surface-variant font-body-md text-body-md">Join the elite network of institutional thinkers.</p>
+</section>
+<!-- Signup Form -->
+<form action="#" class="space-y-stack-md" method="POST">
+<!-- Full Name -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant block">Full Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">person</span>
+<input class="glass-input w-full pl-10 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-tertiary text-on-surface font-body-md bg-surface-container-low" name="name" placeholder="Marcus Aurelius" required="" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant block">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">mail</span>
+<input class="glass-input w-full pl-10 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-tertiary text-on-surface font-body-md bg-surface-container-low" name="email" placeholder="name@institutional.com" required="" type="email"/>
+</div>
+</div>
+<!-- Country & Phone Row -->
+<div class="grid grid-cols-1 gap-stack-md">
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant block">Country</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">public</span>
+<select class="glass-input w-full pl-10 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-tertiary text-on-surface font-body-md bg-surface-container-low appearance-none" name="country">
+<option value="US">United States</option>
+<option value="UK">United Kingdom</option>
+<option value="SG">Singapore</option>
+<option value="HK">Hong Kong</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant block">Phone Number</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">call</span>
+<input class="glass-input w-full pl-10 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-tertiary text-on-surface font-body-md bg-surface-container-low" name="phone" placeholder="+1 (555) 000-0000" required="" type="tel"/>
+</div>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant block">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">lock</span>
+<input class="glass-input w-full pl-10 pr-10 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-tertiary text-on-surface font-body-md bg-surface-container-low" name="password" placeholder="••••••••" required="" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</div>
+<!-- Confirm Password -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant block">Confirm Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">shield</span>
+<input class="glass-input w-full pl-10 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-tertiary text-on-surface font-body-md bg-surface-container-low" name="confirm_password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Referral Code -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant block">Referral Code (Optional)</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">confirmation_number</span>
+<input class="glass-input w-full pl-10 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-tertiary text-on-surface font-body-md bg-surface-container-low" name="referral" placeholder="STOIC-2024" type="text"/>
+</div>
+</div>
+<!-- Password Requirements -->
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant">
+<p class="font-label-caps text-label-caps text-primary mb-2">Security Requirements:</p>
+<ul class="space-y-1 text-on-surface-variant font-data-point text-data-point">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-tertiary" data-weight="fill">check_circle</span>
+                            Minimum 12 characters
+                        </li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-tertiary" data-weight="fill">check_circle</span>
+                            One uppercase &amp; one numerical value
+                        </li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-outline">circle</span>
+                            One special character (@, #, $, %)
+                        </li>
+</ul>
+</div>
+<!-- Terms & Risk Checkbox -->
+<div class="flex items-start gap-3 py-2">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant bg-surface-container-low text-tertiary focus:ring-tertiary cursor-pointer" id="terms" required="" type="checkbox"/>
+<label class="font-body-md text-body-md text-on-surface-variant text-sm leading-tight" for="terms">
+                        I agree to the <a class="text-tertiary underline decoration-tertiary/30" href="#">Terms of Service</a> and acknowledge the <a class="text-tertiary underline decoration-tertiary/30" href="#">Risk Disclosure</a> associated with institutional research.
+                    </label>
+</div>
+<!-- Action Buttons -->
+<div class="space-y-stack-md pt-stack-sm">
+<button class="w-full py-4 bg-tertiary text-on-tertiary font-label-caps text-label-caps font-bold rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-[0.98] transition-transform" type="submit">
+                        CREATE ACCOUNT
+                    </button>
+<div class="relative flex items-center justify-center">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-outline-variant"></div>
+</div>
+<span class="relative px-4 bg-background text-on-surface-variant font-label-caps text-label-caps">OR</span>
+</div>
+<button class="w-full py-4 bg-surface-container-high border border-outline-variant text-on-surface font-label-caps text-label-caps font-bold rounded-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-transform" type="button">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+                        REGISTER WITH GOOGLE
+                    </button>
+</div>
+<!-- Footer Link -->
+<div class="text-center pt-stack-md">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Already have an account? 
+                        <a class="text-primary font-bold hover:text-tertiary transition-colors" href="#">Log In</a>
+</p>
+</div>
+</form>
+</div>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant w-full mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop py-stack-lg max-w-container-max mx-auto space-y-4 md:space-y-0">
+<span class="font-label-caps text-label-caps text-on-surface-variant text-center md:text-left">
+                © 2024 AskStoic Institutional Research. All rights reserved.
+            </span>
+<div class="flex flex-wrap justify-center gap-4">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-tertiary transition-colors duration-200 cursor-pointer" href="#">Privacy Policy</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-tertiary transition-colors duration-200 cursor-pointer" href="#">Terms of Service</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-tertiary transition-colors duration-200 cursor-pointer" href="#">Contact Support</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interactions for form inputs
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('focus', () => {
+                element.parentElement.querySelector('.material-symbols-outlined').style.color = '#4edea3';
+            });
+            element.addEventListener('blur', () => {
+                element.parentElement.querySelector('.material-symbols-outlined').style.color = '#909097';
+            });
+        });
+
+        // Simple toggle for password visibility
+        const visibilityBtn = document.querySelector('button[type="button"] .material-symbols-outlined');
+        if(visibilityBtn) {
+            visibilityBtn.addEventListener('click', function() {
+                const input = this.closest('.relative').querySelector('input');
+                if(input.type === 'password') {
+                    input.type = 'text';
+                    this.textContent = 'visibility_off';
+                } else {
+                    input.type = 'password';
+                    this.textContent = 'visibility';
+                }
+            });
+        }
+    </script>
+</body></html>

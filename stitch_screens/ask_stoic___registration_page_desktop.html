@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AskStoic | Premium Account Registration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-variant": "#22364e", "surface-container": "#0a2137", "on-primary-fixed-variant": "#3f465c", "on-secondary-container": "#aeb8d1", "secondary-fixed": "#d8e2fc", "surface-tint": "#bec6e0", secondary: "#bcc6df", "on-primary": "#283044", "on-primary-fixed": "#131b2e", "tertiary-fixed-dim": "#46e265", "tertiary-container": "#001d05", "on-background": "#d2e4ff", "inverse-surface": "#d2e4ff", outline: "#909097", "surface-dim": "#001429", "primary-fixed-dim": "#bec6e0", "on-tertiary-container": "#009536", "on-primary-container": "#798098", error: "#ffb4ab", "secondary-container": "#3f495e", "surface-container-lowest": "#000f21", "on-error-container": "#ffdad6", "on-tertiary": "#003910", "surface-bright": "#263a52", "on-secondary-fixed": "#111c2e", "tertiary-fixed": "#6cff81", "on-secondary": "#273044", "primary-container": "#0f172a", "on-tertiary-fixed": "#002106", background: "#001429", "surface-container-high": "#162b42", "on-surface": "#d2e4ff", "secondary-fixed-dim": "#bcc6df", "on-surface-variant": "#c6c6cd", "outline-variant": "#45464d", tertiary: "#46e265", "surface-container-highest": "#22364e", "on-secondary-fixed-variant": "#3d475b", "inverse-primary": "#565e74", "error-container": "#93000a", surface: "#001429", "on-error": "#690005", "surface-container-low": "#051c33", "primary-fixed": "#dae2fd", "inverse-on-surface": "#1d3249", primary: "#bec6e0", "on-tertiary-fixed-variant": "#00531a"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"stack-lg": "32px", "margin-mobile": "20px", "container-max": "1280px", gutter: "24px", "stack-sm": "8px", "stack-xl": "64px", "stack-md": "16px", "margin-desktop": "64px"}, fontFamily: {"body-lg": ["Inter"], "headline-xl": ["Inter"], "headline-lg": ["Inter"], "body-md": ["Inter"], "label-caps": ["JetBrains Mono"], "headline-lg-mobile": ["Inter"], "data-point": ["JetBrains Mono"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}]}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+        .glow-emerald:focus-within {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+            border-color: #4edea3;
+        }
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #d4e4fa;
+            -webkit-box-shadow: 0 0 0px 1000px #051424 inset;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+        .form-input {
+            background-color: #051424;
+            border: 1px solid #334155;
+            color: #d4e4fa;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen selection:bg-tertiary selection:text-tertiary-container">
+<main class="flex min-h-screen flex-col md:flex-row">
+<!-- Left Side: Brand Messaging & Experience -->
+<section class="hidden md:flex relative w-full md:w-[45%] lg:w-[40%] bg-surface-container-lowest p-margin-desktop flex-col justify-between overflow-hidden">
+<!-- Background Visual Overlay -->
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+<div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida/AP1WRLs0kdCxoGEDuiY0DM5DlbryOi3pg3zYUtZWlGDZ_3856xIru-Q18D8nD3v2GJaD0J76_QuqWi4M-1OaSr3MajFOqQneQiB5s33j_X47LYpNqQJjzX6mi85f__A_J5A2ohd8GK3PxA72h8JxSJV3GCAQBePU3qhYcigiG5aJ-u58WegAcCl_jVOHqt673HrlWOrXWsBLTPnmjjqdQhxs_o7-1BvX0mv8KBGVobJ1LU6OaGxyzCOWSRoux7LY')"></div>
+</div>
+<div class="relative z-10 space-y-stack-xl">
+<div>
+<img alt="AskStoic Logo" class="w-24 h-24 mb-stack-lg" src="https://lh3.googleusercontent.com/aida/AP1WRLtpjAD0mEA1PNoJCoCJvvxG3USNkXHH4yM923dvuoj8b3klNqhlAY3uJgH0sxdzeF04iunLR3s63Kk5Bom-U6OCP_kBQaU9VmIugR8uAkhRNzvTzOO6EwP96Tvu_vFexU-Wvi1UYDcILEaJFX-8Kn6gD5PsB2CQmA1fTSsqYqN6j86pAgAnpDfkl6y425vudJMyn_RnGwVDe1HLbwqUvRtSSEmMIJ6e_kIHE__o_glGP-nNnojp8MIFdaXs"/>
+<h1 class="font-headline-xl text-headline-xl text-on-surface mb-stack-md leading-tight">Join the Elite.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md">Step into a professional environment designed for serious institutional research and market mastery.</p>
+</div>
+<ul class="space-y-stack-lg">
+<li class="flex items-start gap-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">analytics</span>
+</div>
+<div>
+<h3 class="font-label-caps text-label-caps text-tertiary mb-1">Institutional Tools</h3>
+<p class="font-body-md text-on-surface-variant text-sm">Access the exact data visualization and analytical tools used by top-tier trading floors.</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">groups</span>
+</div>
+<div>
+<h3 class="font-label-caps text-label-caps text-tertiary mb-1">Veteran Mentors</h3>
+<p class="font-body-md text-on-surface-variant text-sm">Direct access to curriculum leaders with decades of institutional experience.</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">school</span>
+</div>
+<div>
+<h3 class="font-label-caps text-label-caps text-tertiary mb-1">Structured Curriculum</h3>
+<p class="font-body-md text-on-surface-variant text-sm">A rigorous, step-by-step methodology from fundamental theory to advanced execution.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="relative z-10">
+<p class="font-label-caps text-label-caps text-outline">AskStoic Institutional Research © 2024</p>
+</div>
+</section>
+<!-- Right Side: Registration Form -->
+<section class="flex-1 flex items-center justify-center p-margin-mobile md:p-margin-desktop bg-background">
+<div class="w-full max-w-xl space-y-stack-lg">
+<!-- Mobile Logo (Visible only on small screens) -->
+<div class="md:hidden flex flex-col items-center mb-stack-lg text-center">
+<img alt="AskStoic Logo" class="w-16 h-16 mb-stack-md" src="https://lh3.googleusercontent.com/aida/AP1WRLtpjAD0mEA1PNoJCoCJvvxG3USNkXHH4yM923dvuoj8b3klNqhlAY3uJgH0sxdzeF04iunLR3s63Kk5Bom-U6OCP_kBQaU9VmIugR8uAkhRNzvTzOO6EwP96Tvu_vFexU-Wvi1UYDcILEaJFX-8Kn6gD5PsB2CQmA1fTSsqYqN6j86pAgAnpDfkl6y425vudJMyn_RnGwVDe1HLbwqUvRtSSEmMIJ6e_kIHE__o_glGP-nNnojp8MIFdaXs"/>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile">Join the Elite</h1>
+</div>
+<div class="glass-panel p-stack-lg md:p-stack-xl rounded-xl">
+<header class="mb-stack-lg text-center md:text-left">
+<h2 class="font-headline-lg text-headline-lg mb-2">Create Your Account</h2>
+<p class="text-on-surface-variant font-body-md">Begin your journey towards professional discipline.</p>
+</header>
+<form class="space-y-stack-md" id="registrationForm" novalidate="">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<!-- Full Name -->
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant block" for="fullName">Full Name</label>
+<div class="glow-emerald rounded">
+<input class="form-input w-full px-4 py-3 focus:outline-none placeholder:opacity-30" id="fullName" name="fullName" placeholder="MARCUS AURELIUS" required="" type="text"/>
+</div>
+<p class="error-msg hidden text-error text-[10px] font-label-caps mt-1">This field is required</p>
+</div>
+<!-- Email -->
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant block" for="email">Email Address</label>
+<div class="glow-emerald rounded">
+<input class="form-input w-full px-4 py-3 focus:outline-none placeholder:opacity-30" id="email" name="email" placeholder="RESEARCH@ASKSTOIC.COM" required="" type="email"/>
+</div>
+<p class="error-msg hidden text-error text-[10px] font-label-caps mt-1">Enter a valid email address</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<!-- Country -->
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant block" for="country">Country</label>
+<div class="glow-emerald rounded">
+<select class="form-input w-full px-4 py-3 focus:outline-none appearance-none" id="country" name="country" required="">
+<option disabled="" selected="" value="">SELECT COUNTRY</option>
+<option value="US">UNITED STATES</option>
+<option value="UK">UNITED KINGDOM</option>
+<option value="DE">GERMANY</option>
+<option value="CH">SWITZERLAND</option>
+<option value="JP">JAPAN</option>
+<option value="SG">SINGAPORE</option>
+</select>
+</div>
+</div>
+<!-- Phone -->
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant block" for="phone">Phone Number</label>
+<div class="glow-emerald rounded">
+<input class="form-input w-full px-4 py-3 focus:outline-none placeholder:opacity-30" id="phone" name="phone" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<!-- Password -->
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant block" for="password">Password</label>
+<div class="glow-emerald rounded relative">
+<input class="form-input w-full px-4 py-3 focus:outline-none placeholder:opacity-30" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant" onclick="togglePassword('password')" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+<div class="pt-2 space-y-1">
+<div class="flex items-center gap-2 text-[10px] font-label-caps text-outline" id="req-len">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> 8+ CHARACTERS
+                                    </div>
+<div class="flex items-center gap-2 text-[10px] font-label-caps text-outline" id="req-sym">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> SYMBOL &amp; NUMBER
+                                    </div>
+</div>
+</div>
+<!-- Confirm Password -->
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant block" for="confirmPassword">Confirm Password</label>
+<div class="glow-emerald rounded relative">
+<input class="form-input w-full px-4 py-3 focus:outline-none placeholder:opacity-30" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required="" type="password"/>
+</div>
+<p class="hidden text-error text-[10px] font-label-caps mt-1" id="match-error">Passwords do not match</p>
+</div>
+</div>
+<!-- Influencer/Referral (Collapsible) -->
+<div class="pt-stack-sm">
+<button class="text-tertiary text-xs font-label-caps hover:underline transition-all" onclick="document.getElementById('referralField').classList.toggle('hidden')" type="button">
+                                + HAVE A REFERRAL CODE?
+                            </button>
+<div class="hidden mt-2" id="referralField">
+<div class="glow-emerald rounded">
+<input class="form-input w-full px-4 py-2 focus:outline-none" placeholder="ENTER CODE" type="text"/>
+</div>
+</div>
+</div>
+<!-- TOS Checkbox -->
+<div class="flex items-start gap-3 pt-stack-sm">
+<div class="relative flex items-center h-5">
+<input class="w-4 h-4 rounded border-outline-variant bg-background text-tertiary focus:ring-tertiary focus:ring-offset-background" id="tos" name="tos" required="" type="checkbox"/>
+</div>
+<label class="text-[11px] leading-tight text-on-surface-variant font-body-md" for="tos">
+                                I AGREE TO THE <a class="text-tertiary hover:underline" href="#">TERMS OF SERVICE</a> AND ACKNOWLEDGE THE <a class="text-tertiary hover:underline" href="#">RISK DISCLOSURE</a> STATEMENT FOR MARGIN TRADING AND INSTITUTIONAL TOOLS.
+                            </label>
+</div>
+<!-- CTA Group -->
+<div class="space-y-stack-md pt-stack-md">
+<button class="w-full bg-tertiary text-on-tertiary font-label-caps py-4 rounded-lg font-bold tracking-widest hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-tertiary/10" type="submit">
+                                CREATE ACCOUNT
+                            </button>
+<div class="relative flex items-center justify-center">
+<div class="border-t border-outline-variant w-full"></div>
+<span class="absolute bg-surface-variant px-4 font-label-caps text-[10px] text-outline">OR</span>
+</div>
+<button class="w-full bg-transparent border border-outline-variant text-on-surface font-label-caps py-4 rounded-lg flex items-center justify-center gap-3 hover:bg-surface-variant transition-all" type="button">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="currentColor"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="currentColor"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="currentColor"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="currentColor"></path>
+</svg>
+                                REGISTER WITH GOOGLE
+                            </button>
+</div>
+</form>
+</div>
+<div class="text-center font-body-md">
+<p class="text-on-surface-variant">ALREADY HAVE AN ACCOUNT? <a class="text-tertiary font-bold hover:underline" href="#">LOG IN</a></p>
+</div>
+</div>
+</section>
+</main>
+<script>
+        // Form Validation Logic
+        const form = document.getElementById('registrationForm');
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirmPassword');
+        const reqLen = document.getElementById('req-len');
+        const reqSym = document.getElementById('req-sym');
+        const matchError = document.getElementById('match-error');
+
+        function togglePassword(id) {
+            const el = document.getElementById(id);
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        passwordInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            
+            // Length check
+            if (val.length >= 8) {
+                reqLen.classList.replace('text-outline', 'text-tertiary');
+                reqLen.querySelector('span').innerText = 'check_circle';
+                reqLen.querySelector('span').style.fontVariationSettings = "'FILL' 1";
+            } else {
+                reqLen.classList.replace('text-tertiary', 'text-outline');
+                reqLen.querySelector('span').innerText = 'radio_button_unchecked';
+                reqLen.querySelector('span').style.fontVariationSettings = "'FILL' 0";
+            }
+
+            // Symbol and Number check
+            const hasNum = /\d/.test(val);
+            const hasSym = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+            if (hasNum && hasSym) {
+                reqSym.classList.replace('text-outline', 'text-tertiary');
+                reqSym.querySelector('span').innerText = 'check_circle';
+                reqSym.querySelector('span').style.fontVariationSettings = "'FILL' 1";
+            } else {
+                reqSym.classList.replace('text-tertiary', 'text-outline');
+                reqSym.querySelector('span').innerText = 'radio_button_unchecked';
+                reqSym.querySelector('span').style.fontVariationSettings = "'FILL' 0";
+            }
+
+            validateMatch();
+        });
+
+        confirmInput.addEventListener('input', validateMatch);
+
+        function validateMatch() {
+            if (confirmInput.value && passwordInput.value !== confirmInput.value) {
+                matchError.classList.remove('hidden');
+                confirmInput.classList.add('border-error');
+            } else {
+                matchError.classList.add('hidden');
+                confirmInput.classList.remove('border-error');
+            }
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            let hasError = false;
+
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            inputs.forEach(input => {
+                const errorMsg = input.parentElement.parentElement.querySelector('.error-msg');
+                if (!input.value || (input.type === 'checkbox' && !input.checked)) {
+                    input.classList.add('border-error');
+                    if (errorMsg) errorMsg.classList.remove('hidden');
+                    hasError = true;
+                } else {
+                    input.classList.remove('border-error');
+                    if (errorMsg) errorMsg.classList.add('hidden');
+                }
+            });
+
+            if (!hasError && passwordInput.value === confirmInput.value) {
+                // Success action
+                const btn = form.querySelector('button[type="submit"]');
+                btn.innerHTML = '<span class="flex items-center justify-center gap-2">COMMENCING... <svg class="animate-spin h-4 w-4 text-on-tertiary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>';
+                setTimeout(() => {
+                    alert('Registration payload sent. Welcome to AskStoic.');
+                    btn.innerText = 'CREATE ACCOUNT';
+                }, 1500);
+            }
+        });
+    </script>
+</body></html>

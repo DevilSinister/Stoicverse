@@ -1,44 +1,52 @@
-# UI/UX Design System: Ask Stoic
+# UI/UX Design System: Ask Stoic (Trading Floor Style)
+
+This document outlines the visual identity, UX guidelines, and interaction principles for the Ask Stoic platform, utilizing the `/impeccable` methodology.
 
 ## 1. Design Strategy & Vibe
+**Strategy:** "Committed Dark Institutional"
+**Register:** Product-first community and learning UI with professional trading floor energy.
+**Physical Scene:** A professional, focused trading terminal with sharp hairlines separating dark navy and slate surfaces. Monochromatic foundation punctuated by high-intent emerald green accents for growth and execution states.
 
-Strategy: Committed Dark Editorial.
-
-Register: product-first community and learning UI with editorial marketing moments.
-
-Physical scene: a cold, precise control room with surgical hairlines separating dark monolithic surfaces. The interface should feel like quiet infrastructure, stripped of noise, using a single mint accent for absolute clarity.
+### Anti-Patterns to Refuse & Avoid
+- **NO AI Slop:** No purple/blue neon gradients. No "glassmorphism as default".
+- **NO Generic Light Themes:** Avoid warm AI-default cream/sand/beige entirely.
+- **NO "Hero-Metric" Clichés:** Avoid the standard SaaS oversized numbers with gradients.
+- **NO Ghost Cards:** No combining `border: 1px solid` with `box-shadow: 0 16px...` on the same element.
+- **NO Over-rounding:** Strict systematic feel. Border radius should be `4px` (rounded-sm) for CTAs and small controls, and maximum `8px` (rounded-lg) for cards/panels.
 
 ## 2. Color Palette
+A deep navy canvas divided by clean slate-gray borders, with a single emerald accent representing execution, active states, progress, and primary actions.
 
-A near-black canvas divided by surgical hairlines, with one mint accent threading focus, active state, progress, and primary actions.
-
-| Role | Color Name | OKLCH | Fallback HEX | Usage |
-|---|---|---|---|---|
-| Body Background | Cold Void | `oklch(0.12 0.005 260)` | `#0C0E10` | Whole application canvas |
-| Surface | Monolith | `oklch(0.18 0.005 260)` | `#16181A` | Panels, cards, terminal blocks |
-| Hairline Borders | Surgical Steel | `oklch(0.25 0.005 260)` | `#2A2C2E` | Dividers, grid lines, structural borders |
-| Ink | Bone White | `oklch(0.95 0.005 260)` | `#F0F1F2` | Headings and important text |
-| Muted Text | Fog | `oklch(0.65 0.01 260)` | `#8B8E91` | Secondary text and placeholders |
-| Accent | Glacial Mint | `oklch(0.85 0.12 160)` | `#A7E5C5` | Primary actions, focus rings, active states |
+| Role | Color Name | Hex Code | Usage |
+|---|---|---|---|
+| **Body Background** | Deep Navy | `#051424` | The dark canvas for the entire application. |
+| **Surface** | Container Low | `#0D1C2D` | Side navigation, panel backgrounds. |
+| **Monolith Surface** | Slate Gray | `#1E293B` | Cards, popovers, active dialog panels. |
+| **Hairline Borders**| Surgical Border | `#334155` | 1px solid dividers, grid lines, structural borders. |
+| **Ink (Text Primary)**| Pure White | `#FFFFFF` | Primary headings and important text. |
+| **Muted Text** | Muted Slate | `#94A3B8` | Secondary text, placeholders. |
+| **Accent** | Accent Emerald | `#10B981` | Focus rings, active states, primary CTA accents. |
+| **Hover Accent** | Bright Emerald | `#4EDE93` | Hover states and highlight details. |
 
 ## 3. Typography
+This design system uses Inter for headings and body to keep a neutral, systematic appearance, and JetBrains Mono for metadata, labels, and data points to provide a trading-terminal feel.
 
-Display and headings use Cormorant for the editorial Stoic voice. Body, UI controls, navigation, and dense product text use Inter. Technical details, small labels, logs, prices, and metadata use JetBrains Mono.
+- **Display & Headings:** **Inter**
+  - *Usage:* H1, H2, Hero text, and key metrics.
+  - *Rules:* Heavy weights, tight letter-spacing (`-0.02em` to `-0.01em`).
+- **Body & UI Elements:** **Inter**
+  - *Usage:* Paragraphs, buttons, metadata, UI controls.
+  - *Rules:* Cap line length at 65–75ch. Clean, highly legible, open line height (`1.6`).
+- **Labels & Numbers:** **JetBrains Mono**
+  - *Usage:* Categories, monospaced status labels, chart values, prices.
 
-Use balanced wrapping for display headings, keep body line length to 65-75ch, and avoid fluid product UI type except in true landing-page hero copy.
+## 4. Layout & Spacing
+- **Surgical Grid:** Use 1px borders (`border-[#334155]` or `border-slate-700`) to divide dashboard sections cleanly.
+- **Vertical Rhythm:** 8px base grid.
+- **Desktop:** Emphasize wide horizontal gutters and side margins (64px).
+- **Mobile:** Reflow content into a single column. Horizontal padding reduces to 20px, typography scales down.
 
-## 4. Layout & Rhythm
-
-Use strict grids, hairline dividers, and dark surfaces. Product screens should favor dense but calm layouts: side navigation, top bars, tables, feeds, status panels, progress bars, and role-aware controls. Cards are allowed for repeated records, events, lessons, payment summaries, and dashboard panels, but should not be nested or over-rounded.
-
-## 5. Components
-
-Buttons and inputs are pill-shaped only where they are compact controls. Larger panels use modest radius. Every interactive element needs default, hover, focus-visible, disabled, and active treatment. Locked, paid, pending, completed, live, and suspended states must include text labels or icons in addition to color.
-
-## 6. Motion
-
-Motion is quiet and stateful: 150-250ms transitions for hover, active, disclosure, and loading states. No bounce, no decorative page-load choreography. Respect `prefers-reduced-motion`.
-
-## 7. Accessibility
-
-Muted text must maintain AA contrast on the dark background. Minimum tap targets are 44px. Focus rings use the mint accent. Avoid color-only meaning, keep form labels visible, and ensure dense tables and feeds remain readable at mobile widths.
+## 5. Interaction & Motion
+- **Quiet Motion:** Only animate when strictly necessary. Use `ease-out-expo` (150-250ms). No bouncy/elastic effects.
+- **Hover States:** Subtle background shifts or the emerald accent glow. No scale transforms.
+- **Focus States:** Emerald border with a low-opacity emerald outer glow (`0px 0px 15px rgba(16, 185, 129, 0.2)`).

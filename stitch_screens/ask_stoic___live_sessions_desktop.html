@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Live Sessions | AskStoic</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;700&amp;family=Barlow+Condensed:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-tertiary-container": "#009536", outline: "#909097", "surface-tint": "#bec6e0", "on-tertiary-fixed": "#002106", "on-secondary-fixed-variant": "#3d475b", "surface-container-high": "#162b42", "on-tertiary-fixed-variant": "#00531a", "on-secondary-fixed": "#111c2e", "surface-container-low": "#051c33", "on-primary-fixed": "#131b2e", "surface-container-highest": "#22364e", "primary-fixed": "#dae2fd", primary: "#bec6e0", "error-container": "#93000a", "surface-dim": "#001429", "secondary-container": "#3f495e", "on-surface-variant": "#c6c6cd", "on-primary-fixed-variant": "#3f465c", "on-error-container": "#ffdad6", "on-secondary-container": "#aeb8d1", "surface-variant": "#22364e", "on-tertiary": "#003910", background: "#001429", "inverse-primary": "#565e74", "primary-fixed-dim": "#bec6e0", "on-primary-container": "#798098", "primary-container": "#0f172a", "outline-variant": "#45464d", "secondary-fixed-dim": "#bcc6df", surface: "#001429", "tertiary-fixed": "#6cff81", "surface-container-lowest": "#000f21", "on-surface": "#d2e4ff", "on-primary": "#283044", "tertiary-container": "#001d05", tertiary: "#46e265", "secondary-fixed": "#d8e2fc", "on-secondary": "#273044", "surface-bright": "#263a52", secondary: "#bcc6df", "inverse-on-surface": "#1d3249", "surface-container": "#0a2137", "on-background": "#d2e4ff", "on-error": "#690005", error: "#ffb4ab", "tertiary-fixed-dim": "#46e265", "inverse-surface": "#d2e4ff"}, borderRadius: {DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px"}, spacing: {"margin-mobile": "20px", "stack-md": "16px", "stack-lg": "32px", "container-max": "1280px", "stack-xl": "64px", "stack-sm": "8px", "margin-desktop": "64px", gutter: "24px"}, fontFamily: {"headline-xl": ["Inter"], "headline-lg": ["Inter"], "body-lg": ["Inter"], "headline-lg-mobile": ["Inter"], "label-caps": ["JetBrains Mono"], "data-point": ["JetBrains Mono"], "body-md": ["Inter"], headline: ["Archivo Narrow"], display: ["Archivo Narrow"], body: ["Barlow Condensed"], label: ["Jetbrains Mono"]}, fontSize: {"headline-xl": ["48px", {lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}], "headline-lg-mobile": ["24px", {lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600"}], "label-caps": ["12px", {lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "500"}], "data-point": ["14px", {lineHeight: "1.0", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "1.6", letterSpacing: "0", fontWeight: "400"}]}}}};</script>
+<style>
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+        .emerald-glow:hover {
+            box-shadow: 0px 0px 15px rgba(16, 185, 129, 0.2);
+            border-color: #4edea3;
+        }
+        .active-tab {
+            color: #4edea3;
+            border-bottom: 2px solid #4edea3;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-50 bg-background border-b border-outline-variant">
+<div class="flex justify-between items-center h-16 px-margin-desktop max-w-container-max mx-auto">
+<div class="flex items-center gap-stack-md">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">AskStoic</span>
+<nav class="hidden md:flex items-center ml-stack-xl gap-stack-lg">
+<a class="font-body-md text-on-surface-variant hover:text-tertiary transition-colors duration-200" href="#">Dashboard</a>
+<a class="font-body-md text-tertiary border-b-2 border-tertiary pb-1" href="#">Sessions</a>
+<a class="font-body-md text-on-surface-variant hover:text-tertiary transition-colors duration-200" href="#">Academy</a>
+<a class="font-body-md text-on-surface-variant hover:text-tertiary transition-colors duration-200" href="#">Intelligence</a>
+<a class="font-body-md text-on-surface-variant hover:text-tertiary transition-colors duration-200" href="#">Community</a>
+</nav>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-tertiary transition-colors cursor-pointer">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-tertiary transition-colors cursor-pointer">settings</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a corporate executive in a sharp navy blue suit, set against a blurred background of a modern high-rise office at twilight. The lighting is cold and precise, reflecting an institutional and stoic professional atmosphere. High-end photography with deep contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5i_igZAKDGR8QytrT8ht1gIaRM0BtUSElhRjEWrWUT09YsrSQ3qbRJYaZcuWvIjFs-F1l9_adt0APkEDVr9H_sbH8obfNHOXeTUoPy2H5hFU-SBnXOE5rXQi4woH8B1uc3PVuJWIubDl-ozOIqrD6xf_0-M2IhLzzJA5PlyarSVnkMoQ8CLnKv2C9Pn7O29YoP40bU5u87uYA-5zB39vT-MIbM0eB2MSWgiZqlbPWddDCXIawI2cKbNBjXTN7SiJSKJzjVvB4zn3L"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex max-w-container-max mx-auto">
+<!-- Side Navigation -->
+<aside class="hidden md:flex h-screen w-64 left-0 sticky flex-col py-stack-lg gap-stack-md border-r border-outline-variant bg-surface-container">
+<div class="px-stack-md mb-stack-lg">
+<div class="flex items-center gap-stack-sm">
+<div class="w-10 h-10 bg-tertiary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg font-bold text-tertiary leading-none">AS</div>
+<div class="font-label-caps text-label-caps text-outline">ELITE MENTORSHIP</div>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-stack-sm space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded bg-secondary-container text-tertiary border-l-4 border-tertiary transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">live_tv</span>
+<span>Live Sessions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-all" href="#">
+<span class="material-symbols-outlined">school</span>
+<span>Curriculum</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-all" href="#">
+<span class="material-symbols-outlined">account_balance</span>
+<span>Strategy Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Mentorship</span>
+</a>
+</nav>
+<div class="p-stack-md">
+<button class="w-full bg-tertiary text-on-tertiary font-label-caps py-3 rounded-lg font-bold tracking-wider hover:opacity-90 transition-all uppercase">Upgrade to Pro</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 min-w-0 bg-background px-margin-mobile md:px-stack-xl py-stack-lg">
+<!-- Page Header & Filter Control -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-stack-md mb-stack-xl">
+<div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface mb-2">Live Sessions</h1>
+<p class="text-on-surface-variant max-w-xl">Direct access to institutional desk traders and market analysts. Real-time execution and methodology breakdown.</p>
+</div>
+<div class="flex flex-wrap gap-stack-sm">
+<div class="flex border border-outline-variant rounded-lg p-1 bg-surface-container-low">
+<button class="px-4 py-1.5 rounded text-tertiary bg-secondary-container font-label-caps">LIVE NOW</button>
+<button class="px-4 py-1.5 rounded text-outline hover:text-on-surface font-label-caps transition-colors">UPCOMING</button>
+<button class="px-4 py-1.5 rounded text-outline hover:text-on-surface font-label-caps transition-colors">PAST</button>
+</div>
+</div>
+</div>
+<!-- Advanced Filters -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-stack-lg">
+<div class="space-y-2">
+<label class="font-label-caps text-outline">DATE RANGE</label>
+<div class="relative">
+<input class="w-full bg-surface-container border border-outline-variant rounded-lg px-4 py-2.5 font-data-point text-on-surface focus:border-tertiary outline-none" type="text" value="OCT 24 - OCT 31"/>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-outline">calendar_today</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-caps text-outline">TIER ACCESS</label>
+<select class="w-full bg-surface-container border border-outline-variant rounded-lg px-4 py-2.5 font-data-point text-on-surface focus:border-tertiary outline-none appearance-none">
+<option>ALL TIERS</option>
+<option>ELITE</option>
+<option>PRO</option>
+<option>STANDARD</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="font-label-caps text-outline">HOST</label>
+<select class="w-full bg-surface-container border border-outline-variant rounded-lg px-4 py-2.5 font-data-point text-on-surface focus:border-tertiary outline-none appearance-none">
+<option>ALL HOSTS</option>
+<option>Marcus Aurelius</option>
+<option>Seneca</option>
+<option>Epictetus</option>
+</select>
+</div>
+<div class="flex items-end">
+<button class="w-full h-[46px] border border-outline-variant rounded-lg flex items-center justify-center gap-2 text-on-surface hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">tune</span>
+<span class="font-label-caps">RESET FILTERS</span>
+</button>
+</div>
+</div>
+<!-- Live Session Main Cards (Bento Style) -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter mb-stack-xl">
+<!-- Session Card 1: Active -->
+<div class="glass-panel rounded-xl p-stack-md flex flex-col md:flex-row gap-stack-md emerald-glow transition-all relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-tertiary"></div>
+<!-- Date Block -->
+<div class="flex flex-col items-center justify-center bg-surface-container-highest px-6 py-4 rounded-lg min-w-[100px]">
+<span class="font-label-caps text-outline text-[10px]">OCT</span>
+<span class="font-headline-lg text-headline-lg text-tertiary">24</span>
+</div>
+<!-- Content -->
+<div class="flex-1 space-y-stack-sm">
+<div class="flex justify-between items-start">
+<span class="bg-tertiary/10 text-tertiary font-label-caps px-2 py-1 rounded text-[10px] border border-tertiary/20">LIVE NOW</span>
+<div class="flex items-center gap-1 text-tertiary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+<span class="font-label-caps text-[10px]">ELITE TIER</span>
+</div>
+</div>
+<h3 class="font-headline-lg text-2xl text-on-surface">Institutional Liquidity Hunt</h3>
+<div class="grid grid-cols-2 gap-4 text-on-surface-variant">
+<div>
+<p class="font-label-caps text-[10px] text-outline">HOST</p>
+<p class="text-sm font-medium">Marcus Aurelius</p>
+</div>
+<div>
+<p class="font-label-caps text-[10px] text-outline">TOPIC</p>
+<p class="text-sm font-medium">Market Microstructure</p>
+</div>
+</div>
+<div class="flex items-center gap-2 pt-2 border-t border-outline-variant">
+<span class="material-symbols-outlined text-outline text-lg">schedule</span>
+<span class="font-data-point text-outline">14:00 GMT+1</span>
+<span class="font-data-point text-tertiary ml-auto">00:42:15 remaining</span>
+</div>
+<div class="flex flex-wrap gap-2 pt-4">
+<button class="bg-tertiary text-on-tertiary px-6 py-2 rounded font-label-caps text-xs font-bold hover:opacity-90">JOIN ZOOM</button>
+<button class="border border-outline-variant text-on-surface px-4 py-2 rounded font-label-caps text-xs hover:bg-surface-variant">VIEW DETAILS</button>
+<button class="text-outline hover:text-on-surface material-symbols-outlined p-2">calendar_add_on</button>
+</div>
+</div>
+</div>
+<!-- Session Card 2: Upcoming -->
+<div class="glass-panel rounded-xl p-stack-md flex flex-col md:flex-row gap-stack-md transition-all hover:bg-surface-container-high border-outline-variant">
+<!-- Date Block -->
+<div class="flex flex-col items-center justify-center bg-surface-container-low px-6 py-4 rounded-lg min-w-[100px]">
+<span class="font-label-caps text-outline text-[10px]">OCT</span>
+<span class="font-headline-lg text-headline-lg text-on-surface">26</span>
+</div>
+<!-- Content -->
+<div class="flex-1 space-y-stack-sm">
+<div class="flex justify-between items-start">
+<span class="bg-surface-variant text-outline font-label-caps px-2 py-1 rounded text-[10px]">STARTING SOON</span>
+<div class="flex items-center gap-1 text-on-secondary-container">
+<span class="material-symbols-outlined text-sm">workspace_premium</span>
+<span class="font-label-caps text-[10px]">PRO TIER</span>
+</div>
+</div>
+<h3 class="font-headline-lg text-2xl text-on-surface">Order Flow Imbalance Masterclass</h3>
+<div class="grid grid-cols-2 gap-4 text-on-surface-variant">
+<div>
+<p class="font-label-caps text-[10px] text-outline">HOST</p>
+<p class="text-sm font-medium">Seneca the Younger</p>
+</div>
+<div>
+<p class="font-label-caps text-[10px] text-outline">TOPIC</p>
+<p class="text-sm font-medium">Advanced Tape Reading</p>
+</div>
+</div>
+<div class="flex items-center gap-2 pt-2 border-t border-outline-variant">
+<span class="material-symbols-outlined text-outline text-lg">schedule</span>
+<span class="font-data-point text-outline">09:00 GMT+1</span>
+<span class="font-data-point text-on-surface-variant ml-auto">Starts in 2d 14h</span>
+</div>
+<div class="flex flex-wrap gap-2 pt-4">
+<button class="bg-surface-variant text-on-surface px-6 py-2 rounded font-label-caps text-xs font-bold opacity-50 cursor-not-allowed">NOT STARTED</button>
+<button class="border border-outline-variant text-on-surface px-4 py-2 rounded font-label-caps text-xs hover:bg-surface-variant">VIEW DETAILS</button>
+<button class="text-outline hover:text-on-surface material-symbols-outlined p-2">calendar_add_on</button>
+</div>
+</div>
+</div>
+</div>
+<!-- System States Section -->
+<div class="mb-stack-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary">monitor_heart</span>
+                    System Status Prototypes
+                </h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Cancelled -->
+<div class="glass-panel p-stack-md rounded-lg border-red-500/30 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-red-400 text-[10px]">CANCELLED</span>
+<span class="material-symbols-outlined text-red-500 text-lg">cancel</span>
+</div>
+<p class="font-medium text-sm">Macro Outlook Q4</p>
+<p class="text-[12px] text-outline">This session was cancelled due to host technical unavailability.</p>
+</div>
+<!-- Rescheduled -->
+<div class="glass-panel p-stack-md rounded-lg border-yellow-500/30 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-yellow-500 text-[10px]">RESCHEDULED</span>
+<span class="material-symbols-outlined text-yellow-500 text-lg">update</span>
+</div>
+<p class="font-medium text-sm">Volatility Skew Analysis</p>
+<p class="text-[12px] text-outline">Moved from Oct 22 to Oct 25. Check updated time in details.</p>
+</div>
+<!-- Full Capacity -->
+<div class="glass-panel p-stack-md rounded-lg border-outline-variant flex flex-col gap-2 relative">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-outline text-[10px]">FULL CAPACITY</span>
+<span class="material-symbols-outlined text-outline text-lg">group_off</span>
+</div>
+<p class="font-medium text-sm">Live Trading Floor</p>
+<p class="text-[12px] text-outline">Maximum participant limit reached (500/500). Recording will be available.</p>
+</div>
+<!-- Expired Link -->
+<div class="glass-panel p-stack-md rounded-lg border-outline-variant flex flex-col gap-2 grayscale">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-outline text-[10px]">EXPIRED LINK</span>
+<span class="material-symbols-outlined text-outline text-lg">link_off</span>
+</div>
+<p class="font-medium text-sm">Post-Market Sync</p>
+<p class="text-[12px] text-outline">The session access window has closed. Access denied.</p>
+</div>
+<!-- Not Eligible (Locked) -->
+<div class="glass-panel p-stack-md rounded-lg bg-surface-container-low border-outline-variant flex flex-col gap-2 group cursor-pointer hover:border-tertiary transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-outline text-[10px]">LOCKED</span>
+<span class="material-symbols-outlined text-outline group-hover:text-tertiary text-lg">lock</span>
+</div>
+<p class="font-medium text-sm">HFT Logic Deep-Dive</p>
+<p class="text-[12px] text-outline">Requires ELITE Tier access. Upgrade your account to unlock.</p>
+</div>
+<!-- Not Started -->
+<div class="glass-panel p-stack-md rounded-lg border-outline-variant flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-outline text-[10px]">NOT STARTED</span>
+<span class="material-symbols-outlined text-outline text-lg">hourglass_empty</span>
+</div>
+<p class="font-medium text-sm">Economic Calendar Review</p>
+<p class="text-[12px] text-outline">The host has not yet started the broadcast. Check back in 15m.</p>
+</div>
+<!-- Ended -->
+<div class="glass-panel p-stack-md rounded-lg border-outline-variant flex flex-col gap-2 opacity-60">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-outline text-[10px]">ENDED</span>
+<span class="material-symbols-outlined text-outline text-lg">task_alt</span>
+</div>
+<p class="font-medium text-sm">Psychology of Scaling</p>
+<p class="text-[12px] text-outline">This session concluded at 15:30 GMT+1. Watch the replay.</p>
+</div>
+<!-- System Alert -->
+<div class="glass-panel p-stack-md rounded-lg bg-on-tertiary-container/10 border-on-tertiary-container flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-on-tertiary-container text-[10px]">STREAMS ACTIVE</span>
+<span class="material-symbols-outlined text-on-tertiary-container text-lg">wifi_tethering</span>
+</div>
+<p class="font-medium text-sm">Global Network Load</p>
+<p class="text-[12px] text-outline">Systems are operational. Latency 12ms. Institutional grade uplink.</p>
+</div>
+</div>
+</div>
+<!-- Mentorship Banner / CTA -->
+<div class="relative w-full rounded-2xl overflow-hidden mb-stack-xl">
+<div class="absolute inset-0 bg-gradient-to-r from-background to-transparent z-10"></div>
+<div class="w-full h-64 bg-cover bg-center" data-alt="A cinematic, wide-angle shot of a high-tech financial command center at night. Wall-to-wall monitors show complex algorithmic trading charts in emerald green and white. The aesthetic is extremely polished, institutional, and stoic, with a focus on precision and high-performance computing. Moody atmosphere with soft neon glows." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBEhwz79yZIQ7RT_gX0cDYU6sY5w_era40Tofcfsj56IulovKTgpafU0vAejjRzMbE7-VWalsmYRlCUADmHPC_sGfcNBdgQQ-KrfI6RMtHGweqETZzBehc0SxUWA2JXPMsc8G71qKNmnzqreFEvQgH8dbxjQ6AM8xfsGTj2MGllwMoUERFEx7_65xrdtSGFBxq-kjEzO5jmajJRptJ0cvPTOdIvTisci8xip-QwkU4s7_0uMCGLjUVhoosyaqW99vCTRJSXBlRmj3KI')"></div>
+<div class="absolute inset-0 z-20 flex flex-col justify-center px-stack-lg">
+<span class="font-label-caps text-tertiary mb-2">LIMITED AVAILABILITY</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface max-w-md">1-on-1 Institutional Strategy Audits</h2>
+<p class="text-on-surface-variant max-w-sm mt-4">Personalized sessions with Marcus Aurelius to review your execution logs and risk management protocols.</p>
+<button class="mt-6 w-fit bg-on-surface text-background font-label-caps px-8 py-3 rounded-lg font-bold hover:bg-tertiary transition-colors">BOOK AUDIT</button>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="w-full py-stack-lg border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop gap-stack-md max-w-container-max mx-auto">
+<div class="flex flex-col items-center md:items-start gap-1">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">AskStoic</span>
+<p class="font-label-caps text-label-caps text-outline">© 2024 AskStoic. Institutional Grade Education.</p>
+</div>
+<nav class="flex flex-wrap justify-center gap-stack-md">
+<a class="font-label-caps text-label-caps text-outline hover:text-on-surface transition-colors" href="#">Terms of Service</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-on-surface transition-colors" href="#">Risk Disclosure</a>
+<a class="font-label-caps text-label-caps text-outline hover:text-on-surface transition-colors" href="#">Support</a>
+</nav>
+</div>
+</footer>
+<!-- Mobile Bottom Navigation Shell -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container h-16 flex items-center justify-around z-50 px-4">
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-label-caps">HOME</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">live_tv</span>
+<span class="text-[10px] font-label-caps">LIVE</span>
+</button>
+<div class="mb-8 w-12 h-12 bg-tertiary rounded-full flex items-center justify-center shadow-lg shadow-tertiary/20">
+<span class="material-symbols-outlined text-on-tertiary">add</span>
+</div>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">school</span>
+<span class="text-[10px] font-label-caps">ACADEMY</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-label-caps">PROFILE</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for hover glow on desktop cards
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Simple Countdown Timer simulation for the primary card
+        let time = 42 * 60 + 15;
+        const countdownEl = document.querySelector('.font-data-point.text-tertiary');
+        if(countdownEl) {
+            setInterval(() => {
+                if(time > 0) {
+                    time--;
+                    let h = Math.floor(time / 3600);
+                    let m = Math.floor((time % 3600) / 60);
+                    let s = time % 60;
+                    countdownEl.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} remaining`;
+                }
+            }, 1000);
+        }
+    </script>
+</body></html>

@@ -23,7 +23,7 @@ function Field({
 }) {
   return (
     <label className="block group">
-      <span className="font-label-sm text-label-sm uppercase tracking-[0.14em] text-[var(--color-fog-muted)] group-focus-within:text-[var(--color-primary-container)] transition-colors duration-200">
+      <span className="font-label-sm text-label-sm uppercase tracking-[0.14em] text-fog-muted group-focus-within:text-primary-container transition-colors duration-200">
         {label}
       </span>
       <input
@@ -31,7 +31,7 @@ function Field({
         placeholder={placeholder}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 min-h-12 w-full rounded-full border border-[var(--color-surgical-steel)] bg-[var(--color-surface-container-lowest)] px-5 text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-fog-muted)] focus:border-[var(--color-primary-container)] focus:ring-1 focus:ring-[var(--color-primary-container)] transition-all duration-200 hover:border-[var(--color-primary-container)]"
+        className="mt-2 min-h-12 w-full rounded border border-surgical-steel bg-surface-container-lowest px-5 text-on-surface outline-none placeholder:text-fog-muted focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all duration-200 hover:border-primary-container/70"
       />
     </label>
   );
@@ -89,43 +89,45 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   return (
-    <main className="grid min-h-screen lg:grid-cols-[1fr_30rem] bg-[var(--color-surface-container-lowest)]">
-      <section className="hidden border-r border-[var(--color-surgical-steel)] p-12 lg:flex lg:flex-col lg:justify-between relative overflow-hidden bg-[var(--color-monolith-surface)]">
-        <div className="absolute inset-0 opacity-10 [background-image:linear-gradient(#2A2C2E_1px,transparent_1px),linear-gradient(90deg,#2A2C2E_1px,transparent_1px)] [background-size:60px_60px]" />
+    <div className="min-h-screen bg-surface text-on-surface lg:grid lg:grid-cols-[1fr_30rem]">
+      {/* Editorial Panel */}
+      <section className="hidden border-r border-surgical-steel p-12 lg:flex lg:flex-col lg:justify-between relative overflow-hidden bg-surface-container-low">
+        <div className="absolute inset-0 opacity-10 [background-image:linear-gradient(#334155_1px,transparent_1px),linear-gradient(90deg,#334155_1px,transparent_1px)] [background-size:60px_60px]" />
         
         <div className="relative z-10">
           <Link
             href="/"
-            className="font-headline-md text-headline-md text-[var(--color-primary-container)] tracking-wider"
+            className="font-headline-sm text-headline-sm text-primary-container tracking-wider font-bold"
           >
             Stoicverse
           </Link>
         </div>
 
-        <div className="relative z-10 my-auto max-w-2xl border-l-2 border-[var(--color-primary-container)] pl-8 py-6">
-          <h1 className="font-display-lg text-display-lg text-[var(--color-on-surface)] leading-tight">
+        <div className="relative z-10 my-auto max-w-2xl border-l-2 border-primary-container pl-8 py-6">
+          <h1 className="font-display text-4xl font-extrabold text-white leading-tight">
             Enter the operating surface for disciplined study.
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-[var(--color-on-surface-variant)] leading-relaxed">
+          <p className="mt-6 max-w-xl font-body text-base text-on-surface-variant leading-relaxed">
             Membership unlocks community channels, tier-one lessons, and the path toward Master access.
           </p>
         </div>
 
-        <div className="relative z-10 text-xs text-[var(--color-fog-muted)] font-code-block tracking-[0.2em] uppercase">
+        <div className="relative z-10 text-xs text-fog-muted font-label uppercase tracking-[0.2em]">
           system_entry // secure_access_portal
         </div>
       </section>
 
-      <section className="relative flex items-center justify-center p-6 md:p-12 overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(#2A2C2E_1px,transparent_1px),linear-gradient(90deg,#2A2C2E_1px,transparent_1px)] [background-size:60px_60px]" />
+      {/* Form Panel */}
+      <section className="relative flex items-center justify-center p-6 md:p-12 overflow-hidden bg-surface">
+        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(#334155_1px,transparent_1px),linear-gradient(90deg,#334155_1px,transparent_1px)] [background-size:60px_60px]" />
 
         <form
           onSubmit={handleSubmit}
-          className="relative z-10 w-full max-w-md border-t-2 border-t-[var(--color-primary-container)] border-x border-b border-[var(--color-surgical-steel)] bg-[var(--color-monolith-surface)] p-8 md:p-10 shadow-xl transition-all duration-300 hover:shadow-[var(--color-primary-container)]/5"
+          className="relative z-10 w-full max-w-md border-t-2 border-t-primary-container border-x border-b border-surgical-steel bg-monolith-surface p-8 md:p-10 rounded-lg shadow-xl hover:shadow-primary-container/5 transition-all duration-300"
         >
-          <div className="mb-8 flex items-center gap-3 text-[var(--color-primary-container)]">
+          <div className="mb-8 flex items-center gap-3 text-primary-container">
             {isSignup ? <Shield size={24} className="animate-pulse" /> : <LogIn size={24} />}
-            <h1 className="font-headline-sm text-headline-sm tracking-wide">
+            <h1 className="font-headline text-xl font-bold tracking-wide">
               {isSignup ? "Sign up" : "Log in"}
             </h1>
           </div>
@@ -157,7 +159,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           </div>
 
           <button
-            className="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--color-primary-container)] font-label-md text-label-md text-[var(--color-on-primary-fixed)] hover:bg-[var(--color-primary)] transition-all duration-300 transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-70 emerald-glow"
             type="submit"
             disabled={loading}
           >
@@ -166,28 +168,28 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           </button>
 
           {error && (
-            <p className="mt-4 text-sm text-[var(--color-error)]">
+            <p className="mt-4 text-sm text-red-400 font-body">
               {error}
             </p>
           )}
 
           {message && (
-            <p className="mt-4 text-sm text-[var(--color-primary-container)]">
+            <p className="mt-4 text-sm text-primary-container font-body">
               {message}
             </p>
           )}
 
-          <p className="mt-6 text-center text-sm text-[var(--color-fog-muted)]">
+          <p className="mt-6 text-center text-sm text-fog-muted font-body">
             {isSignup ? "Already registered?" : "Need access?"}{" "}
             <Link
               href={isSignup ? "/login" : "/signup"}
-              className="text-[var(--color-primary-container)] hover:underline transition-all"
+              className="text-primary-container hover:underline transition-all font-semibold"
             >
               {isSignup ? "Log in" : "Sign up"}
             </Link>
           </p>
         </form>
       </section>
-    </main>
+    </div>
   );
 }
