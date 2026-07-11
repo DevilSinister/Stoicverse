@@ -1,11 +1,11 @@
 # Graph Report - Ask_Stoic  (2026-07-11)
 
 ## Corpus Check
-- 76 files · ~103,713 words
+- 77 files · ~103,844 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 528 nodes · 562 edges · 49 communities (39 shown, 10 thin omitted)
+- 530 nodes · 570 edges · 49 communities (39 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
@@ -49,8 +49,8 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `Content safety` - 28 edges
-2. `requireActiveMembership()` - 16 edges
-3. `compilerOptions` - 16 edges
+2. `compilerOptions` - 16 edges
+3. `requireActiveMembership()` - 15 edges
 4. `App Flow` - 15 edges
 5. `createClient()` - 13 edges
 6. `Technical Requirements Document (TRD)` - 13 edges
@@ -77,8 +77,8 @@
 ## Communities (49 total, 10 thin omitted)
 
 ### Community 0 - "AskStoicScreens.tsx"
-Cohesion: 0.08
-Nodes (30): AdminPage(), PATCH(), GET(), CheckoutPage(), CommunityPage(), LessonPage(), CreatorPage(), EventsPage() (+22 more)
+Cohesion: 0.10
+Nodes (22): AdminPage(), CommunityPage(), LessonPage(), CreatorPage(), EventsPage(), MasterPage(), CommitmentPage(), SubscriptionPage() (+14 more)
 
 ### Community 1 - "Implementation Plan"
 Cohesion: 0.05
@@ -173,32 +173,32 @@ Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
 ### Community 39 - "client.ts"
-Cohesion: 0.14
-Nodes (14): authRoutes, config, copyResponseState(), isRouteMatch(), memberRoutes, proxy(), redirectWithState(), safeNextPath() (+6 more)
+Cohesion: 0.10
+Nodes (21): authRoutes, config, copyResponseState(), isRouteMatch(), memberRoutes, proxy(), redirectWithState(), safeNextPath() (+13 more)
 
 ### Community 40 - "server.ts"
-Cohesion: 0.19
-Nodes (9): DashboardPage(), DashboardData, DashboardView(), Event, eventDate(), nav, Notification, roleName() (+1 more)
+Cohesion: 0.16
+Nodes (11): DashboardPage(), DashboardData, DashboardView(), Event, eventDate(), Notification, roleName(), SearchResult (+3 more)
 
 ## Knowledge Gaps
-- **312 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+307 more)
+- **311 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+306 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getSupabaseConfig()` connect `client.ts` to `AskStoicScreens.tsx`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `createClient()` connect `AskStoicScreens.tsx` to `client.ts`?**
-  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `createClient()` connect `client.ts` to `AskStoicScreens.tsx`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Why does `Content safety` connect `Content safety` to `claude-fable-5.md`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `rsc` to the rest of the system?**
-  _312 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _311 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AskStoicScreens.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10384068278805121 - nodes in this community are weakly interconnected._
 - **Should `Implementation Plan` be split into smaller, more focused modules?**
   _Cohesion score 0.04878048780487805 - nodes in this community are weakly interconnected._
 - **Should `Technical Requirements Document (TRD)` be split into smaller, more focused modules?**
   _Cohesion score 0.05714285714285714 - nodes in this community are weakly interconnected._
+- **Should `compilerOptions` be split into smaller, more focused modules?**
+  _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._

@@ -55,8 +55,8 @@
     "semantic_hash": ""
   },
   "src/app/events/page.tsx": {
-    "mtime": 1783740684.28284,
-    "ast_hash": "a22f6632880ab361703a11a08021139a",
+    "mtime": 1783791329.1833904,
+    "ast_hash": "216c0144fcfad6cd32198fa08159d2f7",
     "semantic_hash": ""
   },
   "src/app/layout.tsx": {
@@ -70,8 +70,8 @@
     "semantic_hash": ""
   },
   "src/app/master/page.tsx": {
-    "mtime": 1783740727.0220833,
-    "ast_hash": "e0dd2a889b347d0c30fdceaa42ba37cb",
+    "mtime": 1783791337.383251,
+    "ast_hash": "aca30fe968d13bebfe4a39dc871d851f",
     "semantic_hash": ""
   },
   "src/app/page.tsx": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "src/components/screens/AskStoicScreens.tsx": {
-    "mtime": 1783742975.1235707,
-    "ast_hash": "feddeea4165ad8622d7151f23486a52f",
+    "mtime": 1783791371.7775145,
+    "ast_hash": "c70e9437c7d26cd00aa4cddd02f3dd93",
     "semantic_hash": ""
   },
   "src/components/ui/button.tsx": {
@@ -400,8 +400,8 @@
     "semantic_hash": ""
   },
   "src/app/community/page.tsx": {
-    "mtime": 1783742443.4847639,
-    "ast_hash": "ebd0248658e618a3e6ecc67d5745e132",
+    "mtime": 1783791320.062978,
+    "ast_hash": "c3357d780a79ffb23c2236444a2f329b",
     "semantic_hash": ""
   },
   "src/app/privacy/page.tsx": {
@@ -430,13 +430,13 @@
     "semantic_hash": ""
   },
   "src/components/dashboard/DashboardView.tsx": {
-    "mtime": 1783789400.701878,
-    "ast_hash": "e1398e8ed12a23f50f97da325fd71ead",
+    "mtime": 1783791200.4758596,
+    "ast_hash": "aab9001d6bd92c7f8b69b1b6dbff6dbc",
     "semantic_hash": ""
   },
   "src/lib/supabase/access.ts": {
-    "mtime": 1783742430.0698478,
-    "ast_hash": "d7a69bb9233c9b344bb135ae78ef38d4",
+    "mtime": 1783791308.1922755,
+    "ast_hash": "913430b049b25e21a0bb132e1740266d",
     "semantic_hash": ""
   },
   "src/lib/supabase/env.ts": {
@@ -487,6 +487,11 @@
   "src/app/sign-up/page.tsx": {
     "mtime": 1783790684.1167994,
     "ast_hash": "c02a67ecc1ddaa00935408f0e421e48e",
+    "semantic_hash": ""
+  },
+  "src/lib/navigation/app-nav.ts": {
+    "mtime": 1783791174.464985,
+    "ast_hash": "acf81d38a2f9f63e242fb4651996aa60",
     "semantic_hash": ""
   }
 }

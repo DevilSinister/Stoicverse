@@ -1,13 +1,18 @@
 # Graph Report - Ask_Stoic  (2026-07-11)
 
 ## Corpus Check
-- 77 files · ~103,844 words
+- 80 files · ~144,850 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 530 nodes · 570 edges · 49 communities (39 shown, 10 thin omitted)
+- 548 nodes · 594 edges · 49 communities (39 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
+
+## Graph Freshness
+- Built from commit: `9ed0f2b2`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - AskStoicScreens.tsx
@@ -49,8 +54,8 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `Content safety` - 28 edges
-2. `compilerOptions` - 16 edges
-3. `requireActiveMembership()` - 15 edges
+2. `requireActiveMembership()` - 17 edges
+3. `compilerOptions` - 16 edges
 4. `App Flow` - 15 edges
 5. `createClient()` - 13 edges
 6. `Technical Requirements Document (TRD)` - 13 edges
@@ -62,14 +67,14 @@
 ## Surprising Connections (you probably didn't know these)
 - `proxy()` --calls--> `getSupabaseConfig()`  [EXTRACTED]
   proxy.ts → src/lib/supabase/env.ts
+- `CoursesPage()` --calls--> `requireActiveMembership()`  [EXTRACTED]
+  src/app/courses/page.tsx → src/lib/supabase/access.ts
 - `DashboardPage()` --calls--> `requireActiveMembership()`  [EXTRACTED]
   src/app/dashboard/page.tsx → src/lib/supabase/access.ts
 - `AdminPage()` --calls--> `requirePlatformRole()`  [EXTRACTED]
   src/app/admin/page.tsx → src/lib/supabase/access.ts
 - `PATCH()` --calls--> `createClient()`  [EXTRACTED]
   src/app/api/dashboard/notifications/route.ts → src/lib/supabase/server.ts
-- `GET()` --calls--> `createClient()`  [EXTRACTED]
-  src/app/api/dashboard/search/route.ts → src/lib/supabase/server.ts
 
 ## Import Cycles
 - None detected.
@@ -77,8 +82,8 @@
 ## Communities (49 total, 10 thin omitted)
 
 ### Community 0 - "AskStoicScreens.tsx"
-Cohesion: 0.10
-Nodes (22): AdminPage(), CommunityPage(), LessonPage(), CreatorPage(), EventsPage(), MasterPage(), CommitmentPage(), SubscriptionPage() (+14 more)
+Cohesion: 0.07
+Nodes (31): AdminPage(), PATCH(), GET(), CheckoutPage(), CommunityPage(), LessonPage(), CreatorPage(), EventsPage() (+23 more)
 
 ### Community 1 - "Implementation Plan"
 Cohesion: 0.05
@@ -129,8 +134,8 @@ Cohesion: 0.12
 Nodes (15): 10. Influencer Flow (Inline UI), 11. Super Admin Flow, 12. Notification Flow, 13. Page Map, 1. Public / Unauthenticated Flow, 2. Signup & Onboarding Flow, 3. Member Dashboard Flow, 4. Community (Channel) Flow (+7 more)
 
 ### Community 13 - "UI/UX Design System: Ask Stoic"
-Cohesion: 0.20
-Nodes (9): 1. Design Strategy & Vibe, 2. Color Palette, 3. Typography, 4. Layout & Rhythm, 5. Interaction & Motion, 6. Accessibility & UX Quality (CRITICAL), Anti-Patterns to Refuse & Avoid, Font Pairing (+1 more)
+Cohesion: 0.15
+Nodes (12): Brand & Style, Buttons, Cards, Chips & Status Indicators, Colors, Components, Data Visualization, Elevation & Depth (+4 more)
 
 ### Community 14 - "UI/UX Design System: Ask Stoic"
 Cohesion: 0.20
@@ -141,8 +146,8 @@ Cohesion: 0.22
 Nodes (8): graphify reference: extra exports and benchmark, Step 6b - Wiki (only if --wiki flag), Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag), Step 7a - FalkorDB export (only if --falkordb or --falkordb-push flag), Step 7b - SVG export (only if --svg flag), Step 7c - GraphML export (only if --graphml flag), Step 7d - MCP server (only if --mcp flag), Step 8 - Token reduction benchmark (only if total_words > 5000)
 
 ### Community 16 - "UI/UX Design System: Ask Stoic"
-Cohesion: 0.22
-Nodes (8): 1. Design Strategy & Vibe, 2. Color Palette, 3. Typography, 4. Layout & Rhythm, 5. Components, 6. Motion, 7. Accessibility, UI/UX Design System: Ask Stoic
+Cohesion: 0.25
+Nodes (7): 1. Design Strategy & Vibe, 2. Color Palette, 3. Typography, 4. Layout & Spacing, 5. Interaction & Motion, Anti-Patterns to Refuse & Avoid, UI/UX Design System: Ask Stoic (Trading Floor Style)
 
 ### Community 17 - "Product"
 Cohesion: 0.25
@@ -173,32 +178,32 @@ Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
 ### Community 39 - "client.ts"
-Cohesion: 0.10
-Nodes (21): authRoutes, config, copyResponseState(), isRouteMatch(), memberRoutes, proxy(), redirectWithState(), safeNextPath() (+13 more)
+Cohesion: 0.14
+Nodes (14): authRoutes, config, copyResponseState(), isRouteMatch(), memberRoutes, proxy(), redirectWithState(), safeNextPath() (+6 more)
 
 ### Community 40 - "server.ts"
-Cohesion: 0.16
-Nodes (11): DashboardPage(), DashboardData, DashboardView(), Event, eventDate(), Notification, roleName(), SearchResult (+3 more)
+Cohesion: 0.09
+Nodes (21): CoursesPage(), DashboardPage(), FilterType, LearningPathData, LearningPathView(), LessonProgressItem, TierProgressItem, DashboardData (+13 more)
 
 ## Knowledge Gaps
-- **311 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+306 more)
+- **321 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+316 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `createClient()` connect `client.ts` to `AskStoicScreens.tsx`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+- **Why does `getSupabaseConfig()` connect `client.ts` to `AskStoicScreens.tsx`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `createClient()` connect `AskStoicScreens.tsx` to `client.ts`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **Why does `Content safety` connect `Content safety` to `claude-fable-5.md`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `rsc` to the rest of the system?**
-  _311 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _321 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AskStoicScreens.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.10384068278805121 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07474600870827286 - nodes in this community are weakly interconnected._
 - **Should `Implementation Plan` be split into smaller, more focused modules?**
   _Cohesion score 0.04878048780487805 - nodes in this community are weakly interconnected._
 - **Should `Technical Requirements Document (TRD)` be split into smaller, more focused modules?**
   _Cohesion score 0.05714285714285714 - nodes in this community are weakly interconnected._
-- **Should `compilerOptions` be split into smaller, more focused modules?**
-  _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._

@@ -140,10 +140,17 @@ export function AppShell({
               key={item.href}
               href={item.href}
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex min-h-11 items-center gap-3 px-3 py-2 rounded font-label text-xs uppercase tracking-wider transition ${isActive ? "bg-sidebar-accent text-sidebar-primary border-r-2 border-sidebar-primary font-bold" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-primary"}`}
+              className={`flex min-h-11 items-center justify-between px-4 py-2 rounded-full font-label text-xs uppercase tracking-wider transition ${isActive ? "bg-sidebar-accent text-sidebar-primary border-r-2 border-sidebar-primary font-bold" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-primary"}`}
             >
-              <Icon size={16} />
-              <span>{item.label}</span>
+              <div className="flex items-center gap-3">
+                <Icon size={16} />
+                <span>{item.label}</span>
+              </div>
+              {item.label === "Community" && unreadCount > 0 && (
+                <span className="grid min-w-5 h-5 place-items-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white uppercase tracking-normal animate-pulse shrink-0">
+                  {unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}

@@ -1,8 +1,7 @@
 
 
 import Link from "next/link";
-import { ArrowRight, Bell, CalendarDays, Check, ChevronRight, CircleDollarSign, CreditCard, Crown, Gauge, GraduationCap, Image as ImageIcon, Lock, LogIn, Menu, MessageSquare, MoreVertical, Play, Plus, Search, Send, Shield, Video } from "lucide-react";
-import { buildAppNav } from "@/lib/navigation/app-nav";
+import { ArrowRight, CalendarDays, Check, ChevronRight, CreditCard, Crown, Gauge, Image as ImageIcon, Lock, LogIn, MessageSquare, MoreVertical, Play, Plus, Send, Shield, Video } from "lucide-react";
 import { AppShell as SharedAppShell } from "@/components/layout/AppShell";
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(" ");
@@ -57,15 +56,16 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function AppShell({ active, title, isMaster = false, children }: { active: string; title: string; isMaster?: boolean; children: React.ReactNode }) {
+function AppShell({ active, title, isMaster = false, memberName, platformRole, currentTier, notifications, children }: { active: string; title: string; isMaster?: boolean; memberName?: string; platformRole?: string; currentTier?: number; notifications?: import("@/components/layout/AppShell").Notification[]; children: React.ReactNode }) {
   return (
     <SharedAppShell
       active={active}
       title={title}
       isMaster={isMaster}
-      memberName="Marcus Aurelius"
-      platformRole={isMaster ? "influencer" : "member"}
-      currentTier={isMaster ? 4 : 2}
+      memberName={memberName}
+      platformRole={platformRole}
+      currentTier={currentTier}
+      notifications={notifications}
     >
       {children}
     </SharedAppShell>
@@ -121,7 +121,7 @@ export function LandingScreen() {
             </div>
           </div>
           <div className="mx-auto mt-10 grid max-w-7xl px-4 md:grid-cols-2 md:px-8 lg:grid-cols-4 lg:px-16 gap-6">
-            {curriculum.map(([k, t, b, note], index) => (
+            {curriculum.map(([k, t, b, note]) => (
               <article key={t} className="group border border-surgical-steel bg-monolith-surface p-6 rounded-lg flex flex-col justify-between min-h-[300px] hover:border-primary-container/40 transition-all duration-300">
                 <div>
                   <div className="flex items-center justify-between">
@@ -285,15 +285,29 @@ export function DashboardScreen() {
   );
 }
 
-export function FeedScreen({ master = false, isMaster = false, canCreateChannels = false, canPost = false }: { master?: boolean; isMaster?: boolean; canCreateChannels?: boolean; canPost?: boolean }) {
-  const posts = [
-    ["Seneca_99", "It's not that we have a short time to live, but that we waste a lot of it. How is everyone applying this today?", "12 reactions"],
-    ["MarcusAurelius_Bot", "You have power over your mind, not outside events. Realize this, and you will find strength.", "Pinned"],
-    ["Epictetus_Fan", "I wrote a small focus script to block certain sites during work hours. External control to build internal habit.", "4 reactions"]
-  ];
+type CommunityChannel = { id: string; name: string; type: string; description: string | null; isUnread?: boolean };
+type CommunityPost = { id: string; authorName: string; body: string | null; imageUrl: string | null; createdAt: string; isPinned: boolean; reactionCount: number; channelName: string };
+
+export function FeedScreen({
+  master = false,
+  isMaster = false,
+  canCreateChannels = false,
+  canPost = false,
+  memberName,
+  platformRole,
+  currentTier,
+  notifications,
+  channels = [],
+  posts = [],
+}: {
+  master?: boolean; isMaster?: boolean; canCreateChannels?: boolean; canPost?: boolean;
+  memberName?: string; platformRole?: string; currentTier?: number;
+  notifications?: import("@/components/layout/AppShell").Notification[];
+  channels?: CommunityChannel[]; posts?: CommunityPost[];
+}) {
 
   return (
-    <AppShell active={master ? "Master Zone" : "Community"} title={master ? "Master Zone" : "Community Feed"} isMaster={isMaster}>
+    <AppShell active={master ? "Master Zone" : "Community"} title={master ? "Master Zone" : "Community Feed"} isMaster={isMaster} memberName={memberName} platformRole={platformRole} currentTier={currentTier} notifications={notifications}>
       <main className="grid min-h-[calc(100vh-4rem)] md:grid-cols-[18rem_1fr]">
         <aside className="border-b border-surgical-steel bg-surface-container-low p-4 md:border-b-0 md:border-r">
           {canCreateChannels && (
@@ -302,36 +316,49 @@ export function FeedScreen({ master = false, isMaster = false, canCreateChannels
               New Channel
             </button>
           )}
-          {["announcements", "general theory", "stoic practice", "morning reflections", master ? "master zone" : "events"].map((channel) => (
-            <Link
-              href={channel === "events" ? "/events" : "#"}
-              key={channel}
-              className={cx(
-                "flex min-h-11 items-center gap-3 px-3 py-1.5 rounded-lg font-label-md text-label-md transition",
-                (master && channel === "master zone") || (!master && channel === "general theory")
-                  ? "border-l-2 border-primary-container bg-surface-container-high text-primary-container"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container"
-              )}
-            >
-              {channel === "master zone" ? <Crown size={16} /> : <MessageSquare size={16} />}
-              <span>#{channel}</span>
-            </Link>
-          ))}
+          {channels.map((channel) => {
+            const isSelected = (master && channel.type === "master") || (!master && channel.type !== "master");
+            const isUnread = channel.isUnread ?? (!isSelected && (channel.name.toLowerCase() === "announcements" || channel.name.toLowerCase() === "morning reflections"));
+            return (
+              <Link
+                href={channel.type === "events" ? "/events" : "#"}
+                key={channel.id}
+                className={cx(
+                  "flex min-h-11 items-center justify-between px-3 py-1.5 rounded-lg font-label-md text-label-md transition",
+                  isSelected
+                    ? "border-l-2 border-primary-container bg-surface-container-high text-primary-container"
+                    : isUnread
+                      ? "text-white font-bold hover:bg-surface-container-high"
+                      : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  {channel.type === "master" ? <Crown size={16} /> : <MessageSquare size={16} />}
+                  <span>#{channel.name}</span>
+                </div>
+                {isUnread && (
+                  <span className="size-2 rounded-full bg-primary-container animate-pulse shrink-0 mr-1" />
+                )}
+              </Link>
+            );
+          })}
+          {channels.length === 0 && <p className="px-3 py-4 font-body text-sm text-fog-muted">No channels are available yet.</p>}
         </aside>
         <section className="relative flex min-w-0 flex-col bg-surface">
           <div className={cx("flex-1 space-y-6 overflow-y-auto p-4 md:p-8", canPost && "pb-36")}>
-            {posts.map(([author, body, status]) => (
-              <article key={author} className="group flex gap-4 p-4 border border-surgical-steel bg-monolith-surface rounded-lg">
+            {posts.map((post) => (
+              <article key={post.id} className="group flex gap-4 p-4 border border-surgical-steel bg-monolith-surface rounded-lg">
                 <div className="grid size-10 shrink-0 place-items-center rounded bg-surface-container-high border border-surgical-steel font-headline text-lg font-bold text-primary-container">
-                  {author[0]}
+                  {post.authorName[0]?.toUpperCase() ?? "M"}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <h3 className="font-label-md text-label-md text-white font-semibold">{author}</h3>
-                    <span className="font-label text-[10px] text-fog-muted">Today</span>
-                    <span className="border border-surgical-steel bg-surface-container-low px-2 py-0.5 rounded font-label text-[10px] text-primary-container">{status}</span>
+                    <h3 className="font-label-md text-label-md text-white font-semibold">{post.authorName}</h3>
+                    <span className="font-label text-[10px] text-fog-muted">{new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(post.createdAt))}</span>
+                    <span className="border border-surgical-steel bg-surface-container-low px-2 py-0.5 rounded font-label text-[10px] text-primary-container">{post.isPinned ? "Pinned" : `${post.reactionCount} reactions`}</span>
                   </div>
-                  <p className="mt-2 font-body text-sm text-on-surface-variant leading-relaxed">{body}</p>
+                  <p className="mt-2 font-body text-sm text-on-surface-variant leading-relaxed">{post.body ?? "Shared an attachment."}</p>
+                  {post.imageUrl && <a href={post.imageUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex font-label text-xs font-semibold uppercase tracking-wider text-primary-container hover:underline">View attachment</a>}
                 </div>
                 {canPost && (
                   <div className="hidden gap-1 opacity-0 transition group-hover:opacity-100 sm:flex">
@@ -345,6 +372,7 @@ export function FeedScreen({ master = false, isMaster = false, canCreateChannels
                 )}
               </article>
             ))}
+            {posts.length === 0 && <div className="border border-dashed border-surgical-steel bg-monolith-surface p-8 text-center rounded-lg"><p className="font-headline text-base font-semibold text-white">No posts yet</p><p className="mt-2 font-body text-sm text-fog-muted">New community updates will appear here.</p></div>}
           </div>
           {canPost && (
             <div className="absolute inset-x-0 bottom-0 border-t border-surgical-steel bg-surface-container-low p-4">
