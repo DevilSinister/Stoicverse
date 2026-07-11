@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ask Stoic | Upgrade Infrastructure</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Cormorant:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .surgical-grid {
+            background-image: 
+                linear-gradient(to right, #404943 1px, transparent 1px),
+                linear-gradient(to bottom, #404943 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .monolith-blur {
+            backdrop-filter: blur(12px);
+        }
+        body {
+            background-color: #121416;
+            color: #e2e2e5;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-lowest": "#0c0e10",
+                      "on-secondary-fixed-variant": "#454748",
+                      "surface-tint": "#96d4b4",
+                      "error-container": "#93000a",
+                      "on-error": "#690005",
+                      "surface-container": "#1e2022",
+                      "on-secondary": "#2e3132",
+                      "inverse-primary": "#2e6950",
+                      "tertiary-fixed": "#ffdcc5",
+                      "surface-bright": "#38393c",
+                      "surface-container-low": "#1a1c1e",
+                      "outline": "#8a938c",
+                      "inverse-on-surface": "#2f3133",
+                      "outline-variant": "#404943",
+                      "on-primary-container": "#2d684f",
+                      "on-error-container": "#ffdad6",
+                      "on-primary-fixed": "#002114",
+                      "tertiary-fixed-dim": "#ecbd9d",
+                      "secondary": "#c5c7c8",
+                      "on-background": "#e2e2e5",
+                      "surface-variant": "#333537",
+                      "on-primary-fixed-variant": "#105139",
+                      "primary-container": "#a7e5c5",
+                      "error": "#ffb4ab",
+                      "surface": "#121416",
+                      "inverse-surface": "#e2e2e5",
+                      "on-tertiary-container": "#7a563c",
+                      "secondary-fixed": "#e1e3e4",
+                      "on-surface": "#e2e2e5",
+                      "on-tertiary-fixed": "#2e1502",
+                      "on-surface-variant": "#bfc9c1",
+                      "surface-dim": "#121416",
+                      "surface-container-highest": "#333537",
+                      "on-secondary-fixed": "#191c1d",
+                      "on-primary": "#003825",
+                      "background": "#121416",
+                      "tertiary-container": "#ffcead",
+                      "primary-fixed-dim": "#96d4b4",
+                      "tertiary": "#fff2eb",
+                      "on-tertiary": "#472a13",
+                      "primary": "#cfffe4",
+                      "secondary-container": "#47494a",
+                      "primary-fixed": "#b2f0d0",
+                      "surface-container-high": "#282a2c",
+                      "on-secondary-container": "#b7b8ba",
+                      "secondary-fixed-dim": "#c5c7c8",
+                      "on-tertiary-fixed-variant": "#603f27"
+              },
+              "borderRadius": {
+                      "DEFAULT": "1rem",
+                      "lg": "2rem",
+                      "xl": "3rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-lg": "64px",
+                      "hairline": "1px",
+                      "margin-md": "32px",
+                      "gutter": "1px",
+                      "margin-sm": "16px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "label-md": ["JetBrains Mono"],
+                      "body-lg": ["Inter"],
+                      "display-lg": ["Cormorant"],
+                      "code-block": ["JetBrains Mono"],
+                      "body-sm": ["Inter"],
+                      "display-lg-mobile": ["Cormorant"],
+                      "headline-md": ["Cormorant"],
+                      "body-md": ["Inter"],
+                      "headline-sm": ["Cormorant"],
+                      "label-sm": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "label-md": ["14px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.03em", "fontWeight": "600"}],
+                      "code-block": ["14px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                      "display-lg-mobile": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "headline-md": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                      "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "headline-sm": ["24px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                      "label-sm": ["12px", {"lineHeight": "1.2", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Shell -->
+<header class="bg-surface dark:bg-surface w-full top-0 left-0 border-b border-outline-variant dark:border-outline-variant flex justify-between items-center h-16 px-margin-sm md:px-margin-md z-40 fixed">
+<div class="flex items-center gap-4">
+<span class="font-display-lg-mobile text-display-lg-mobile text-primary dark:text-primary uppercase tracking-tighter">Ask Stoic</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" href="#">Curriculum</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" href="#">Archive</a>
+<a class="text-primary font-medium hover:text-primary transition-colors duration-200 font-label-md text-label-md" href="#">Infrastructure</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="active:opacity-80 transition-opacity p-2">
+<span class="material-symbols-outlined text-primary">help_outline</span>
+</button>
+</div>
+</header>
+<main class="min-h-screen pt-16 pb-20 md:pb-0 flex flex-col items-center justify-center relative overflow-hidden">
+<!-- Background Atmosphere -->
+<div class="absolute inset-0 surgical-grid opacity-10 pointer-events-none"></div>
+<section class="w-full max-w-5xl px-margin-sm md:px-margin-md py-12 grid grid-cols-1 lg:grid-cols-12 gap-gutter bg-outline-variant border border-outline-variant overflow-hidden rounded-lg monolith-blur relative z-10">
+<!-- Left Column: Contractual Details -->
+<div class="lg:col-span-7 bg-surface p-8 md:p-12 flex flex-col justify-between">
+<div>
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-highest border border-outline-variant rounded-full mb-8">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">System Upgrade Required</span>
+</div>
+<h1 class="font-display-lg text-display-lg mb-6">Standard <br/><span class="italic text-primary">Infrastructure</span></h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md mb-10">
+                        This upgrade formalizes your commitment to the Ask Stoic curriculum, providing the necessary digital foundations for consistent intellectual expansion.
+                    </p>
+<div class="space-y-6">
+<div class="flex items-start gap-4 group">
+<div class="mt-1 w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center group-hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">menu_book</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface uppercase mb-1">Full Text Access</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Unrestricted access to the primary and secondary curriculum texts.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 group">
+<div class="mt-1 w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center group-hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">visibility</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface uppercase mb-1">Read-Only Community</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">A portal to observe ongoing discourse without active transmission.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 group">
+<div class="mt-1 w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center group-hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">wb_twilight</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface uppercase mb-1">Daily Morning Briefs</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Automated daily transmissions delivered at 04:00 GMT.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-12 pt-8 border-t border-outline-variant flex items-center gap-4 opacity-50">
+<span class="font-label-sm text-label-sm text-on-surface-variant">PROTOCOL V.4.0.2</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">|</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Infrastructure Tier: Standard</span>
+</div>
+</div>
+<!-- Right Column: The Transaction Monolith -->
+<div class="lg:col-span-5 bg-surface-container-low p-8 md:p-12 flex flex-col justify-center border-l border-outline-variant">
+<div class="text-center mb-10"><div class="inline-flex items-center bg-surface-container-highest p-1 rounded-full mb-6 border border-outline-variant">
+<button class="px-4 py-1 rounded-full font-label-sm text-label-sm uppercase tracking-widest bg-primary text-on-primary-fixed transition-all" id="billing-monthly">
+    Monthly
+  </button>
+<button class="px-4 py-1 rounded-full font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant hover:text-on-surface transition-all" id="billing-annual">
+    Annual
+  </button>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface-variant mb-2">Monthly Stipend</div>
+<div class="flex items-baseline justify-center gap-2"><span class="font-display-lg text-display-lg text-on-surface" id="price-value">$10</span>
+<span class="font-label-md text-label-md text-on-surface-variant" id="price-period">/MONTH</span></div>
+</div>
+<div class="space-y-4 mb-10">
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase block px-4">Identification</label>
+<input class="w-full bg-surface-container-highest border border-outline-variant rounded-full px-6 py-3 text-on-surface placeholder:text-on-secondary-fixed-variant focus:border-primary focus:ring-0 transition-colors font-label-md text-label-md" placeholder="Digital Signature / Name" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase block px-4">Transmission Channel</label>
+<input class="w-full bg-surface-container-highest border border-outline-variant rounded-full px-6 py-3 text-on-surface placeholder:text-on-secondary-fixed-variant focus:border-primary focus:ring-0 transition-colors font-label-md text-label-md" placeholder="Contact Address" type="email"/>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase block px-4">Vault Credentials</label>
+<div class="relative">
+<input class="w-full bg-surface-container-highest border border-outline-variant rounded-full px-6 py-3 text-on-surface placeholder:text-on-secondary-fixed-variant focus:border-primary focus:ring-0 transition-colors font-code-block text-code-block" placeholder="•••• •••• •••• ••••" type="text"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
+<span class="material-symbols-outlined text-on-secondary-fixed-variant text-sm">lock</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<input class="w-full bg-surface-container-highest border border-outline-variant rounded-full px-6 py-3 text-center text-on-surface placeholder:text-on-secondary-fixed-variant focus:border-primary focus:ring-0 transition-colors font-code-block text-code-block" placeholder="MM/YY" type="text"/>
+</div>
+<div class="space-y-1">
+<input class="w-full bg-surface-container-highest border border-outline-variant rounded-full px-6 py-3 text-center text-on-surface placeholder:text-on-secondary-fixed-variant focus:border-primary focus:ring-0 transition-colors font-code-block text-code-block" placeholder="CVC" type="text"/>
+</div>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary-fixed py-5 rounded-full font-label-md text-label-md uppercase font-bold tracking-widest hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(207,255,228,0.2)]">
+                    Confirm Commitment
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<p class="mt-8 text-center font-label-sm text-label-sm text-on-secondary-fixed-variant px-4">
+                    By confirming, you authorize the monthly transmission of funds. Access to the infrastructure is provided immediately upon successful handshake.
+                </p>
+</div>
+</section>
+<!-- Aesthetic Footer Elements -->
+<div class="mt-12 flex flex-col items-center opacity-30 gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-tighter">Monolithic Systems Infrastructure v4.0.0</span>
+<div class="h-hairline w-64 bg-gradient-to-r from-transparent via-outline-variant to-transparent"></div>
+</div>
+</main>
+<!-- Bottom Navigation Shell (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center py-unit h-16 bg-surface border-t border-outline-variant z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors active:scale-95 transition-transform p-2" href="#">
+<span class="material-symbols-outlined">lock</span>
+<span class="font-label-sm text-label-sm">Security</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold hover:bg-surface-container-low transition-colors active:scale-95 transition-transform p-2" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+<span class="font-label-sm text-label-sm">Support</span>
+</a>
+</nav>
+<script>
+        // Simple Micro-interaction for the Confirm Button
+        const confirmBtn = document.querySelector('button');
+        confirmBtn.addEventListener('mouseenter', () => {
+            // Logic for subtle hover effect could go here
+        });
+
+        // Background Pulse Effect for Input Focus
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.style.opacity = '1';
+            });
+            input.addEventListener('blur', () => {
+                // Return to base state
+            });
+        });
+    </script>
+<script>
+  (function() {
+    const monthlyBtn = document.getElementById('billing-monthly');
+    const annualBtn = document.getElementById('billing-annual');
+    const priceValue = document.getElementById('price-value');
+    const pricePeriod = document.getElementById('price-period');
+
+    const activeClasses = ['bg-primary', 'text-on-primary-fixed'];
+    const inactiveClasses = ['text-on-surface-variant', 'hover:text-on-surface'];
+
+    monthlyBtn.addEventListener('click', () => {
+      monthlyBtn.classList.add(...activeClasses);
+      monthlyBtn.classList.remove(...inactiveClasses);
+      annualBtn.classList.remove(...activeClasses);
+      annualBtn.classList.add(...inactiveClasses);
+      priceValue.textContent = '$10';
+      pricePeriod.textContent = '/MONTH';
+    });
+
+    annualBtn.addEventListener('click', () => {
+      annualBtn.classList.add(...activeClasses);
+      annualBtn.classList.remove(...inactiveClasses);
+      monthlyBtn.classList.remove(...activeClasses);
+      monthlyBtn.classList.add(...inactiveClasses);
+      priceValue.textContent = '$100';
+      pricePeriod.textContent = '/YEAR';
+    });
+  })();
+</script></body></html>

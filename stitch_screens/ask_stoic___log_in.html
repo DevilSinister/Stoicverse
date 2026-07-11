@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="en" class="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><meta charset="utf-8"><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#0c0e10",
+                        "on-secondary-fixed-variant": "#454748",
+                        "surface-tint": "#96d4b4",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "surface-container": "#1e2022",
+                        "on-secondary": "#2e3132",
+                        "inverse-primary": "#2e6950",
+                        "tertiary-fixed": "#ffdcc5",
+                        "surface-bright": "#38393c",
+                        "surface-container-low": "#1a1c1e",
+                        "outline": "#8a938c",
+                        "inverse-on-surface": "#2f3133",
+                        "outline-variant": "#404943",
+                        "on-primary-container": "#2d684f",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#002114",
+                        "tertiary-fixed-dim": "#ecbd9d",
+                        "secondary": "#c5c7c8",
+                        "on-background": "#e2e2e5",
+                        "surface-variant": "#333537",
+                        "on-primary-fixed-variant": "#105139",
+                        "primary-container": "#a7e5c5",
+                        "error": "#ffb4ab",
+                        "surface": "#121416",
+                        "inverse-surface": "#e2e2e5",
+                        "on-tertiary-container": "#7a563c",
+                        "secondary-fixed": "#e1e3e4",
+                        "on-surface": "#e2e2e5",
+                        "on-tertiary-fixed": "#2e1502",
+                        "on-surface-variant": "#bfc9c1",
+                        "surface-dim": "#121416",
+                        "surface-container-highest": "#333537",
+                        "on-secondary-fixed": "#191c1d",
+                        "on-primary": "#003825",
+                        "background": "#121416",
+                        "tertiary-container": "#ffcead",
+                        "primary-fixed-dim": "#96d4b4",
+                        "tertiary": "#fff2eb",
+                        "on-tertiary": "#472a13",
+                        "primary": "#cfffe4",
+                        "secondary-container": "#47494a",
+                        "primary-fixed": "#b2f0d0",
+                        "surface-container-high": "#282a2c",
+                        "on-secondary-container": "#b7b8ba",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "on-tertiary-fixed-variant": "#603f27"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-lg": "64px",
+                        "hairline": "1px",
+                        "margin-md": "32px",
+                        "gutter": "1px",
+                        "margin-sm": "16px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Cormorant"],
+                        "code-block": ["JetBrains Mono"],
+                        "body-sm": ["Inter"],
+                        "display-lg-mobile": ["Cormorant"],
+                        "headline-md": ["Cormorant"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Cormorant"],
+                        "label-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+                        "code-block": ["14px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "display-lg-mobile": ["36px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-md": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-sm": ["24px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "1.2", "fontWeight": "500" }]
+                    }
+                },
+            },
+        }
+    }catch(_e){}</script></head><body class="antialiased min-h-screen flex flex-col overflow-hidden font-body-md text-body-md">
+<!-- Subtle Background Elements -->
+<div class="grain-overlay"></div>
+<div class="scan-line opacity-10"></div>
+<!-- Header Area (Suppressing full TopAppBar for focus) -->
+<header class="w-full flex justify-between items-center h-16 px-margin-sm md:px-margin-md absolute top-0 left-0 z-10">
+<div class="font-display-lg-mobile text-display-lg-mobile text-primary uppercase tracking-tighter">
+            Ask Stoic
+        </div>
+<div class="flex items-center gap-unit">
+<span class="material-symbols-outlined text-outline-variant" data-icon="help_outline" data-original-icon="help_outline">help_outline</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex items-center justify-center p-margin-sm relative">
+<!-- Background Atmospheric Element -->
+<div class="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
+<div class="w-[80vw] h-[80vw] rounded-full border border-outline-variant scale-150"></div>
+<div class="w-[60vw] h-[60vw] rounded-full border border-outline-variant scale-125"></div>
+</div>
+<!-- Central Monolithic Card -->
+<section class="monolithic-card w-full max-w-[440px] rounded-lg p-margin-md md:p-margin-lg flex flex-col gap-margin-md relative z-20 overflow-hidden border-hairline">
+<!-- Terminal Header Decor -->
+<div class="absolute top-0 left-0 w-full h-hairline bg-outline-variant"></div>
+<div class="flex justify-between items-center mb-unit">
+<span class="font-label-sm text-label-sm text-outline tracking-widest uppercase">Identity Verification</span>
+<span class="font-label-sm text-label-sm text-primary-container">SYS_READY</span>
+</div>
+<div class="flex flex-col gap-unit">
+<h1 class="font-display-lg-mobile text-display-lg-mobile text-on-surface leading-tight font-display-lg">Return to Silence</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-[30ch]">Authenticate your presence to resume the philosophical inquiry.</p>
+</div>
+<form class="flex flex-col gap-margin-sm">
+<!-- Email Field -->
+<div class="flex flex-col gap-unit">
+<label class="font-label-sm text-label-sm text-outline ml-unit" for="email">Email Coordinate</label>
+<div class="relative">
+<input class="surgical-input w-full rounded-full px-5 py-4 font-label-md text-label-md text-on-surface placeholder:text-surface-variant bg-surface-container-low" id="email" placeholder="name@domain.ext" type="email">
+</div>
+</div>
+<!-- Password Field -->
+<div class="flex flex-col gap-unit">
+<div class="flex justify-between items-end ml-unit items-center">
+<label class="font-label-sm text-label-sm text-outline" for="password">Cipher Key</label>
+<a class="font-label-sm text-label-sm text-on-primary-fixed-variant hover:text-primary transition-colors" href="#">Forgot?</a>
+</div>
+<div class="relative">
+<input class="surgical-input w-full rounded-full px-5 py-4 font-label-md text-label-md text-on-surface placeholder:text-surface-variant bg-surface-container-low" id="password" placeholder="••••••••" type="password">
+</div>
+</div>
+<!-- Primary Action -->
+<button class="w-full bg-primary-fixed-dim hover:bg-primary text-on-primary-fixed font-label-md text-label-md py-4 px-8 rounded-full transition-all duration-300 transform active:scale-[0.98] mt-unit" type="submit">
+                    Log In
+                </button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-unit">
+<div class="flex-grow h-hairline bg-outline-variant"></div>
+<span class="font-label-sm text-label-sm text-outline-variant px-unit">OR</span>
+<div class="flex-grow h-hairline bg-outline-variant"></div>
+</div>
+<!-- Initialization Link -->
+<div class="flex flex-col items-center gap-unit">
+<p class="font-body-sm text-body-sm text-on-surface-variant">New observer?</p>
+<a class="font-label-sm text-label-sm text-primary tracking-wide hover:underline underline-offset-4" href="#">
+                    Initialize Account
+                </a>
+</div>
+<!-- Bottom Detail Decor -->
+<div class="flex justify-center mt-unit">
+<div class="w-12 h-hairline bg-primary opacity-30"></div>
+</div>
+</section>
+</main>
+<!-- Footer Decorative Info -->
+<footer class="w-full py-margin-sm px-margin-md flex justify-between items-center opacity-40">
+<div class="flex gap-margin-sm font-label-sm text-label-sm">
+<span class="text-outline uppercase">V. 4.0.2</span>
+<span class="text-outline uppercase">Infrastructure: Cold Void</span>
+</div>
+<div class="flex gap-margin-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="lock">lock</span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest">End-to-End Encrypted</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction for input focus effects
+        const inputs = document.querySelectorAll('.surgical-input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                // Subtle card glow or focus logic could go here
+            });
+        });
+
+        // Form Submission visual feedback
+        document.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Authenticating...';
+            btn.style.opacity = '0.7';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerText = 'Success';
+                btn.style.backgroundColor = '#96d4b4';
+                // Simulate redirect
+                console.log('Redirecting to dashboard...');
+            }, 1200);
+        });
+    </script>
+
+</body></html>

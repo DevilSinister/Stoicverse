@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ask Stoic - Master Zone</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;700&amp;family=Inter:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Cormorant:wght@500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"tertiary-fixed": "#ffdcc5", "tertiary-container": "#ffcead", "surface-tint": "#96d4b4", "on-primary-container": "#2d684f", "inverse-surface": "#e2e2e5", "on-surface-variant": "#bfc9c1", "on-background": "#e2e2e5", "fog-muted": "#8B8E91", "on-secondary": "#2e3132", "surface-dim": "#121416", surface: "#121416", "on-tertiary-fixed-variant": "#603f27", "on-error": "#690005", "surface-container-lowest": "#0c0e10", "on-primary": "#003825", "surface-container-highest": "#333537", "tertiary-fixed-dim": "#ecbd9d", "secondary-container": "#47494a", "primary-fixed": "#b2f0d0", "on-tertiary": "#472a13", "on-secondary-container": "#b7b8ba", "surface-container-low": "#1a1c1e", "surface-bright": "#38393c", "secondary-fixed": "#e1e3e4", "outline-variant": "#404943", "inverse-primary": "#2e6950", background: "#121416", "on-secondary-fixed": "#191c1d", "error-container": "#93000a", "on-primary-fixed-variant": "#105139", "monolith-surface": "#16181A", "secondary-fixed-dim": "#c5c7c8", "surface-variant": "#333537", primary: "#cfffe4", "on-error-container": "#ffdad6", "on-tertiary-fixed": "#2e1502", "on-surface": "#e2e2e5", "inverse-on-surface": "#2f3133", "on-secondary-fixed-variant": "#454748", error: "#ffb4ab", "surgical-steel": "#2A2C2E", "primary-container": "#a7e5c5", "primary-fixed-dim": "#96d4b4", "on-primary-fixed": "#002114", secondary: "#c5c7c8", outline: "#8a938c", tertiary: "#fff2eb", "surface-container-high": "#282a2c", "on-tertiary-container": "#7a563c", "surface-container": "#1e2022"}, borderRadius: {DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px"}, spacing: {unit: "4px", "margin-sm": "16px", "margin-lg": "64px", hairline: "1px", gutter: "1px", "margin-md": "32px"}, fontFamily: {"code-block": ["jetbrainsMono"], "body-md": ["Inter"], "display-lg": ["Cormorant"], "body-lg": ["Inter"], "headline-sm": ["Cormorant"], "headline-md": ["Cormorant"], "label-sm": ["jetbrainsMono"], "label-md": ["jetbrainsMono"], "display-lg-mobile": ["Cormorant"], "body-sm": ["Inter"], headline: ["Cormorant"], display: ["Cormorant"], body: ["Inter"], label: ["Jetbrains Mono"]}, fontSize: {"code-block": ["14px", {lineHeight: "1.6", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "1.5", fontWeight: "400"}], "display-lg": ["48px", {lineHeight: "1.1", letterSpacing: "-0.03em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}], "headline-sm": ["24px", {lineHeight: "1.3", fontWeight: "500"}], "headline-md": ["32px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "500"}], "label-sm": ["12px", {lineHeight: "1.2", fontWeight: "500"}], "label-md": ["14px", {lineHeight: "1.2", letterSpacing: "0.02em", fontWeight: "500"}], "display-lg-mobile": ["36px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "600"}], "body-sm": ["14px", {lineHeight: "1.4", fontWeight: "400"}]}}}};</script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .message-row:hover .msg-actions {
+            opacity: 1;
+        }
+      </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface h-screen overflow-hidden flex font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar (Shared Component) -->
+<nav class="bg-monolith-surface border-r border-surgical-steel h-screen w-64 flex-shrink-0 hidden md:flex flex-col">
+<!-- Header -->
+<div class="p-margin-sm border-b border-surgical-steel flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-surgical-steel overflow-hidden flex-shrink-0">
+<img alt="Stoic Influencer Profile" class="w-full h-full object-cover" data-alt="A stark, high-contrast, black and white portrait of a stoic philosopher statue, lit from the side to emphasize dramatic shadows and sharp angles. The mood is serious, contemplative, and editorial, perfectly suited for a dark theme interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4dfrOqdiQ9Sx_coBgRcEwXa5UrGQQfAsH9ieKhyxaZoAVq5URG7urNYgVa_QEd-_pi5kJUcivfgeAuEzof5dt4ybRtaBKTvMB6AwCQOHX7Q1Uap7MjNTzVaahxhEyko-y0IfQ_UuLw-5Fvb6OYyFHagdnFjKHICzWYHBiGfAfLAgflgf8AonZfglnI4xdTUW1cfGClVy8ERv-lCY95uo_WZDok7YnBixUQXCNCqEvOnAbA4WM52fIh46HcgMzkOJZ0zBhVtDoI-Y"/>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">Ask Stoic</h1>
+<p class="font-label-sm text-label-sm text-fog-muted">Community Hub</p>
+</div>
+</div>
+<!-- Scrollable Nav Items -->
+<div class="flex-1 overflow-y-auto no-scrollbar py-unit">
+<div class="px-unit mb-unit">
+<button class="w-full bg-primary-container hover:bg-surface-tint text-on-primary-container font-label-md text-label-md py-2 px-4 rounded-sm flex items-center justify-center gap-2 transition-colors duration-150">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New Channel
+                </button>
+</div>
+<ul class="space-y-unit">
+<li>
+<a class="flex items-center gap-3 py-2 text-primary font-bold border-l-2 border-primary pl-4 hover:bg-surface-container-high transition-colors duration-150 opacity-80" href="#">
+<span class="material-symbols-outlined text-[20px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-label-md text-label-md">Master Zone</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 py-2 text-on-surface-variant hover:text-on-surface pl-4 hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">forum</span>
+<span class="font-label-md text-label-md">General Theory</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 py-2 text-on-surface-variant hover:text-on-surface pl-4 hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">fitness_center</span>
+<span class="font-label-md text-label-md">Stoic Practice</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 py-2 text-on-surface-variant hover:text-on-surface pl-4 hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">wb_sunny</span>
+<span class="font-label-md text-label-md">Morning Reflections</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 py-2 text-on-surface-variant hover:text-on-surface pl-4 hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-label-md text-label-md">Archives</span>
+</a>
+</li>
+</ul>
+</div>
+<!-- Footer Nav -->
+<div class="border-t border-surgical-steel py-unit">
+<ul class="space-y-unit">
+<li>
+<a class="flex items-center gap-3 py-2 text-on-surface-variant hover:text-on-surface pl-4 hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 py-2 text-on-surface-variant hover:text-on-surface pl-4 hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface-container-lowest relative">
+<!-- TopAppBar (Shared Component) -->
+<header class="bg-surface docked full-width top-0 border-b border-surgical-steel flex justify-between items-center w-full px-margin-sm h-16 flex-shrink-0 z-20">
+<div class="flex items-center gap-4">
+<h2 class="font-headline-sm text-headline-sm font-semibold text-primary hidden md:block">Master Zone</h2>
+<!-- Mobile Menu Toggle (placeholder) -->
+<button class="md:hidden text-on-surface-variant hover:text-primary transition-opacity">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<nav class="hidden md:flex gap-6 ml-6">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-opacity py-5" href="#">Threads</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-opacity py-5" href="#">Mentions</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-opacity py-5" href="#">Pins</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<!-- Search -->
+<div class="hidden lg:flex items-center bg-monolith-surface border border-surgical-steel rounded-sm px-2 py-1 focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<span class="material-symbols-outlined text-fog-muted text-[16px] mr-2">search</span>
+<input class="bg-transparent border-none text-code-block font-code-block text-on-surface focus:ring-0 p-0 w-32 placeholder-fog-muted outline-none" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="hover:text-primary transition-opacity p-1">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-primary transition-opacity p-1">
+<span class="material-symbols-outlined">people</span>
+</button>
+<button class="hover:text-primary transition-opacity p-1">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<button class="bg-transparent border border-surgical-steel text-on-surface hover:border-primary-container hover:text-primary-container font-label-sm text-label-sm px-3 py-1.5 rounded-sm transition-colors hidden sm:block">
+                    Go Live
+                </button>
+</div>
+</header>
+<!-- Feed Area -->
+<div class="flex-1 overflow-y-auto no-scrollbar p-margin-sm flex flex-col gap-6 pb-32">
+<!-- Message 1 -->
+<div class="message-row flex gap-4 group relative">
+<div class="w-10 h-10 rounded-full border border-surgical-steel overflow-hidden flex-shrink-0 bg-monolith-surface">
+<img class="w-full h-full object-cover" data-alt="A stark, minimalist profile picture featuring a geometric, low-poly rendering of an ancient bust. The color palette is strictly deep blacks, slate grays, and a single sharp mint green highlight on the eye. Dark editorial style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjIccUc1_h_We-1zNdGFID3ydCcy5fnl2i7MXBmZxl1mLv873O7MVkU0OSAk3bmqp4hb9fuBRIXAwUW6DgeKB-x5wnbH8dnc9EFzjUUVNRp-279sba9iU9TZ9xsPIjufcrWMqQ_rHwJcnVkajLWfqUMSxlDLHtJwHUbk7yaZrfQM9aadOnep2vDSKSFaNQYYEYNC7xqIVjMbfhEd9Y7Gp3PJ-9izPvV3tMy12hwlcsK1r65qgqwpxG8qIS7DA_PS-9zzyx3EDp_zY"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline gap-2 mb-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Seneca_99</span>
+<span class="font-code-block text-[10px] text-fog-muted">Today at 10:24 AM</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                        It's not that we have a short time to live, but that we waste a lot of it. How is everyone applying this today? I found myself doomscrolling and had to physically put the phone in another room.
+                    </p>
+<!-- Reactions -->
+<div class="flex gap-2 mt-2">
+<button class="flex items-center gap-1 bg-monolith-surface border border-primary-container/30 px-2 py-0.5 rounded-sm hover:border-primary-container transition-colors">
+<span class="text-[12px]">🔥</span>
+<span class="font-label-sm text-[10px] text-primary-container">12</span>
+</button>
+<button class="flex items-center gap-1 bg-surface-container border border-surgical-steel px-2 py-0.5 rounded-sm hover:border-surgical-steel transition-colors">
+<span class="text-[12px]">🤔</span>
+<span class="font-label-sm text-[10px] text-on-surface-variant">4</span>
+</button>
+</div>
+</div>
+<!-- Influencer Controls (Hover) -->
+<div class="msg-actions absolute top-0 right-0 opacity-0 bg-monolith-surface border border-surgical-steel rounded-sm flex items-center p-1 transition-opacity z-10 shadow-sm">
+<button class="text-on-surface-variant hover:text-primary-container p-1 rounded-sm transition-colors" title="Pin">
+<span class="material-symbols-outlined text-[16px]">keep</span>
+</button>
+<div class="w-px h-4 bg-surgical-steel mx-1"></div>
+<button class="text-on-surface-variant hover:text-error p-1 rounded-sm transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Message 2 -->
+<div class="message-row flex gap-4 group relative">
+<div class="w-10 h-10 rounded-full border border-surgical-steel overflow-hidden flex-shrink-0 bg-monolith-surface">
+<div class="w-full h-full flex items-center justify-center font-headline-sm text-primary-container">M</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline gap-2 mb-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold">MarcusAurelius_Bot</span>
+<span class="bg-primary-container text-on-primary-container text-[8px] font-code-block px-1 rounded-sm uppercase tracking-wider">Bot</span>
+<span class="font-code-block text-[10px] text-fog-muted">Today at 11:00 AM</span>
+</div>
+<div class="bg-monolith-surface border-l-2 border-primary-container pl-4 py-2 my-2">
+<p class="font-display-lg text-[20px] text-on-surface italic leading-tight">
+                            "You have power over your mind - not outside events. Realize this, and you will find strength."
+                        </p>
+</div>
+</div>
+<!-- Influencer Controls (Hover) -->
+<div class="msg-actions absolute top-0 right-0 opacity-0 bg-monolith-surface border border-surgical-steel rounded-sm flex items-center p-1 transition-opacity z-10 shadow-sm">
+<button class="text-on-surface-variant hover:text-primary-container p-1 rounded-sm transition-colors" title="Pin">
+<span class="material-symbols-outlined text-[16px]">keep</span>
+</button>
+<div class="w-px h-4 bg-surgical-steel mx-1"></div>
+<button class="text-on-surface-variant hover:text-error p-1 rounded-sm transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Message 3 -->
+<div class="message-row flex gap-4 group relative">
+<div class="w-10 h-10 rounded-full border border-surgical-steel overflow-hidden flex-shrink-0 bg-monolith-surface">
+<img class="w-full h-full object-cover" data-alt="A stark, high-contrast, dark-mode architectural photo of brutalist concrete structures. Sharp lines, deep shadows, and an imposing atmosphere. Strict 1px mint border framing the subject." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHFqprz3_nWTme1wHoDpvdlEpYSCO1umBaaWq_EdW2FqnU5Bz0sEkIi3GBAGiEmkmj9oDEBtEhA5B9mVybaRqEHTsdQRgMbcAtzgHxqC1DlfXr2ahN9DtjJWuC1RphebRpkAj5hi4BIqKwCTlGYfQKxetJuQK-XnykJPfvBqJhLewIfDIBAodfZKmpsn0kCvJcZwBsrar5DWKjaU6Dboz1BpYrhekfEWvEVM3SpldNQohXx33LiZOK-7pndK64e_QyRR8xi9ZXoPg"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline gap-2 mb-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Epictetus_Fan</span>
+<span class="font-code-block text-[10px] text-fog-muted">Today at 1:15 PM</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                        Building on Seneca_99's point, the dichotomy of control is everything. I wrote a small script to block certain sites during my work hours. It's external control to build internal habit.
+                    </p>
+<div class="mt-3 border border-surgical-steel bg-surface rounded-sm p-3 inline-block max-w-full overflow-x-auto">
+<code class="font-code-block text-code-block text-fog-muted whitespace-pre">
+<span class="text-primary-container">function</span> blockDistractions() {
+  <span class="text-on-surface-variant">const</span> time = <span class="text-primary-container">new</span> Date().getHours();
+  <span class="text-primary-container">if</span> (time &gt; 9 &amp;&amp; time &lt; 17) {
+    focusMode.<span class="text-primary-container">enable</span>();
+  }
+}
+                        </code>
+</div>
+</div>
+<!-- Influencer Controls (Hover) -->
+<div class="msg-actions absolute top-0 right-0 opacity-0 bg-monolith-surface border border-surgical-steel rounded-sm flex items-center p-1 transition-opacity z-10 shadow-sm">
+<button class="text-on-surface-variant hover:text-primary-container p-1 rounded-sm transition-colors" title="Pin">
+<span class="material-symbols-outlined text-[16px]">keep</span>
+</button>
+<div class="w-px h-4 bg-surgical-steel mx-1"></div>
+<button class="text-on-surface-variant hover:text-error p-1 rounded-sm transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Message Input -->
+<div class="absolute bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-surgical-steel p-margin-sm">
+<div class="max-w-4xl mx-auto flex items-end gap-2 bg-monolith-surface border border-surgical-steel rounded-sm p-2 focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<!-- Input Actions -->
+<div class="flex gap-1 pb-1">
+<button class="text-primary-container hover:bg-surface-container p-1.5 rounded-sm transition-colors" title="Add Image">
+<span class="material-symbols-outlined text-[20px]">image</span>
+</button>
+<button class="text-primary-container hover:bg-surface-container p-1.5 rounded-sm transition-colors" title="Create Event">
+<span class="material-symbols-outlined text-[20px]">event</span>
+</button>
+</div>
+<!-- Textarea -->
+<textarea class="flex-1 bg-transparent border-none text-body-sm font-body-sm text-on-surface focus:ring-0 p-2 placeholder-fog-muted outline-none resize-none min-h-[40px] max-h-[120px] no-scrollbar" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" placeholder="Message #master-zone..." rows="1"></textarea>
+<!-- Send -->
+<div class="pb-1">
+<button class="bg-primary-container text-on-primary-container hover:bg-surface-tint p-1.5 rounded-sm transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</div>
+</div>
+<div class="max-w-4xl mx-auto mt-2 text-right">
+<span class="font-code-block text-[10px] text-fog-muted">Use **bold** and *italic* for emphasis. Code blocks supported.</span>
+</div>
+</div>
+</main>
+</body></html>

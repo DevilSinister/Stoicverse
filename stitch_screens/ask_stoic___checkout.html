@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ask Stoic | Membership Protocol</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&amp;family=Inter:wght@100..900&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#38393c",
+                        "secondary-fixed": "#e1e3e4",
+                        "secondary": "#c5c7c8",
+                        "on-surface-variant": "#bfc9c1",
+                        "tertiary": "#fff2eb",
+                        "surface-container-highest": "#333537",
+                        "surface-container": "#1e2022",
+                        "on-background": "#e2e2e5",
+                        "on-primary-fixed-variant": "#105139",
+                        "tertiary-fixed-dim": "#ecbd9d",
+                        "primary-container": "#a7e5c5",
+                        "primary": "#cfffe4",
+                        "on-tertiary": "#472a13",
+                        "tertiary-fixed": "#ffdcc5",
+                        "on-secondary-fixed-variant": "#454748",
+                        "on-tertiary-fixed-variant": "#603f27",
+                        "surface-variant": "#333537",
+                        "surface-container-low": "#1a1c1e",
+                        "background": "#0c0e10", /* Cold Void per prompt */
+                        "surface-dim": "#121416",
+                        "on-primary": "#003825",
+                        "inverse-on-surface": "#2f3133",
+                        "surface-container-high": "#282a2c",
+                        "surface-tint": "#96d4b4",
+                        "on-tertiary-container": "#7a563c",
+                        "on-secondary-container": "#b7b8ba",
+                        "on-primary-fixed": "#002114",
+                        "on-secondary": "#2e3132",
+                        "on-error": "#690005",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#96d4b4",
+                        "outline": "#8a938c",
+                        "on-tertiary-fixed": "#2e1502",
+                        "primary-fixed": "#b2f0d0",
+                        "tertiary-container": "#ffcead",
+                        "inverse-primary": "#2e6950",
+                        "surface-container-lowest": "#0c0e10",
+                        "outline-variant": "#404943",
+                        "surface": "#121416",
+                        "on-error-container": "#ffdad6",
+                        "error-container": "#93000a",
+                        "on-surface": "#e2e2e5",
+                        "inverse-surface": "#e2e2e5",
+                        "secondary-container": "#47494a",
+                        "on-secondary-fixed": "#191c1d",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "on-primary-container": "#2d684f",
+                        "surgical-steel": "#404943" /* Token mapping for 1px lines */
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "hairline": "1px",
+                        "margin-md": "32px",
+                        "unit": "4px",
+                        "gutter": "1px",
+                        "margin-sm": "16px",
+                        "margin-lg": "64px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Cormorant"],
+                        "headline-sm": ["Cormorant"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["JetBrains Mono"],
+                        "label-md": ["JetBrains Mono"],
+                        "headline-md": ["Cormorant"],
+                        "display-lg-mobile": ["Cormorant"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "code-block": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0c0e10;
+            color: #e2e2e5;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .surgical-border {
+            border: 1px solid #404943;
+        }
+        .surgical-border-b {
+            border-bottom: 1px solid #404943;
+        }
+        .surgical-border-r {
+            border-right: 1px solid #404943;
+        }
+        .monolith {
+            background-color: #121416;
+        }
+        input:focus {
+            outline: none !important;
+            border-color: #a7e5c5 !important;
+            box-shadow: 0 0 0 2px rgba(167, 229, 197, 0.1);
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md min-h-screen flex flex-col">
+<!-- Top AppBar Component -->
+<header class="fixed top-0 w-full z-50 bg-surface border-b border-surgical-steel h-16 px-margin-sm md:px-margin-md lg:px-margin-lg flex justify-between items-center">
+<div class="flex items-center gap-4">
+<span class="font-headline-sm text-headline-sm font-medium tracking-tighter text-on-surface">Ask Stoic</span>
+</div>
+<nav class="hidden md:flex gap-8">
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-md text-body-md" href="#">Curriculum</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-md text-body-md" href="#">Communities</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-md text-body-md" href="#">Philosophers</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-md text-body-md" href="#">Pricing</a>
+</nav>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-label-md text-label-md hover:opacity-90 transition-all active:scale-95">
+            Begin Journey
+        </button>
+</header>
+<main class="flex-grow flex items-center justify-center pt-24 pb-12 px-margin-sm md:px-margin-md">
+<!-- Monolithic Checkout Card -->
+<div class="w-full max-w-5xl monolith surgical-border rounded-lg overflow-hidden flex flex-col md:flex-row">
+<!-- Left Column: Summary -->
+<section class="w-full md:w-5/12 p-8 md:p-12 surgical-border-r flex flex-col justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-[0.2em] mb-4 block">Selection</span>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-8">Membership Protocol</h1>
+<div class="space-y-6">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary">Community Membership</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Access to the disciplined mind collective.</p>
+</div>
+<span class="font-label-md text-label-md text-on-surface">$10.00</span>
+</div>
+<div class="pt-6 border-t border-surgical-steel opacity-30"></div>
+<ul class="space-y-4">
+<li class="flex items-center gap-3 font-body-sm text-body-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                Daily Stoic Meditations
+                            </li>
+<li class="flex items-center gap-3 font-body-sm text-body-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                Private Discord Access
+                            </li>
+<li class="flex items-center gap-3 font-body-sm text-body-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                Infrastructure Priority
+                            </li>
+</ul>
+</div>
+</div>
+<div class="mt-12 md:mt-24">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest block mb-2">Order Total</span>
+<div class="flex items-baseline gap-2">
+<span class="font-label-md text-label-md text-on-surface-variant">Monthly Stipend:</span>
+<span class="font-display-lg text-display-lg text-on-surface">$10.00</span>
+</div>
+</div>
+</section>
+<!-- Right Column: Payment -->
+<section class="w-full md:w-7/12 p-8 md:p-12 flex flex-col">
+<div class="flex justify-between items-center mb-10">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Secure Payment Form</h2>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="material-symbols-outlined text-on-surface-variant">verified_user</span>
+</div>
+</div>
+<form class="space-y-8 flex-grow" onsubmit="event.preventDefault();">
+<!-- Name Field -->
+<div class="space-y-3">
+<label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider">Name on Card</label>
+<input class="w-full bg-transparent surgical-border rounded-full px-6 py-4 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/30 focus:border-primary transition-all" placeholder="Marcus Aurelius" type="text"/>
+</div>
+<!-- Card Details Field -->
+<div class="space-y-3">
+<label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider">Card Details</label>
+<div class="surgical-border rounded-lg overflow-hidden monolith">
+<div class="p-4 surgical-border-b">
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 font-label-md text-label-md tracking-[0.1em] text-on-surface placeholder:text-on-surface-variant/30" placeholder="0000 0000 0000 0000" type="text"/>
+</div>
+<div class="flex">
+<div class="w-1/2 surgical-border-r p-4">
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 font-label-md text-label-md text-on-surface placeholder:text-on-surface-variant/30" placeholder="MM / YY" type="text"/>
+</div>
+<div class="w-1/2 p-4">
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 font-label-md text-label-md text-on-surface placeholder:text-on-surface-variant/30" placeholder="CVC" type="text"/>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-6">
+<button class="w-full bg-primary text-on-primary py-5 rounded-full font-label-md text-label-md font-bold uppercase tracking-widest hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary/10">
+                            Initialize Payment - $10.00
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<div class="flex items-center gap-2 justify-center mt-6">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">shield</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant opacity-60">End-to-end encrypted within the Cold Void infrastructure.</p>
+</div>
+</form>
+<div class="mt-12 pt-8 border-t border-surgical-steel flex flex-wrap gap-6 opacity-40 justify-center">
+<div class="flex items-center gap-2 grayscale">
+<span class="material-symbols-outlined">credit_card</span>
+<span class="font-label-sm text-label-sm">VISA</span>
+</div>
+<div class="flex items-center gap-2 grayscale">
+<span class="material-symbols-outlined">account_balance</span>
+<span class="font-label-sm text-label-sm">MASTERCARD</span>
+</div>
+<div class="flex items-center gap-2 grayscale">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-sm text-label-sm">AMEX</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer Component -->
+<footer class="w-full border-t border-surgical-steel bg-surface py-12 px-margin-sm md:px-margin-md lg:px-margin-lg flex flex-col md:flex-row justify-between items-center gap-unit">
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="font-label-md text-label-md font-bold uppercase tracking-widest text-on-surface">Ask Stoic</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 Ask Stoic. Built for the disciplined mind.</p>
+</div>
+<nav class="flex gap-8 mt-6 md:mt-0">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Ethics</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Infrastructure</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Terminal</a>
+</nav>
+</footer>
+<!-- Background Subtle Micro-interaction script -->
+<script>
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            // Subtle shift in a "monolith" shadow if we were using them, 
+            // but since we are "Surgical Precision", we use a faint radial glow following cursor
+            document.body.style.backgroundImage = `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(167, 229, 197, 0.03) 0%, transparent 40%)`;
+        });
+    </script>
+</body></html>

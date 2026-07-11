@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Video Lesson Player - Stoic Infrastructure</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;700&amp;family=Inter:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"tertiary-fixed": "#ffdcc5", "surgical-steel": "#2A2C2E", "surface-container": "#1e2022", "on-error-container": "#ffdad6", "secondary-fixed-dim": "#c5c7c8", "surface-dim": "#121416", "fog-muted": "#8B8E91", surface: "#121416", "on-background": "#e2e2e5", "on-secondary": "#2e3132", "monolith-surface": "#16181A", background: "#121416", "secondary-container": "#47494a", "inverse-surface": "#e2e2e5", "on-secondary-fixed-variant": "#454748", "tertiary-fixed-dim": "#ecbd9d", "inverse-on-surface": "#2f3133", "on-tertiary": "#472a13", "tertiary-container": "#ffcead", tertiary: "#fff2eb", "on-primary-container": "#2d684f", secondary: "#c5c7c8", "on-tertiary-fixed": "#2e1502", "on-primary-fixed": "#002114", "on-surface-variant": "#bfc9c1", "primary-fixed-dim": "#96d4b4", "outline-variant": "#404943", "on-primary": "#003825", "surface-container-lowest": "#0c0e10", "surface-container-highest": "#333537", "on-primary-fixed-variant": "#105139", error: "#ffb4ab", "on-surface": "#e2e2e5", "on-secondary-container": "#b7b8ba", "surface-tint": "#96d4b4", "on-tertiary-fixed-variant": "#603f27", "surface-variant": "#333537", "primary-container": "#a7e5c5", "surface-container-low": "#1a1c1e", "primary-fixed": "#b2f0d0", primary: "#cfffe4", outline: "#8a938c", "secondary-fixed": "#e1e3e4", "surface-bright": "#38393c", "on-error": "#690005", "surface-container-high": "#282a2c", "error-container": "#93000a", "on-secondary-fixed": "#191c1d", "on-tertiary-container": "#7a563c", "inverse-primary": "#2e6950"}, borderRadius: {DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px"}, spacing: {"margin-sm": "16px", unit: "4px", "margin-lg": "64px", gutter: "1px", "margin-md": "32px", hairline: "1px"}, fontFamily: {"label-md": ["jetbrainsMono"], "body-lg": ["Inter"], "display-lg-mobile": ["Cormorant"], "body-sm": ["Inter"], "headline-md": ["Cormorant"], "display-lg": ["Cormorant"], "body-md": ["Inter"], "headline-sm": ["Cormorant"], "label-sm": ["jetbrainsMono"], "code-block": ["jetbrainsMono"], headline: ["Cormorant"], display: ["Cormorant"], body: ["Inter"], label: ["Jetbrains Mono"]}, fontSize: {"label-md": ["14px", {lineHeight: "1.2", letterSpacing: "0.02em", fontWeight: "500"}], "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}], "display-lg-mobile": ["36px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "600"}], "body-sm": ["14px", {lineHeight: "1.4", fontWeight: "400"}], "headline-md": ["32px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "500"}], "display-lg": ["48px", {lineHeight: "1.1", letterSpacing: "-0.03em", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "1.5", fontWeight: "400"}], "headline-sm": ["24px", {lineHeight: "1.3", fontWeight: "500"}], "label-sm": ["12px", {lineHeight: "1.2", fontWeight: "500"}], "code-block": ["14px", {lineHeight: "1.6", fontWeight: "400"}]}}}};</script>
+<style>
+        body {
+            background-color: #121416; /* cold void background */
+            color: #e2e2e5;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen bg-background">
+<!-- SideNavBar Component -->
+<aside class="hidden md:flex flex-col h-screen sticky left-0 top-0 pt-8 bg-monolith-surface dark:bg-monolith-surface text-primary dark:text-primary font-label-md text-label-md w-80 border-r border-surgical-steel z-30">
+<div class="px-6 pb-8 border-b border-surgical-steel">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-surgical-steel">
+<img class="w-full h-full object-cover" data-alt="A stark, high-contrast, black and white portrait of a stoic philosopher figure, resembling a classical marble bust but rendered with modern, harsh, directional lighting against a completely black void. The aesthetic is cold, intellectual, and institutional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXTacZ8z0ab6j0-fjTsAQSiITN9Wl0Rc0inpTmvTskHZOS9kKRMk8gocGs3EiGLzeGxvyh_hGTfNtmh6r2NTFo-ZQE09zOMW1s9ALYSTXFHzut3JitOhuZM7sMXL1QNKADU8N0HHtjtfNRZrbcQQBjAd-AVGIPZ4kiccjxbjDblcD5Jjn5jvu36AkTzisQvUSoI1Ksd5fFg8ww7630gTSDITCjXSWxhY_D8cUJS2rKmfgZQ92ZdMZZ6sq3dxbLFcD6FSQK_Feox0w"/>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Marcus Aurelius</h2>
+<p class="font-jetbrainsMono text-label-sm text-fog-muted tracking-tighter">Course: Meditations III</p>
+</div>
+</div>
+<button class="w-full py-2 bg-primary-container text-on-primary-container font-label-md text-label-md hover:brightness-110 transition-all focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-offset-2 focus:ring-offset-background flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">download</span>
+                Download Workbook
+            </button>
+</div>
+<nav class="flex-grow py-4 overflow-y-auto">
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-4 py-3 px-6 text-fog-muted pl-4 hover:bg-surface-container-highest transition-all active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+                        Introduction
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-4 py-3 px-6 text-fog-muted pl-4 hover:bg-surface-container-highest transition-all active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">security</span>
+                        The Inner Citadel
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-4 py-3 px-6 text-primary font-bold border-l-2 border-primary pl-4 bg-surface-container-highest/20 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">visibility</span>
+                        Objective Representation
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-4 py-3 px-6 text-fog-muted pl-4 hover:bg-surface-container-highest transition-all active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">favorite</span>
+                        Amor Fati
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-4 py-3 px-6 text-fog-muted pl-4 hover:bg-surface-container-highest transition-all active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">self_improvement</span>
+                        Meditation Practice
+                    </a>
+</li>
+</ul>
+</nav>
+<div class="border-t border-surgical-steel py-4">
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-4 py-3 px-6 text-fog-muted pl-4 hover:bg-surface-container-highest transition-all active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+                        Support
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-4 py-3 px-6 text-fog-muted pl-4 hover:bg-surface-container-highest transition-all active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">tune</span>
+                        Settings
+                    </a>
+</li>
+</ul>
+</div>
+</aside>
+<div class="flex-1 flex flex-col min-w-0">
+<!-- TopAppBar Component -->
+<header class="bg-background dark:bg-background text-primary dark:text-primary font-headline-sm text-headline-sm w-full h-16 border-b border-surgical-steel flex justify-between items-center px-margin-md sticky top-0 z-20">
+<div class="flex items-center gap-4 font-jetbrainsMono text-label-sm text-fog-muted">
+<span class="font-bold text-primary tracking-tighter cursor-pointer hover:text-primary transition-colors duration-200">STOIC_INFRASTRUCTURE</span>
+<span class="text-surgical-steel">/</span>
+<a class="hover:text-primary transition-colors duration-200" href="#">Curriculum</a>
+<span class="text-surgical-steel">/</span>
+<a class="hover:text-primary transition-colors duration-200" href="#">Meditations III</a>
+<span class="text-surgical-steel">/</span>
+<span class="text-on-surface">Objective Representation</span>
+</div>
+<div class="flex items-center gap-6 font-label-md text-label-md text-on-surface-variant font-medium">
+<nav class="hidden lg:flex gap-6">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Curriculum</a>
+<a class="hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Resources</a>
+<a class="hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Archive</a>
+</nav>
+<div class="flex gap-4 border-l border-surgical-steel pl-6">
+<button class="hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80 focus:outline-none focus:text-primary"><span class="material-symbols-outlined">settings</span></button>
+<button class="hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80 focus:outline-none focus:text-primary"><span class="material-symbols-outlined">account_circle</span></button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-margin-md lg:p-margin-lg overflow-y-auto max-w-[1200px] mx-auto w-full">
+<!-- Header Section -->
+<div class="mb-8 border-b border-surgical-steel pb-6">
+<h1 class="font-display-lg text-display-lg text-on-surface mb-4">Objective Representation: Stripping the Event Bare</h1>
+<div class="flex gap-6 font-jetbrainsMono text-label-md text-fog-muted">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> Duration: 12:40</span>
+<span class="flex items-center gap-2"><span class="material-symbols-outlined" style="font-size: 16px;">person</span> Instructor: Marcus Aurelius</span>
+</div>
+</div>
+<!-- Video Player Area -->
+<div class="bg-monolith-surface border border-surgical-steel mb-8">
+<div class="aspect-video relative bg-surface-container-lowest">
+<!-- Video Placeholder Image -->
+<div class="absolute inset-0 bg-cover bg-center opacity-60" data-alt="A wide cinematic shot representing abstract philosophical analysis. A monolithic, perfectly smooth geometric cube sits in the center of an expansive, dark concrete room. Sharp, single-source light cuts across the cube, casting long, absolute black shadows. The scene embodies stripping away narrative to reveal bare objective reality. Cold, austere aesthetic with a hint of glacial mint in the shadow penumbra." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBNedDPBTwDHXhlJ0s2-bsX86yAfI71ubvzhDIMRJ_EhwWfpbrjGpoOdeGUOtkqdxbsz_M3vvnG49JB9vUheC4CvNJkMOs0jp2Lv25GbVtdQD2ReD2VzM_nBAmtMm0kC2v_o5JXvE0NMDvai0A3WPo6MA0_Gs2vJ7Ofpk3FCspZRr5bNr2S_EM9NKyvL18YIN4LItxs3PPdbY-uu8B86wSb9Hu0aKubVZCX1xaCG2x7i0e640RyuRB0PlxKMUrR_5cm6MldjhL_aQ')"></div>
+<!-- Play Button Overlay -->
+<div class="absolute inset-0 flex items-center justify-center cursor-pointer group hover:bg-background/20 transition-all duration-300">
+<div class="w-20 h-20 rounded-full border border-surgical-steel bg-monolith-surface/80 flex items-center justify-center group-hover:border-primary-container group-hover:text-primary-container transition-colors duration-300">
+<span class="material-symbols-outlined" style="font-size: 36px; font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="h-1 w-full bg-surgical-steel relative">
+<div class="absolute top-0 left-0 h-full bg-primary-container" style="width: 35%;"></div>
+</div>
+</div>
+<!-- Navigation Controls -->
+<div class="flex justify-between items-center mb-12 py-4 border-y border-surgical-steel">
+<button class="flex items-center gap-3 px-6 py-3 border border-surgical-steel bg-transparent text-on-surface hover:border-primary-container hover:text-primary-container transition-all font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-offset-2 focus:ring-offset-background">
+<span class="material-symbols-outlined">arrow_left</span>
+                    Previous Lesson
+                </button>
+<button class="flex items-center gap-3 px-6 py-3 bg-primary-container text-on-primary-container hover:brightness-110 transition-all font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-offset-2 focus:ring-offset-background">
+                    Next Lesson
+                    <span class="material-symbols-outlined">arrow_right</span>
+</button>
+</div>
+<!-- Resources Section (Bento style grid) -->
+<section>
+<h3 class="font-jetbrainsMono text-label-sm text-fog-muted uppercase tracking-widest mb-6 border-b border-surgical-steel pb-2">Lesson Resources</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-surgical-steel border border-surgical-steel">
+<!-- Resource Item 1 -->
+<a class="bg-monolith-surface p-6 flex items-start gap-4 hover:bg-surface-container-highest transition-all group focus:outline-none focus:ring-2 focus:ring-primary-container inset-ring-2 inset-ring-primary-container" href="#">
+<div class="p-3 border border-surgical-steel text-fog-muted group-hover:text-primary-container group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-body-lg text-on-surface mb-1 group-hover:text-primary-container transition-colors">Core Geometry Worksheet</h4>
+<p class="font-body-sm text-body-sm text-fog-muted">PDF Document (2.4 MB)</p>
+</div>
+</a>
+<!-- Resource Item 2 -->
+<a class="bg-monolith-surface p-6 flex items-start gap-4 hover:bg-surface-container-highest transition-all group focus:outline-none focus:ring-2 focus:ring-primary-container" href="#">
+<div class="p-3 border border-surgical-steel text-fog-muted group-hover:text-primary-container group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined">auto_stories</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-body-lg text-on-surface mb-1 group-hover:text-primary-container transition-colors">Daily Reflection Guide</h4>
+<p class="font-body-sm text-body-sm text-fog-muted">Interactive PDF (1.1 MB)</p>
+</div>
+</a>
+<!-- Resource Item 3 -->
+<a class="bg-monolith-surface p-6 flex items-start gap-4 hover:bg-surface-container-highest transition-all group focus:outline-none focus:ring-2 focus:ring-primary-container" href="#">
+<div class="p-3 border border-surgical-steel text-fog-muted group-hover:text-primary-container group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined">terminal</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-body-lg text-on-surface mb-1 group-hover:text-primary-container transition-colors">Analytical Frameworks</h4>
+<p class="font-body-sm text-body-sm text-fog-muted">Text Data (.txt)</p>
+</div>
+</a>
+</div>
+</section>
+</main>
+</div>
+</body></html>

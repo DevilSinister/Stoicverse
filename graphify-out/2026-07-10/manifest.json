@@ -1,0 +1,377 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1783695447.1698434,
+    "ast_hash": "1cfe068865df8f43a39f0cb65bbc9170",
+    "semantic_hash": ""
+  },
+  "components.json": {
+    "mtime": 1783694030.0213692,
+    "ast_hash": "fc5c9e9a7b93eeb2f7b4e1ce0959e4a6",
+    "semantic_hash": ""
+  },
+  "eslint.config.mjs": {
+    "mtime": 1783692653.4132535,
+    "ast_hash": "dfa1f5f6a7037bf39dc510f30b180002",
+    "semantic_hash": ""
+  },
+  "next.config.ts": {
+    "mtime": 1783692654.1175811,
+    "ast_hash": "9b77af189a21a7a64e4bd7a426f64176",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1783700869.2722745,
+    "ast_hash": "5856d7ce9c6bdf9ba448fcfa7d871e74",
+    "semantic_hash": ""
+  },
+  "postcss.config.mjs": {
+    "mtime": 1783692653.5857158,
+    "ast_hash": "239f3ebf717465dc636818a1a619398d",
+    "semantic_hash": ""
+  },
+  "src/app/admin/page.tsx": {
+    "mtime": 1783697301.3034556,
+    "ast_hash": "f376aab2500590976dfa300b229e351f",
+    "semantic_hash": ""
+  },
+  "src/app/checkout/page.tsx": {
+    "mtime": 1783697301.256346,
+    "ast_hash": "11d16ff064c8e180e3dc74232c5d1065",
+    "semantic_hash": ""
+  },
+  "src/app/community/[slug]/page.tsx": {
+    "mtime": 1783697301.2713451,
+    "ast_hash": "78cd639e9af0cc08ad0055773bd16f6a",
+    "semantic_hash": ""
+  },
+  "src/app/courses/lesson/[id]/page.tsx": {
+    "mtime": 1783697301.283306,
+    "ast_hash": "bd40c883787465b7b0afee9ab650b3d6",
+    "semantic_hash": ""
+  },
+  "src/app/creator/page.tsx": {
+    "mtime": 1783697301.3074853,
+    "ast_hash": "8f9f67d749d4d4297e0e4fa0ea119769",
+    "semantic_hash": ""
+  },
+  "src/app/dashboard/page.tsx": {
+    "mtime": 1783697301.2683227,
+    "ast_hash": "d8db0c5d3282513d59834db6d0f352a0",
+    "semantic_hash": ""
+  },
+  "src/app/events/page.tsx": {
+    "mtime": 1783697301.281295,
+    "ast_hash": "60e365d097fad7e5eda7dba0e0d5f872",
+    "semantic_hash": ""
+  },
+  "src/app/layout.tsx": {
+    "mtime": 1783697432.9922645,
+    "ast_hash": "9d4c8ee6adf5b76d5ebd2a324019726e",
+    "semantic_hash": ""
+  },
+  "src/app/login/page.tsx": {
+    "mtime": 1783697301.2471406,
+    "ast_hash": "3f7987f237a0c41146e9c37a26cfa044",
+    "semantic_hash": ""
+  },
+  "src/app/master/page.tsx": {
+    "mtime": 1783697301.298193,
+    "ast_hash": "9f9c73b08e457eff73badafed7bb60f9",
+    "semantic_hash": ""
+  },
+  "src/app/page.tsx": {
+    "mtime": 1783697301.2454588,
+    "ast_hash": "6c6de26e8ba218f9bab6d91c01663e67",
+    "semantic_hash": ""
+  },
+  "src/app/signup/community/page.tsx": {
+    "mtime": 1783697301.2531505,
+    "ast_hash": "4121e3472a2486279fa6c1e9794f8dc7",
+    "semantic_hash": ""
+  },
+  "src/app/signup/page.tsx": {
+    "mtime": 1783697301.2511396,
+    "ast_hash": "c7e0e61dd3847c9b500119399eb03dc3",
+    "semantic_hash": ""
+  },
+  "src/app/subscription/commitment/page.tsx": {
+    "mtime": 1783697301.2670312,
+    "ast_hash": "db0a47c1693290774c2f025124e1a5a7",
+    "semantic_hash": ""
+  },
+  "src/app/subscription/page.tsx": {
+    "mtime": 1783697301.258358,
+    "ast_hash": "d8b6acb60a52f74b1364d027dcaa864d",
+    "semantic_hash": ""
+  },
+  "src/components/landing/Curriculum.tsx": {
+    "mtime": 1783694076.5032823,
+    "ast_hash": "c6fa4ce9baeea7e353764d6d8d0ed7c3",
+    "semantic_hash": ""
+  },
+  "src/components/landing/Hero.tsx": {
+    "mtime": 1783694302.1539392,
+    "ast_hash": "91e343ad6e89a463672cc7d2e722ce15",
+    "semantic_hash": ""
+  },
+  "src/components/landing/Pricing.tsx": {
+    "mtime": 1783694312.2966352,
+    "ast_hash": "a974ec89181e5b5c935c36a8d8dfb80c",
+    "semantic_hash": ""
+  },
+  "src/components/layout/Footer.tsx": {
+    "mtime": 1783694128.8828833,
+    "ast_hash": "12149a3c57994d8fe7a7c69504e5e99a",
+    "semantic_hash": ""
+  },
+  "src/components/layout/Header.tsx": {
+    "mtime": 1783694297.0172367,
+    "ast_hash": "499032effac518bccea49e7c37bfe2cd",
+    "semantic_hash": ""
+  },
+  "src/components/screens/AskStoicScreens.tsx": {
+    "mtime": 1783697508.8041954,
+    "ast_hash": "686f93e927a1491fab6491a804cc1fa4",
+    "semantic_hash": ""
+  },
+  "src/components/ui/button.tsx": {
+    "mtime": 1783694071.9791293,
+    "ast_hash": "e04ce5251d6b0dd04020988126c905e9",
+    "semantic_hash": ""
+  },
+  "src/lib/utils.ts": {
+    "mtime": 1783694072.183743,
+    "ast_hash": "5a6fd53fdcf2be529e9cc0b718fde352",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1783692766.8618243,
+    "ast_hash": "ee17fd1c97c735e9f3564e3f5251f125",
+    "semantic_hash": ""
+  },
+  ".claude/CLAUDE.md": {
+    "mtime": 1783695447.1254263,
+    "ast_hash": "c232166e6492ba1ed955030b16979b05",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/SKILL.md": {
+    "mtime": 1783695447.1254263,
+    "ast_hash": "60dae20a917d4f50294ef7f88470cf53",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/add-watch.md": {
+    "mtime": 1783695288.572168,
+    "ast_hash": "d59d027fe449f06aa03905a01184e779",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/exports.md": {
+    "mtime": 1783695288.572168,
+    "ast_hash": "9da2a2152e60a22f07f05fed5158f287",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/extraction-spec.md": {
+    "mtime": 1783695288.5777018,
+    "ast_hash": "42fef56a01698118f7fd722acdadea34",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/github-and-merge.md": {
+    "mtime": 1783695288.579466,
+    "ast_hash": "cde13df085e4c492aeb7ba298a996d0d",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/hooks.md": {
+    "mtime": 1783695288.580506,
+    "ast_hash": "3f545db6ce646650bb9de588f5512a27",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/query.md": {
+    "mtime": 1783695288.580506,
+    "ast_hash": "3c46f8ad006874260614ed8657d02307",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/transcribe.md": {
+    "mtime": 1783695288.580506,
+    "ast_hash": "67b6a5fa6c0974e18f60db9f8932fbd8",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/update.md": {
+    "mtime": 1783695288.5830698,
+    "ast_hash": "c698309979460d0f02ba616417844399",
+    "semantic_hash": ""
+  },
+  "01_PRD.md": {
+    "mtime": 1783627286.0444467,
+    "ast_hash": "87fd1e2704cc0f4687025721f92594ce",
+    "semantic_hash": ""
+  },
+  "02_TRD.md": {
+    "mtime": 1783627272.0591347,
+    "ast_hash": "a801a555b7bd155ad145e2a5efbcd7fb",
+    "semantic_hash": ""
+  },
+  "03_APP_FLOW.md": {
+    "mtime": 1783627241.104229,
+    "ast_hash": "8cd9d54e7db66dfd548f50ff37c034b4",
+    "semantic_hash": ""
+  },
+  "04_DATABASE_SCHEMA.md": {
+    "mtime": 1783627228.3395746,
+    "ast_hash": "7862764fc2cc48191e9eefa8fe535767",
+    "semantic_hash": ""
+  },
+  "05_IMPLEMENTATION_PLAN.md": {
+    "mtime": 1783627221.113558,
+    "ast_hash": "244063fe662570c524bda6fe6c0e5cdb",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1783692916.4354157,
+    "ast_hash": "9e09241799026ac05be315a2f0b50055",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1783695447.1436427,
+    "ast_hash": "b0517ee048d45b5cd5463430230eb52f",
+    "semantic_hash": ""
+  },
+  "DESIGN.md": {
+    "mtime": 1783696820.7684672,
+    "ast_hash": "b0b33c828bcc8c1ec37ea3b86ae871d8",
+    "semantic_hash": ""
+  },
+  "PRODUCT.md": {
+    "mtime": 1783696820.7663085,
+    "ast_hash": "8bfcfa352c978306bcd0ef10bdee079f",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1783692653.2983668,
+    "ast_hash": "f15aaa42d5d299d091b1171097ea56ad",
+    "semantic_hash": ""
+  },
+  "UI_UX.md": {
+    "mtime": 1783694293.441323,
+    "ast_hash": "196ab52216711c37c704a99c1d739428",
+    "semantic_hash": ""
+  },
+  "claude-fable-5.md": {
+    "mtime": 1783626726.2690384,
+    "ast_hash": "5d7f1081c0fe82c05e39b2f83da86a59",
+    "semantic_hash": ""
+  },
+  "landing_page.html": {
+    "mtime": 1783692580.179839,
+    "ast_hash": "7f2580454408f240e65f66db2b168ae4",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___checkout.html": {
+    "mtime": 1783694574.0431025,
+    "ast_hash": "25b2baf05e7e0451118a22c8e8f24d49",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___community_feed.html": {
+    "mtime": 1783694573.9704838,
+    "ast_hash": "a94e036cc063627802545f1c1d3b22c5",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___events_directory.html": {
+    "mtime": 1783694573.9969594,
+    "ast_hash": "bb0704b7ce4658a70821e00426c645c1",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___influencer_cm_dashboard.html": {
+    "mtime": 1783694573.9433253,
+    "ast_hash": "bbe4eabe6d593be79f4dee7015789334",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___landing_page.html": {
+    "mtime": 1783694574.0853746,
+    "ast_hash": "7f2580454408f240e65f66db2b168ae4",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___log_in.html": {
+    "mtime": 1783694573.9704838,
+    "ast_hash": "fd9d95dbd8c4ac61acc3a4fa66983c6f",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___master_zone_dashboard.html": {
+    "mtime": 1783694573.9473915,
+    "ast_hash": "2e44fa8b86f9ec37f8b652a9ba343a00",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___member_dashboard.html": {
+    "mtime": 1783694573.975561,
+    "ast_hash": "e7db374a98277051736f121701217618",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___sign_up.html": {
+    "mtime": 1783694573.979561,
+    "ast_hash": "698c2e26a6171f80650d2c736a2b4364",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___sign_up__community_selection_.html": {
+    "mtime": 1783694573.9961803,
+    "ast_hash": "c4ceefa7a04469f2aa2f53b4fbcc5bc4",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___subscription__annual_vs_monthly_.html": {
+    "mtime": 1783694573.9979706,
+    "ast_hash": "9df36a01509effc0ae51606ba471f0da",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___subscription_commitment.html": {
+    "mtime": 1783694573.9765625,
+    "ast_hash": "648f0800095f36f2e024426369d1f21d",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___super_admin_dashboard.html": {
+    "mtime": 1783694573.9657829,
+    "ast_hash": "e2efe6f4b7b30263542630da3c9b7dae",
+    "semantic_hash": ""
+  },
+  "stitch_screens/ask_stoic___video_lesson_player.html": {
+    "mtime": 1783694573.963467,
+    "ast_hash": "a49613f6d46535ce5e31f3b0af02b9a2",
+    "semantic_hash": ""
+  },
+  "stitch_screens/design_md.md": {
+    "mtime": 1783694573.9364696,
+    "ast_hash": "623d7bc01315280c6b9017bc97cd2a92",
+    "semantic_hash": ""
+  },
+  "cover.webp": {
+    "mtime": 1783681349.0069487,
+    "ast_hash": "0d89a4a69204b6f1ace096d9fcbbddf0",
+    "semantic_hash": ""
+  },
+  "preview-desktop.png": {
+    "mtime": 1783681357.7713993,
+    "ast_hash": "2bd33439e6957289ece23a101e558f85",
+    "semantic_hash": ""
+  },
+  "public/file.svg": {
+    "mtime": 1783692653.634182,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "public/globe.svg": {
+    "mtime": 1783692653.7201464,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "public/next.svg": {
+    "mtime": 1783692653.7950032,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "public/vercel.svg": {
+    "mtime": 1783692653.872184,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "public/window.svg": {
+    "mtime": 1783692653.9394765,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  }
+}

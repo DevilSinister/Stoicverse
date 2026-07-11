@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ask Stoic - Influencer CM Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;700&amp;family=Inter:wght@400;500;700&amp;family=Jetbrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"fog-muted": "#8B8E91", "outline-variant": "#404943", "on-primary-fixed": "#002114", "on-surface-variant": "#bfc9c1", "tertiary-fixed": "#ffdcc5", "inverse-on-surface": "#2f3133", "primary-fixed-dim": "#96d4b4", "on-tertiary": "#472a13", "monolith-surface": "#16181A", "on-secondary-fixed-variant": "#454748", "on-background": "#e2e2e5", background: "#121416", "error-container": "#93000a", "surface-container-low": "#1a1c1e", "tertiary-fixed-dim": "#ecbd9d", tertiary: "#fff2eb", outline: "#8a938c", "secondary-fixed-dim": "#c5c7c8", primary: "#cfffe4", "tertiary-container": "#ffcead", "surface-dim": "#121416", "on-secondary-fixed": "#191c1d", "on-primary-fixed-variant": "#105139", "primary-container": "#a7e5c5", "on-tertiary-container": "#7a563c", surface: "#121416", "on-secondary": "#2e3132", error: "#ffb4ab", "on-secondary-container": "#b7b8ba", "inverse-surface": "#e2e2e5", "primary-fixed": "#b2f0d0", "on-tertiary-fixed-variant": "#603f27", "on-primary-container": "#2d684f", "on-surface": "#e2e2e5", "secondary-container": "#47494a", "surface-bright": "#38393c", "surface-container-lowest": "#0c0e10", "surface-tint": "#96d4b4", "surface-container-high": "#282a2c", "secondary-fixed": "#e1e3e4", "on-tertiary-fixed": "#2e1502", "surface-container-highest": "#333537", "on-primary": "#003825", "on-error": "#690005", secondary: "#c5c7c8", "on-error-container": "#ffdad6", "surgical-steel": "#2A2C2E", "inverse-primary": "#2e6950", "surface-variant": "#333537", "surface-container": "#1e2022"}, borderRadius: {DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px"}, spacing: {"margin-md": "32px", "margin-lg": "64px", unit: "4px", hairline: "1px", "margin-sm": "16px", gutter: "1px"}, fontFamily: {"label-md": ["JetBrains Mono"], "headline-sm": ["Cormorant"], "headline-md": ["Cormorant"], "label-sm": ["JetBrains Mono"], "code-block": ["JetBrains Mono"], "display-lg": ["Cormorant"], "body-lg": ["Inter"], "body-md": ["Inter"], "display-lg-mobile": ["Cormorant"], "body-sm": ["Inter"], headline: ["Cormorant"], display: ["Cormorant"], body: ["Inter"], label: ["Jetbrains Mono"]}, fontSize: {"label-md": ["14px", {lineHeight: "1.2", letterSpacing: "0.02em", fontWeight: "500"}], "headline-sm": ["24px", {lineHeight: "1.3", fontWeight: "500"}], "headline-md": ["32px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "500"}], "label-sm": ["12px", {lineHeight: "1.2", fontWeight: "500"}], "code-block": ["14px", {lineHeight: "1.6", fontWeight: "400"}], "display-lg": ["48px", {lineHeight: "1.1", letterSpacing: "-0.03em", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "1.5", fontWeight: "400"}], "display-lg-mobile": ["36px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "600"}], "body-sm": ["14px", {lineHeight: "1.4", fontWeight: "400"}]}}}};</script>
+<style>
+        body { background-color: #0c0e10; color: #e2e2e5; }
+        /* Hide scrollbar for clean brutalist look */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+    </style>
+</head>
+<body class="min-h-screen font-body-md text-on-surface bg-surface-container-lowest">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-screen w-64 bg-monolith-surface border-r border-surgical-steel flex flex-col py-margin-md z-30">
+<div class="px-margin-sm mb-margin-md border-b border-surgical-steel pb-margin-sm">
+<h1 class="font-headline-md text-headline-md text-primary tracking-tight">Ask Stoic</h1>
+<p class="font-label-sm text-label-sm text-fog-muted mt-2">Influencer Dashboard</p>
+</div>
+<ul class="flex-1 flex flex-col space-y-0">
+<li>
+<a class="flex items-center px-margin-sm py-3 text-primary font-bold border-r-2 border-primary bg-surgical-steel bg-opacity-20 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center px-margin-sm py-3 text-on-surface-variant font-label-md hover:bg-surgical-steel hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" style="font-variation-settings: 'FILL' 0;">school</span>
+<span class="font-label-md text-label-md">Course Management</span>
+</a>
+</li>
+<li>
+<a class="flex items-center px-margin-sm py-3 text-on-surface-variant font-label-md hover:bg-surgical-steel hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" style="font-variation-settings: 'FILL' 0;">gavel</span>
+<span class="font-label-md text-label-md">Moderators</span>
+</a>
+</li>
+<li>
+<a class="flex items-center px-margin-sm py-3 text-on-surface-variant font-label-md hover:bg-surgical-steel hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" style="font-variation-settings: 'FILL' 0;">person_search</span>
+<span class="font-label-md text-label-md">Review Queue</span>
+</a>
+</li>
+<li class="mt-auto pt-margin-md border-t border-surgical-steel">
+<a class="flex items-center px-margin-sm py-3 text-on-surface-variant font-label-md hover:bg-surgical-steel hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="ml-64 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-20 bg-background border-b border-surgical-steel flex justify-between items-center h-16 px-margin-md">
+<div class="flex items-center space-x-margin-md">
+<h2 class="font-headline-sm text-headline-sm text-on-background">Influencer CM</h2>
+<div class="flex space-x-6 border-l border-surgical-steel pl-margin-md hidden md:flex">
+<span class="font-label-sm text-label-sm text-primary">TOTAL_MEMBERS: 12,482</span>
+<span class="font-label-sm text-label-sm text-primary">ACTIVE_NOW: 843</span>
+</div>
+</div>
+<div class="flex items-center space-x-6">
+<button class="text-on-surface-variant hover:text-primary transition-transform scale-95 active:scale-90 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-transform scale-95 active:scale-90 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+</button>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 font-label-md text-label-md hover:bg-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background flex items-center">
+<span class="material-symbols-outlined mr-2 text-[18px]">add</span>
+                    New Course
+                </button>
+<div class="w-8 h-8 rounded-none bg-surgical-steel border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover grayscale" data-alt="A stark, high-contrast portrait of a stern figure in profile against a completely black background. Lighting is harsh, singular, and clinical, casting deep shadows. The color palette is monochromatic with a slight cold blue tint, emphasizing a serious, editorial aesthetic suitable for an administrative or influencer profile image." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8dTx_PDkNIePBASWXJh3NICJFJoLSzaNoYYGE-bgB1SChvo_mWUcVZ435BBTYzdbEFm-o3FAfGPH_CsluEexW_sYBeX2FOtjVcyWO-vg0ePqjLAdrmlj3_JUqJQas_TEri2m47iohUTDZ-fDyZY6HMSzSjMdu9Nahx2IMJpeCS_IQ2CIir7ghoPNKCDF1JZefccqQinuLIdq5cRAPiJqeQGMFsyMB02kmshEI19LtPQ3ExtYhVtWewpzhNVjMifXe_fVXJ3zpnYg"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas (The Monolithic Grid) -->
+<main class="flex-1 p-margin-md grid grid-cols-1 lg:grid-cols-12 gap-px bg-surgical-steel border border-surgical-steel">
+<!-- Column 1: Course & Moderators (Left 8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-px">
+<!-- Course Management Section -->
+<section class="bg-monolith-surface border border-surgical-steel flex flex-col h-full">
+<header class="p-margin-sm border-b border-surgical-steel flex justify-between items-center bg-surface-container-low">
+<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-widest">Course Directory</h3>
+<button class="border border-surgical-steel text-on-surface px-3 py-1 font-label-sm text-label-sm hover:border-primary hover:text-primary transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-1 focus:ring-offset-monolith-surface">
+                            + New Lesson
+                        </button>
+</header>
+<div class="flex-1 p-0 overflow-y-auto max-h-[400px]">
+<ul class="flex flex-col">
+<li class="p-margin-sm border-b border-surgical-steel hover:bg-surface-container-highest transition-colors group flex justify-between items-start">
+<div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold">Stoic Foundations I</h4>
+<p class="font-code-block text-code-block text-fog-muted mt-1">ID: ST-101 | ENROLLED: 4,092 | STATUS: ACTIVE</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 border border-surgical-steel text-on-surface px-4 py-2 font-label-md text-label-md hover:bg-surgical-steel transition-all focus:outline-none focus:ring-2 focus:ring-primary">
+                                    Edit
+                                </button>
+</li>
+<li class="p-margin-sm border-b border-surgical-steel hover:bg-surface-container-highest transition-colors group flex justify-between items-start">
+<div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold">Advanced Dichotomy of Control</h4>
+<p class="font-code-block text-code-block text-fog-muted mt-1">ID: ST-201 | ENROLLED: 1,844 | STATUS: ACTIVE</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 border border-surgical-steel text-on-surface px-4 py-2 font-label-md text-label-md hover:bg-surgical-steel transition-all focus:outline-none focus:ring-2 focus:ring-primary">
+                                    Edit
+                                </button>
+</li>
+<li class="p-margin-sm border-b border-surgical-steel hover:bg-surface-container-highest transition-colors group flex justify-between items-start">
+<div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold">Meditations Deep Dive</h4>
+<p class="font-code-block text-code-block text-fog-muted mt-1">ID: ST-305 | ENROLLED: 890 | STATUS: DRAFTING</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 border border-surgical-steel text-on-surface px-4 py-2 font-label-md text-label-md hover:bg-surgical-steel transition-all focus:outline-none focus:ring-2 focus:ring-primary">
+                                    Edit
+                                </button>
+</li>
+</ul>
+</div>
+</section>
+<!-- Moderator Management Section -->
+<section class="bg-monolith-surface border border-surgical-steel flex flex-col mt-px h-full">
+<header class="p-margin-sm border-b border-surgical-steel bg-surface-container-low">
+<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-widest">Moderator Cadre</h3>
+</header>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-surgical-steel bg-surface-container-highest font-label-sm text-label-sm text-fog-muted">
+<th class="p-3 font-normal">OPERATOR</th>
+<th class="p-3 font-normal">DESIGNATION</th>
+<th class="p-3 font-normal text-right">ACTION</th>
+</tr>
+</thead>
+<tbody class="font-code-block text-code-block">
+<tr class="border-b border-surgical-steel hover:bg-surface-container-low transition-colors">
+<td class="p-3 text-on-surface flex items-center">
+<div class="w-2 h-2 bg-primary mr-3"></div>
+                                        Marcus A.
+                                    </td>
+<td class="p-3 text-fog-muted">Senior Mod</td>
+<td class="p-3 text-right">
+<button class="text-on-surface-variant hover:text-primary underline decoration-surgical-steel hover:decoration-primary transition-colors">Manage</button>
+</td>
+</tr>
+<tr class="border-b border-surgical-steel hover:bg-surface-container-low transition-colors">
+<td class="p-3 text-on-surface flex items-center">
+<div class="w-2 h-2 bg-primary mr-3"></div>
+                                        Epictetus F.
+                                    </td>
+<td class="p-3 text-fog-muted">Senior Mod</td>
+<td class="p-3 text-right">
+<button class="text-on-surface-variant hover:text-primary underline decoration-surgical-steel hover:decoration-primary transition-colors">Manage</button>
+</td>
+</tr>
+<tr class="border-b border-surgical-steel hover:bg-surface-container-low transition-colors">
+<td class="p-3 text-on-surface flex items-center">
+<div class="w-2 h-2 bg-fog-muted mr-3"></div>
+                                        Seneca Y.
+                                    </td>
+<td class="p-3 text-fog-muted">Junior Mod</td>
+<td class="p-3 text-right">
+<button class="text-on-surface-variant hover:text-primary underline decoration-surgical-steel hover:decoration-primary transition-colors">Manage</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- Column 2: Review Queue (Right 4 cols) -->
+<div class="lg:col-span-4 bg-monolith-surface border border-surgical-steel flex flex-col h-full">
+<header class="p-margin-sm border-b border-surgical-steel bg-surface-container-low flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-widest">Review Queue</h3>
+<span class="bg-primary text-on-primary-fixed px-2 py-0.5 font-label-sm text-label-sm font-bold">14 PENDING</span>
+</header>
+<div class="flex-1 overflow-y-auto p-margin-sm space-y-margin-sm">
+<!-- Queue Item 1 -->
+<div class="border border-surgical-steel p-margin-sm bg-background flex flex-col relative group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<h4 class="font-body-md text-body-md text-on-surface font-semibold mb-1">Julian M.</h4>
+<p class="font-code-block text-code-block text-fog-muted text-xs mb-4">"Seeking mastery over emotional impulses during high-stress trading periods."</p>
+<div class="flex space-x-2 mt-auto">
+<button class="flex-1 bg-primary text-on-primary-fixed font-label-md text-label-md py-2 hover:bg-primary-container transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
+                                ACCEPT
+                            </button>
+<button class="flex-1 border border-surgical-steel text-on-surface font-label-md text-label-md py-2 hover:bg-surface-container-highest transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
+                                REJECT
+                            </button>
+</div>
+</div>
+<!-- Queue Item 2 -->
+<div class="border border-surgical-steel p-margin-sm bg-background flex flex-col relative group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<h4 class="font-body-md text-body-md text-on-surface font-semibold mb-1">Aurelia T.</h4>
+<p class="font-code-block text-code-block text-fog-muted text-xs mb-4">"Interested in applying Stoic frameworks to modern team management and conflict resolution."</p>
+<div class="flex space-x-2 mt-auto">
+<button class="flex-1 bg-primary text-on-primary-fixed font-label-md text-label-md py-2 hover:bg-primary-container transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
+                                ACCEPT
+                            </button>
+<button class="flex-1 border border-surgical-steel text-on-surface font-label-md text-label-md py-2 hover:bg-surface-container-highest transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
+                                REJECT
+                            </button>
+</div>
+</div>
+<!-- Queue Item 3 -->
+<div class="border border-surgical-steel p-margin-sm bg-background flex flex-col relative group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<h4 class="font-body-md text-body-md text-on-surface font-semibold mb-1">Cassius B.</h4>
+<p class="font-code-block text-code-block text-fog-muted text-xs mb-4">"Looking for disciplined daily routines to counter severe procrastination and lack of focus."</p>
+<div class="flex space-x-2 mt-auto">
+<button class="flex-1 bg-primary text-on-primary-fixed font-label-md text-label-md py-2 hover:bg-primary-container transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
+                                ACCEPT
+                            </button>
+<button class="flex-1 border border-surgical-steel text-on-surface font-label-md text-label-md py-2 hover:bg-surface-container-highest transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
+                                REJECT
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
