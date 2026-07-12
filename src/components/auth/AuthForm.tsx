@@ -135,8 +135,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <div className="space-y-5">
             {isSignup && (
               <Field
-                label="Full name"
-                placeholder="Marcus North"
+                label="Username"
+                placeholder="marcus_north"
                 value={fullName}
                 onChange={setFullName}
               />

@@ -1,80 +1,38 @@
 # Database Schema
-## Stoicverse Single-Community Model
 
-**Last Updated:** July 11, 2026
+## Stoicverse single-community model
+
+**Last updated:** July 12, 2026
 
 ## Scope
 
-The database supports one global Stoicverse community. There is no `communities` table, `community_roles` table, community slug, tenant identifier, or community owner relationship. Every membership, channel, post, event, lesson, tier, and payment is global to Stoicverse.
+All application data belongs to one global Stoicverse community. The schema must not add `communities`, `community_roles`, a community slug, a tenant identifier, or `community_id` unless the product scope changes explicitly.
 
-## Identity And Roles
+## Identity and access
 
-`auth.users` is managed by Supabase Auth. `public.profiles` extends each account with `full_name`, `avatar_url`, `is_suspended`, and a global `platform_role`:
+Supabase Auth owns `auth.users`. `profiles` adds `full_name`, `avatar_url`, `is_suspended`, and global `platform_role` (`member`, `moderator`, `influencer`, `super_admin`). A partial unique index limits the platform to one influencer.
 
-- `member`
-- `moderator`
-- `influencer`
-- `super_admin`
+`platform_settings` is a singleton configuration record. `memberships` stores the global paid-access lifecycle; `member_tiers` stores a member’s tier and Master state.
 
-The partial unique index `profiles_one_influencer_idx` ensures that there can be at most one influencer account. A super admin assigns this role when the Stoicverse influencer account is created; the role does not create or own a separate community.
+## Core records
 
-## Singleton Configuration
+- Content: `channels`, `posts`, `reactions`, `events`, `tiers`, `lessons`, and `lesson_progress`.
+- Applications and fulfilment: `review_applications`, `team_applications`, and `mentorships`.
+- Operations: `payments`, `notifications`, and `stripe_webhook_events`.
 
-`platform_settings` has exactly one row, enforced by a `singleton` boolean primary key constrained to `true`. It holds `community_name` (default `Stoicverse`), membership pricing, Stripe price identifiers, and the optional `influencer_id` reference.
+`lessons.video_file_id` stores a provider identifier only. `events.zoom_url` is sensitive, tier-gated content rather than public event metadata.
 
-## Core Tables
+## Required RLS invariants
 
-| Table | Purpose |
-| --- | --- |
-| `profiles` | Account profile, suspension state, and global platform role. |
-| `platform_settings` | The singleton Stoicverse configuration record. |
-| `memberships` | One paid membership lifecycle per user, with global status and billing dates. |
-| `payments` | Stripe payment and refund records. |
-| `channels` | Stoicverse-wide discussion channels. |
-| `posts` | Messages within channels. |
-| `reactions` | A member's reaction to a post. |
-| `events` | Stoicverse events and gated attendance details. |
-| `tiers` | Global curriculum tiers. |
-| `lessons` | Global, tier-gated lessons. |
-| `member_tiers` | A member's active tier and unlock state. |
-| `lesson_progress` | Per-member lesson completion and watch progress. |
-| `review_applications` | Master-tier review requests. |
-| `team_applications` | Moderator or team applications. |
-| `mentorships` | Optional mentorship purchases and fulfillment status. |
-| `notifications` | Member notifications. |
-| `stripe_webhook_events` | Idempotency ledger for Stripe webhooks. |
+- Users read or update only their own profile fields; staff controls role and suspension state.
+- Active, non-suspended membership is required for protected Stoicverse data.
+- Database policies enforce minimum tier for all gated channels, posts, lessons, event links, and Master content.
+- Staff may perform only the operations granted by their global role; policies and UI must agree.
+- Payment, webhook, membership activation, mentorship activation, and system notifications use trusted server-side access only.
+- Stripe event ids remain unique to prevent duplicate webhook effects.
 
-## Relationships
+## Automation
 
-```mermaid
-erDiagram
-  PROFILES ||--o| MEMBERSHIPS : has
-  PROFILES ||--o| MEMBER_TIERS : progresses
-  PROFILES ||--o{ POSTS : authors
-  PROFILES ||--o{ REACTIONS : creates
-  PROFILES ||--o{ LESSON_PROGRESS : tracks
-  CHANNELS ||--o{ POSTS : contains
-  POSTS ||--o{ REACTIONS : receives
-  TIERS ||--o{ LESSONS : gates
-  TIERS ||--o{ MEMBER_TIERS : unlocks
-  LESSONS ||--o{ LESSON_PROGRESS : records
-```
+Membership activation creates a Tier 1 record if absent. Lesson completion and tier advancement must run atomically so a member cannot unlock content twice or skip a lesson. Timestamp triggers maintain mutable records.
 
-## Access And RLS
-
-- Every application table has Row Level Security enabled.
-- A user can read and update only their own profile fields; role and suspension changes are staff-controlled.
-- Active, non-suspended membership is required to read protected community, course, event, progression, and payment data.
-- `super_admin` has platform-wide operational access.
-- The single `influencer` and moderators have global Stoicverse content and moderation permissions; no policy is scoped by community id.
-- Payments and Stripe webhook records are written by trusted server-side code only.
-
-## Lifecycle Automation
-
-- Creating or activating a membership creates the member's global `member_tiers` record if needed.
-- Updated-at triggers maintain timestamp fields.
-- Stripe webhook processing changes membership state only after server-side validation and records event ids in `stripe_webhook_events` to prevent duplicate processing.
-
-## Migrations
-
-The current model is introduced by `supabase/migrations/20260711000005_single_stoicverse_schema.sql`. It replaces the earlier multitenant schema. Any future migration must preserve the single-community invariant and must not add `community_id` to application tables unless the product scope changes explicitly.
+The active schema originates in `supabase/migrations/20260711000005_single_stoicverse_schema.sql`; later migrations may refine it but must preserve these invariants.

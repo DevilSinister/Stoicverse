@@ -3,11 +3,21 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 type ActionResult = { error?: string; success?: true };
 
 const asTrimmedString = (value: FormDataEntryValue | null) =>
   typeof value === "string" ? value.trim() : "";
+
+function isApprovedZoomUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && (url.hostname === "zoom.us" || url.hostname.endsWith(".zoom.us") || url.hostname === "zoom.com" || url.hostname.endsWith(".zoom.com"));
+  } catch {
+    return false;
+  }
+}
 
 export async function enrollInEvent(eventId: string): Promise<ActionResult> {
   const supabase = await createClient();
@@ -42,9 +52,7 @@ export async function createEvent(formData: FormData): Promise<ActionResult> {
   if (endsAt && new Date(endsAt) <= new Date(startsAt)) {
     return { error: "The event end time must be after its start time." };
   }
-  if (zoomUrl) {
-    try { new URL(zoomUrl); } catch { return { error: "Enter a valid Zoom URL, or leave it blank for now." }; }
-  }
+  if (zoomUrl && !isApprovedZoomUrl(zoomUrl)) return { error: "Use an HTTPS Zoom meeting URL, or leave it blank for now." };
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -52,10 +60,10 @@ export async function createEvent(formData: FormData): Promise<ActionResult> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("platform_role")
+    .select("platform_role, is_suspended")
     .eq("id", user.id)
     .maybeSingle();
-  if (!profile || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) {
+  if (!profile || profile.is_suspended || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) {
     return { error: "Only community staff can create events." };
   }
 
@@ -68,6 +76,9 @@ export async function createEvent(formData: FormData): Promise<ActionResult> {
     .maybeSingle();
 
   if (!channel) {
+    if (!["influencer", "super_admin"].includes(profile.platform_role)) {
+      return { error: "An administrator or influencer must configure the events channel first." };
+    }
     const { data, error } = await supabase
       .from("channels")
       .insert({ name: "events", type: "events", description: "Live Stoicverse sessions", created_by: user.id })
@@ -87,13 +98,17 @@ export async function createEvent(formData: FormData): Promise<ActionResult> {
       host_name: hostName,
       starts_at: new Date(startsAt).toISOString(),
       ends_at: endsAt ? new Date(endsAt).toISOString() : null,
-      zoom_url: zoomUrl || null,
       min_tier: minTier,
     })
     .select("id")
     .single();
 
   if (eventError || !event) return { error: "Unable to create the event." };
+
+  if (zoomUrl) {
+    const { error: roomError } = await createAdminClient().from("event_rooms").upsert({ event_id: event.id, zoom_url: zoomUrl }, { onConflict: "event_id" });
+    if (roomError) return { error: "Event created, but its meeting room could not be secured." };
+  }
 
   const { error: postError } = await supabase.from("posts").insert({
     channel_id: channel.id,
@@ -110,18 +125,21 @@ export async function createEvent(formData: FormData): Promise<ActionResult> {
 
 export async function updateEventZoomUrl(eventId: string, zoomUrl: string): Promise<ActionResult> {
   if (!eventId || !zoomUrl.trim()) return { error: "Enter the meeting URL before publishing it." };
-  try { new URL(zoomUrl); } catch { return { error: "Enter a valid Zoom URL." }; }
+  if (!isApprovedZoomUrl(zoomUrl.trim())) return { error: "Use an HTTPS Zoom meeting URL." };
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to update this event." };
 
-  const { data: profile } = await supabase.from("profiles").select("platform_role").eq("id", user.id).maybeSingle();
-  if (!profile || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) {
+  const { data: profile } = await supabase.from("profiles").select("platform_role, is_suspended").eq("id", user.id).maybeSingle();
+  if (!profile || profile.is_suspended || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) {
     return { error: "Only community staff can update event rooms." };
   }
 
-  const { error } = await supabase.from("events").update({ zoom_url: zoomUrl.trim() }).eq("id", eventId);
+  const { data: event, error: eventError } = await supabase.from("events").select("id").eq("id", eventId).maybeSingle();
+  if (eventError || !event) return { error: "Unable to find that event." };
+
+  const { error } = await createAdminClient().from("event_rooms").upsert({ event_id: event.id, zoom_url: zoomUrl.trim() }, { onConflict: "event_id" });
   if (error) return { error: "Unable to publish the meeting link." };
 
   revalidatePath("/events");

@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { CheckoutScreen } from "@/components/screens/AskStoicScreens";
@@ -23,13 +22,6 @@ export default async function CheckoutPage({
 
   // If we are checking out standard membership (default), check if already active
   if (product !== "mentorship" && product !== "annual") {
-    const cookieStore = await cookies();
-    const hasLocalActive = cookieStore.get("stoicverse_membership_active")?.value === "true";
-
-    if (hasLocalActive) {
-      redirect("/dashboard");
-    }
-
     const { data: membership, error } = await supabase
       .from("memberships")
       .select("id")
@@ -39,6 +31,7 @@ export default async function CheckoutPage({
       .maybeSingle();
 
     if (error) {
+      console.error("Membership Error in checkout:", error);
       throw new Error("Unable to validate membership.");
     }
 

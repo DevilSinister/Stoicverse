@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
@@ -13,25 +12,18 @@ export async function requireActiveMembership(nextPath: string) {
     redirect(`/login?next=${encodeURIComponent(nextPath)}`);
   }
 
-  const cookieStore = await cookies();
-  const hasLocalActive = cookieStore.get("stoicverse_membership_active")?.value === "true";
+  const [{ data: membership, error: membershipError }, { data: profile, error: profileError }] = await Promise.all([
+    supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle(),
+    supabase.from("profiles").select("is_suspended").eq("id", user.id).maybeSingle(),
+  ]);
 
-  if (hasLocalActive) {
-    return { supabase, user };
-  }
-
-  const { data: membership, error } = await supabase
-    .from("memberships")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (error) {
+  if (membershipError || profileError) {
+    console.error("Membership Error:", membershipError);
+    console.error("Profile Error:", profileError);
     throw new Error("Unable to validate membership.");
   }
 
-  if (!membership) {
+  if (!membership || profile?.is_suspended) {
     redirect("/checkout");
   }
 
@@ -69,7 +61,7 @@ export async function requirePlatformRole(requiredRole: "super_admin" | "influen
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("platform_role")
+    .select("platform_role, is_suspended")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -77,7 +69,7 @@ export async function requirePlatformRole(requiredRole: "super_admin" | "influen
     throw new Error("Unable to validate admin access.");
   }
 
-  if (profile?.platform_role !== requiredRole) {
+  if (profile?.is_suspended || profile?.platform_role !== requiredRole) {
     redirect("/");
   }
 

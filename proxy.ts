@@ -100,19 +100,16 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  const { data: membership, error: membershipError } = await supabase
-    .from("memberships")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
+  const [{ data: membership, error: membershipError }, { data: profile, error: profileError }] = await Promise.all([
+    supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle(),
+    supabase.from("profiles").select("is_suspended").eq("id", user.id).maybeSingle(),
+  ]);
 
-  if (membershipError) {
+  if (membershipError || profileError) {
     return unavailableWithState(response);
   }
 
-  const hasActiveMembership = Boolean(membership);
+  const hasActiveMembership = Boolean(membership) && !profile?.is_suspended;
 
   if (isCheckoutRoute && hasActiveMembership) {
     return redirectWithState(response, new URL("/dashboard", request.url));

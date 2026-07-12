@@ -32,7 +32,7 @@ export default async function EventsPage() {
   const visibleEvents: EventRecord[] = (events ?? [])
     .map((event) => ({
       id: event.id, title: event.title, description: event.description, hostName: event.host_name ?? "Stoicverse Team",
-      startsAt: event.starts_at, endsAt: event.ends_at, zoomUrl: event.zoom_url, minTier: event.min_tier,
+      startsAt: event.starts_at, endsAt: event.ends_at, minTier: event.min_tier,
       status: event.status, enrolled: enrolledIds.has(event.id),
     }));
 

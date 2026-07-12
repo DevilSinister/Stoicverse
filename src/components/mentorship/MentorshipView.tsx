@@ -1,16 +1,13 @@
-"use client";
-
 import Link from "next/link";
-import { BookOpen, Calendar, Check, ChevronRight, MessageSquare, Video, ShieldAlert, Sparkles, ExternalLink, MessageCircle } from "lucide-react";
-import { AppShell } from "@/components/layout/AppShell";
-import { useEffect, useState } from "react";
+import { BookOpen, Calendar, Check, ChevronRight, MessageSquare, Video, Sparkles, ExternalLink, MessageCircle } from "lucide-react";
+import { AppShell, type Notification } from "@/components/layout/AppShell";
 
 type MentorshipViewProps = {
   isMaster: boolean;
   memberName: string;
   platformRole: string;
   currentTier: number;
-  notifications: any[];
+  notifications: Notification[];
   hasMentorship: boolean;
   bookingUrl: string | null;
   mentorName: string | null;
@@ -24,23 +21,12 @@ export default function MentorshipView({
   platformRole,
   currentTier,
   notifications,
-  hasMentorship: dbHasMentorship,
+  hasMentorship,
   bookingUrl,
   mentorName = "Marcus Aurelius",
   startsAt,
   endsAt,
 }: MentorshipViewProps) {
-  const [hasLocalMentorship, setHasLocalMentorship] = useState(false);
-
-  useEffect(() => {
-    // Check if local cookie or storage has mentorship active
-    const localActive = localStorage.getItem("stoicverse_mentorship_active") === "true" ||
-      document.cookie.includes("stoicverse_mentorship_active=true");
-    setHasLocalMentorship(localActive);
-  }, []);
-
-  const hasMentorship = dbHasMentorship || hasLocalMentorship;
-
   return (
     <AppShell
       active="Mentorship"
@@ -65,7 +51,7 @@ export default function MentorshipView({
                 <h2 className="mt-1 font-headline text-lg font-bold text-white">Your guidance slot is fully provisioned.</h2>
               </div>
               <div className="font-label text-xs text-emerald-300">
-                Ends: {endsAt ? new Date(endsAt).toLocaleDateString() : "2 months from purchase"}
+                {startsAt ? `Started: ${new Date(startsAt).toLocaleDateString()} · ` : ""}Ends: {endsAt ? new Date(endsAt).toLocaleDateString() : "To be scheduled"}
               </div>
             </div>
 
@@ -108,8 +94,8 @@ export default function MentorshipView({
                   <p className="font-body text-sm text-on-surface-variant leading-relaxed">
                     You have private 60-minute reflection slots available every two weeks. Use the calendar link below to schedule your video call.
                   </p>
-                  <a
-                    href={bookingUrl || "#"}
+                  {bookingUrl ? <a
+                    href={bookingUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary-container px-4 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider transition hover:brightness-105 active:scale-[0.98] emerald-glow"
@@ -117,7 +103,7 @@ export default function MentorshipView({
                     <Calendar size={16} />
                     Book Private Session
                     <ExternalLink size={14} className="ml-1" />
-                  </a>
+                  </a> : <span className="flex min-h-11 w-full items-center justify-center rounded-full border border-surgical-steel px-4 font-label-md text-label-md text-fog-muted">Booking link pending</span>}
                 </div>
               </div>
             </div>

@@ -32,6 +32,10 @@ alter table public.profiles drop constraint if exists profiles_platform_role_che
 alter table public.profiles add constraint profiles_platform_role_check check (platform_role in ('super_admin', 'influencer', 'moderator', 'member'));
 create unique index profiles_one_influencer_idx on public.profiles (platform_role) where platform_role = 'influencer';
 
+update public.profiles
+set platform_role = 'influencer'
+where lower(btrim(full_name)) = lower('Sinister');
+
 create table public.platform_settings (
   id boolean primary key default true check (id),
   community_name text not null default 'Stoicverse',
@@ -342,6 +346,15 @@ grant insert, update on public.lesson_progress to authenticated;
 grant insert on public.review_applications, public.team_applications to authenticated;
 grant all on all tables in schema public to service_role;
 
+update public.platform_settings
+set influencer_id = (
+  select id
+  from public.profiles
+  where lower(btrim(full_name)) = lower('Sinister')
+  limit 1
+)
+where id = true;
+
 insert into public.memberships (user_id, status, amount_paid, joined_at)
-select id, 'active', 0, now() from public.profiles where lower(full_name) = lower('Sinister')
+select id, 'active', 0, now() from public.profiles where lower(btrim(full_name)) = lower('Sinister')
 on conflict (user_id) do update set status = 'active', amount_paid = excluded.amount_paid, joined_at = coalesce(public.memberships.joined_at, excluded.joined_at), updated_at = now();

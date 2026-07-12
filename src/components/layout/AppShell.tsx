@@ -493,7 +493,7 @@ export function AppShell({
               <form onSubmit={handleUpdateName} className="space-y-3">
                 <h3 className="font-headline text-sm font-semibold text-white">Update Profile</h3>
                 <div>
-                  <label htmlFor="settings-username" className="block font-label text-[10px] uppercase tracking-wider text-fog-muted mb-1.5">Full Name</label>
+                  <label htmlFor="settings-username" className="block font-label text-[10px] uppercase tracking-wider text-fog-muted mb-1.5">Username</label>
                   <input
                     id="settings-username"
                     type="text"

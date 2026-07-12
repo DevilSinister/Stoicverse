@@ -47,5 +47,10 @@
   "45": "page.tsx",
   "46": "error.tsx",
   "47": "page.tsx",
-  "48": "page.tsx"
+  "48": "page.tsx",
+  "49": "EventsView.tsx",
+  "50": "createClient",
+  "51": "rls.integration.mjs",
+  "52": "SECURITY_DEPLOYMENT.md",
+  "53": "README.md"
 }

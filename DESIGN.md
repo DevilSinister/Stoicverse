@@ -1,52 +1,39 @@
-# UI/UX Design System: Ask Stoic (Trading Floor Style)
+# Stoicverse Design System
 
-This document outlines the visual identity, UX guidelines, and interaction principles for the Ask Stoic platform, utilizing the `/impeccable` methodology.
+**Last updated:** July 12, 2026
 
-## 1. Design Strategy & Vibe
-**Strategy:** "Committed Dark Institutional"
-**Register:** Product-first community and learning UI with professional trading floor energy.
-**Physical Scene:** A professional, focused trading terminal with sharp hairlines separating dark navy and slate surfaces. Monochromatic foundation punctuated by high-intent emerald green accents for growth and execution states.
+## Direction
 
-### Anti-Patterns to Refuse & Avoid
-- **NO AI Slop:** No purple/blue neon gradients. No "glassmorphism as default".
-- **NO Generic Light Themes:** Avoid warm AI-default cream/sand/beige entirely.
-- **NO "Hero-Metric" Clichés:** Avoid the standard SaaS oversized numbers with gradients.
-- **NO Ghost Cards:** No combining `border: 1px solid` with `box-shadow: 0 16px...` on the same element.
-- **NO Over-rounding on Containers:** Strict systematic feel. Card/panel structures top out at `8px` (rounded-lg). All interactive CTAs, action buttons, and small tags should be fully round (`rounded-full`) to feel like tactile coins or control knobs contrasting with the grid.
+Stoicverse uses a quiet editorial interface: serious, cold, and precise. It should feel like dependable learning infrastructure, not a social feed, trading terminal, or generic SaaS dashboard.
 
-## 2. Color Palette
-A deep navy canvas divided by clean slate-gray borders, with a single emerald accent representing execution, active states, progress, and primary actions.
+## Palette
 
-| Role | Color Name | Hex Code | Usage |
-|---|---|---|---|
-| **Body Background** | Deep Navy | `#051424` | The dark canvas for the entire application. |
-| **Surface** | Container Low | `#0D1C2D` | Side navigation, panel backgrounds. |
-| **Monolith Surface** | Slate Gray | `#1E293B` | Cards, popovers, active dialog panels. |
-| **Hairline Borders**| Surgical Border | `#334155` | 1px solid dividers, grid lines, structural borders. |
-| **Ink (Text Primary)**| Pure White | `#FFFFFF` | Primary headings and important text. |
-| **Muted Text** | Muted Slate | `#94A3B8` | Secondary text, placeholders. |
-| **Accent** | Accent Emerald | `#10B981` | Focus rings, active states, primary CTA accents. |
-| **Hover Accent** | Bright Emerald | `#4EDE93` | Hover states and highlight details. |
+| Role | Value | Use |
+| --- | --- | --- |
+| Canvas | `#0C0E10` | Page background |
+| Surface | `#16181A` | Cards and secondary panels |
+| Border | `#2A2C2E` | Hairlines and grid dividers |
+| Primary text | `#F0F1F2` | Headings and essential actions |
+| Muted text | `#8B8E91` | Supporting copy and metadata |
+| Accent | `#A7E5C5` | Focus, active state, progress, and primary calls to action |
 
-## 3. Typography
-This design system uses Inter for headings and body to keep a neutral, systematic appearance, and JetBrains Mono for metadata, labels, and data points to provide a trading-terminal feel.
+## Typography
 
-- **Display & Headings:** **Inter**
-  - *Usage:* H1, H2, Hero text, and key metrics.
-  - *Rules:* Heavy weights, tight letter-spacing (`-0.02em` to `-0.01em`).
-- **Body & UI Elements:** **Inter**
-  - *Usage:* Paragraphs, buttons, metadata, UI controls.
-  - *Rules:* Cap line length at 65–75ch. Clean, highly legible, open line height (`1.6`).
-- **Labels & Numbers:** **JetBrains Mono**
-  - *Usage:* Categories, monospaced status labels, chart values, prices.
+- **Cormorant:** display and headings. Use for page titles, important statements, and pricing; apply tight tracking and balanced wrapping.
+- **Inter:** body, navigation, controls, forms, labels, and metadata.
 
-## 4. Layout & Spacing
-- **Surgical Grid:** Use 1px borders (`border-[#334155]` or `border-slate-700`) to divide dashboard sections cleanly.
-- **Vertical Rhythm:** 8px base grid.
-- **Desktop:** Emphasize wide horizontal gutters and side margins (64px).
-- **Mobile:** Reflow content into a single column. Horizontal padding reduces to 20px, typography scales down.
+Do not use JetBrains Mono. Numeric or status information should use Inter with tabular numerals where alignment matters.
 
-## 5. Interaction & Motion
-- **Quiet Motion:** Only animate when strictly necessary. Use `ease-out-expo` (150-250ms). No bouncy/elastic effects.
-- **Hover States:** Subtle background shifts or the emerald accent glow. No scale transforms.
-- **Focus States:** Emerald border with a low-opacity emerald outer glow (`0px 0px 15px rgba(16, 185, 129, 0.2)`).
+## Layout and components
+
+- Use a strict 8px spacing rhythm and 1px hairline dividers to create structure before decoration.
+- Use moderate rounding (`12–16px`) for cards and containers. Buttons, tags, and inputs are pill-shaped.
+- Keep desktop layouts spacious and grid-led; reflow to one column with at least 20px horizontal padding on mobile.
+- Use clear labels for tier, eligibility, payments, and staff actions. Preserve minimum 44px touch targets.
+
+## Interaction and accessibility
+
+- Motion is quiet, purposeful, and 150–300ms; no bounce or scale-driven layout shifts.
+- Hover states use subtle surface changes or mint emphasis. Focus states use a visible mint outline.
+- Muted text must maintain at least 4.5:1 contrast on its background.
+- Avoid gradients, glassmorphism, warm beige themes, decorative hero metrics, excessive shadows, and oversized rounded containers.

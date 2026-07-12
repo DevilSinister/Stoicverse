@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, CalendarDays, Check, ChevronRight, CreditCard, Crown, Gauge, Image as ImageIcon, Lock, LogIn, MessageSquare, MoreVertical, Play, Plus, Send, Shield, Video } from "lucide-react";
 import { AppShell as SharedAppShell } from "@/components/layout/AppShell";
@@ -642,34 +642,28 @@ export function CommunitySelectionScreen() {
 
 export function CheckoutScreen() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const product = searchParams.get("product");
   const isMentorship = product === "mentorship";
-  const isAnnual = product === "annual";
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    if (isMentorship) {
-      // Set mentorship active cookie (expires in 60 days)
-      document.cookie = "stoicverse_mentorship_active=true; path=/; max-age=5184000; SameSite=Lax";
-      // Also write to local storage as fallback
-      localStorage.setItem("stoicverse_mentorship_active", "true");
-      router.push("/mentorship");
-    } else {
-      // Set membership active cookie (expires in 1 year)
-      document.cookie = "stoicverse_membership_active=true; path=/; max-age=31536000; SameSite=Lax";
-      localStorage.setItem("stoicverse_membership_active", "true");
-      if (isAnnual) {
-        localStorage.setItem("stoicverse_membership_tier", "annual");
-      }
-      router.push("/dashboard");
+    setError(null);
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product: isMentorship ? "mentorship" : "membership" }),
+      });
+      const payload = await response.json() as { url?: string; error?: string };
+      if (!response.ok || !payload.url) throw new Error(payload.error ?? "Unable to start secure checkout.");
+      window.location.assign(payload.url);
+    } catch (checkoutError) {
+      setError(checkoutError instanceof Error ? checkoutError.message : "Unable to start secure checkout.");
+      setLoading(false);
     }
   };
 
@@ -686,13 +680,11 @@ export function CheckoutScreen() {
         <div className="relative z-10 my-auto max-w-2xl border-l-2 border-primary-container pl-8 py-4">
           <p className="font-label-sm text-label-sm uppercase tracking-[0.16em] text-primary-container">Checkout</p>
           <h1 className="mt-3 font-headline text-3xl font-extrabold text-white leading-tight md:text-4xl">
-            {isMentorship ? "Secure Mentorship." : isAnnual ? "Activate Annual Membership." : "Activate membership."}
+            {isMentorship ? "Secure Mentorship." : "Activate membership."}
           </h1>
           <p className="mt-4 font-body text-base text-on-surface-variant leading-relaxed">
             {isMentorship
               ? "Accelerate your training with dedicated 1-on-1 private logs reviews and private reflection slots with a Master Stoic."
-              : isAnnual
-              ? "Unlock a full year of the complete operating surface for disciplined study, interactive feedback, and community reflection."
               : "Unlock the complete operating surface for disciplined study, interactive feedback, and community reflection."}
           </p>
 
@@ -744,15 +736,6 @@ export function CheckoutScreen() {
                     <p className="mt-1 font-body text-xs text-on-surface-variant">Attend gated video sessions, monthly reflection rooms, and live lectures.</p>
                   </div>
                 </div>
-                {isAnnual && (
-                  <div className="flex items-start gap-4">
-                    <Check className="mt-1 size-5 text-primary-container shrink-0" />
-                    <div>
-                      <h4 className="font-headline text-sm text-white font-semibold">Annual Savings Locked In</h4>
-                      <p className="mt-1 font-body text-xs text-on-surface-variant">Get 12 months for the price of 10, saving 16% over standard monthly pricing.</p>
-                    </div>
-                  </div>
-                )}
               </>
             )}
           </div>
@@ -771,10 +754,8 @@ export function CheckoutScreen() {
             <span className="font-headline text-lg font-bold text-primary-container">
               {isMentorship ? (
                 <span>$1,000.00<span className="text-xs text-fog-muted lowercase font-normal">/2mo</span></span>
-              ) : isAnnual ? (
-                <span>$100.00<span className="text-xs text-fog-muted lowercase font-normal">/yr</span></span>
               ) : (
-                <span>$10.00<span className="text-xs text-fog-muted lowercase font-normal">/mo</span></span>
+                <span>Membership</span>
               )}
             </span>
           </div>
@@ -805,8 +786,9 @@ export function CheckoutScreen() {
               className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CreditCard size={16} />
-              {loading ? "Processing..." : isMentorship ? "Pay $1,000.00" : isAnnual ? "Pay $100.00" : "Pay $10.00"}
+              {loading ? "Redirecting to secure checkout..." : isMentorship ? "Continue to secure mentorship checkout" : "Continue to secure membership checkout"}
             </button>
+            {error && <p role="alert" className="font-body text-sm text-red-400">{error}</p>}
           </div>
         </form>
       </section>

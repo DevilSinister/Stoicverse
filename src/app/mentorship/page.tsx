@@ -21,9 +21,8 @@ export default async function MentorshipPage() {
   const notifications = notificationsResult.data ?? [];
   const mentorship = mentorshipResult.data;
 
-  // Type assertion or casting for mentor profile details
-  const mentor = mentorship?.mentor as any;
-  const mentorName = mentor?.full_name ?? "Marcus Aurelius";
+  const mentor = mentorship?.mentor as unknown as { full_name?: string } | { full_name?: string }[] | null | undefined;
+  const mentorName = (Array.isArray(mentor) ? mentor[0]?.full_name : mentor?.full_name) ?? "Marcus Aurelius";
 
   return (
     <MentorshipView
