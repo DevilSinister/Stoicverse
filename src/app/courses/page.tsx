@@ -1,17 +1,8 @@
-import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { requireActiveMembership } from "@/lib/supabase/access";
 import { LearningPathView, type LearningPathData } from "@/components/courses/LearningPathView";
 
-type CoursesPageOptions = {
-  nextPath?: string;
-  routeBase?: string;
-  creatorWorkspace?: boolean;
-};
-
-export async function renderCoursesPage({ nextPath = "/courses", routeBase = "", creatorWorkspace = false }: CoursesPageOptions = {}) {
-  const { supabase, user } = creatorWorkspace
-    ? await requireInfluencerWorkspace(nextPath)
-    : await requireActiveMembership(nextPath);
-
+export default async function CoursesPage() {
+  const { supabase, user } = await requireActiveMembership("/courses");
   const [profileResult, tierResult, progressResult, lessonsResult, tiersResult] = await Promise.all([
     supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
     supabase.from("member_tiers").select("current_tier, is_master").eq("user_id", user.id).maybeSingle(),
@@ -84,9 +75,5 @@ export async function renderCoursesPage({ nextPath = "/courses", routeBase = "",
     tiers: formattedTiers,
   };
 
-  return <LearningPathView data={data} routeBase={routeBase} />;
-}
-
-export default async function CoursesPage() {
-  return renderCoursesPage();
+  return <LearningPathView data={data} />;
 }
