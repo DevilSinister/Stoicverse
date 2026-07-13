@@ -15,7 +15,7 @@ Stoicverse is one paid Stoic learning community. It combines a read-led communit
 | --- | --- |
 | Member | Consume eligible community content, complete lessons, react to posts, enrol in eligible events, apply for mentorship and—after Master unlock—review and team applications. |
 | Moderator | Member capabilities plus publish, pin, and delete community posts; create and manage events; warn or suspend members. |
-| Influencer | Moderator capabilities plus create, reorder, rename, and delete channels; manage moderators, curriculum, and review applications. One global influencer account is allowed. |
+| Influencer | Uses the protected `/creator` operational workspace instead of member-facing screens; manages channels, moderators, curriculum, review applications, and events. One global influencer account is allowed. |
 | Super admin | Platform-wide operations: roles, members, payments, settings, and moderation. |
 
 Members cannot create posts, channels, direct messages, or access content, links, or video identifiers above their earned tier.

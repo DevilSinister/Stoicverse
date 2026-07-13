@@ -5,6 +5,7 @@ import { getSupabaseConfig } from "@/lib/supabase/env";
 
 const authRoutes = ["/login", "/signup"];
 const memberRoutes = ["/dashboard", "/community", "/courses", "/events", "/master", "/subscription"];
+const influencerRoute = "/creator";
 
 function isRouteMatch(path: string, routes: string[]) {
   return routes.some((route) => path === route || path.startsWith(`${route}/`));
@@ -81,6 +82,7 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isCheckoutRoute = path === "/checkout";
+  const isInfluencerRoute = path === influencerRoute || path.startsWith(`${influencerRoute}/`);
   const requiresMembership = isRouteMatch(path, memberRoutes);
   const isAuthRoute = authRoutes.includes(path);
   const currentPath = `${path}${request.nextUrl.search}`;
@@ -95,14 +97,14 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  const needsSubscriptionCheck = isCheckoutRoute || requiresMembership || isAuthRoute;
+  const needsSubscriptionCheck = isCheckoutRoute || requiresMembership || isAuthRoute || isInfluencerRoute;
   if (!needsSubscriptionCheck) {
     return response;
   }
 
   const [{ data: membership, error: membershipError }, { data: profile, error: profileError }] = await Promise.all([
     supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle(),
-    supabase.from("profiles").select("is_suspended").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("is_suspended, platform_role").eq("id", user.id).maybeSingle(),
   ]);
 
   if (membershipError || profileError) {
@@ -110,6 +112,14 @@ export async function proxy(request: NextRequest) {
   }
 
   const hasActiveMembership = Boolean(membership) && !profile?.is_suspended;
+
+  if (profile?.platform_role === "influencer" && !isInfluencerRoute) {
+    return redirectWithState(response, new URL(influencerRoute, request.url));
+  }
+
+  if (isInfluencerRoute && (profile?.is_suspended || profile?.platform_role !== "influencer")) {
+    return redirectWithState(response, new URL("/", request.url));
+  }
 
   if (isCheckoutRoute && hasActiveMembership) {
     return redirectWithState(response, new URL("/dashboard", request.url));
@@ -121,7 +131,7 @@ export async function proxy(request: NextRequest) {
 
   if (isAuthRoute) {
     const next = safeNextPath(request);
-    const destination = hasActiveMembership ? "/dashboard" : next === "/checkout" ? next : "/checkout";
+    const destination = profile?.platform_role === "influencer" ? influencerRoute : hasActiveMembership ? "/dashboard" : next === "/checkout" ? next : "/checkout";
     return redirectWithState(response, new URL(destination, request.url));
   }
 
