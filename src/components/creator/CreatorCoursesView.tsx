@@ -1,47 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { CheckCircle2, ChevronRight, Clock, GraduationCap, Lock, PlayCircle } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { CheckCircle2, ChevronRight, Clock, GraduationCap, Lock, PlayCircle, Plus } from "lucide-react";
 
+import { addLesson } from "@/app/courses/actions";
 import { AppShell } from "@/components/layout/AppShell";
+import type { LearningPathData, TierProgressItem } from "@/components/courses/LearningPathView";
 import { withRouteBase } from "@/lib/navigation/paths";
-
-export type LessonProgressItem = {
-  id: string;
-  title: string;
-  description: string | null;
-  sortOrder: number;
-  duration: number | null;
-  isCompleted: boolean;
-  completionPercentage: number;
-  isLocked: boolean;
-  isUpcoming: boolean;
-};
-
-export type TierProgressItem = {
-  id: string;
-  level: number;
-  title: string;
-  description: string | null;
-  lessons: LessonProgressItem[];
-  isLocked: boolean;
-  completedCount: number;
-  totalCount: number;
-};
-
-export type LearningPathData = {
-  memberName: string;
-  platformRole: string;
-  currentTier: number;
-  isMaster: boolean;
-  tiers: TierProgressItem[];
-};
 
 type FilterType = "all" | "in-progress" | "available" | "completed" | "locked";
 
-export function LearningPathView({ data, routeBase = "" }: { data: LearningPathData; routeBase?: string }) {
+export function CreatorCoursesView({ data }: { data: LearningPathData }) {
   const [filter, setFilter] = useState<FilterType>("all");
+  const [isAddingLesson, setIsAddingLesson] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const submitLesson = (formData: FormData) => startTransition(async () => {
+    const result = await addLesson(formData);
+    setMessage(result.error ?? "Lesson created. Published lessons are now visible to members.");
+    if (result.success) setIsAddingLesson(false);
+  });
 
   const allLessons = useMemo(() => {
     return data.tiers.flatMap((tier) =>
@@ -76,22 +56,30 @@ export function LearningPathView({ data, routeBase = "" }: { data: LearningPathD
   return (
     <AppShell
       active="Learning"
-      title="Learning Path"
+      title="Creator Curriculum"
       isMaster={data.isMaster}
       memberName={data.memberName}
       platformRole={data.platformRole}
       currentTier={data.currentTier}
-      routeBase={routeBase}
+      routeBase="/creator"
     >
       <div className="mx-auto max-w-[1440px] space-y-8 px-4 py-8 md:px-8">
         <header className="flex flex-col justify-between gap-6 border-b border-surgical-steel pb-6 md:flex-row md:items-end">
           <div>
-            <h2 className="font-display text-3xl font-bold tracking-tight text-white">Curriculum Path</h2>
+            <h2 className="font-display text-3xl font-bold tracking-tight text-white">Creator Curriculum</h2>
             <p className="mt-2 max-w-lg font-body text-sm text-on-surface-variant">
-              A rigorous curriculum designed for disciplined capital management and psychological fortitude.
+              Manage the member learning path from a dedicated creator workspace without exposing these controls on user routes.
             </p>
           </div>
           <div className="flex w-full flex-col gap-3 md:w-80">
+            <button
+              type="button"
+              onClick={() => setIsAddingLesson(true)}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary-container px-5 font-label text-xs font-semibold uppercase tracking-wider text-on-primary-fixed transition hover:brightness-110"
+            >
+              <Plus size={16} />
+              Add lesson
+            </button>
             <div className="space-y-2">
               <div className="flex items-end justify-between">
                 <span className="font-label text-label-sm uppercase tracking-wider text-on-surface-variant">Overall Progress</span>
@@ -103,6 +91,15 @@ export function LearningPathView({ data, routeBase = "" }: { data: LearningPathD
             </div>
           </div>
         </header>
+
+        {message && (
+          <div role="status" className="flex items-center justify-between gap-4 border border-primary-container/50 bg-primary-container/10 px-4 py-3 font-body text-sm text-on-surface">
+            <span>{message}</span>
+            <button className="font-label text-xs text-primary-container hover:text-white" onClick={() => setMessage(null)}>
+              Dismiss
+            </button>
+          </div>
+        )}
 
         <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {data.tiers.map((tier) => {
@@ -198,7 +195,7 @@ export function LearningPathView({ data, routeBase = "" }: { data: LearningPathD
                   {!isLocked && (
                     <div className="pt-2">
                       <Link
-                        href={withRouteBase(routeBase, `/courses/lesson/${lesson.id}`)}
+                        href={withRouteBase("/creator", `/courses/lesson/${lesson.id}`)}
                         className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-label text-xs uppercase tracking-wider transition ${isCompleted ? "border border-surgical-steel text-on-surface-variant hover:border-primary-container/50 hover:text-white" : inProgress ? "bg-primary-container text-on-primary-fixed hover:bg-opacity-90" : "border border-primary-container text-primary-container hover:bg-primary-container/10"}`}
                       >
                         {isCompleted ? "Review" : inProgress ? "Resume" : "Start"}
@@ -219,6 +216,12 @@ export function LearningPathView({ data, routeBase = "" }: { data: LearningPathD
           )}
         </section>
       </div>
+      {isAddingLesson && <AddLessonDialog tiers={data.tiers} pending={isPending} onClose={() => setIsAddingLesson(false)} onSubmit={submitLesson} />}
     </AppShell>
   );
+}
+
+function AddLessonDialog({ tiers, pending, onClose, onSubmit }: { tiers: TierProgressItem[]; pending: boolean; onClose: () => void; onSubmit: (formData: FormData) => void }) {
+  const input = "h-10 border border-surgical-steel bg-surface-container-low px-3 font-body text-sm text-white outline-none placeholder:text-fog-muted focus:border-primary-container";
+  return <div role="dialog" aria-modal="true" aria-labelledby="add-lesson-title" className="fixed inset-0 z-50 grid place-items-center bg-surface-container-lowest/85 p-4" onMouseDown={onClose}><form action={onSubmit} onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-xl rounded-lg border border-surgical-steel bg-monolith-surface"><div className="border-b border-surgical-steel bg-surface-container-high px-5 py-4"><p className="font-label text-xs text-primary-container">CURRICULUM CONTROL</p><h2 id="add-lesson-title" className="mt-1 font-headline text-lg font-semibold text-white">Add lesson</h2></div><div className="grid gap-4 p-5 sm:grid-cols-2"><label className="grid gap-1.5 sm:col-span-2"><span className="font-label text-xs text-fog-muted">Lesson title</span><input className={input} name="title" required /></label><label className="grid gap-1.5"><span className="font-label text-xs text-fog-muted">Tier</span><select className={input} name="tierId" required>{tiers.map((tier) => <option key={tier.id} value={tier.id}>Tier {tier.level}: {tier.title}</option>)}</select></label><label className="grid gap-1.5"><span className="font-label text-xs text-fog-muted">Status</span><select className={input} name="status" defaultValue="draft"><option value="draft">Draft</option><option value="published">Published</option></select></label><label className="grid gap-1.5 sm:col-span-2"><span className="font-label text-xs text-fog-muted">Google Drive file ID</span><input className={input} name="videoFileId" placeholder="File ID only, not a sharing URL" required /></label><label className="grid gap-1.5"><span className="font-label text-xs text-fog-muted">Duration (seconds)</span><input className={input} name="durationSeconds" type="number" min="0" defaultValue="0" required /></label><label className="grid gap-1.5"><span className="font-label text-xs text-fog-muted">Order</span><input className={input} name="sortOrder" type="number" min="0" defaultValue="0" required /></label><label className="grid gap-1.5 sm:col-span-2"><span className="font-label text-xs text-fog-muted">Description</span><textarea className={input} name="description" rows={3} /></label></div><div className="flex justify-end gap-3 border-t border-surgical-steel px-5 py-4"><button type="button" onClick={onClose} className="min-h-10 px-3 font-label text-xs text-fog-muted hover:text-white">Cancel</button><button disabled={pending} className="min-h-10 rounded-full bg-primary-container px-5 font-label text-xs font-semibold uppercase tracking-wider text-on-primary-fixed disabled:opacity-60">{pending ? "Saving…" : "Save lesson"}</button></div></form></div>;
 }
