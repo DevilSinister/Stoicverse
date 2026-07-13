@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
-import { CheckCircle2, ChevronRight, Clock, GraduationCap, Lock, PlayCircle } from "lucide-react";
+import { useState, useMemo, useTransition } from "react";
+import { CheckCircle2, ChevronRight, Clock, GraduationCap, Lock, PlayCircle, Plus } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { addLesson } from "@/app/courses/actions";
+import { withRouteBase } from "@/lib/navigation/paths";
 
 export type LessonProgressItem = {
   id: string;
@@ -18,6 +20,7 @@ export type LessonProgressItem = {
 };
 
 export type TierProgressItem = {
+  id: string;
   level: number;
   title: string;
   description: string | null;
@@ -37,8 +40,18 @@ export type LearningPathData = {
 
 type FilterType = "all" | "in-progress" | "available" | "completed" | "locked";
 
-export function LearningPathView({ data }: { data: LearningPathData }) {
+export function LearningPathView({ data, routeBase = "" }: { data: LearningPathData; routeBase?: string }) {
   const [filter, setFilter] = useState<FilterType>("all");
+  const [isAddingLesson, setIsAddingLesson] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const canAddLessons = data.platformRole === "influencer";
+
+  const submitLesson = (formData: FormData) => startTransition(async () => {
+    const result = await addLesson(formData);
+    setMessage(result.error ?? "Lesson created. Published lessons are now visible to members.");
+    if (result.success) setIsAddingLesson(false);
+  });
 
   // Aggregate all lessons across all tiers
   const allLessons = useMemo(() => {
@@ -88,6 +101,7 @@ export function LearningPathView({ data }: { data: LearningPathData }) {
       memberName={data.memberName}
       platformRole={data.platformRole}
       currentTier={data.currentTier}
+      routeBase={routeBase}
     >
       <div className="px-4 md:px-8 py-8 max-w-[1440px] mx-auto space-y-8">
         {/* Header & Overall Progress */}
@@ -98,7 +112,9 @@ export function LearningPathView({ data }: { data: LearningPathData }) {
               A rigorous curriculum designed for disciplined capital management and psychological fortitude.
             </p>
           </div>
-          <div className="w-full md:w-80 space-y-2">
+          <div className="flex w-full flex-col gap-3 md:w-80">
+            {canAddLessons && <button type="button" onClick={() => setIsAddingLesson(true)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary-container px-5 font-label text-xs font-semibold uppercase tracking-wider text-on-primary-fixed transition hover:brightness-110"><Plus size={16} /> Add lesson</button>}
+            <div className="space-y-2">
             <div className="flex justify-between items-end">
               <span className="font-label text-label-sm text-on-surface-variant uppercase tracking-wider">Overall Progress</span>
               <span className="font-label text-label-sm text-primary-container font-semibold">{overallProgress}% Mastery</span>
@@ -106,8 +122,11 @@ export function LearningPathView({ data }: { data: LearningPathData }) {
             <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden border border-surgical-steel">
               <div className="h-full bg-primary-container rounded-full transition-all duration-500 emerald-glow" style={{ width: `${overallProgress}%` }} />
             </div>
+            </div>
           </div>
         </header>
+
+        {message && <div role="status" className="flex items-center justify-between gap-4 border border-primary-container/50 bg-primary-container/10 px-4 py-3 font-body text-sm text-on-surface"><span>{message}</span><button className="font-label text-xs text-primary-container hover:text-white" onClick={() => setMessage(null)}>Dismiss</button></div>}
 
         {/* Tier Overview Grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -223,7 +242,7 @@ export function LearningPathView({ data }: { data: LearningPathData }) {
                   {!isLocked && (
                     <div className="pt-2">
                       <Link
-                        href={`/courses/lesson/${lesson.id}`}
+                        href={withRouteBase(routeBase, `/courses/lesson/${lesson.id}`)}
                         className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-label text-xs uppercase tracking-wider transition ${isCompleted ? "border border-surgical-steel text-on-surface-variant hover:text-white hover:border-primary-container/50" : inProgress ? "bg-primary-container text-on-primary-fixed hover:bg-opacity-90" : "border border-primary-container text-primary-container hover:bg-primary-container/10"}`}
                       >
                         {isCompleted ? "Review" : inProgress ? "Resume" : "Start"}
@@ -244,6 +263,12 @@ export function LearningPathView({ data }: { data: LearningPathData }) {
           )}
         </section>
       </div>
+      {isAddingLesson && <AddLessonDialog tiers={data.tiers} pending={isPending} onClose={() => setIsAddingLesson(false)} onSubmit={submitLesson} />}
     </AppShell>
   );
+}
+
+function AddLessonDialog({ tiers, pending, onClose, onSubmit }: { tiers: TierProgressItem[]; pending: boolean; onClose: () => void; onSubmit: (formData: FormData) => void }) {
+  const input = "h-10 border border-surgical-steel bg-surface-container-low px-3 font-body text-sm text-white outline-none placeholder:text-fog-muted focus:border-primary-container";
+  return <div role="dialog" aria-modal="true" aria-labelledby="add-lesson-title" className="fixed inset-0 z-50 grid place-items-center bg-surface-container-lowest/85 p-4" onMouseDown={onClose}><form action={onSubmit} onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-xl border border-surgical-steel bg-monolith-surface rounded-lg"><div className="border-b border-surgical-steel bg-surface-container-high px-5 py-4"><p className="font-label text-xs text-primary-container">CURRICULUM CONTROL</p><h2 id="add-lesson-title" className="mt-1 font-headline text-lg font-semibold text-white">Add lesson</h2></div><div className="grid gap-4 p-5 sm:grid-cols-2"><label className="grid gap-1.5 sm:col-span-2"><span className="font-label text-xs text-fog-muted">Lesson title</span><input className={input} name="title" required /></label><label className="grid gap-1.5"><span className="font-label text-xs text-fog-muted">Tier</span><select className={input} name="tierId" required>{tiers.map((tier) => <option key={tier.id} value={tier.id}>Tier {tier.level}: {tier.title}</option>)}</select></label><label className="grid gap-1.5"><span className="font-label text-xs text-fog-muted">Status</span><select className={input} name="status" defaultValue="draft"><option value="draft">Draft</option><option value="published">Published</option></select></label><label className="grid gap-1.5 sm:col-span-2"><span className="font-label text-xs text-fog-muted">Google Drive file ID</span><input className={input} name="videoFileId" placeholder="File ID only, not a sharing URL" required /></label><label className="grid gap-1.5"><span className="font-label text-xs text-fog-muted">Duration (seconds)</span><input className={input} name="durationSeconds" type="number" min="0" defaultValue="0" required /></label><label className="grid gap-1.5"><span className="font-label text-xs text-fog-muted">Order</span><input className={input} name="sortOrder" type="number" min="0" defaultValue="0" required /></label><label className="grid gap-1.5 sm:col-span-2"><span className="font-label text-xs text-fog-muted">Description</span><textarea className={input} name="description" rows={3} /></label></div><div className="flex justify-end gap-3 border-t border-surgical-steel px-5 py-4"><button type="button" onClick={onClose} className="min-h-10 px-3 font-label text-xs text-fog-muted hover:text-white">Cancel</button><button disabled={pending} className="min-h-10 rounded-full bg-primary-container px-5 font-label text-xs font-semibold uppercase tracking-wider text-on-primary-fixed disabled:opacity-60">{pending ? "Saving…" : "Save lesson"}</button></div></form></div>;
 }

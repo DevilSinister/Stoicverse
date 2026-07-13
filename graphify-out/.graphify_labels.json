@@ -52,5 +52,7 @@
   "50": "createClient",
   "51": "rls.integration.mjs",
   "52": "SECURITY_DEPLOYMENT.md",
-  "53": "README.md"
+  "53": "README.md",
+  "54": "LearningPathView.tsx",
+  "55": "influencer-inline-controls.contract.mjs"
 }

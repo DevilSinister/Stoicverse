@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, Menu, Search, X, Crown, LogOut, ChevronRight, AlertCircle, Settings } from "lucide-react";
+import { Bell, Menu, Search, X, Crown, LogOut, AlertCircle, Settings } from "lucide-react";
 
 import { buildAppNav } from "@/lib/navigation/app-nav";
+import { withRouteBase } from "@/lib/navigation/paths";
 import { createClient } from "@/lib/supabase/client";
 
 export type Notification = {
@@ -34,6 +35,7 @@ export interface AppShellProps {
   platformRole?: string;
   currentTier?: number;
   notifications?: Notification[];
+  routeBase?: string;
   children: React.ReactNode;
 }
 
@@ -50,6 +52,7 @@ export function AppShell({
   platformRole = "member",
   currentTier = 1,
   notifications: initialNotifications = EMPTY_NOTIFICATIONS,
+  routeBase = "",
   children,
 }: AppShellProps) {
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
@@ -64,7 +67,6 @@ export function AppShell({
 
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isUpgradeOpen, setUpgradeOpen] = useState(false);
-  const [currentName, setCurrentName] = useState(memberName);
   const [email, setEmail] = useState("");
   const [newName, setNewName] = useState(memberName);
   const [newPassword, setNewPassword] = useState("");
@@ -85,10 +87,7 @@ export function AppShell({
     loadUser();
   }, [supabase]);
 
-  useEffect(() => {
-    setCurrentName(memberName);
-    setNewName(memberName);
-  }, [memberName]);
+  const currentName = settingsSuccess === "Username updated successfully." ? newName : memberName;
 
   const handleUpdateName = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,10 +105,9 @@ export function AppShell({
 
       if (updateError) throw updateError;
 
-      setCurrentName(newName);
       setSettingsSuccess("Username updated successfully.");
-    } catch (err: any) {
-      setSettingsError(err.message || "Failed to update username");
+    } catch (error: unknown) {
+      setSettingsError(error instanceof Error ? error.message : "Failed to update username");
     } finally {
       setSettingsLoading(false);
     }
@@ -135,8 +133,8 @@ export function AppShell({
       setNewPassword("");
       setConfirmPassword("");
       setSettingsSuccess("Password updated successfully.");
-    } catch (err: any) {
-      setSettingsError(err.message || "Failed to update password");
+    } catch (error: unknown) {
+      setSettingsError(error instanceof Error ? error.message : "Failed to update password");
     } finally {
       setSettingsLoading(false);
     }
@@ -150,26 +148,15 @@ export function AppShell({
       if (error) throw error;
       setSettingsOpen(false);
       window.location.href = "/login";
-    } catch (err: any) {
-      setSettingsError(err.message || "Failed to sign out");
+    } catch (error: unknown) {
+      setSettingsError(error instanceof Error ? error.message : "Failed to sign out");
       setSettingsLoading(false);
     }
   };
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
-  const navItems = useMemo(() => buildAppNav({ isMaster }), [isMaster]);
+  const navItems = useMemo(() => buildAppNav({ isMaster, routeBase }), [isMaster, routeBase]);
   const visibleResults = query.trim().length >= 2 ? results : [];
-
-  // Sync notifications prop changes safely
-  useEffect(() => {
-    const hasChanged =
-      initialNotifications.length !== notifications.length ||
-      initialNotifications.some((n, idx) => n.id !== notifications[idx]?.id || n.is_read !== notifications[idx]?.is_read);
-
-    if (hasChanged) {
-      setNotifications(initialNotifications);
-    }
-  }, [initialNotifications, notifications]);
 
   useEffect(() => {
     if (isSearchOpen) searchInput.current?.focus();
@@ -182,17 +169,19 @@ export function AppShell({
     const timeout = window.setTimeout(async () => {
       setSearching(true);
       try {
-        const response = await fetch(`/api/dashboard/search?q=${encodeURIComponent(query.trim())}`, { signal: controller.signal });
+        const params = new URLSearchParams({ q: query.trim() });
+        if (routeBase) params.set("base", routeBase);
+        const response = await fetch(`/api/dashboard/search?${params.toString()}`, { signal: controller.signal });
         const payload = await response.json() as { results?: SearchResult[] };
         setResults(response.ok ? payload.results ?? [] : []);
-      } catch (err) {
+      } catch {
         // Ignored
       } finally {
         if (!controller.signal.aborted) setSearching(false);
       }
     }, 250);
     return () => { controller.abort(); window.clearTimeout(timeout); };
-  }, [query, isSearchOpen]);
+  }, [query, isSearchOpen, routeBase]);
 
   async function openNotifications() {
     setNotificationsOpen(true);
@@ -212,7 +201,7 @@ export function AppShell({
         // Rollback
         setNotifications((prev) => prev.map((n) => unreadIds.includes(n.id) ? { ...n, is_read: false } : n));
       }
-    } catch (err) {
+    } catch {
       setNotifications((prev) => prev.map((n) => unreadIds.includes(n.id) ? { ...n, is_read: false } : n));
     }
   }
@@ -617,7 +606,7 @@ export function AppShell({
                     <div>
                       <div className="font-headline text-lg font-bold text-primary-container mb-3">$100.00<span className="text-xs font-normal text-fog-muted">/yr</span></div>
                       <Link
-                        href="/checkout?product=annual"
+                        href={withRouteBase("", "/checkout?product=annual")}
                         onClick={() => setUpgradeOpen(false)}
                         className="flex min-h-9 w-full items-center justify-center rounded-full bg-primary-container font-label text-xs uppercase tracking-wider text-on-primary-fixed hover:brightness-105 active:scale-[0.98] transition"
                       >
@@ -638,7 +627,7 @@ export function AppShell({
                     <div>
                       <div className="font-headline text-lg font-bold text-emerald-400 mb-3">$1,000.00<span className="text-xs font-normal text-fog-muted">/2mo</span></div>
                       <Link
-                        href="/checkout?product=mentorship"
+                        href={withRouteBase("", "/checkout?product=mentorship")}
                         onClick={() => setUpgradeOpen(false)}
                         className="flex min-h-9 w-full items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 font-label text-xs uppercase tracking-wider text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.98] transition"
                       >

@@ -1,8 +1,16 @@
 import { DashboardView, type DashboardData } from "@/components/dashboard/DashboardView";
-import { requireActiveMembership } from "@/lib/supabase/access";
+import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
 
-export default async function DashboardPage() {
-  const { supabase, user } = await requireActiveMembership("/dashboard");
+type DashboardPageOptions = {
+  nextPath?: string;
+  routeBase?: string;
+  creatorWorkspace?: boolean;
+};
+
+export async function renderDashboardPage({ nextPath = "/dashboard", routeBase = "", creatorWorkspace = false }: DashboardPageOptions = {}) {
+  const { supabase, user } = creatorWorkspace
+    ? await requireInfluencerWorkspace(nextPath)
+    : await requireActiveMembership(nextPath);
 
   const now = new Date().toISOString();
   const [profileResult, tierResult, progressResult, lessonsResult, eventsResult, notificationsResult] = await Promise.all([
@@ -45,5 +53,9 @@ export default async function DashboardPage() {
     notifications: notificationsResult.data ?? [],
   };
 
-  return <DashboardView data={data} />;
+  return <DashboardView data={data} routeBase={routeBase} />;
+}
+
+export default async function DashboardPage() {
+  return renderDashboardPage();
 }

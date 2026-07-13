@@ -1,8 +1,16 @@
 import { EventsView, type EventRecord } from "@/components/events/EventsView";
-import { requireActiveMembership } from "@/lib/supabase/access";
+import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
 
-export default async function EventsPage() {
-  const { supabase, user } = await requireActiveMembership("/events");
+type EventsPageOptions = {
+  nextPath?: string;
+  routeBase?: string;
+  creatorWorkspace?: boolean;
+};
+
+export async function renderEventsPage({ nextPath = "/events", routeBase = "", creatorWorkspace = false }: EventsPageOptions = {}) {
+  const { supabase, user } = creatorWorkspace
+    ? await requireInfluencerWorkspace(nextPath)
+    : await requireActiveMembership(nextPath);
   const [{ data: tier, error: tierError }, { data: profile, error: profileError }, { data: events, error: eventsError }, { data: enrollments, error: enrollmentError }] = await Promise.all([
     supabase
     .from("member_tiers")
@@ -36,5 +44,9 @@ export default async function EventsPage() {
       status: event.status, enrolled: enrolledIds.has(event.id),
     }));
 
-  return <EventsView events={visibleEvents} enrollmentAvailable={!enrollmentError} currentTier={tier?.current_tier ?? 1} isMaster={tier?.is_master ?? false} memberName={profile?.full_name ?? undefined} canManage={["moderator", "influencer", "super_admin"].includes(profile?.platform_role ?? "")} />;
+  return <EventsView events={visibleEvents} enrollmentAvailable={!enrollmentError} currentTier={tier?.current_tier ?? 1} isMaster={tier?.is_master ?? false} memberName={profile?.full_name ?? undefined} canManage={["moderator", "influencer", "super_admin"].includes(profile?.platform_role ?? "")} routeBase={routeBase} />;
+}
+
+export default async function EventsPage() {
+  return renderEventsPage();
 }

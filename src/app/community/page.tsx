@@ -1,8 +1,16 @@
 import { FeedScreen } from "@/components/screens/AskStoicScreens";
-import { requireActiveMembership } from "@/lib/supabase/access";
+import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
 
-export default async function CommunityPage() {
-  const { supabase, user } = await requireActiveMembership("/community");
+type CommunityPageOptions = {
+  nextPath?: string;
+  routeBase?: string;
+  creatorWorkspace?: boolean;
+};
+
+export async function renderCommunityPage({ nextPath = "/community", routeBase = "", creatorWorkspace = false }: CommunityPageOptions = {}) {
+  const { supabase, user } = creatorWorkspace
+    ? await requireInfluencerWorkspace(nextPath)
+    : await requireActiveMembership(nextPath);
   const [profileResult, tierResult, channelsResult, postsResult, notificationsResult] = await Promise.all([
     supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
     supabase.from("member_tiers").select("current_tier, is_master").eq("user_id", user.id).maybeSingle(),
@@ -49,6 +57,11 @@ export default async function CommunityPage() {
       notifications={notificationsResult.data ?? []}
       channels={channels}
       posts={posts}
+      routeBase={routeBase}
     />
   );
+}
+
+export default async function CommunityPage() {
+  return renderCommunityPage();
 }

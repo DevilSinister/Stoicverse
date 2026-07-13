@@ -13,6 +13,7 @@ type MentorshipViewProps = {
   mentorName: string | null;
   startsAt: string | null;
   endsAt: string | null;
+  routeBase?: string;
 };
 
 export default function MentorshipView({
@@ -26,6 +27,7 @@ export default function MentorshipView({
   mentorName = "Marcus Aurelius",
   startsAt,
   endsAt,
+  routeBase = "",
 }: MentorshipViewProps) {
   return (
     <AppShell
@@ -36,6 +38,7 @@ export default function MentorshipView({
       platformRole={platformRole}
       currentTier={currentTier}
       notifications={notifications}
+      routeBase={routeBase}
     >
       <div className="mx-auto max-w-5xl p-6 md:p-10">
         {hasMentorship ? (

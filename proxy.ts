@@ -4,11 +4,22 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseConfig } from "@/lib/supabase/env";
 
 const authRoutes = ["/login", "/signup"];
-const memberRoutes = ["/dashboard", "/community", "/courses", "/events", "/master", "/subscription"];
-const influencerRoute = "/creator";
+const creatorRoute = "/creator";
+const memberRoutes = ["/dashboard", "/community", "/courses", "/events", "/master", "/mentorship", "/subscription"];
+const creatorRoutes = ["/creator", "/creator/dashboard", "/creator/community", "/creator/courses", "/creator/events", "/creator/master", "/creator/mentorship"];
 
 function isRouteMatch(path: string, routes: string[]) {
   return routes.some((route) => path === route || path.startsWith(`${route}/`));
+}
+
+function mapMemberRouteToCreator(path: string) {
+  if (path === "/dashboard" || path.startsWith("/dashboard/")) return `${creatorRoute}/dashboard`;
+  if (path === "/community" || path.startsWith("/community/")) return `${creatorRoute}/community`;
+  if (path === "/courses" || path.startsWith("/courses/")) return `${creatorRoute}${path}`;
+  if (path === "/events" || path.startsWith("/events/")) return `${creatorRoute}/events`;
+  if (path === "/master" || path.startsWith("/master/")) return `${creatorRoute}/master`;
+  if (path === "/mentorship" || path.startsWith("/mentorship/")) return `${creatorRoute}/mentorship`;
+  return `${creatorRoute}/dashboard`;
 }
 
 function safeNextPath(request: NextRequest) {
@@ -82,12 +93,12 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isCheckoutRoute = path === "/checkout";
-  const isInfluencerRoute = path === influencerRoute || path.startsWith(`${influencerRoute}/`);
+  const isCreatorRoute = isRouteMatch(path, creatorRoutes);
   const requiresMembership = isRouteMatch(path, memberRoutes);
   const isAuthRoute = authRoutes.includes(path);
   const currentPath = `${path}${request.nextUrl.search}`;
 
-  if ((isCheckoutRoute || requiresMembership) && !user) {
+  if ((isCheckoutRoute || requiresMembership || isCreatorRoute) && !user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", currentPath);
     return redirectWithState(response, loginUrl);
@@ -97,7 +108,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  const needsSubscriptionCheck = isCheckoutRoute || requiresMembership || isAuthRoute || isInfluencerRoute;
+  const needsSubscriptionCheck = isCheckoutRoute || requiresMembership || isAuthRoute || isCreatorRoute;
   if (!needsSubscriptionCheck) {
     return response;
   }
@@ -113,12 +124,18 @@ export async function proxy(request: NextRequest) {
 
   const hasActiveMembership = Boolean(membership) && !profile?.is_suspended;
 
-  if (profile?.platform_role === "influencer" && !isInfluencerRoute) {
-    return redirectWithState(response, new URL(influencerRoute, request.url));
+  const isInfluencer = profile?.platform_role === "influencer" && !profile?.is_suspended;
+
+  if (isCreatorRoute && !isInfluencer) {
+    return redirectWithState(response, new URL(hasActiveMembership ? "/dashboard" : "/checkout", request.url));
   }
 
-  if (isInfluencerRoute && (profile?.is_suspended || profile?.platform_role !== "influencer")) {
-    return redirectWithState(response, new URL("/", request.url));
+  if (requiresMembership && isInfluencer) {
+    return redirectWithState(response, new URL(mapMemberRouteToCreator(path), request.url));
+  }
+
+  if (isCheckoutRoute && isInfluencer) {
+    return redirectWithState(response, new URL(creatorRoute, request.url));
   }
 
   if (isCheckoutRoute && hasActiveMembership) {
@@ -131,7 +148,14 @@ export async function proxy(request: NextRequest) {
 
   if (isAuthRoute) {
     const next = safeNextPath(request);
-    const destination = profile?.platform_role === "influencer" ? influencerRoute : hasActiveMembership ? "/dashboard" : next === "/checkout" ? next : "/checkout";
+    let destination: string;
+    if (isInfluencer) {
+      destination = next?.startsWith(creatorRoute) ? next : creatorRoute;
+    } else if (hasActiveMembership) {
+      destination = next && !next.startsWith(creatorRoute) ? next : "/dashboard";
+    } else {
+      destination = next === "/checkout" ? next : "/checkout";
+    }
     return redirectWithState(response, new URL(destination, request.url));
   }
 

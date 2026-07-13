@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, CalendarDays, Check, ChevronRight, CreditCard, Crown, Gauge, Image as ImageIcon, Lock, LogIn, MessageSquare, MoreVertical, Play, Plus, Send, Shield, Video } from "lucide-react";
+import { ArrowRight, CalendarDays, Check, CreditCard, Crown, Gauge, Image as ImageIcon, Lock, LogIn, MessageSquare, MoreVertical, Play, Plus, Send, Shield, Video } from "lucide-react";
 import { AppShell as SharedAppShell } from "@/components/layout/AppShell";
+import { withRouteBase } from "@/lib/navigation/paths";
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(" ");
 
@@ -58,7 +59,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function AppShell({ active, title, isMaster = false, memberName, platformRole, currentTier, notifications, children }: { active: string; title: string; isMaster?: boolean; memberName?: string; platformRole?: string; currentTier?: number; notifications?: import("@/components/layout/AppShell").Notification[]; children: React.ReactNode }) {
+function AppShell({ active, title, isMaster = false, memberName, platformRole, currentTier, notifications, routeBase, children }: { active: string; title: string; isMaster?: boolean; memberName?: string; platformRole?: string; currentTier?: number; notifications?: import("@/components/layout/AppShell").Notification[]; routeBase?: string; children: React.ReactNode }) {
   return (
     <SharedAppShell
       active={active}
@@ -68,6 +69,7 @@ function AppShell({ active, title, isMaster = false, memberName, platformRole, c
       platformRole={platformRole}
       currentTier={currentTier}
       notifications={notifications}
+      routeBase={routeBase}
     >
       {children}
     </SharedAppShell>
@@ -301,15 +303,17 @@ export function FeedScreen({
   notifications,
   channels = [],
   posts = [],
+  routeBase = "",
 }: {
   master?: boolean; isMaster?: boolean; canCreateChannels?: boolean; canPost?: boolean;
   memberName?: string; platformRole?: string; currentTier?: number;
   notifications?: import("@/components/layout/AppShell").Notification[];
   channels?: CommunityChannel[]; posts?: CommunityPost[];
+  routeBase?: string;
 }) {
 
   return (
-    <AppShell active={master ? "Master Zone" : "Community"} title={master ? "Master Zone" : "Community Feed"} isMaster={isMaster} memberName={memberName} platformRole={platformRole} currentTier={currentTier} notifications={notifications}>
+    <AppShell active={master ? "Master Zone" : "Community"} title={master ? "Master Zone" : "Community Feed"} isMaster={isMaster} memberName={memberName} platformRole={platformRole} currentTier={currentTier} notifications={notifications} routeBase={routeBase}>
       <main className="grid min-h-[calc(100vh-4rem)] md:grid-cols-[18rem_1fr]">
         <aside className="border-b border-surgical-steel bg-surface-container-low p-4 md:border-b-0 md:border-r">
           {canCreateChannels && (
@@ -323,7 +327,7 @@ export function FeedScreen({
             const isUnread = channel.isUnread ?? (!isSelected && (channel.name.toLowerCase() === "announcements" || channel.name.toLowerCase() === "morning reflections"));
             return (
               <Link
-                href={channel.type === "events" ? "/events" : "#"}
+                href={channel.type === "events" ? withRouteBase(routeBase, "/events") : "#"}
                 key={channel.id}
                 className={cx(
                   "flex min-h-11 items-center justify-between px-3 py-1.5 rounded-lg font-label-md text-label-md transition",
@@ -507,50 +511,6 @@ export function AdminScreen() {
               <Metric label="Curriculum" value="Global tiers" />
               <Metric label="Access" value="One membership" />
             </div>
-          </div>
-        </Panel>
-      </main>
-    </AppShell>
-  );
-}
-
-export function CreatorScreen() {
-  return (
-    <AppShell active="Dashboard" title="Influencer Community Dashboard">
-      <main className="grid gap-6 p-4 md:grid-cols-12 md:p-8 max-w-7xl mx-auto">
-        <div className="space-y-6 md:col-span-8">
-          <Panel title="Community Ops">
-            <div className="grid gap-4 p-5 sm:grid-cols-3">
-              <Metric label="Active today" value="1,284" />
-              <Metric label="Pending reviews" value="18" />
-              <Metric label="Lessons queued" value="6" />
-            </div>
-          </Panel>
-          <Panel title="Review Queue">
-            <div className="divide-y divide-surgical-steel">
-              {["Nadia K.", "Omar R.", "Selene T."].map((name) => (
-                <div key={name} className="flex items-center justify-between p-4 font-body text-sm hover:bg-surface-container-high/50 transition">
-                  <div>
-                    <p className="text-white font-semibold">{name}</p>
-                    <p className="font-label text-xs text-fog-muted">Master application pending</p>
-                  </div>
-                  <ButtonLink href="/master" variant="outline">Review</ButtonLink>
-                </div>
-              ))}
-            </div>
-          </Panel>
-        </div>
-        <Panel title="Controls" className="md:col-span-4">
-          <div className="space-y-3 p-5">
-            {["Create channel", "Add lesson", "Schedule event", "Assign moderator"].map((item) => (
-              <button
-                key={item}
-                className="flex min-h-11 w-full items-center justify-between rounded-full border border-surgical-steel bg-surface-container-low px-4 py-2 text-left font-label text-xs uppercase tracking-wider transition hover:border-primary-container hover:text-primary-container"
-              >
-                {item}
-                <ChevronRight size={16} />
-              </button>
-            ))}
           </div>
         </Panel>
       </main>

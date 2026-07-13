@@ -34,6 +34,7 @@ export async function enrollInEvent(eventId: string): Promise<ActionResult> {
   }
 
   revalidatePath("/events");
+  revalidatePath("/creator/events");
   return { success: true };
 }
 
@@ -120,6 +121,8 @@ export async function createEvent(formData: FormData): Promise<ActionResult> {
 
   revalidatePath("/events");
   revalidatePath("/community");
+  revalidatePath("/creator/events");
+  revalidatePath("/creator/community");
   return { success: true };
 }
 
@@ -143,5 +146,6 @@ export async function updateEventZoomUrl(eventId: string, zoomUrl: string): Prom
   if (error) return { error: "Unable to publish the meeting link." };
 
   revalidatePath("/events");
+  revalidatePath("/creator/events");
   return { success: true };
 }
