@@ -14,7 +14,7 @@ export async function requireActiveMembership(nextPath: string) {
 
   const [{ data: membership, error: membershipError }, { data: profile, error: profileError }] = await Promise.all([
     supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle(),
-    supabase.from("profiles").select("is_suspended").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("is_suspended, platform_role").eq("id", user.id).maybeSingle(),
   ]);
 
   if (membershipError || profileError) {
@@ -25,6 +25,37 @@ export async function requireActiveMembership(nextPath: string) {
 
   if (!membership || profile?.is_suspended) {
     redirect("/checkout");
+  }
+
+  return { supabase, user };
+}
+
+export async function requireInfluencerWorkspace(nextPath: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+  }
+
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("is_suspended, platform_role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Unable to validate influencer access.");
+  }
+
+  if (profile?.is_suspended) {
+    redirect("/login");
+  }
+
+  if (profile?.platform_role !== "influencer") {
+    redirect("/dashboard");
   }
 
   return { supabase, user };
@@ -44,6 +75,25 @@ export async function requireMasterMembership(nextPath: string) {
 
   if (!tier?.is_master) {
     redirect("/dashboard");
+  }
+
+  return { supabase, user };
+}
+
+export async function requireInfluencerMasterWorkspace(nextPath: string) {
+  const { supabase, user } = await requireInfluencerWorkspace(nextPath);
+  const { data: tier, error } = await supabase
+    .from("member_tiers")
+    .select("is_master")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Unable to validate master access.");
+  }
+
+  if (!tier?.is_master) {
+    redirect("/creator/dashboard");
   }
 
   return { supabase, user };

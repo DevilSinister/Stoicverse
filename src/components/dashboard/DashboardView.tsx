@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Gauge, Play, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useMemo } from "react";
 
-import { AppShell } from "@/components/layout/AppShell";
+import { AppShell, type Notification } from "@/components/layout/AppShell";
+import { withRouteBase } from "@/lib/navigation/paths";
 
 type Event = { id: string; title: string; description: string | null; starts_at: string; min_tier: number; status: string };
 
@@ -12,13 +13,13 @@ export type DashboardData = {
   memberName: string; platformRole: string; currentTier: number; isMaster: boolean; currentTierTitle: string;
   completedLessons: number; totalLessons: number; currentTierCompleted: number; currentTierTotal: number;
   activeLesson: { id: string; title: string; description: string | null; progress: number } | null;
-  upcomingEvent: Event | null; notifications: any[];
+  upcomingEvent: Event | null; notifications: Notification[];
 };
 
 const roleName = (role: string) => role.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 
-export function DashboardView({ data }: { data: DashboardData }) {
+export function DashboardView({ data, routeBase = "" }: { data: DashboardData; routeBase?: string }) {
   const tierProgress = data.currentTierTotal ? Math.round((data.currentTierCompleted / data.currentTierTotal) * 100) : 0;
   const roles = useMemo(() => ["Subscriber", roleName(data.platformRole), data.isMaster ? "Master" : `Tier ${data.currentTier} (${data.currentTierTitle})`], [data]);
 
@@ -31,6 +32,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
       platformRole={data.platformRole}
       currentTier={data.currentTier}
       notifications={data.notifications}
+      routeBase={routeBase}
     >
       {/* Dashboard Grid */}
       <main className="relative grid gap-6 p-4 md:p-8 md:grid-cols-12 max-w-[1440px] mx-auto">
@@ -68,7 +70,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
                     <p className="max-w-xl font-body text-sm text-on-surface-variant">{data.activeLesson.description || "Continue your current lesson."}</p>
                     <p className="font-label text-xs text-primary-container font-semibold uppercase tracking-wider">{Math.round(data.activeLesson.progress)}% complete</p>
                   </div>
-                  <Link href={`/courses/lesson/${data.activeLesson.id}`} className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-container px-6 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all emerald-glow shrink-0">
+                  <Link href={withRouteBase(routeBase, `/courses/lesson/${data.activeLesson.id}`)} className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-container px-6 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all emerald-glow shrink-0">
                     Resume lesson
                     <ArrowRight size={16} className="ml-1.5" />
                   </Link>

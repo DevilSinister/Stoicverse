@@ -1,8 +1,16 @@
 import MentorshipView from "@/components/mentorship/MentorshipView";
-import { requireActiveMembership } from "@/lib/supabase/access";
+import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
 
-export default async function MentorshipPage() {
-  const { supabase, user } = await requireActiveMembership("/mentorship");
+type MentorshipPageOptions = {
+  nextPath?: string;
+  routeBase?: string;
+  creatorWorkspace?: boolean;
+};
+
+export async function renderMentorshipPage({ nextPath = "/mentorship", routeBase = "", creatorWorkspace = false }: MentorshipPageOptions = {}) {
+  const { supabase, user } = creatorWorkspace
+    ? await requireInfluencerWorkspace(nextPath)
+    : await requireActiveMembership(nextPath);
 
   const [profileResult, tierResult, notificationsResult, mentorshipResult] = await Promise.all([
     supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
@@ -36,6 +44,11 @@ export default async function MentorshipPage() {
       mentorName={mentorName}
       startsAt={mentorship?.starts_at ?? null}
       endsAt={mentorship?.ends_at ?? null}
+      routeBase={routeBase}
     />
   );
+}
+
+export default async function MentorshipPage() {
+  return renderMentorshipPage();
 }

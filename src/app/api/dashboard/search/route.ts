@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
+
+import { normalizeSearchBase, withRouteBase } from "@/lib/navigation/paths";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { data: membership, error: membershipError } = await supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle();
-  if (membershipError || !membership) return NextResponse.json({ error: "Membership required" }, { status: 403 });
-  const query = new URL(request.url).searchParams.get("q")?.trim() ?? "";
+  const searchParams = new URL(request.url).searchParams;
+  const base = normalizeSearchBase(searchParams.get("base"));
+  const [{ data: membership, error: membershipError }, { data: profile, error: profileError }] = await Promise.all([
+    supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle(),
+    supabase.from("profiles").select("platform_role, is_suspended").eq("id", user.id).maybeSingle(),
+  ]);
+  const isInfluencer = profile?.platform_role === "influencer" && !profile?.is_suspended;
+  if (membershipError || profileError || (!membership && !isInfluencer)) return NextResponse.json({ error: "Membership required" }, { status: 403 });
+  const query = searchParams.get("q")?.trim() ?? "";
   if (query.length < 2 || query.length > 80) return NextResponse.json({ error: "Search query must be 2–80 characters" }, { status: 400 });
   const escaped = query.replace(/[,%()]/g, " ");
   const pattern = `%${escaped}%`;
@@ -17,5 +25,5 @@ export async function GET(request: Request) {
     supabase.from("events").select("id, title, description").in("status", ["upcoming", "live"]).gte("starts_at", now).or(`title.ilike.${pattern},description.ilike.${pattern}`).limit(8),
   ]);
   if (lessons.error || events.error) return NextResponse.json({ error: "Search unavailable" }, { status: 500 });
-  return NextResponse.json({ results: [...(lessons.data ?? []).map((item) => ({ ...item, href: `/courses/lesson/${item.id}`, kind: "lesson" as const })), ...(events.data ?? []).map((item) => ({ ...item, href: "/events", kind: "event" as const }))] });
+  return NextResponse.json({ results: [...(lessons.data ?? []).map((item) => ({ ...item, href: withRouteBase(base, `/courses/lesson/${item.id}`), kind: "lesson" as const })), ...(events.data ?? []).map((item) => ({ ...item, href: withRouteBase(base, "/events"), kind: "event" as const }))] });
 }

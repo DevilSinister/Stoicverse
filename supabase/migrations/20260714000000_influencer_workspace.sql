@@ -7,3 +7,7 @@ create policy influencer_profiles_read on public.profiles for select to authenti
 create policy influencer_moderator_assignment on public.profiles for update to authenticated
 using (public.is_influencer() and platform_role in ('member', 'moderator'))
 with check (public.is_influencer() and platform_role in ('member', 'moderator'));
+grant insert, update, delete on public.channels to authenticated;
+grant insert, update, delete on public.lessons to authenticated;
+grant update on public.review_applications to authenticated;
+grant update (platform_role) on public.profiles to authenticated;

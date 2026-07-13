@@ -39,8 +39,8 @@ function eventState(event: EventRecord, now: number) {
   return "upcoming";
 }
 
-export function EventsView({ events, enrollmentAvailable, currentTier, isMaster, canManage, memberName }: {
-  events: EventRecord[]; enrollmentAvailable: boolean; currentTier: number; isMaster: boolean; canManage: boolean; memberName?: string;
+export function EventsView({ events, enrollmentAvailable, currentTier, isMaster, canManage, memberName, routeBase = "" }: {
+  events: EventRecord[]; enrollmentAvailable: boolean; currentTier: number; isMaster: boolean; canManage: boolean; memberName?: string; routeBase?: string;
 }) {
   const [now, setNow] = useState(() => Date.now());
   const [isCreating, setIsCreating] = useState(false);
@@ -70,7 +70,7 @@ export function EventsView({ events, enrollmentAvailable, currentTier, isMaster,
   });
 
   return (
-    <AppShell active="Events" title="Events Directory" isMaster={isMaster} currentTier={currentTier} memberName={memberName}>
+    <AppShell active="Events" title="Events Directory" isMaster={isMaster} currentTier={currentTier} memberName={memberName} routeBase={routeBase}>
       <main className="mx-auto max-w-7xl p-4 md:p-8">
         <div className="mb-6 flex flex-col gap-4 border-b border-surgical-steel pb-6 md:flex-row md:items-end md:justify-between">
           <div>

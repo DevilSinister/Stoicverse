@@ -1,8 +1,17 @@
 import { FeedScreen } from "@/components/screens/AskStoicScreens";
-import { requireMasterMembership } from "@/lib/supabase/access";
+import { requireInfluencerMasterWorkspace, requireMasterMembership } from "@/lib/supabase/access";
 
-export default async function MasterPage() {
-  const { supabase, user } = await requireMasterMembership("/master");
+type MasterPageOptions = {
+  nextPath?: string;
+  routeBase?: string;
+  creatorWorkspace?: boolean;
+  deniedRedirectPath?: string;
+};
+
+export async function renderMasterPage({ nextPath = "/master", routeBase = "", creatorWorkspace = false }: MasterPageOptions = {}) {
+  const { supabase, user } = creatorWorkspace
+    ? await requireInfluencerMasterWorkspace(nextPath)
+    : await requireMasterMembership(nextPath);
   const [profileResult, tierResult, channelsResult, postsResult, notificationsResult] = await Promise.all([
     supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
     supabase.from("member_tiers").select("current_tier").eq("user_id", user.id).maybeSingle(),
@@ -33,5 +42,9 @@ export default async function MasterPage() {
     })
     .filter((post) => post.channelType === "master");
 
-  return <FeedScreen master isMaster memberName={profileResult.data?.full_name?.trim() || "Practitioner"} platformRole={profileResult.data?.platform_role ?? "member"} currentTier={tierResult.data?.current_tier ?? 5} notifications={notificationsResult.data ?? []} channels={channelsResult.data ?? []} posts={posts} />;
+  return <FeedScreen master isMaster memberName={profileResult.data?.full_name?.trim() || "Practitioner"} platformRole={profileResult.data?.platform_role ?? "member"} currentTier={tierResult.data?.current_tier ?? 5} notifications={notificationsResult.data ?? []} channels={channelsResult.data ?? []} posts={posts} routeBase={routeBase} />;
+}
+
+export default async function MasterPage() {
+  return renderMasterPage();
 }

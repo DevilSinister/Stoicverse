@@ -44,7 +44,7 @@
 | Behaviour | Status | Required disposition |
 | --- | --- | --- |
 | Annual membership and recurring `$10/mo` presentation | Not in approved product scope | Remove UI and checkout query handling until separately approved. |
-| `/creator` route | Approved influencer-only operational workspace | Retain as the canonical influencer destination; redirect signed-in influencers there and deny member/moderator access. |
+| `/creator` route | Approved influencer-only workspace namespace | Retain it as the canonical influencer destination; build it from the same shared member UI and redirect influencer sessions there. |
 | `/subscription`, `/subscription/commitment`, `/log-in`, and `/sign-up` routes | Legacy or duplicate surface area | Redirect or remove after confirming no live inbound links. |
 | Event enrolment and optional delayed Zoom publication | Useful extension, not previously specified | Retain and document as approved event behaviour; secure it with tier-aware policies. |
 | Search, profile settings, and notification display | Useful extension | Retain; complete their backend lifecycle and tests. |
