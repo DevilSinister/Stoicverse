@@ -37,7 +37,13 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  await supabase.auth.exchangeCodeForSession(code);
+  const { data: exchange } = await supabase.auth.exchangeCodeForSession(code);
+  if (exchange.user) {
+    const { data: profile } = await supabase.from("profiles").select("platform_role, is_suspended").eq("id", exchange.user.id).maybeSingle();
+    if (profile?.platform_role === "influencer" && !profile.is_suspended) {
+      return NextResponse.redirect(new URL("/creator", request.url), { headers: response.headers });
+    }
+  }
 
   return response;
 }

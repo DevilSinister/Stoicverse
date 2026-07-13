@@ -75,3 +75,21 @@ export async function requirePlatformRole(requiredRole: "super_admin" | "influen
 
   return { supabase, user };
 }
+
+/** Re-authorize every influencer mutation. Proxy redirects are never an access boundary. */
+export async function requireInfluencer() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Authentication required.");
+
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("platform_role, is_suspended")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error || !profile || profile.is_suspended || profile.platform_role !== "influencer") {
+    throw new Error("Influencer access is required.");
+  }
+  return { supabase, user };
+}

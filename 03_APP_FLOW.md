@@ -25,10 +25,10 @@ There is no community selection, influencer page, community slug, or tenant-spec
 ## Staff journey
 
 - Moderators publish, pin, delete, and moderate posts; they create and manage events.
-- The influencer additionally manages channels, lessons, moderators, and review applications.
+- The influencer signs into the protected `/creator` operational workspace rather than member-facing screens. It manages channels, lessons, moderators, reviews, and events.
 - The super admin manages members, roles, billing records, platform settings, and platform-wide moderation at `/admin`.
 
-All staff controls appear inline in the relevant member-facing screens. A separate staff-only dashboard is not required except for super-admin operations.
+Moderators use inline member-facing controls. The influencer workspace at `/creator` is the approved exception and is inaccessible to members and moderators.
 
 ## Notifications
 
