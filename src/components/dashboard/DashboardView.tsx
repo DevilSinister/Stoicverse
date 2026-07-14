@@ -57,7 +57,7 @@ export function DashboardView({ data, routeBase = "" }: { data: DashboardData; r
           
           {/* Top Metrics Grid */}
           <div className="grid gap-6 md:grid-cols-2">
-            <Metric label="Lessons completed" value={`${data.completedLessons} / ${data.totalLessons}`} />
+            <Metric label="Courses completed" value={`${data.completedLessons} / ${data.totalLessons}`} />
             <Metric label="Next tier to unlock" value={nextTierToUnlock} />
           </div>
 
@@ -90,7 +90,7 @@ export function DashboardView({ data, routeBase = "" }: { data: DashboardData; r
                 </div>
                 <div className="flex justify-between items-center text-xs font-label text-fog-muted px-1">
                   <span>{data.isMaster ? "Highest Tier Attained" : `Unlocks ${getTierTitle(data.currentTier + 1)} at 100% completion`}</span>
-                  <span className="text-primary-container font-medium">{data.currentTierTotal - data.currentTierCompleted} lessons remaining</span>
+                  <span className="text-primary-container font-medium">{data.currentTierTotal - data.currentTierCompleted} courses remaining</span>
                 </div>
               </div>
             </div>
@@ -98,7 +98,7 @@ export function DashboardView({ data, routeBase = "" }: { data: DashboardData; r
 
           {/* Redesigned Clickable Continue Learning Card */}
           <Link 
-            href={data.activeLesson ? withRouteBase(routeBase, `/courses/lesson/${data.activeLesson.id}`) : withRouteBase(routeBase, "/courses")} 
+            href={data.activeLesson ? `/courses/${data.activeLesson.id}` : withRouteBase(routeBase, "/courses")}
             className="block group"
           >
             <div className="border border-surgical-steel bg-monolith-surface rounded-xl overflow-hidden hover:border-primary-container/40 active:scale-[0.99] transition-all duration-200">
@@ -112,14 +112,14 @@ export function DashboardView({ data, routeBase = "" }: { data: DashboardData; r
                     <div className="space-y-3.5 flex-1 pr-4">
                       <div className="flex items-center gap-2">
                         <span className="border border-surgical-steel bg-surface-container-high px-2 py-0.5 rounded font-label text-[10px] text-fog-muted font-semibold tracking-wider">ACTIVE</span>
-                        <span className="text-xs font-label text-primary-container/70 group-hover:text-primary-container transition-colors font-medium">Resume lesson &rarr;</span>
+                        <span className="text-xs font-label text-primary-container/70 group-hover:text-primary-container transition-colors font-medium">Resume course &rarr;</span>
                       </div>
                       <h3 className="font-headline text-xl font-bold text-white leading-snug group-hover:text-primary-container transition-colors">{data.activeLesson.title}</h3>
-                      <p className="max-w-xl font-body text-sm text-on-surface-variant group-hover:text-white transition-colors">{data.activeLesson.description || "Continue your current lesson."}</p>
+                      <p className="max-w-xl font-body text-sm text-on-surface-variant group-hover:text-white transition-colors">{data.activeLesson.description || "Continue your current course."}</p>
                       
                       <div className="space-y-2 pt-2 max-w-md">
                         <div className="flex justify-between font-label text-xs">
-                          <span className="text-fog-muted">Lesson Progress</span>
+                          <span className="text-fog-muted">Course Progress</span>
                           <span className="text-primary-container font-semibold">{Math.round(data.activeLesson.progress)}%</span>
                         </div>
                         <div className="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden border border-surgical-steel">
@@ -136,7 +136,7 @@ export function DashboardView({ data, routeBase = "" }: { data: DashboardData; r
                 ) : (
                   <div className="text-center py-6 space-y-3">
                     <h3 className="font-headline text-lg font-bold text-white">Your curriculum is clear</h3>
-                    <p className="text-sm text-on-surface-variant max-w-md mx-auto">New lessons will appear here as they are released. Click to explore all courses.</p>
+                    <p className="text-sm text-on-surface-variant max-w-md mx-auto">New courses and videos will appear here as they are released.</p>
                     <span className="inline-block text-xs font-label text-primary-container uppercase tracking-wider hover:underline">Explore Curriculum &rarr;</span>
                   </div>
                 )}

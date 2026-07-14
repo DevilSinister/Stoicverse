@@ -17,7 +17,7 @@ There is no community selection, influencer page, community slug, or tenant-spec
 
 - `/dashboard` shows current tier, next eligible lesson, progress, relevant upcoming event, and notifications.
 - `/community` shows only channels and posts accessible to the member. Members can react but cannot publish.
-- `/courses` shows eligible tiers and sequential lessons. `/courses/lesson/[id]` authorizes access before returning a Google Drive preview. Watch progress is recorded every 15 seconds; 85% completion unlocks the next lesson or tier.
+- `/courses` shows published named courses with tier and prerequisite eligibility. Members enrol, then `/courses/[id]` presents ordered videos; `/courses/[id]/video/[videoId]` authorizes access before returning a Google Drive preview. Watch progress is recorded every 15 seconds and 80% unlocks the next video.
 - `/events` shows eligible events. Members may enrol when eligible; the Zoom link is returned only when their tier permits it.
 - `/master` is available only after Advanced is complete. It contains Master content and the review-application state.
 - `/mentorship` explains the offer until payment succeeds, then shows the assigned mentor, dates, resources, and booking link.
@@ -25,6 +25,7 @@ There is no community selection, influencer page, community slug, or tenant-spec
 ## Staff journey
 
 - The influencer uses `/creator/events` to draft, manually publish, update, cancel, and inspect events. Intended publication times are reminders surfaced in Needs attention; they do not auto-publish. Moderator event management is deferred.
+- The influencer uses `/creator/courses` to create and publish courses, configure tier/prerequisite rules and rewards, add required or optional Drive videos with immediate or scheduled release times, and finish a course when its completion set is ready.
 - The influencer signs into `/creator`, which initially mirrors the community surface and keeps the same shared shell, navigation, and inline staff controls.
 - The super admin manages members, roles, billing records, platform settings, and platform-wide moderation at `/admin`.
 

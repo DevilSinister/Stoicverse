@@ -1,3 +1,4 @@
+/* Legacy tier path retained below for migration reference.
 import { requireActiveMembership } from "@/lib/supabase/access";
 import { LearningPathView, type LearningPathData } from "@/components/courses/LearningPathView";
 
@@ -81,3 +82,5 @@ export async function renderCoursesPage({ nextPath = "/courses", routeBase = "" 
 export default async function CoursesPage() {
   return renderCoursesPage();
 }
+*/
+export { default, renderCoursesPage } from "./CourseCatalogPage";

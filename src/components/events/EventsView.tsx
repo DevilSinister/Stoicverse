@@ -233,9 +233,9 @@ function EventList({
                     </span>
                     <div className="flex items-center gap-2">
                       {isLive && (
-                        <span className="flex h-2 w-2 relative">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-container"></span>
+                        <span className="relative inline-flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-container opacity-75" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-primary-container" />
                         </span>
                       )}
                       <span className={`font-bold tracking-wider ${isLive ? 'text-primary-container' : 'text-fog-muted'}`}>

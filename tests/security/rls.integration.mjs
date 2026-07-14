@@ -6,7 +6,8 @@ const required = [
   "SUPABASE_TEST_URL", "SUPABASE_TEST_ANON_KEY", "RLS_SUSPENDED_JWT", "RLS_INACTIVE_JWT",
   "RLS_TIER1_JWT", "RLS_QUALIFIED_JWT", "RLS_MODERATOR_JWT", "RLS_INFLUENCER_JWT",
   "RLS_SUPER_ADMIN_JWT", "RLS_HIGH_TIER_EVENT_ID", "RLS_HIGH_TIER_LESSON_ID",
-  "RLS_OTHER_NOTIFICATION_ID",
+  "RLS_OTHER_NOTIFICATION_ID", "RLS_TIER1_USER_ID", "RLS_HIGH_TIER_COURSE_ID",
+  "RLS_LOCKED_COURSE_VIDEO_ID",
 ];
 const missing = required.filter((name) => !process.env[name]);
 const skip = missing.length ? `Missing isolated Supabase RLS fixture variables: ${missing.join(", ")}` : false;
@@ -49,6 +50,19 @@ test("members cannot forge progress or mutate protected records", { skip }, asyn
   assert.notEqual((await member.from("profiles").update({ platform_role: "super_admin" }).eq("id", "00000000-0000-4000-8000-000000000001")).error, null);
   assert.notEqual((await member.from("memberships").update({ status: "active" }).neq("user_id", "00000000-0000-4000-8000-000000000001")).error, null);
   assert.notEqual((await member.from("payments").insert({})).error, null);
+});
+
+test("course writes and provider assets remain influencer-only", { skip }, async () => {
+  const member = client(process.env.RLS_TIER1_JWT);
+  assert.notEqual((await member.from("courses").insert({ title: "Forged course", min_tier: 1, completion_tier: 5, created_by: process.env.RLS_TIER1_USER_ID })).error, null);
+  assert.notEqual((await member.from("course_video_assets").select("video_file_id")).error, null);
+});
+
+test("course enrollment and video progress are validated by database functions", { skip }, async () => {
+  const lowTier = client(process.env.RLS_TIER1_JWT);
+  assert.notEqual((await lowTier.rpc("enroll_in_course", { target_course_id: process.env.RLS_HIGH_TIER_COURSE_ID })).error, null);
+  assert.notEqual((await lowTier.rpc("get_course_video_file_id", { target_video_id: process.env.RLS_LOCKED_COURSE_VIDEO_ID })).error, null);
+  assert.notEqual((await lowTier.rpc("record_course_video_progress", { target_video_id: process.env.RLS_LOCKED_COURSE_VIDEO_ID, elapsed_seconds: 15 })).error, null);
 });
 
 test("notification updates remain scoped to the signed-in member", { skip }, async () => {

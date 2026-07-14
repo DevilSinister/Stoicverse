@@ -1,3 +1,4 @@
+/* Legacy tier editor retained below for migration reference.
 import { CreatorCoursesView } from "@/components/creator/CreatorCoursesView";
 import type { LearningPathData } from "@/components/courses/LearningPathView";
 import { requireInfluencerWorkspace } from "@/lib/supabase/access";
@@ -68,3 +69,5 @@ export default async function CreatorCoursesPage() {
 
   return <CreatorCoursesView data={data} />;
 }
+*/
+export { default } from "./CreatorCourseManagerPageV2";

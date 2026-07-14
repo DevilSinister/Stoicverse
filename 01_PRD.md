@@ -24,8 +24,9 @@ Members cannot create posts, channels, direct messages, or access content, links
 
 - A verified account purchases one $10 Stoicverse membership through Stripe. A successful, verified webhook activates the membership and Tier 1.
 - Members see only active channels, posts, lessons, event links, and Master content allowed by their membership and tier. Restricted content must not be returned to the browser before access is checked.
-- The curriculum contains Basic, Beginner, Intermediate, and Advanced tiers. Lessons unlock in order; completing the required lessons at 85% watch progress unlocks the next tier. Completing Advanced unlocks Master.
-- Lessons use authenticated Google Drive preview embeds. Store only the file identifier, never the original sharing URL.
+- The curriculum is managed as named courses such as Basic, Beginner, and Intermediate. Members enrol only when their tier and all configured prerequisite courses qualify; videos unlock in order at 80% watch progress. A finished course awards its configured higher tier after all required videos are complete.
+- The influencer may release videos over time and marks the course finished when its completion set is ready. Required videos added later reopen dependent-course access; optional additions do not revoke members who had already completed the course.
+- Course videos use authenticated Google Drive preview embeds. Store provider identifiers in a protected asset table, never return them before access is authorized, and never store the original sharing URL.
 - Staff can publish community content and events from the same member-facing surface. Event cards remain visible when relevant, but the Zoom link is available only to qualified members.
 - Master members can submit a review application. Staff can review it, schedule a call, record the outcome, and unlock a team application after approval.
 - Any active member may buy the $1,000 mentorship. Staff can assign a mentor, dates, resources, and a booking link after payment succeeds.

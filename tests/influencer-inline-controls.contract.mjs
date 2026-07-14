@@ -27,7 +27,7 @@ test("canonical creator pages use creator-only routes and workspace access", () 
 
   assert.match(creatorPage, /CreatorDashboardPage/);
   assert.match(creatorDashboard, /requireInfluencerWorkspace/);
-  assert.match(creatorCourses, /CreatorCoursesView/);
+  assert.match(creatorCourses, /CreatorCourseManagerPage/);
   assert.match(creatorEvents, /CreatorEventsView/);
   assert.match(creatorLesson, /requireInfluencerWorkspace/);
   assert.match(access, /export async function requireInfluencerWorkspace/);
@@ -37,18 +37,20 @@ test("member screens are clean while creator screens own the management controls
   const nav = read("src/lib/navigation/app-nav.ts");
   const shell = read("src/components/layout/AppShell.tsx");
   const dashboard = read("src/components/dashboard/DashboardView.tsx");
-  const memberLearning = read("src/components/courses/LearningPathView.tsx");
+  const memberLearning = read("src/components/courses/CourseCatalog.tsx");
   const memberEvents = read("src/components/events/EventsView.tsx");
-  const creatorLearning = read("src/components/creator/CreatorCoursesView.tsx");
+  const creatorLearning = read("src/components/creator/CreatorCourseManagerV2.tsx");
   const creatorEvents = read("src/components/creator/CreatorEventsView.tsx");
 
   assert.match(nav, /routeBase/);
   assert.match(shell, /params\.set\("base", routeBase\)/);
-  assert.match(dashboard, /withRouteBase\(routeBase, `\/courses\/lesson\/\$\{data\.activeLesson\.id\}`\)/);
+  assert.match(dashboard, /`\/courses\/\$\{data\.activeLesson\.id\}`/);
   assert.doesNotMatch(memberLearning, /Add lesson/);
   assert.doesNotMatch(memberEvents, /Create event/);
   assert.doesNotMatch(memberEvents, /Publish Zoom link/);
-  assert.match(creatorLearning, /Add lesson/);
+  assert.match(creatorLearning, /Create course/);
+  assert.match(creatorLearning, /Add video/);
+  assert.match(creatorLearning, /Finish course/);
   assert.match(creatorEvents, /Create event/);
   assert.match(creatorEvents, /Publish (Zoom link|room)/);
 });

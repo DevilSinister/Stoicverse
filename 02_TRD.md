@@ -21,7 +21,7 @@ Stoicverse has one global community. There are no community ids, community slugs
 
 Every protected request must validate authentication, suspension state, active membership, role, and tier where applicable. Row Level Security must enforce the same boundary for direct Supabase access:
 
-- Tier-gated channels, posts, lessons, event records, and Zoom links are returned only to qualified members or authorized staff.
+- Tier-gated channels, posts, courses, course videos, event records, and Zoom links are returned only to qualified members or authorized staff.
 - Lesson video identifiers and embed URLs are never selected for unauthorized users.
 - Staff writes are restricted to the correct global roles; moderator and influencer capabilities must match the UI.
 - Payments, membership activation, mentorship activation, and notification writes occur only in trusted server-side webhook/service code.
@@ -31,7 +31,7 @@ Every protected request must validate authentication, suspension state, active m
 - Supabase auth callback, sign-up, sign-in, sign-out, password reset, and profile update.
 - Stripe Checkout session creation for membership and mentorship; a signature-verified, idempotent Stripe webhook.
 - Authorized mutation endpoints/server actions for posts, reactions, channels, events, lessons, progress, review applications, mentorship management, notifications, and admin operations.
-- A lesson-progress endpoint that accepts elapsed watch time, clamps it to the lesson duration, marks completion at the configured threshold, and advances tiers atomically.
+- Course-video endpoints authorize enrolment, tier, prerequisites, and preceding-video completion before returning a Drive preview; bounded progress completes at 80% and awards course/tier completion atomically.
 
 ## Security and operational requirements
 
