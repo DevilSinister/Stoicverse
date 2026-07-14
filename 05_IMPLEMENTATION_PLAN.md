@@ -11,7 +11,7 @@
 - Supabase SSR clients, authentication callback, route proxy, active-membership, Master, and super-admin guards.
 - Single-community Supabase schema with profiles, memberships, tiers, lessons, posts, events, applications, mentorships, payments, notifications, and RLS scaffolding.
 - Read views for dashboard, community, courses, events, Master, mentorship, checkout, and admin; search and notification display UI.
-- Event UI plus server actions for enrolment, staff event creation, and publishing an event Zoom link.
+- Event UI plus server actions for enrolment, influencer event drafts/manual publishing, lifecycle management, in-app notifications, attendee metrics, and publishing an event Zoom link.
 - Account profile/password UI and basic role-aware screen controls.
 
 ## Must complete before MVP launch

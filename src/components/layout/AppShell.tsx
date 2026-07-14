@@ -155,7 +155,7 @@ export function AppShell({
   };
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
-  const navItems = useMemo(() => buildAppNav({ isMaster, routeBase }), [isMaster, routeBase]);
+  const navItems = useMemo(() => buildAppNav({ routeBase }), [routeBase]);
   const visibleResults = query.trim().length >= 2 ? results : [];
 
   useEffect(() => {

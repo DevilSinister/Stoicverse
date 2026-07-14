@@ -57,5 +57,5 @@ export async function renderDashboardPage({ nextPath = "/dashboard", routeBase =
 }
 
 export default async function DashboardPage() {
-  return renderDashboardPage();
+  return renderDashboardPage({ routeBase: "/dashboard" });
 }

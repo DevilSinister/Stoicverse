@@ -24,7 +24,7 @@ There is no community selection, influencer page, community slug, or tenant-spec
 
 ## Staff journey
 
-- Moderators publish, pin, delete, and moderate posts; they create and manage events.
+- The influencer uses `/creator/events` to draft, manually publish, update, cancel, and inspect events. Intended publication times are reminders surfaced in Needs attention; they do not auto-publish. Moderator event management is deferred.
 - The influencer signs into `/creator`, which initially mirrors the community surface and keeps the same shared shell, navigation, and inline staff controls.
 - The super admin manages members, roles, billing records, platform settings, and platform-wide moderation at `/admin`.
 
@@ -32,4 +32,4 @@ Moderators stay on the member routes. The influencer uses the protected `/creato
 
 ## Notifications
 
-Tier unlocks, payments, event updates, warnings, review decisions, and mentorship updates create in-app notifications. Events that need email also send transactional messages through Resend.
+Tier unlocks, payments, event updates, warnings, review decisions, and mentorship updates create in-app notifications. Event notifications are in-app only.

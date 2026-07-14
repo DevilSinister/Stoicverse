@@ -5,21 +5,12 @@ import { getSupabaseConfig } from "@/lib/supabase/env";
 
 const authRoutes = ["/login", "/signup"];
 const creatorRoute = "/creator";
-const memberRoutes = ["/dashboard", "/community", "/courses", "/events", "/master", "/mentorship", "/subscription"];
-const creatorRoutes = ["/creator", "/creator/dashboard", "/creator/community", "/creator/courses", "/creator/events", "/creator/master", "/creator/mentorship"];
+const memberRoutes = ["/dashboard"];
+const creatorRoutes = ["/creator"];
+const adminRoutes = ["/admin"];
 
 function isRouteMatch(path: string, routes: string[]) {
   return routes.some((route) => path === route || path.startsWith(`${route}/`));
-}
-
-function mapMemberRouteToCreator(path: string) {
-  if (path === "/dashboard" || path.startsWith("/dashboard/")) return `${creatorRoute}/dashboard`;
-  if (path === "/community" || path.startsWith("/community/")) return `${creatorRoute}/community`;
-  if (path === "/courses" || path.startsWith("/courses/")) return `${creatorRoute}${path}`;
-  if (path === "/events" || path.startsWith("/events/")) return `${creatorRoute}/events`;
-  if (path === "/master" || path.startsWith("/master/")) return `${creatorRoute}/master`;
-  if (path === "/mentorship" || path.startsWith("/mentorship/")) return `${creatorRoute}/mentorship`;
-  return `${creatorRoute}/dashboard`;
 }
 
 function safeNextPath(request: NextRequest) {
@@ -94,11 +85,12 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isCheckoutRoute = path === "/checkout";
   const isCreatorRoute = isRouteMatch(path, creatorRoutes);
+  const isAdminRoute = isRouteMatch(path, adminRoutes);
   const requiresMembership = isRouteMatch(path, memberRoutes);
   const isAuthRoute = authRoutes.includes(path);
   const currentPath = `${path}${request.nextUrl.search}`;
 
-  if ((isCheckoutRoute || requiresMembership || isCreatorRoute) && !user) {
+  if ((isCheckoutRoute || requiresMembership || isCreatorRoute || isAdminRoute) && !user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", currentPath);
     return redirectWithState(response, loginUrl);
@@ -108,7 +100,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  const needsSubscriptionCheck = isCheckoutRoute || requiresMembership || isAuthRoute || isCreatorRoute;
+  const needsSubscriptionCheck = isCheckoutRoute || requiresMembership || isAuthRoute || isCreatorRoute || isAdminRoute;
   if (!needsSubscriptionCheck) {
     return response;
   }
@@ -125,13 +117,25 @@ export async function proxy(request: NextRequest) {
   const hasActiveMembership = Boolean(membership) && !profile?.is_suspended;
 
   const isInfluencer = profile?.platform_role === "influencer" && !profile?.is_suspended;
+  const isAdmin = profile?.platform_role === "super_admin" && !profile?.is_suspended;
+
+  if (isAdminRoute && !isAdmin) {
+    return redirectWithState(response, new URL(isInfluencer ? creatorRoute : hasActiveMembership ? "/dashboard" : "/checkout", request.url));
+  }
+
+  if (isAdmin) {
+    if (isAuthRoute || isCheckoutRoute || requiresMembership || isCreatorRoute) {
+      return redirectWithState(response, new URL("/admin", request.url));
+    }
+    return response;
+  }
 
   if (isCreatorRoute && !isInfluencer) {
     return redirectWithState(response, new URL(hasActiveMembership ? "/dashboard" : "/checkout", request.url));
   }
 
   if (requiresMembership && isInfluencer) {
-    return redirectWithState(response, new URL(mapMemberRouteToCreator(path), request.url));
+    return redirectWithState(response, new URL(creatorRoute, request.url));
   }
 
   if (isCheckoutRoute && isInfluencer) {

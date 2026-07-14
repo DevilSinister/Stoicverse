@@ -1,113 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
-import { CalendarDays, Check, Clock3, Lock, Users, Video } from "lucide-react";
-
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { CalendarDays, Clock3, Lock, Users, Video, X } from "lucide-react";
 import { enrollInEvent } from "@/app/events/actions";
 import { AppShell } from "@/components/layout/AppShell";
 
-export type EventRecord = {
-  id: string;
-  title: string;
-  description: string | null;
-  hostName: string;
-  startsAt: string;
-  endsAt: string | null;
-  minTier: number;
-  status: "upcoming" | "live" | "completed" | "cancelled";
-  enrolled: boolean;
-};
+export type EventRecord = { id: string; title: string; description: string | null; hostName: string; startsAt: string; endsAt: string | null; minTier: number; status: "upcoming" | "live" | "completed" | "cancelled"; enrolled: boolean; publishAt?: string | null; publishedAt?: string | null; cancelledAt?: string | null; cancellationReason?: string | null };
+const formatter = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const label = (tier: number) => tier === 5 ? "Masters" : `Tier ${tier}+`;
+const state = (event: EventRecord, now: number) => event.status === "cancelled" ? "cancelled" : event.endsAt && new Date(event.endsAt).getTime() <= now ? "completed" : new Date(event.startsAt).getTime() <= now ? "live" : "upcoming";
+const duration = (event: EventRecord) => event.endsAt ? `${Math.round((new Date(event.endsAt).getTime() - new Date(event.startsAt).getTime()) / 60_000)} min` : "Duration unavailable";
 
-const formatter = new Intl.DateTimeFormat(undefined, {
-  weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
-});
-
-function timeUntil(iso: string, now: number) {
-  const remaining = new Date(iso).getTime() - now;
-  if (remaining <= 0) return "Now";
-  const totalMinutes = Math.floor(remaining / 60_000);
-  const days = Math.floor(totalMinutes / 1_440);
-  const hours = Math.floor((totalMinutes % 1_440) / 60);
-  const minutes = totalMinutes % 60;
-  return days ? `${days}d ${hours}h` : `${hours}h ${minutes}m`;
+export function EventsView({ events, enrollmentAvailable, currentTier, isMaster, memberName, routeBase = "" }: { events: EventRecord[]; enrollmentAvailable: boolean; currentTier: number; isMaster: boolean; memberName?: string; routeBase?: string }) {
+  const router = useRouter(); const pathname = usePathname(); const params = useSearchParams(); const [now, setNow] = useState(Date.now()); const [message, setMessage] = useState<string | null>(null); const [pending, startTransition] = useTransition();
+  useEffect(() => { const interval = window.setInterval(() => setNow(Date.now()), 30_000); return () => window.clearInterval(interval); }, []);
+  const selected = useMemo(() => events.find((event) => event.id === params.get("event")) ?? null, [events, params]);
+  const setSelected = (event: EventRecord | null) => { const next = new URLSearchParams(params); if (event) next.set("event", event.id); else next.delete("event"); router.replace(`${pathname}${next.size ? `?${next}` : ""}`, { scroll: false }); };
+  const enroll = (id: string) => startTransition(async () => { const result = await enrollInEvent(id); setMessage(result.error ?? "You’re enrolled. Your event desk is ready."); });
+  const upcoming = events.filter((event) => ["upcoming", "live"].includes(state(event, now)));
+  const recent = events.filter((event) => state(event, now) === "completed" && new Date(event.endsAt ?? event.startsAt).getTime() > now - 86_400_000);
+  return <AppShell active="Events" title="Events Directory" isMaster={isMaster} currentTier={currentTier} memberName={memberName} routeBase={routeBase}><main className="mx-auto max-w-7xl p-4 md:p-8"><header className="mb-6 border-b border-surgical-steel pb-6"><p className="font-label text-xs tracking-[.14em] text-primary-container">SESSION LEDGER</p><h1 className="mt-2 font-headline text-2xl font-bold text-white md:text-3xl">Scheduled practice, held live.</h1><p className="mt-2 font-body text-sm text-on-surface-variant">Open a session to review its details, then enroll once to keep your place.</p></header>{message && <div role="status" className="mb-5 border border-primary-container/50 bg-primary-container/10 p-3 text-sm text-white">{message}</div>}{!enrollmentAvailable && <div role="status" className="mb-5 border border-amber-400/50 p-3 text-sm text-white">Enrollment is being prepared.</div>}<EventList title="On the schedule" events={upcoming} onOpen={setSelected} />{recent.length > 0 && <EventList title="Recently concluded" events={recent} onOpen={setSelected} />}</main>{selected && <MemberEventDetails event={selected} currentTier={currentTier} isMaster={isMaster} pending={pending} enrollmentAvailable={enrollmentAvailable} onClose={() => setSelected(null)} onEnroll={enroll} />}</AppShell>;
 }
-
-function eventState(event: EventRecord, now: number) {
-  if (event.status === "cancelled") return "cancelled";
-  if (event.endsAt && new Date(event.endsAt).getTime() <= now) return "completed";
-  if (new Date(event.startsAt).getTime() <= now) return "live";
-  return "upcoming";
-}
-
-export function EventsView({ events, enrollmentAvailable, currentTier, isMaster, memberName, routeBase = "" }: {
-  events: EventRecord[]; enrollmentAvailable: boolean; currentTier: number; isMaster: boolean; memberName?: string; routeBase?: string;
-}) {
-  const [now, setNow] = useState(() => Date.now());
-  const [message, setMessage] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-  useEffect(() => { const timer = window.setInterval(() => setNow(Date.now()), 30_000); return () => window.clearInterval(timer); }, []);
-
-  const nextEvent = useMemo(() => events.find((event) => eventState(event, now) === "upcoming"), [events, now]);
-  const upcoming = events.filter((event) => ["upcoming", "live"].includes(eventState(event, now)));
-  const recentCutoff = now - 24 * 60 * 60 * 1000;
-  const recent = events.filter((event) => eventState(event, now) === "completed" && new Date(event.endsAt ?? event.startsAt).getTime() >= recentCutoff);
-
-  const submitEnrollment = (eventId: string) => startTransition(async () => {
-    const result = await enrollInEvent(eventId);
-    setMessage(result.error ?? "You're enrolled. Your event desk is ready.");
-  });
-
-  return (
-    <AppShell active="Events" title="Events Directory" isMaster={isMaster} currentTier={currentTier} memberName={memberName} routeBase={routeBase}>
-      <main className="mx-auto max-w-7xl p-4 md:p-8">
-        <div className="mb-6 flex flex-col gap-4 border-b border-surgical-steel pb-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="font-label text-xs tracking-[0.14em] text-primary-container">SESSION LEDGER</p>
-            <h1 className="mt-2 font-headline text-2xl font-bold text-white md:text-3xl">Scheduled practice, held live.</h1>
-            <p className="mt-2 max-w-2xl font-body text-sm leading-relaxed text-on-surface-variant">Enroll once to keep your place. Event rooms unlock at their scheduled time for qualified members.</p>
-          </div>
-        </div>
-
-        {!enrollmentAvailable && <div role="status" className="mb-5 border border-amber-400/50 bg-amber-400/10 px-4 py-3 font-body text-sm text-on-surface">Event enrollment is being prepared. Apply the latest database migration to enable enrollment.</div>}
-        {message && <div role="status" className="mb-5 flex items-center justify-between gap-4 border border-primary-container/50 bg-primary-container/10 px-4 py-3 font-body text-sm text-on-surface"><span>{message}</span><button className="font-label text-xs text-primary-container hover:text-white" onClick={() => setMessage(null)}>Dismiss</button></div>}
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_16rem]">
-          <div className="space-y-8">
-            <EventList title="On the schedule" events={upcoming} now={now} currentTier={currentTier} pending={isPending} enrollmentAvailable={enrollmentAvailable} onEnroll={submitEnrollment} />
-            {recent.length > 0 && <EventList title="Recently concluded" events={recent} now={now} currentTier={currentTier} pending={isPending} enrollmentAvailable={enrollmentAvailable} onEnroll={submitEnrollment} />}
-          </div>
-          <aside className="h-fit rounded-lg border border-surgical-steel bg-surface-container-low xl:sticky xl:top-6">
-            <div className="border-b border-surgical-steel bg-surface-container-high px-4 py-3"><p className="font-label text-xs tracking-[0.13em] text-fog-muted">NEXT SESSION</p></div>
-            <div className="p-4">
-              {nextEvent ? <><p className="font-label text-xs text-primary-container">IN {timeUntil(nextEvent.startsAt, now)}</p><h2 className="mt-2 font-headline text-lg font-semibold text-white">{nextEvent.title}</h2><p className="mt-3 border-t border-surgical-steel pt-3 font-label text-xs text-fog-muted">{formatter.format(new Date(nextEvent.startsAt))}</p></> : <p className="font-body text-sm leading-relaxed text-fog-muted">No upcoming sessions have been scheduled.</p>}
-            </div>
-          </aside>
-        </div>
-      </main>
-    </AppShell>
-  );
-}
-
-function EventList({ title, events, now, currentTier, pending, enrollmentAvailable, onEnroll }: { title: string; events: EventRecord[]; now: number; currentTier: number; pending: boolean; enrollmentAvailable: boolean; onEnroll: (id: string) => void }) {
-  return <section><div className="mb-3 flex items-center gap-3"><h2 className="font-headline text-lg font-semibold text-white">{title}</h2><span className="h-px flex-1 bg-surgical-steel" /></div>{events.length ? <div className="grid gap-4 lg:grid-cols-2">{events.map((event) => <EventCard key={event.id} event={event} now={now} currentTier={currentTier} pending={pending} enrollmentAvailable={enrollmentAvailable} onEnroll={onEnroll} />)}</div> : <div className="border border-dashed border-surgical-steel p-6 font-body text-sm text-fog-muted">No sessions in this window.</div>}</section>;
-}
-
-function EventCard({ event, now, currentTier, pending, enrollmentAvailable, onEnroll }: { event: EventRecord; now: number; currentTier: number; pending: boolean; enrollmentAvailable: boolean; onEnroll: (id: string) => void }) {
-  const state = eventState(event, now);
-  const tierAllowed = currentTier >= event.minTier;
-  const isLive = state === "live";
-  const isCompleted = state === "completed";
-  const canEnter = event.enrolled && tierAllowed && isLive;
-  const roomLabel = !event.enrolled ? "Enroll to access room" : !tierAllowed ? `Unlock Tier ${event.minTier}` : canEnter ? "Join Zoom room" : `Room opens in ${timeUntil(event.startsAt, now)}`;
-  const openRoom = async () => {
-    const response = await fetch(`/api/events/${event.id}/room`);
-    const payload = await response.json() as { url?: string; error?: string };
-    if (!response.ok || !payload.url) { window.alert(payload.error ?? "The room is not available yet."); return; }
-    window.open(payload.url, "_blank", "noopener,noreferrer");
-  };
-
-  return <article className="flex min-h-[285px] flex-col rounded-lg border border-surgical-steel bg-monolith-surface transition-colors hover:border-slate-500">
-    <div className="flex items-center justify-between border-b border-surgical-steel bg-surface-container-high px-4 py-3"><span className="font-label text-xs text-primary-container">TIER {event.minTier}+</span><span className={state === "live" ? "font-label text-xs text-primary-container" : "font-label text-xs text-fog-muted"}>{state === "live" ? "● LIVE NOW" : state === "completed" ? "CONCLUDED" : `STARTS IN ${timeUntil(event.startsAt, now)}`}</span></div>
-    <div className="flex flex-1 flex-col p-5"><h3 className="font-headline text-xl font-semibold text-white">{event.title}</h3><p className="mt-2 line-clamp-2 font-body text-sm leading-relaxed text-on-surface-variant">{event.description || "A focused live session for the Stoicverse community."}</p><dl className="mt-5 grid gap-2 border-t border-surgical-steel pt-4 font-label text-xs text-fog-muted"><div className="flex items-center gap-2"><CalendarDays size={14} className="text-primary-container" /><dd>{formatter.format(new Date(event.startsAt))}</dd></div><div className="flex items-center gap-2"><Users size={14} className="text-primary-container" /><dd>Hosted by {event.hostName}</dd></div></dl><div className="mt-auto pt-5">{isCompleted ? <span className="inline-flex items-center gap-2 font-label text-xs text-fog-muted"><Check size={15} /> Session ended</span> : !tierAllowed ? <span className="inline-flex items-center gap-2 font-label text-xs text-fog-muted"><Lock size={15} /> Reach Tier {event.minTier} to enroll</span> : !enrollmentAvailable ? <span className="inline-flex min-h-10 w-full items-center justify-center gap-2 border border-surgical-steel px-4 font-label text-xs text-fog-muted"><Clock3 size={15} /> Enrollment preparing</span> : !event.enrolled ? <button disabled={pending} onClick={() => onEnroll(event.id)} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full bg-primary-container px-4 font-label text-xs font-semibold text-on-primary-fixed transition hover:brightness-110 disabled:opacity-60"><Users size={15} /> Enroll in session</button> : canEnter ? <button type="button" onClick={openRoom} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full bg-primary-container px-4 font-label text-xs font-semibold text-on-primary-fixed transition hover:brightness-110"><Video size={15} /> {roomLabel}</button> : <span className="inline-flex min-h-10 w-full items-center justify-center gap-2 border border-surgical-steel px-4 font-label text-xs text-fog-muted"><Clock3 size={15} /> {roomLabel}</span>}</div></div>
-  </article>;
-}
+function EventList({ title, events, onOpen }: { title: string; events: EventRecord[]; onOpen: (event: EventRecord) => void }) { return <section className="mb-8"><div className="mb-3 flex gap-3"><h2 className="font-headline text-lg text-white">{title}</h2><span className="mt-4 h-px flex-1 bg-surgical-steel" /></div>{events.length ? <div className="grid gap-4 lg:grid-cols-2">{events.map((event) => <button type="button" key={event.id} onClick={() => onOpen(event)} className="rounded-lg border border-surgical-steel bg-monolith-surface p-5 text-left hover:border-primary-container"><div className="flex justify-between"><span className="font-label text-xs text-primary-container">{label(event.minTier)}</span><span className="font-label text-xs text-fog-muted">{event.status.toUpperCase()}</span></div><h3 className="mt-3 font-headline text-xl text-white">{event.title}</h3><p className="mt-2 text-sm text-on-surface-variant">{formatter.format(new Date(event.startsAt))}</p></button>)}</div> : <p className="border border-dashed border-surgical-steel p-6 text-sm text-fog-muted">No sessions in this window.</p>}</section>; }
+function MemberEventDetails({ event, currentTier, isMaster, pending, enrollmentAvailable, onClose, onEnroll }: { event: EventRecord; currentTier: number; isMaster: boolean; pending: boolean; enrollmentAvailable: boolean; onClose: () => void; onEnroll: (id: string) => void }) { const close = useRef<HTMLButtonElement>(null); useEffect(() => { close.current?.focus(); const key = (e: KeyboardEvent) => e.key === "Escape" && onClose(); window.addEventListener("keydown", key); return () => window.removeEventListener("keydown", key); }, [onClose]); const permitted = isMaster || currentTier >= event.minTier; const live = state(event, Date.now()) === "live"; const join = async () => { const response = await fetch(`/api/events/${event.id}/room`); const payload = await response.json() as { url?: string; error?: string }; if (!response.ok || !payload.url) return window.alert(payload.error ?? "Room unavailable."); window.open(payload.url, "_blank", "noopener,noreferrer"); }; return <div role="dialog" aria-modal="true" aria-labelledby="member-event-title" className="fixed inset-0 z-50 grid place-items-center bg-surface-container-lowest/85 p-4" onMouseDown={onClose}><div onMouseDown={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-lg border border-surgical-steel bg-monolith-surface"><div className="flex justify-between border-b border-surgical-steel p-5"><div><p className="font-label text-xs text-primary-container">EVENT DETAILS</p><h2 id="member-event-title" className="mt-1 font-headline text-xl text-white">{event.title}</h2></div><button ref={close} onClick={onClose}><X /></button></div><div className="space-y-4 p-5 text-sm"><p className="text-on-surface-variant">{event.description || "A focused live session for the Stoicverse community."}</p><div className="grid gap-2 border-y border-surgical-steel py-4 text-fog-muted"><p><CalendarDays className="mr-2 inline text-primary-container" size={14} />{formatter.format(new Date(event.startsAt))}</p><p><Clock3 className="mr-2 inline text-primary-container" size={14} />{duration(event)}</p><p><Users className="mr-2 inline text-primary-container" size={14} />Hosted by {event.hostName} · {label(event.minTier)}</p></div>{!permitted ? <p className="flex items-center gap-2 text-fog-muted"><Lock size={15} />Reach {label(event.minTier)} to enroll.</p> : !event.enrolled ? <button disabled={pending || !enrollmentAvailable} onClick={() => onEnroll(event.id)} className="w-full rounded-full bg-primary-container p-3 font-label text-xs text-on-primary-fixed">Enroll in session</button> : live ? <button onClick={join} className="flex w-full items-center justify-center gap-2 rounded-full bg-primary-container p-3 font-label text-xs text-on-primary-fixed"><Video size={15} />Join Zoom room</button> : <p className="text-fog-muted">You’re enrolled. The room opens at the scheduled time.</p>}</div></div></div>; }

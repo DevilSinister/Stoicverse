@@ -1,8 +1,8 @@
 import { requireActiveMembership } from "@/lib/supabase/access";
 import { LearningPathView, type LearningPathData } from "@/components/courses/LearningPathView";
 
-export default async function CoursesPage() {
-  const { supabase, user } = await requireActiveMembership("/courses");
+export async function renderCoursesPage({ nextPath = "/courses", routeBase = "" }: { nextPath?: string; routeBase?: string } = {}) {
+  const { supabase, user } = await requireActiveMembership(nextPath);
   const [profileResult, tierResult, progressResult, lessonsResult, tiersResult] = await Promise.all([
     supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
     supabase.from("member_tiers").select("current_tier, is_master").eq("user_id", user.id).maybeSingle(),
@@ -75,5 +75,9 @@ export default async function CoursesPage() {
     tiers: formattedTiers,
   };
 
-  return <LearningPathView data={data} />;
+  return <LearningPathView data={data} routeBase={routeBase} />;
+}
+
+export default async function CoursesPage() {
+  return renderCoursesPage();
 }

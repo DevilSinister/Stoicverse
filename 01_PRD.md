@@ -29,7 +29,7 @@ Members cannot create posts, channels, direct messages, or access content, links
 - Staff can publish community content and events from the same member-facing surface. Event cards remain visible when relevant, but the Zoom link is available only to qualified members.
 - Master members can submit a review application. Staff can review it, schedule a call, record the outcome, and unlock a team application after approval.
 - Any active member may buy the $1,000 mentorship. Staff can assign a mentor, dates, resources, and a booking link after payment succeeds.
-- In-app notifications cover account, payment, tier, event, review, and mentorship status. Required transactional emails are sent through Resend.
+- In-app notifications cover account, payment, tier, event, review, and mentorship status. Event creation, updates, cancellation, and room publication notify active members in-app only; event email is not part of the current workflow.
 
 ## Non-goals and deferred behaviour
 

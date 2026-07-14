@@ -1,8 +1,8 @@
 import { EventsView, type EventRecord } from "@/components/events/EventsView";
 import { requireActiveMembership } from "@/lib/supabase/access";
 
-export default async function EventsPage() {
-  const { supabase, user } = await requireActiveMembership("/events");
+export async function renderEventsPage({ nextPath = "/events", routeBase = "" }: { nextPath?: string; routeBase?: string } = {}) {
+  const { supabase, user } = await requireActiveMembership(nextPath);
   const [{ data: tier, error: tierError }, { data: profile, error: profileError }, { data: events, error: eventsError }, { data: enrollments, error: enrollmentError }] = await Promise.all([
     supabase
     .from("member_tiers")
@@ -12,7 +12,7 @@ export default async function EventsPage() {
     supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
     // This also remains compatible with older event schemas: absent optional
     // columns are simply not returned by Postgres when selecting all fields.
-    supabase.from("events").select("*").neq("status", "cancelled").order("starts_at", { ascending: true }),
+    supabase.from("events").select("*").in("status", ["upcoming", "live", "completed", "cancelled"]).order("starts_at", { ascending: true }),
     supabase.from("event_enrollments").select("event_id").eq("user_id", user.id),
   ]);
 
@@ -33,8 +33,13 @@ export default async function EventsPage() {
     .map((event) => ({
       id: event.id, title: event.title, description: event.description, hostName: event.host_name ?? "Stoicverse Team",
       startsAt: event.starts_at, endsAt: event.ends_at, minTier: event.min_tier,
-      status: event.status, enrolled: enrolledIds.has(event.id),
+      status: event.status, enrolled: enrolledIds.has(event.id), publishAt: event.publish_at ?? null, publishedAt: event.published_at ?? null,
+      cancelledAt: event.cancelled_at ?? null, cancellationReason: event.cancellation_reason ?? null,
     }));
 
-  return <EventsView events={visibleEvents} enrollmentAvailable={!enrollmentError} currentTier={tier?.current_tier ?? 1} isMaster={tier?.is_master ?? false} memberName={profile?.full_name ?? undefined} />;
+  return <EventsView events={visibleEvents} enrollmentAvailable={!enrollmentError} currentTier={tier?.current_tier ?? 1} isMaster={tier?.is_master ?? false} memberName={profile?.full_name ?? undefined} routeBase={routeBase} />;
+}
+
+export default async function EventsPage() {
+  return renderEventsPage();
 }

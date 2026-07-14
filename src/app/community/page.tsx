@@ -1,16 +1,13 @@
 import { FeedScreen } from "@/components/screens/AskStoicScreens";
-import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { requireActiveMembership } from "@/lib/supabase/access";
 
 type CommunityPageOptions = {
   nextPath?: string;
   routeBase?: string;
-  creatorWorkspace?: boolean;
 };
 
-export async function renderCommunityPage({ nextPath = "/community", routeBase = "", creatorWorkspace = false }: CommunityPageOptions = {}) {
-  const { supabase, user } = creatorWorkspace
-    ? await requireInfluencerWorkspace(nextPath)
-    : await requireActiveMembership(nextPath);
+export async function renderCommunityPage({ nextPath = "/community", routeBase = "" }: CommunityPageOptions = {}) {
+  const { supabase, user } = await requireActiveMembership(nextPath);
   const [profileResult, tierResult, channelsResult, postsResult, notificationsResult] = await Promise.all([
     supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
     supabase.from("member_tiers").select("current_tier, is_master").eq("user_id", user.id).maybeSingle(),
@@ -24,8 +21,6 @@ export async function renderCommunityPage({ nextPath = "/community", routeBase =
   }
 
   const profile = profileResult.data;
-  const canCreateChannels = profile?.platform_role === "influencer";
-  const canPost = canCreateChannels || profile?.platform_role === "moderator";
   const isMaster = tierResult.data?.is_master ?? false;
   const channels = (channelsResult.data ?? []).filter((channel) => isMaster || channel.type !== "master");
   const posts = (postsResult.data ?? [])
@@ -49,8 +44,6 @@ export async function renderCommunityPage({ nextPath = "/community", routeBase =
   return (
     <FeedScreen
       isMaster={isMaster}
-      canCreateChannels={canCreateChannels}
-      canPost={canPost}
       memberName={profile?.full_name?.trim() || "Practitioner"}
       platformRole={profile?.platform_role ?? "member"}
       currentTier={tierResult.data?.current_tier ?? 1}
