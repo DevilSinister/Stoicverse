@@ -1,2 +1,10 @@
-import{notFound}from"next/navigation";import{CourseVideoPlayer}from"@/components/courses/CourseVideoPlayer";import{requireActiveMembership}from"@/lib/supabase/access";
-export default async function VideoPage({params}:{params:Promise<{id:string;videoId:string}>}){const{id,videoId}=await params;const{supabase}=await requireActiveMembership(`/courses/${id}/video/${videoId}`);const{data,error}=await supabase.from("course_videos").select("id,title,description,course_id").eq("id",videoId).eq("course_id",id).maybeSingle();if(error||!data)notFound();return <main className="mx-auto min-h-screen max-w-5xl p-6 md:p-10"><p className="text-xs uppercase tracking-wider text-primary-container">Secured course video</p><h1 className="mt-2 font-headline text-3xl font-bold text-white">{data.title}</h1>{data.description&&<p className="mt-3 text-on-surface-variant">{data.description}</p>}<div className="mt-8"><CourseVideoPlayer videoId={data.id} title={data.title}/></div></main>}
+import { redirect } from "next/navigation";
+
+export default async function VideoPage({
+  params,
+}: {
+  params: Promise<{ id: string; videoId: string }>;
+}) {
+  const { id, videoId } = await params;
+  redirect(`/dashboard/courses/${id}/video/${videoId}`);
+}

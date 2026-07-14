@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2, Lock, PlayCircle, Sparkles } from "lucide-react";
 import { useMemo } from "react";
 
 import { AppShell, type Notification } from "@/components/layout/AppShell";
@@ -9,18 +9,35 @@ import { withRouteBase } from "@/lib/navigation/paths";
 
 type Event = { id: string; title: string; description: string | null; starts_at: string; min_tier: number; status: string };
 
+export type TierProgressDetail = {
+  level: number;
+  title: string;
+  completedCount: number;
+  totalCount: number;
+  status: "locked" | "active" | "completed";
+};
+
 export type DashboardData = {
-  memberName: string; platformRole: string; currentTier: number; isMaster: boolean; currentTierTitle: string;
-  completedLessons: number; totalLessons: number; currentTierCompleted: number; currentTierTotal: number;
-  activeLesson: { id: string; title: string; description: string | null; progress: number } | null;
-  upcomingEvent: Event | null; notifications: Notification[];
+  memberName: string;
+  platformRole: string;
+  currentTier: number;
+  isMaster: boolean;
+  currentTierTitle: string;
+  completedLessons: number;
+  totalLessons: number;
+  currentTierCompleted: number;
+  currentTierTotal: number;
+  activeLesson: { id: string; title: string; description: string | null; progress: number; completedVideos: number; totalVideos: number; remainingMinutes: number; isCompleted: boolean } | null;
+  enrolledCourses: { id: string; title: string; description: string | null; progress: number; completedVideos: number; totalVideos: number; remainingMinutes: number; isCompleted: boolean }[];
+  upcomingEvent: Event | null;
+  notifications: Notification[];
+  tierProgressDetails: TierProgressDetail[];
 };
 
 const roleName = (role: string) => role.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 
 export function DashboardView({ data, routeBase = "" }: { data: DashboardData; routeBase?: string }) {
-  const tierProgress = data.currentTierTotal ? Math.round((data.currentTierCompleted / data.currentTierTotal) * 100) : 0;
   const roles = useMemo(() => ["Subscriber", roleName(data.platformRole), data.isMaster ? "Master" : `Tier ${data.currentTier} (${data.currentTierTitle})`], [data]);
 
   const getTierTitle = (level: number) => {
@@ -35,6 +52,14 @@ export function DashboardView({ data, routeBase = "" }: { data: DashboardData; r
     const nextLevel = data.currentTier + 1;
     return `Tier ${nextLevel} (${getTierTitle(nextLevel)})`;
   }, [data.currentTier, data.isMaster]);
+
+  // Calculate remaining courses in Tiers 1-4 before reaching Mastery (Tier 5)
+  const coursesToMastery = useMemo(() => {
+    return data.tierProgressDetails.reduce((sum, tier) => {
+      const remaining = Math.max(0, tier.totalCount - tier.completedCount);
+      return sum + remaining;
+    }, 0);
+  }, [data.tierProgressDetails]);
 
   return (
     <AppShell
@@ -61,44 +86,151 @@ export function DashboardView({ data, routeBase = "" }: { data: DashboardData; r
             <Metric label="Next tier to unlock" value={nextTierToUnlock} />
           </div>
 
-          {/* Redesigned Training Vector Panel */}
-          <Panel title="Training vector">
+          {/* Redesigned 4-Segment Training Vector Panel */}
+          <Panel title="Training vector & mastery progress">
             <div className="p-6 md:p-8 space-y-6">
+              
+              {/* Mastery Heading & Remaining Calculator */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-1.5">
-                  <span className="font-label text-xs font-semibold text-primary-container uppercase tracking-wider">Active Training Tier</span>
-                  <h2 className="font-headline text-3xl font-extrabold text-white tracking-tight mt-1">{data.currentTierTitle}</h2>
-                  <p className="text-sm text-fog-muted font-body">Level 0{data.currentTier} of 05</p>
+                  <span className="font-label text-xs font-semibold text-primary-container uppercase tracking-wider">STOIC PATHWAY</span>
+                  <h2 className="font-headline text-3xl font-extrabold text-white tracking-tight mt-1">
+                    {data.isMaster ? "Stoic Master" : data.currentTierTitle}
+                  </h2>
+                  <p className="text-sm text-fog-muted font-body">
+                    {data.isMaster 
+                      ? "You have completed all tiers and achieved Master status."
+                      : `Currently active at Level 0${data.currentTier} of 04.`}
+                  </p>
                 </div>
                 
                 <div className="flex items-center gap-4 bg-surface-container-high border border-surgical-steel/60 px-5 py-3.5 rounded-xl shrink-0">
                   <div className="text-right">
-                    <p className="text-[10px] font-label text-fog-muted uppercase tracking-wider font-bold">Tier Progress</p>
-                    <p className="font-headline text-2xl font-black text-primary-container mt-0.5">{tierProgress}%</p>
+                    <p className="text-[10px] font-label text-fog-muted uppercase tracking-wider font-bold">Pathway Status</p>
+                    <p className="font-headline text-lg font-bold text-white mt-1">
+                      {data.isMaster ? (
+                        <span className="text-primary-container flex items-center gap-1.5 font-extrabold text-sm uppercase tracking-wider">
+                          <Sparkles size={14} /> Mastered
+                        </span>
+                      ) : coursesToMastery === 0 ? (
+                        <span className="text-primary-container font-extrabold text-sm uppercase tracking-wider">Prereqs Met</span>
+                      ) : (
+                        <span className="text-white font-extrabold text-sm uppercase tracking-wider">{coursesToMastery} course{coursesToMastery === 1 ? "" : "s"} left</span>
+                      )}
+                    </p>
                   </div>
                   <div className="w-px h-8 bg-surgical-steel" />
                   <div>
-                    <p className="text-[10px] font-label text-fog-muted uppercase tracking-wider font-bold">Completed</p>
-                    <p className="font-headline text-2xl font-bold text-white mt-0.5">{data.currentTierCompleted}<span className="text-sm text-fog-muted font-normal">/{data.currentTierTotal}</span></p>
+                    <p className="text-[10px] font-label text-fog-muted uppercase tracking-wider font-bold">To Mastery</p>
+                    <p className="font-headline text-xs font-semibold text-primary-container mt-1.5">
+                      {data.isMaster ? "Completed" : `${coursesToMastery} courses to unlock Master Zone`}
+                    </p>
                   </div>
                 </div>
               </div>
               
-              <div className="space-y-2.5">
-                <div className="h-3.5 w-full bg-surface-container-high rounded-full overflow-hidden border border-surgical-steel p-0.5">
-                  <div className="h-full bg-primary-container rounded-full transition-all duration-700 ease-out-expo emerald-glow" style={{ width: `${tierProgress}%` }} />
+              {/* 4-Segmented Progress Line */}
+              <div className="space-y-3">
+                <div className="grid grid-cols-4 gap-2.5">
+                  {data.tierProgressDetails.map((tier) => {
+                    const segmentProgress = tier.status === "completed" 
+                      ? 100 
+                      : tier.status === "locked" 
+                      ? 0 
+                      : tier.totalCount > 0 
+                      ? Math.round((tier.completedCount / tier.totalCount) * 100)
+                      : 0;
+
+                    return (
+                      <div key={tier.level} className="space-y-1.5">
+                        <div className="h-3 w-full bg-surface-container-high rounded-full overflow-hidden border border-surgical-steel/70 p-0.5 relative">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-700 ease-out-expo ${
+                              tier.status === "completed" 
+                                ? "bg-primary-container emerald-glow"
+                                : tier.status === "active"
+                                ? "bg-primary-container/80 emerald-glow"
+                                : "bg-transparent"
+                            }`} 
+                            style={{ width: `${segmentProgress}%` }} 
+                          />
+                        </div>
+                        <div className="flex justify-between items-center text-[10px] font-label px-0.5">
+                          <span className={`${tier.status === "locked" ? "text-fog-muted" : "text-white font-medium"}`}>
+                            T0{tier.level}
+                          </span>
+                          <span className={`${tier.status === "locked" ? "text-fog-muted/65" : "text-primary-container font-mono"}`}>
+                            {segmentProgress}%
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="flex justify-between items-center text-xs font-label text-fog-muted px-1">
-                  <span>{data.isMaster ? "Highest Tier Attained" : `Unlocks ${getTierTitle(data.currentTier + 1)} at 100% completion`}</span>
-                  <span className="text-primary-container font-medium">{data.currentTierTotal - data.currentTierCompleted} courses remaining</span>
+                <div className="flex justify-between items-center text-xs font-label text-fog-muted pt-1">
+                  <span>{data.isMaster ? "Highest attainment reached." : "Unlock the final Master tier by completing all prerequisite courses."}</span>
                 </div>
               </div>
+
+              {/* Individual Tier calculators details */}
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-4 border-t border-surgical-steel/40">
+                {data.tierProgressDetails.map((tier) => {
+                  const isActive = tier.status === "active";
+                  const isCompleted = tier.status === "completed";
+                  
+                  return (
+                    <div 
+                      key={tier.level} 
+                      className={`rounded-lg border p-3.5 space-y-2 transition-all ${
+                        isActive
+                          ? "border-primary-container bg-primary-container/5"
+                          : isCompleted
+                          ? "border-surgical-steel bg-surface-container-high/40 opacity-90"
+                          : "border-surgical-steel/40 bg-surface-container-low/10 opacity-60"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-label uppercase tracking-wider text-fog-muted">
+                          Tier 0{tier.level}
+                        </span>
+                        {isCompleted ? (
+                          <CheckCircle2 size={13} className="text-primary-container" />
+                        ) : isActive ? (
+                          <PlayCircle size={13} className="text-primary-container" />
+                        ) : (
+                          <Lock size={13} className="text-fog-muted" />
+                        )}
+                      </div>
+
+                      <div>
+                        <h4 className="text-sm font-headline font-bold text-white leading-tight">
+                          {tier.title}
+                        </h4>
+                        <p className="text-[11px] font-label text-fog-muted mt-1">
+                          {tier.completedCount} / {tier.totalCount} Course{tier.totalCount === 1 ? "" : "s"}
+                        </p>
+                      </div>
+
+                      <div className="text-[10px] font-body">
+                        {isCompleted ? (
+                          <span className="text-primary-container font-semibold">Tier Completed</span>
+                        ) : isActive ? (
+                          <span className="text-white font-medium">Currently Studying</span>
+                        ) : (
+                          <span className="text-fog-muted">Locked</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
             </div>
           </Panel>
 
           {/* Redesigned Clickable Continue Learning Card */}
           <Link 
-            href={data.activeLesson ? `/courses/${data.activeLesson.id}` : withRouteBase(routeBase, "/courses")}
+            href={data.activeLesson ? withRouteBase(routeBase, `/courses/${data.activeLesson.id}`) : withRouteBase(routeBase, "/courses")}
             className="block group"
           >
             <div className="border border-surgical-steel bg-monolith-surface rounded-xl overflow-hidden hover:border-primary-container/40 active:scale-[0.99] transition-all duration-200">
@@ -125,6 +257,11 @@ export function DashboardView({ data, routeBase = "" }: { data: DashboardData; r
                         <div className="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden border border-surgical-steel">
                           <div className="h-full bg-primary-container rounded-full transition-all duration-500 emerald-glow" style={{ width: `${data.activeLesson.progress}%` }} />
                         </div>
+                      </div>
+                      <div className="grid max-w-md grid-cols-3 divide-x divide-surgical-steel border border-surgical-steel bg-surface-container-low/30 text-center">
+                        <div className="px-3 py-3"><p className="text-[10px] font-label uppercase tracking-wide text-fog-muted">Lessons</p><p className="mt-1 text-sm font-semibold tabular-nums text-white">{data.activeLesson.completedVideos}/{data.activeLesson.totalVideos}</p></div>
+                        <div className="px-3 py-3"><p className="text-[10px] font-label uppercase tracking-wide text-fog-muted">Remaining</p><p className="mt-1 text-sm font-semibold tabular-nums text-white">{data.activeLesson.remainingMinutes}m</p></div>
+                        <div className="px-3 py-3"><p className="text-[10px] font-label uppercase tracking-wide text-fog-muted">Status</p><p className="mt-1 text-sm font-semibold text-primary-container">{data.activeLesson.isCompleted ? "Complete" : "Active"}</p></div>
                       </div>
                     </div>
                     

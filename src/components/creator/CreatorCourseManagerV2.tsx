@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { 
   addCourseVideo, 
   createCourse, 
@@ -14,8 +14,8 @@ import {
 } from "@/app/courses/actions";
 import { AppShell } from "@/components/layout/AppShell";
 import { 
-  ArrowLeft, Plus, Edit, Clock, Video, Lock, Layers, 
-  CheckCircle2, X, AlertCircle, LoaderCircle, Eye, Archive, CheckCircle,
+  ArrowLeft, Plus, Edit, Clock, Video, Layers,
+  X, AlertCircle, LoaderCircle, CheckCircle,
   GripVertical, ChevronDown, Trash2, AlertTriangle
 } from "lucide-react";
 
@@ -28,6 +28,7 @@ type ManagedVideo = {
   sort_order: number; 
   is_optional: boolean; 
   release_at: string | null; 
+  has_secure_asset: boolean;
 };
 
 export type ManagedCourse = { 
@@ -64,7 +65,7 @@ function CustomSelect({
 }: {
   label: string;
   value: string | number;
-  onChange: (val: any) => void;
+  onChange: (val: string | number) => void;
   options: { value: string | number; label: string }[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -124,7 +125,7 @@ export function CreatorCourseManagerV2({
   
   // Drag and Drop ordering state
   const [videoList, setVideoList] = useState<ManagedVideo[]>([]);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [draggedVideoId, setDraggedVideoId] = useState<string | null>(null);
 
   // Modal states
   const [activeModal, setActiveModal] = useState<'create-course' | 'edit-course' | 'add-video' | 'edit-video' | null>(null);
@@ -132,14 +133,16 @@ export function CreatorCourseManagerV2({
 
   const selectedCourse = courses.find(c => c.id === selectedCourseId);
 
-  // Synchronize local video list for reordering
-  useEffect(() => {
-    if (selectedCourse) {
-      setVideoList([...selectedCourse.videos].sort((a, b) => a.sort_order - b.sort_order));
-    } else {
-      setVideoList([]);
-    }
-  }, [selectedCourseId, courses]);
+  const openCourse = (course: ManagedCourse) => {
+    setSelectedCourseId(course.id);
+    setVideoList([...course.videos].sort((a, b) => a.sort_order - b.sort_order));
+  };
+
+  const closeCourse = () => {
+    setSelectedCourseId(null);
+    setVideoList([]);
+    setDraggedVideoId(null);
+  };
 
   const runFormAction = (
     action: (data: FormData) => Promise<ActionResult>, 
@@ -182,7 +185,7 @@ export function CreatorCourseManagerV2({
       } else {
         setMessage("Course deleted successfully.");
         setActiveModal(null);
-        setSelectedCourseId(null);
+        closeCourse();
       }
     });
   };
@@ -202,36 +205,42 @@ export function CreatorCourseManagerV2({
   };
 
   // Drag and Drop handlers
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
+  const handleDragStart = (e: React.DragEvent, videoId: string) => {
+    setDraggedVideoId(videoId);
+    e.dataTransfer.setData("text/plain", videoId);
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
   };
 
-  const handleDragEnter = (targetIndex: number) => {
-    if (draggedIndex === null || draggedIndex === targetIndex) return;
-    const newList = [...videoList];
-    const draggedItem = newList[draggedIndex];
-    newList.splice(draggedIndex, 1);
-    newList.splice(targetIndex, 0, draggedItem);
-    setDraggedIndex(targetIndex);
-    setVideoList(newList);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-    const videoIds = videoList.map(v => v.id);
+  const saveVideoOrder = (nextList: ManagedVideo[]) => {
     startTransition(async () => {
-      const res = await reorderCourseVideos(videoIds);
+      const res = await reorderCourseVideos(nextList.map((video) => video.id));
       if (res.error) {
         setMessage(res.error);
       } else {
         setMessage("Video order updated successfully.");
       }
     });
+  };
+
+  const handleDrop = (e: React.DragEvent, targetVideoId: string) => {
+    e.preventDefault();
+    if (pending) return;
+    const sourceVideoId = e.dataTransfer.getData("text/plain") || draggedVideoId;
+    setDraggedVideoId(null);
+    if (!sourceVideoId || sourceVideoId === targetVideoId) return;
+    const sourceIndex = videoList.findIndex((video) => video.id === sourceVideoId);
+    const targetIndex = videoList.findIndex((video) => video.id === targetVideoId);
+    if (sourceIndex < 0 || targetIndex < 0) return;
+    const nextList = [...videoList];
+    const [source] = nextList.splice(sourceIndex, 1);
+    nextList.splice(targetIndex, 0, source);
+    setVideoList(nextList);
+    saveVideoOrder(nextList);
   };
 
   return (
@@ -301,7 +310,7 @@ export function CreatorCourseManagerV2({
                 {courses.map(course => (
                   <article 
                     key={course.id} 
-                    onClick={() => setSelectedCourseId(course.id)}
+                    onClick={() => openCourse(course)}
                     className="group relative flex flex-col justify-between p-6 rounded-2xl border border-surgical-steel bg-monolith-surface hover:border-primary-container/40 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-lg"
                   >
                     <div className="space-y-4">
@@ -355,7 +364,7 @@ export function CreatorCourseManagerV2({
             <div className="space-y-8 animate-fade-in-up">
               {/* Back Link */}
               <button 
-                onClick={() => setSelectedCourseId(null)}
+                onClick={closeCourse}
                 className="inline-flex items-center gap-2 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-white transition-colors cursor-pointer"
               >
                 <ArrowLeft size={14} /> Back to Courses
@@ -461,12 +470,12 @@ export function CreatorCourseManagerV2({
                   {videoList.map((video, idx) => (
                     <div 
                       key={video.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, idx)}
-                      onDragOver={(e) => handleDragOver(e, idx)}
-                      onDragEnter={() => handleDragEnter(idx)}
-                      onDragEnd={handleDragEnd}
-                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-surgical-steel bg-monolith-surface transition-all duration-150 shadow-sm ${draggedIndex === idx ? "opacity-40 border-primary-container/50 bg-[#16181A]" : "hover:border-primary-container/30"}`}
+                      draggable={!pending}
+                      onDragStart={(e) => handleDragStart(e, video.id)}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, video.id)}
+                      onDragEnd={() => setDraggedVideoId(null)}
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-surgical-steel bg-monolith-surface transition-all duration-150 shadow-sm ${draggedVideoId === video.id ? "opacity-40 border-primary-container/50 bg-[#16181A]" : "hover:border-primary-container/30"}`}
                     >
                       <div className="flex items-start gap-3 min-w-0">
                         {/* Drag Handle */}
@@ -495,6 +504,7 @@ export function CreatorCourseManagerV2({
                               <span className="truncate">Releases: {new Date(video.release_at).toLocaleString()}</span>
                             )}
                           </div>
+                          {!video.has_secure_asset && <p className="mt-2 text-xs font-medium text-amber-300">Drive link missing — edit this video and paste its Google Drive link to restore playback.</p>}
                         </div>
                       </div>
                       <button 
@@ -902,6 +912,10 @@ function VideoAddForm({
   onClose: () => void;
 }) {
   const [isOptional, setIsOptional] = useState<string>("false");
+  const [title, setTitle] = useState("");
+  const [videoFileId, setVideoFileId] = useState("");
+  const [releaseAt, setReleaseAt] = useState("");
+  const [description, setDescription] = useState("");
 
   return (
     <form action={action} className="space-y-4">
@@ -917,15 +931,45 @@ function VideoAddForm({
 
       <div className="space-y-1">
         <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Video Title</label>
-        <input className={inputClass} name="title" placeholder="e.g. Session 1: The Dichotomy of Control" required />
+        <input
+          className={inputClass}
+          name="title"
+          placeholder="e.g. Session 1: The Dichotomy of Control"
+          required
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+        />
       </div>
 
       <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Google Drive File ID</label>
-        <input className={inputClass} name="videoFileId" placeholder="Enter secure Google Drive file ID (e.g. 1aBcDeFgHiJkLmNoP)" required />
+        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Google Drive Link or File ID</label>
+        <input
+          className={inputClass}
+          name="videoFileId"
+          placeholder="Paste a Google Drive share link or file ID"
+          required
+          value={videoFileId}
+          onChange={(event) => setVideoFileId(event.target.value)}
+        />
+      </div>
+
+      <div className="space-y-1">
+        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Description (Optional)</label>
+        <textarea
+          className={`${textareaClass} h-24`}
+          name="description"
+          placeholder="Add context for what members should focus on in this video..."
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+        />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1">
+          <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Duration in Seconds</label>
+          <input className={inputClass} type="number" min="1" name="durationSeconds" placeholder="Only needed if Drive cannot detect it" />
+          <p className="text-xs leading-5 text-fog-muted">Drive duration is detected automatically when available.</p>
+        </div>
         <CustomSelect 
           label="Requirement"
           value={isOptional}
@@ -938,7 +982,13 @@ function VideoAddForm({
 
         <div className="space-y-1">
           <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Release At (Optional)</label>
-          <input className={inputClass} type="datetime-local" name="releaseAt" />
+          <input
+            className={inputClass}
+            type="datetime-local"
+            name="releaseAt"
+            value={releaseAt}
+            onChange={(event) => setReleaseAt(event.target.value)}
+          />
         </div>
       </div>
 
@@ -1021,6 +1071,12 @@ function VideoEditForm({
       <div className="space-y-1">
         <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Video Title</label>
         <input className={inputClass} name="title" defaultValue={video.title} required />
+      </div>
+
+      <div className="space-y-1">
+        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Google Drive Link {video.has_secure_asset ? "(Replace Optional)" : "(Required to Repair)"}</label>
+        <input className={inputClass} name="videoFileId" placeholder="Paste a Google Drive share link or file ID" required={!video.has_secure_asset} />
+        <p className="text-xs leading-5 text-fog-muted">When supplied, Stoicverse securely replaces the source and reads the real duration from Drive.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

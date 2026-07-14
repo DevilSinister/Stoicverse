@@ -83,4 +83,10 @@ export default async function CoursesPage() {
   return renderCoursesPage();
 }
 */
-export { default, renderCoursesPage } from "./CourseCatalogPage";
+import { redirect } from "next/navigation";
+
+export { renderCoursesPage } from "./CourseCatalogPage";
+
+export default function LegacyCoursesPage() {
+  redirect("/dashboard/courses");
+}
