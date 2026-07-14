@@ -765,7 +765,7 @@ function EventDetails({
                 {event.cancellationReason && (
                   <div className="col-span-2 bg-rose-500/5 border border-rose-500/20 rounded p-3 mt-2">
                     <dt className="text-rose-400 font-label text-xs uppercase tracking-wider mb-1">Cancellation Reason</dt>
-                    <dd className="text-rose-200 text-xs italic">"{event.cancellationReason}"</dd>
+                    <dd className="text-rose-200 text-xs italic">&ldquo;{event.cancellationReason}&rdquo;</dd>
                   </div>
                 )}
               </dl>
@@ -914,7 +914,7 @@ function PublishRoomModal({
         >
           <div className="space-y-1">
             <p className="text-xs text-on-surface-variant font-body leading-relaxed">
-              Enter the live meeting link for <strong className="text-white">"{event.title}"</strong>. Members will be notified and can join directly when the session opens.
+              Enter the live meeting link for <strong className="text-white">&ldquo;{event.title}&rdquo;</strong>. Members will be notified and can join directly when the session opens.
             </p>
           </div>
 
@@ -1010,7 +1010,7 @@ function CancelEventModal({
         >
           <div className="space-y-1">
             <p className="text-xs text-on-surface-variant font-body leading-relaxed">
-              Are you sure you want to cancel <strong className="text-white">"{event.title}"</strong>?
+              Are you sure you want to cancel <strong className="text-white">&ldquo;{event.title}&rdquo;</strong>?
               Registered members will be notified immediately. This action cannot be reversed.
             </p>
           </div>
