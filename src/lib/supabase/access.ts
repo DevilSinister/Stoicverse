@@ -23,6 +23,14 @@ export async function requireActiveMembership(nextPath: string) {
     throw new Error("Unable to validate membership.");
   }
 
+  if (profile?.platform_role === "influencer" && !profile.is_suspended) {
+    redirect("/creator");
+  }
+
+  if (profile?.platform_role === "super_admin" && !profile.is_suspended) {
+    redirect("/admin");
+  }
+
   if (!membership || profile?.is_suspended) {
     redirect("/checkout");
   }
@@ -55,7 +63,7 @@ export async function requireInfluencerWorkspace(nextPath: string) {
   }
 
   if (profile?.platform_role !== "influencer") {
-    redirect("/dashboard");
+    redirect(profile?.platform_role === "super_admin" ? "/admin" : "/dashboard");
   }
 
   return { supabase, user };

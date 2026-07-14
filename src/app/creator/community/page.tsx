@@ -35,5 +35,5 @@ export default async function CreatorCommunityPage() {
     })
     .filter((post) => isMaster || post.channelType !== "master");
 
-  return <FeedScreen memberName={profileResult.data?.full_name?.trim() || "Practitioner"} platformRole={profileResult.data?.platform_role ?? "influencer"} currentTier={tierResult.data?.current_tier ?? 1} isMaster={isMaster} notifications={notificationsResult.data ?? []} channels={channels} posts={posts} routeBase="/creator" />;
+  return <FeedScreen canCreateChannels canPost memberName={profileResult.data?.full_name?.trim() || "Practitioner"} platformRole={profileResult.data?.platform_role ?? "influencer"} currentTier={tierResult.data?.current_tier ?? 1} isMaster={isMaster} notifications={notificationsResult.data ?? []} channels={channels} posts={posts} routeBase="/creator" />;
 }

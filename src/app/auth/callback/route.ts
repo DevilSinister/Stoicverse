@@ -52,5 +52,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/creator", request.url), { headers: response.headers });
   }
 
+  if (profile?.platform_role === "super_admin" && !profile.is_suspended) {
+    return NextResponse.redirect(new URL("/admin", request.url), { headers: response.headers });
+  }
+
   return response;
 }

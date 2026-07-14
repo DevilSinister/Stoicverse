@@ -4,18 +4,20 @@ import test from "node:test";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("proxy and auth callback route influencers into the creator namespace", () => {
+test("proxy and auth callback route every role into its own workspace", () => {
   const proxy = read("proxy.ts");
   const callback = read("src/app/auth/callback/route.ts");
 
   assert.match(proxy, /const creatorRoute = "\/creator"/);
-  assert.match(proxy, /mapMemberRouteToCreator/);
+  assert.match(proxy, /const memberRoutes = \["\/dashboard"\]/);
+  assert.match(proxy, /const adminRoutes = \["\/admin"\]/);
   assert.match(proxy, /requiresMembership && isInfluencer/);
   assert.match(proxy, /destination = next\?\.startsWith\(creatorRoute\) \? next : creatorRoute/);
   assert.match(callback, /NextResponse\.redirect\(new URL\("\/creator"/);
+  assert.match(callback, /NextResponse\.redirect\(new URL\("\/admin"/);
 });
 
-test("creator pages use creator-only routes and workspace access", () => {
+test("canonical creator pages use creator-only routes and workspace access", () => {
   const creatorPage = read("src/app/creator/page.tsx");
   const creatorDashboard = read("src/app/creator/dashboard/page.tsx");
   const creatorCourses = read("src/app/creator/courses/page.tsx");
@@ -23,7 +25,7 @@ test("creator pages use creator-only routes and workspace access", () => {
   const creatorLesson = read("src/app/creator/courses/lesson/[id]/page.tsx");
   const access = read("src/lib/supabase/access.ts");
 
-  assert.match(creatorPage, /requireInfluencerWorkspace/);
+  assert.match(creatorPage, /CreatorDashboardPage/);
   assert.match(creatorDashboard, /requireInfluencerWorkspace/);
   assert.match(creatorCourses, /CreatorCoursesView/);
   assert.match(creatorEvents, /CreatorEventsView/);
@@ -48,5 +50,24 @@ test("member screens are clean while creator screens own the management controls
   assert.doesNotMatch(memberEvents, /Publish Zoom link/);
   assert.match(creatorLearning, /Add lesson/);
   assert.match(creatorEvents, /Create event/);
-  assert.match(creatorEvents, /Publish Zoom link/);
+  assert.match(creatorEvents, /Publish (Zoom link|room)/);
+});
+
+test("member and creator route trees expose separate navigation and guards", () => {
+  const nav = read("src/lib/navigation/app-nav.ts");
+  const memberAccess = read("src/lib/supabase/access.ts");
+  const memberCommunity = read("src/app/community/page.tsx");
+
+  for (const path of ["events", "courses", "community", "messages", "notifications", "settings"]) {
+    assert.match(read(`src/app/dashboard/${path}/page.tsx`), /requireActiveMembership|render/);
+  }
+  for (const path of ["channels", "members", "analytics", "revenue", "settings", "notifications"]) {
+    assert.match(read(`src/app/creator/${path}/page.tsx`), /requireInfluencerWorkspace/);
+  }
+  assert.match(nav, /label: "Overview"/);
+  assert.match(nav, /label: "Revenue"/);
+  assert.match(nav, /label: "Community settings"/);
+  assert.match(nav, /label: "Messages"/);
+  assert.doesNotMatch(memberCommunity, /canCreateChannels|canPost/);
+  assert.match(memberAccess, /profile\?\.platform_role === "influencer"/);
 });
