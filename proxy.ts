@@ -80,7 +80,16 @@ export async function proxy(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
+
+  if (authError) {
+    request.cookies.getAll().forEach(({ name }) => {
+      if (name.startsWith("sb-")) {
+        response.cookies.delete(name);
+      }
+    });
+  }
 
   const path = request.nextUrl.pathname;
   const isCheckoutRoute = path === "/checkout";

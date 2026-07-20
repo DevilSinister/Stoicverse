@@ -7,7 +7,6 @@ import {
   FileUp,
   Hash,
   Lock,
-  MessageCircle,
   Pencil,
   Plus,
   Send,
@@ -20,7 +19,7 @@ import {
   FolderPlus,
 } from "lucide-react";
 
-import { createStaffPost, toggleReaction } from "@/app/community/actions";
+import { createStaffPost, toggleReaction, editStaffPost, deleteStaffPost } from "@/app/community/actions";
 import {
   deleteCommunityStructure,
   saveCategory,
@@ -63,15 +62,16 @@ export type CommunityPost = {
   imageUrl: string | null;
   createdAt: string;
   isPinned: boolean;
-  reactionCount: number;
+  reactions: { emoji: string; count: number; userReacted: boolean }[];
 };
 
-const reactionOptions = ["👍", "❤️", "🔥", "💡"];
+const reactionOptions = ["👍", "❤️", "🔥", "💡", "👏", "🎉", "🚀", "👀", "😮", "😢", "💯", "🙏"];
 const tiers = [1, 2, 3, 4, 5];
 const roles = ["member", "moderator", "influencer"] as const;
 
 type Props = {
   workspace: "member" | "creator";
+  currentUserId: string;
   memberName: string;
   platformRole: string;
   currentTier: number;
@@ -323,58 +323,112 @@ function Feed({
   initialPosts,
   canModeratePosts,
   onNotice,
+  currentUserId,
 }: {
   channel?: CommunityChannel;
   initialPosts: CommunityPost[];
   canModeratePosts: boolean;
   onNotice: (value: string) => void;
+  currentUserId: string;
 }) {
+  const [prevInitialPosts, setPrevInitialPosts] = useState(initialPosts);
   const [posts, setPosts] = useState(initialPosts);
-  const [pickerFor, setPickerFor] = useState<string | null>(null);
-  const supabase = useMemo(() => createClient(), []);
 
-  useEffect(() => setPosts(initialPosts), [initialPosts]);
+  if (initialPosts !== prevInitialPosts) {
+    setPrevInitialPosts(initialPosts);
+    setPosts(initialPosts);
+  }
+
+  const [pickerFor, setPickerFor] = useState<string | null>(null);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editBody, setEditBody] = useState("");
+  const [pending, startTransition] = useTransition();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     if (!channel) return;
     const live = supabase
       .channel(`community-posts:${channel.id}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts", filter: `channel_id=eq.${channel.id}` }, async (payload) => {
-        const row = payload.new as { id: string; channel_id: string; body: string | null; image_url: string | null; created_at: string; is_pinned: boolean };
-        const attachment = row.image_url && !row.image_url.startsWith("http") ? await supabase.storage.from("community-posts").createSignedUrl(row.image_url, 60 * 60) : null;
-        const imageUrl = row.image_url?.startsWith("http") ? row.image_url : attachment?.data?.signedUrl ?? null;
-        setPosts((current) =>
-          current.some((post) => post.id === row.id)
-            ? current
-            : [
-                {
-                  id: row.id,
-                  channelId: row.channel_id,
-                  authorName: "Community staff",
-                  body: row.body,
-                  imageUrl,
-                  createdAt: row.created_at,
-                  isPinned: row.is_pinned,
-                  reactionCount: 0,
-                },
-                ...current,
-              ]
-        );
+      .on("postgres_changes", { event: "*", schema: "public", table: "posts", filter: `channel_id=eq.${channel.id}` }, async (payload) => {
+        if (payload.eventType === "INSERT") {
+          const row = payload.new as { id: string; channel_id: string; body: string | null; image_url: string | null; created_at: string; is_pinned: boolean };
+          const attachment = row.image_url && !row.image_url.startsWith("http") ? await supabase.storage.from("community-posts").createSignedUrl(row.image_url, 60 * 60) : null;
+          const imageUrl = row.image_url?.startsWith("http") ? row.image_url : attachment?.data?.signedUrl ?? null;
+          setPosts((current) =>
+            current.some((post) => post.id === row.id)
+              ? current
+              : [
+                  {
+                    id: row.id,
+                    channelId: row.channel_id,
+                    authorName: "Community staff",
+                    body: row.body,
+                    imageUrl,
+                    createdAt: row.created_at,
+                    isPinned: row.is_pinned,
+                    reactions: [],
+                  },
+                  ...current,
+                ]
+          );
+        } else if (payload.eventType === "UPDATE") {
+          const row = payload.new as { id: string; body: string | null; is_deleted: boolean };
+          if (row.is_deleted) {
+            setPosts((current) => current.filter((post) => post.id !== row.id));
+          } else {
+            setPosts((current) =>
+              current.map((post) => (post.id === row.id ? { ...post, body: row.body } : post))
+            );
+          }
+        }
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "reactions" }, (payload) => {
-        const row = (payload.eventType === "DELETE" ? payload.old : payload.new) as { post_id?: string };
-        if (!row.post_id) return;
+        const row = (payload.eventType === "DELETE" ? payload.old : payload.new) as { post_id?: string; emoji?: string; user_id?: string };
+        if (!row.post_id || !row.emoji) return;
+        
+        const isSelf = row.user_id === currentUserId;
         const delta = payload.eventType === "INSERT" ? 1 : payload.eventType === "DELETE" ? -1 : 0;
-        if (delta)
+        
+        if (delta) {
           setPosts((current) =>
-            current.map((post) => (post.id === row.post_id ? { ...post, reactionCount: Math.max(0, post.reactionCount + delta) } : post))
+            current.map((post) => {
+              if (post.id !== row.post_id) return post;
+              const emoji = row.emoji!;
+              const exists = post.reactions.find((r) => r.emoji === emoji);
+              let updatedReactions;
+              if (exists) {
+                if (payload.eventType === "INSERT") {
+                  updatedReactions = post.reactions.map((r) =>
+                    r.emoji === emoji
+                      ? { ...r, count: r.count + 1, userReacted: r.userReacted || isSelf }
+                      : r
+                  );
+                } else {
+                  updatedReactions = post.reactions
+                    .map((r) =>
+                      r.emoji === emoji
+                        ? { ...r, count: Math.max(0, r.count - 1), userReacted: isSelf ? false : r.userReacted }
+                        : r
+                    )
+                    .filter((r) => r.count > 0);
+                }
+              } else {
+                if (payload.eventType === "INSERT") {
+                  updatedReactions = [...post.reactions, { emoji, count: 1, userReacted: isSelf }];
+                } else {
+                  updatedReactions = post.reactions;
+                }
+              }
+              return { ...post, reactions: updatedReactions };
+            })
           );
+        }
       })
       .subscribe();
     return () => {
       void supabase.removeChannel(live);
     };
-  }, [channel?.id, supabase]);
+  }, [channel, supabase, currentUserId]);
 
   const react = useCallback(
     (postId: string, emoji: string) => {
@@ -385,17 +439,63 @@ function Feed({
           return;
         }
         setPosts((current) =>
-          current.map((post) =>
-            post.id === postId
-              ? { ...post, reactionCount: Math.max(0, post.reactionCount + (result.reactionAdded ? 1 : -1)) }
-              : post
-          )
+          current.map((post) => {
+            if (post.id !== postId) return post;
+            const exists = post.reactions.find((r) => r.emoji === emoji);
+            let updatedReactions;
+            if (exists) {
+              if (exists.userReacted) {
+                updatedReactions = post.reactions
+                  .map((r) => r.emoji === emoji ? { ...r, count: Math.max(0, r.count - 1), userReacted: false } : r)
+                  .filter((r) => r.count > 0);
+              } else {
+                updatedReactions = post.reactions.map((r) =>
+                  r.emoji === emoji ? { ...r, count: r.count + 1, userReacted: true } : r
+                );
+              }
+            } else {
+              updatedReactions = [...post.reactions, { emoji, count: 1, userReacted: true }];
+            }
+            return { ...post, reactions: updatedReactions };
+          })
         );
         setPickerFor(null);
       })();
     },
     [onNotice]
   );
+
+  const startEdit = (post: CommunityPost) => {
+    setEditingPostId(post.id);
+    setEditBody(post.body || "");
+  };
+
+  const saveEdit = async (postId: string) => {
+    if (!editBody.trim()) return;
+    startTransition(async () => {
+      const result = await editStaffPost(postId, editBody);
+      if (result.error) {
+        onNotice(result.error);
+      } else {
+        setPosts((current) =>
+          current.map((post) => (post.id === postId ? { ...post, body: editBody.trim() } : post))
+        );
+        setEditingPostId(null);
+      }
+    });
+  };
+
+  const handleDelete = async (postId: string) => {
+    if (!window.confirm("Are you sure you want to delete this message?")) return;
+    startTransition(async () => {
+      const result = await deleteStaffPost(postId);
+      if (result.error) {
+        onNotice(result.error);
+      } else {
+        setPosts((current) => current.filter((post) => post.id !== postId));
+      }
+    });
+  };
 
   if (!channel) {
     return (
@@ -428,86 +528,158 @@ function Feed({
             post.authorName.toLowerCase().includes("moderator") ||
             post.authorName.toLowerCase().includes("staff");
 
+          const isEditing = editingPostId === post.id;
+
           return (
             <article
               key={post.id}
-              className="border border-surgical-steel/40 bg-surface-container-low/60 rounded-xl p-5 hover:border-surgical-steel/80 transition-all duration-200 flex gap-4"
+              className="flex gap-3 items-start max-w-2xl group/post"
             >
               {/* Avatar Initial */}
-              <div className="size-9 shrink-0 rounded-full bg-surface-container-high border border-surgical-steel flex items-center justify-center text-sm font-bold text-primary-container select-none">
+              <div className="size-9 shrink-0 rounded-full bg-surface-container-high border border-surgical-steel flex items-center justify-center text-sm font-bold text-primary-container select-none shadow-sm">
                 {post.authorName[0]?.toUpperCase() || "S"}
               </div>
 
-              {/* Message Content */}
-              <div className="flex-1 min-w-0 space-y-2">
-                <div className="flex items-baseline justify-between gap-4">
-                  <div className="flex items-center gap-2">
-                    <strong className="text-sm text-white font-semibold">{post.authorName}</strong>
+              {/* Message Bubble (WhatsApp Style) */}
+              <div className="flex-1 min-w-0">
+                <div className="bg-emerald-950/25 border border-emerald-500/15 text-white rounded-2xl rounded-tl-none px-4 py-3 shadow-md relative group/bubble min-w-[240px]">
+                  {/* Actions overlay */}
+                  {canModeratePosts && !isEditing && (
+                    <div className="absolute right-3 top-2.5 flex items-center gap-1.5 opacity-0 group-hover/bubble:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => startEdit(post)}
+                        className="p-1 hover:bg-emerald-800/40 rounded text-emerald-400 transition-colors cursor-pointer"
+                        title="Edit message"
+                      >
+                        <Pencil size={11} />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => handleDelete(post.id)}
+                        className="p-1 hover:bg-red-950/45 rounded text-red-400 transition-colors cursor-pointer"
+                        title="Delete message"
+                      >
+                        <X size={11} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Header info */}
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-xs font-bold text-emerald-400">{post.authorName}</span>
                     {isStaff && (
-                      <span className="text-[8px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded border border-primary-container/20 bg-primary-container/5 text-primary-container">
+                      <span className="text-[8px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
                         Staff
                       </span>
                     )}
                   </div>
-                  <time className="text-[10px] text-fog-muted" dateTime={post.createdAt}>
-                    {new Date(post.createdAt).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </time>
+
+                  {/* Body / Editing mode */}
+                  {isEditing ? (
+                    <div className="space-y-2 mt-1">
+                      <textarea
+                        value={editBody}
+                        onChange={(e) => setEditBody(e.target.value)}
+                        disabled={pending}
+                        className="w-full bg-surface-container-lowest border border-emerald-500/30 rounded p-2 text-xs text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 resize-y min-h-[60px]"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => setEditingPostId(null)}
+                          className="px-2.5 py-1 text-[10px] uppercase font-bold text-fog-muted hover:text-white rounded transition-colors cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => saveEdit(post.id)}
+                          className="px-2.5 py-1 text-[10px] uppercase font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded transition-colors cursor-pointer"
+                        >
+                          {pending ? "Saving..." : "Save"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    post.body && (
+                      <p className="text-xs text-on-surface/90 whitespace-pre-wrap leading-relaxed font-body">
+                        {post.body}
+                      </p>
+                    )
+                  )}
+
+                  {/* Image/Attachment */}
+                  {post.imageUrl && !isEditing && (
+                    <div className="mt-3 overflow-hidden rounded-lg border border-emerald-500/20 max-w-md bg-surface-container-lowest/50 group/image">
+                      <img src={post.imageUrl} alt="Attached media" className="max-h-72 w-full object-cover group-hover/image:scale-[1.01] transition-transform duration-300" />
+                      <div className="flex items-center justify-between border-t border-emerald-500/10 bg-emerald-950/30 px-3 py-1.5">
+                        <span className="text-[9px] text-emerald-300/60">Attached Media</span>
+                        <a
+                          href={post.imageUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[10px] text-emerald-400 hover:underline flex items-center gap-1 font-semibold"
+                        >
+                          <FileUp size={11} /> Open Original
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timestamp in footer */}
+                  <div className="flex justify-end items-center gap-1.5 mt-2">
+                    <time className="text-[9px] text-emerald-300/40" dateTime={post.createdAt}>
+                      {new Date(post.createdAt).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </time>
+                  </div>
                 </div>
 
-                {post.body && <p className="text-xs text-on-surface/90 whitespace-pre-wrap leading-relaxed font-body">{post.body}</p>}
+                {/* Discord/Telegram style reactions */}
+                <div className="relative mt-2 flex flex-wrap items-center gap-1.5 px-1">
+                  {post.reactions && post.reactions.length > 0 && post.reactions.map((r) => (
+                    <button
+                      key={r.emoji}
+                      type="button"
+                      onClick={() => react(post.id, r.emoji)}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border transition-all cursor-pointer select-none ${
+                        r.userReacted
+                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                          : "bg-surface-container-high/40 border-surgical-steel/60 text-fog-muted hover:text-white hover:border-surgical-steel"
+                      }`}
+                    >
+                      <span>{r.emoji}</span>
+                      <span className="text-[10px]">{r.count}</span>
+                    </button>
+                  ))}
 
-                {post.imageUrl && (
-                  <div className="mt-3 overflow-hidden rounded-lg border border-surgical-steel max-w-md bg-surface-container-lowest/50 group">
-                    <img src={post.imageUrl} alt="Attached media" className="max-h-72 w-full object-cover group-hover:scale-[1.01] transition-transform duration-300" />
-                    <div className="flex items-center justify-between border-t border-surgical-steel/40 bg-surface-container-low/80 px-3 py-1.5">
-                      <span className="text-[9px] text-fog-muted">Attached Media</span>
-                      <a
-                        href={post.imageUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[10px] text-primary-container hover:underline flex items-center gap-1 font-semibold"
-                      >
-                        <FileUp size={11} /> Open Original
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                {/* Reactions and Actions */}
-                <div className="relative mt-4 flex items-center gap-2.5">
+                  {/* Smile Picker Button */}
                   <button
                     type="button"
                     onClick={() => setPickerFor(pickerFor === post.id ? null : post.id)}
                     aria-label="Add reaction"
-                    className="grid size-7 place-items-center rounded-full border border-surgical-steel/60 text-fog-muted hover:border-primary-container hover:text-primary-container transition-colors cursor-pointer"
+                    className="grid size-6 place-items-center rounded-full border border-surgical-steel/60 text-fog-muted hover:border-emerald-500/50 hover:text-emerald-400 transition-colors cursor-pointer"
                   >
-                    <Smile size={14} />
+                    <Smile size={12} />
                   </button>
 
-                  {post.reactionCount > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => react(post.id, "👍")}
-                      className="px-2.5 py-1 rounded-full border border-primary-container/20 bg-primary-container/5 hover:bg-primary-container/10 transition-colors flex items-center gap-1.5 text-[10px] text-primary-container font-semibold cursor-pointer"
-                    >
-                      <span>👍</span>
-                      <span>{post.reactionCount}</span>
-                    </button>
-                  )}
-
                   {pickerFor === post.id && (
-                    <div className="absolute left-0 bottom-8 z-20 flex gap-1 border border-surgical-steel bg-surface-container-high p-1 shadow-2xl rounded-lg animate-in fade-in slide-in-from-bottom-2 duration-150">
+                    <div className="absolute left-0 bottom-7 z-20 grid grid-cols-6 gap-1 border border-surgical-steel bg-surface-container-high p-1.5 shadow-2xl rounded-lg animate-in fade-in slide-in-from-bottom-2 duration-150 w-[210px]">
                       {reactionOptions.map((emoji) => (
                         <button
                           key={emoji}
                           type="button"
                           onClick={() => react(post.id, emoji)}
-                          className="grid size-8 place-items-center hover:bg-surface-container-lowest rounded transition-colors text-base cursor-pointer"
+                          className="grid size-7 place-items-center hover:bg-surface-container-lowest rounded transition-colors text-base cursor-pointer"
                         >
                           {emoji}
                         </button>
@@ -696,7 +868,6 @@ function ManageChannelsModal({
   onNotice: (value: string) => void;
   onClose: () => void;
 }) {
-  const creator = true;
   const [open, setOpen] = useState<string | null>(categories[0]?.id ?? null);
   const [modal, setModal] = useState<ModalState>(null);
   const [pending, startTransition] = useTransition();
@@ -863,6 +1034,7 @@ function ManageChannelsModal({
 
 export function CommunitySurface({
   workspace,
+  currentUserId,
   memberName,
   platformRole,
   currentTier,
@@ -897,7 +1069,7 @@ export function CommunitySurface({
       notifications={notifications}
       routeBase={routeBase}
     >
-      <main className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[18rem_minmax(0,1fr)] bg-surface">
+      <main className="grid min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] lg:overflow-hidden lg:grid-cols-[18rem_minmax(0,1fr)] bg-surface">
         <ChannelList
           categories={categories}
           channels={channels}
@@ -906,7 +1078,7 @@ export function CommunitySurface({
           routeBase={routeBase}
           onManageClick={() => setIsManageOpen(true)}
         />
-        <section className="min-w-0 bg-surface p-4 md:p-8">
+        <section className="min-w-0 bg-surface p-4 md:p-8 lg:overflow-y-auto lg:h-full">
           {notice && (
             <p
               role="status"
@@ -920,6 +1092,7 @@ export function CommunitySurface({
             initialPosts={activePosts}
             canModeratePosts={canModeratePosts}
             onNotice={setNotice}
+            currentUserId={currentUserId}
           />
         </section>
       </main>

@@ -8,7 +8,7 @@ type Result = { error?: string; success?: true; reactionAdded?: boolean };
 const uuid = (candidate: string) => /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(candidate);
 
 export async function toggleReaction(postId: string, emoji: string): Promise<Result> {
-  if (!uuid(postId) || !["👍", "❤️", "🔥", "💡"].includes(emoji)) return { error: "Invalid reaction." };
+  if (!uuid(postId) || !["👍", "❤️", "🔥", "💡", "👏", "🎉", "🚀", "👀", "😮", "😢", "💯", "🙏"].includes(emoji)) return { error: "Invalid reaction." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to react." };
@@ -42,3 +42,40 @@ export async function createStaffPost(data: FormData): Promise<Result> {
   revalidatePath("/creator/channels");
   return { success: true };
 }
+
+export async function editStaffPost(postId: string, body: string): Promise<Result> {
+  if (!uuid(postId) || !body.trim() || body.length > 10_000) return { error: "Write a valid post body (up to 10,000 characters)." };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Sign in to edit." };
+  
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("platform_role,is_suspended").eq("id", user.id).maybeSingle();
+  if (profileError || !profile || profile.is_suspended || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) {
+    return { error: "Moderator or influencer access is required." };
+  }
+
+  const { error } = await supabase.from("posts").update({ body: body.trim(), updated_at: new Date().toISOString() }).eq("id", postId);
+  if (error) return { error: error.message };
+  revalidatePath("/dashboard/community");
+  revalidatePath("/creator/channels");
+  return { success: true };
+}
+
+export async function deleteStaffPost(postId: string): Promise<Result> {
+  if (!uuid(postId)) return { error: "Invalid post identifier." };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Sign in to delete." };
+
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("platform_role,is_suspended").eq("id", user.id).maybeSingle();
+  if (profileError || !profile || profile.is_suspended || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) {
+    return { error: "Moderator or influencer access is required." };
+  }
+
+  const { error } = await supabase.from("posts").update({ is_deleted: true, updated_at: new Date().toISOString() }).eq("id", postId);
+  if (error) return { error: error.message };
+  revalidatePath("/dashboard/community");
+  revalidatePath("/creator/channels");
+  return { success: true };
+}
+
