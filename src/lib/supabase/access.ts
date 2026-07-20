@@ -13,7 +13,7 @@ export async function requireActiveMembership(nextPath: string) {
   }
 
   const [{ data: membership, error: membershipError }, { data: profile, error: profileError }] = await Promise.all([
-    supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle(),
+    supabase.from("memberships").select("id, expires_at").eq("user_id", user.id).eq("status", "active").maybeSingle(),
     supabase.from("profiles").select("is_suspended, platform_role").eq("id", user.id).maybeSingle(),
   ]);
 
@@ -31,7 +31,9 @@ export async function requireActiveMembership(nextPath: string) {
     redirect("/admin");
   }
 
-  if (!membership || profile?.is_suspended) {
+  const hasActiveMembership = Boolean(membership) && (!membership?.expires_at || new Date(membership.expires_at) > new Date());
+  const isModerator = profile?.platform_role === "moderator" && !profile.is_suspended;
+  if ((!hasActiveMembership && !isModerator) || profile?.is_suspended) {
     redirect("/checkout");
   }
 

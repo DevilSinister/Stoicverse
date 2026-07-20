@@ -106,7 +106,7 @@ export async function proxy(request: NextRequest) {
   }
 
   const [{ data: membership, error: membershipError }, { data: profile, error: profileError }] = await Promise.all([
-    supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle(),
+    supabase.from("memberships").select("id, expires_at").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle(),
     supabase.from("profiles").select("is_suspended, platform_role").eq("id", user.id).maybeSingle(),
   ]);
 
@@ -114,13 +114,15 @@ export async function proxy(request: NextRequest) {
     return unavailableWithState(response);
   }
 
-  const hasActiveMembership = Boolean(membership) && !profile?.is_suspended;
+  const hasActiveMembership = Boolean(membership) && (!membership?.expires_at || new Date(membership.expires_at) > new Date()) && !profile?.is_suspended;
 
   const isInfluencer = profile?.platform_role === "influencer" && !profile?.is_suspended;
   const isAdmin = profile?.platform_role === "super_admin" && !profile?.is_suspended;
+  const isModerator = profile?.platform_role === "moderator" && !profile?.is_suspended;
+  const hasMemberWorkspaceAccess = hasActiveMembership || isModerator;
 
   if (isAdminRoute && !isAdmin) {
-    return redirectWithState(response, new URL(isInfluencer ? creatorRoute : hasActiveMembership ? "/dashboard" : "/checkout", request.url));
+    return redirectWithState(response, new URL(isInfluencer ? creatorRoute : hasMemberWorkspaceAccess ? "/dashboard" : "/checkout", request.url));
   }
 
   if (isAdmin) {
@@ -131,7 +133,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isCreatorRoute && !isInfluencer) {
-    return redirectWithState(response, new URL(hasActiveMembership ? "/dashboard" : "/checkout", request.url));
+    return redirectWithState(response, new URL(hasMemberWorkspaceAccess ? "/dashboard" : "/checkout", request.url));
   }
 
   if (requiresMembership && isInfluencer) {
@@ -142,11 +144,11 @@ export async function proxy(request: NextRequest) {
     return redirectWithState(response, new URL(creatorRoute, request.url));
   }
 
-  if (isCheckoutRoute && hasActiveMembership) {
+  if (isCheckoutRoute && hasMemberWorkspaceAccess) {
     return redirectWithState(response, new URL("/dashboard", request.url));
   }
 
-  if (requiresMembership && !hasActiveMembership) {
+  if (requiresMembership && !hasMemberWorkspaceAccess) {
     return redirectWithState(response, new URL("/checkout", request.url));
   }
 

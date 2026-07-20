@@ -11,7 +11,7 @@
 3. A verified user without active membership reaches `/checkout`.
 4. Stripe confirms the $10 membership through a webhook. The system creates/activates the global membership, creates Tier 1 progress, sends confirmation, and redirects to `/dashboard`.
 
-There is no community selection, influencer page, community slug, or tenant-specific checkout.
+There is no community selection, influencer page, community slug, or tenant-specific checkout because Stoicverse uses one global community.
 
 ## Member journey
 

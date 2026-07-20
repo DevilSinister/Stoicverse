@@ -2,7 +2,7 @@
 
 ## Scope
 
-Stoicverse is one paid Stoic learning community. It is not a marketplace, multi-tenant platform, or creator network. Content, events, curriculum, payments, and progression are global.
+Stoicverse is one paid Stoic learning community. It is a single-community product, not a marketplace, multi-tenant platform, or creator network. Content, events, curriculum, payments, and progression are global.
 
 ## Users
 
@@ -24,6 +24,6 @@ Stoicverse gives paid members one structured path: join, study, unlock progress,
 
 ## Explicit non-goals
 
-- Multiple communities, creators, community discovery, slugs, or community selection.
+- Separate communities, creators, community discovery, slugs, or community selection are out of scope because there is one global Stoicverse community.
 - Per-community roles or cross-community permission checks.
 - Unapproved annual or recurring membership plans.

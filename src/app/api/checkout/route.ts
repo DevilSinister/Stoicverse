@@ -26,10 +26,10 @@ export async function POST(request: Request) {
 
   const [{ data: profile }, { data: membership }] = await Promise.all([
     supabase.from("profiles").select("is_suspended").eq("id", user.id).maybeSingle(),
-    supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle(),
+    supabase.from("memberships").select("id, expires_at").eq("user_id", user.id).eq("status", "active").maybeSingle(),
   ]);
   if (profile?.is_suspended) return NextResponse.json({ error: "This account is unavailable" }, { status: 403 });
-  if (product === "membership" && membership) return NextResponse.json({ error: "Membership is already active" }, { status: 409 });
+  if (product === "membership" && membership && (!membership.expires_at || new Date(membership.expires_at) > new Date())) return NextResponse.json({ error: "Membership is already active" }, { status: 409 });
 
   const secret = process.env.STRIPE_SECRET_KEY;
   const price = process.env[products[product]];

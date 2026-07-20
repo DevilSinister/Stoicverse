@@ -3,7 +3,7 @@
 ## Stoicverse
 
 **Last updated:** July 12, 2026
-**Authoritative scope:** One global Stoicverse community.
+**Authoritative scope:** One single global Stoicverse community.
 
 ## Implemented foundation
 

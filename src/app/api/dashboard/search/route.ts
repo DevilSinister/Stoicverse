@@ -10,11 +10,12 @@ export async function GET(request: Request) {
   const searchParams = new URL(request.url).searchParams;
   const base = normalizeSearchBase(searchParams.get("base"));
   const [{ data: membership, error: membershipError }, { data: profile, error: profileError }] = await Promise.all([
-    supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle(),
+    supabase.from("memberships").select("id, expires_at").eq("user_id", user.id).eq("status", "active").maybeSingle(),
     supabase.from("profiles").select("platform_role, is_suspended").eq("id", user.id).maybeSingle(),
   ]);
-  const isInfluencer = profile?.platform_role === "influencer" && !profile?.is_suspended;
-  if (membershipError || profileError || (!membership && !isInfluencer)) return NextResponse.json({ error: "Membership required" }, { status: 403 });
+  const isStaff = ["moderator", "influencer", "super_admin"].includes(profile?.platform_role ?? "") && !profile?.is_suspended;
+  const hasActiveMembership = Boolean(membership) && (!membership?.expires_at || new Date(membership.expires_at) > new Date());
+  if (membershipError || profileError || (!hasActiveMembership && !isStaff)) return NextResponse.json({ error: "Membership required" }, { status: 403 });
   const query = searchParams.get("q")?.trim() ?? "";
   if (query.length < 2 || query.length > 80) return NextResponse.json({ error: "Search query must be 2–80 characters" }, { status: 400 });
   const escaped = query.replace(/[,%()]/g, " ");

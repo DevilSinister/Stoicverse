@@ -1,8 +1,5 @@
-import { redirect } from "next/navigation";
+import { renderCommunityWorkspace } from "@/components/community/CommunityWorkspace";
 
-import { requireInfluencerWorkspace } from "@/lib/supabase/access";
-
-export default async function CreatorChannelsPage() {
-  await requireInfluencerWorkspace("/creator/channels");
-  redirect("/creator/community");
+export default async function CreatorChannelsPage({ searchParams }: { searchParams: Promise<{ channel?: string }> }) {
+  return renderCommunityWorkspace({ nextPath: "/creator/channels", workspace: "creator", selectedChannelId: (await searchParams).channel });
 }

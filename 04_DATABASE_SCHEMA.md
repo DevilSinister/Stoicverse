@@ -6,7 +6,7 @@
 
 ## Scope
 
-All application data belongs to one global Stoicverse community. The schema must not add `communities`, `community_roles`, a community slug, a tenant identifier, or `community_id` unless the product scope changes explicitly.
+All application data belongs to one single global Stoicverse community. The schema must not add `communities`, `community_roles`, a community slug, a tenant identifier, or `community_id` unless the product scope changes explicitly.
 
 ## Identity and access
 

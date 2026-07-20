@@ -7,7 +7,7 @@
 
 ## Product
 
-Stoicverse is one paid Stoic learning community. It combines a read-led community feed, a gated curriculum, live events, tier progression, Master review applications, and optional mentorship. It is not a marketplace or a multi-community platform.
+Stoicverse is one paid Stoic learning community. It combines a read-led community feed, a gated curriculum, live events, tier progression, Master review applications, and optional mentorship. It is a single-community product, not a marketplace or a platform with separate community instances.
 
 ## Users and permissions
 
@@ -34,7 +34,7 @@ Members cannot create posts, channels, direct messages, or access content, links
 
 ## Non-goals and deferred behaviour
 
-- Multiple communities, community slugs, community discovery, tenant-scoped roles, and creator-owned communities.
+- Separate communities, community slugs, community discovery, tenant-scoped roles, and creator-owned communities are out of scope because Stoicverse uses one global community.
 - Native apps, social login, direct messages, member-to-member interaction, referrals, certificates, an AI assistant, and downloadable resources.
 - Annual membership and recurring subscription plans. These are not approved product behaviour; remove the current annual-plan UI until a separate product decision is made.
 

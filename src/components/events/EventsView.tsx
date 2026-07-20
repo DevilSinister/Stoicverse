@@ -52,6 +52,7 @@ export function EventsView({
   enrollmentAvailable,
   currentTier,
   isMaster,
+  isStaff = false,
   memberName,
   routeBase = "",
 }: {
@@ -59,6 +60,7 @@ export function EventsView({
   enrollmentAvailable: boolean;
   currentTier: number;
   isMaster: boolean;
+  isStaff?: boolean;
   memberName?: string;
   routeBase?: string;
 }) {
@@ -162,6 +164,7 @@ export function EventsView({
             now={now}
             currentTier={currentTier}
             isMaster={isMaster}
+            isStaff={isStaff}
             pending={pending}
             enrollmentAvailable={enrollmentAvailable}
           />
@@ -174,6 +177,7 @@ export function EventsView({
               now={now}
               currentTier={currentTier}
               isMaster={isMaster}
+              isStaff={isStaff}
               pending={pending}
               enrollmentAvailable={enrollmentAvailable}
             />
@@ -186,6 +190,7 @@ export function EventsView({
           event={selected}
           currentTier={currentTier}
           isMaster={isMaster}
+          isStaff={isStaff}
           pending={pending}
           enrollmentAvailable={enrollmentAvailable}
           onClose={() => setSelected(null)}
@@ -205,6 +210,7 @@ function EventList({
   now,
   currentTier,
   isMaster,
+  isStaff,
   pending,
   enrollmentAvailable,
 }: {
@@ -215,6 +221,7 @@ function EventList({
   now: number;
   currentTier: number;
   isMaster: boolean;
+  isStaff: boolean;
   pending: boolean;
   enrollmentAvailable: boolean;
 }) {
@@ -229,7 +236,7 @@ function EventList({
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in">
           {events.map((event) => {
             const isLive = state(event, now) === "live";
-            const permitted = isMaster || currentTier >= event.minTier;
+            const permitted = isStaff || isMaster || currentTier >= event.minTier;
             const isCancelled = event.status === "cancelled";
             const isConcluded = event.endsAt && new Date(event.endsAt).getTime() <= now;
 
@@ -345,6 +352,7 @@ function MemberEventDetails({
   event,
   currentTier,
   isMaster,
+  isStaff,
   pending,
   enrollmentAvailable,
   onClose,
@@ -354,6 +362,7 @@ function MemberEventDetails({
   event: EventRecord;
   currentTier: number;
   isMaster: boolean;
+  isStaff: boolean;
   pending: boolean;
   enrollmentAvailable: boolean;
   onClose: () => void;
@@ -369,7 +378,7 @@ function MemberEventDetails({
     return () => window.removeEventListener("keydown", key);
   }, [onClose]);
 
-  const permitted = isMaster || currentTier >= event.minTier;
+  const permitted = isStaff || isMaster || currentTier >= event.minTier;
   const isLive = state(event, now) === "live";
 
   const join = async () => {

@@ -57,7 +57,14 @@ export async function POST(request: Request) {
       if (paymentError) throw paymentError;
 
       if (productType === "membership") {
-        const { error } = await admin.from("memberships").upsert({ user_id: userId, status: "active", stripe_payment_intent: paymentIntent, amount_paid: amount, joined_at: new Date().toISOString() }, { onConflict: "user_id" });
+        const now = new Date();
+        const { data: existingMembership, error: existingMembershipError } = await admin.from("memberships").select("joined_at, expires_at").eq("user_id", userId).maybeSingle();
+        if (existingMembershipError) throw existingMembershipError;
+        const currentExpiry = existingMembership?.expires_at ? new Date(existingMembership.expires_at) : now;
+        const renewalStart = currentExpiry > now ? currentExpiry : now;
+        const expiresAt = new Date(renewalStart);
+        expiresAt.setUTCMonth(expiresAt.getUTCMonth() + 1);
+        const { error } = await admin.from("memberships").upsert({ user_id: userId, status: "active", stripe_payment_intent: paymentIntent, amount_paid: amount, joined_at: existingMembership?.joined_at ?? now.toISOString(), expires_at: expiresAt.toISOString() }, { onConflict: "user_id" });
         if (error) throw error;
       } else {
         const { error } = await admin.from("mentorships").upsert({ user_id: userId, stripe_payment_intent: paymentIntent, amount_paid: amount, status: "active" }, { onConflict: "stripe_payment_intent" });

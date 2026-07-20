@@ -10,19 +10,19 @@ test("creator events use lifecycle actions and do not send event email", () => {
   assert.match(actions, /saveCreatorEvent/);
   assert.match(actions, /cancelEvent/);
   assert.match(actions, /publishEvent/);
-  assert.match(creator, /Save draft/);
-  assert.match(creator, /Publish now/);
-  assert.match(creator, /RSVP metrics/);
+  assert.match(creator, /Save Draft/);
+  assert.match(creator, /Publish Event/);
+  assert.match(creator, /RSVP Metrics/);
   assert.doesNotMatch(actions, /sendTransactionalEmail/);
 });
 
 test("member event details stay separate from creator attendee metrics", () => {
   const member = read("src/components/events/EventsView.tsx");
   const creator = read("src/components/creator/CreatorEventsView.tsx");
-  assert.match(member, /EVENT DETAILS/);
+  assert.match(member, /Event Details/);
   assert.match(member, /Masters/);
   assert.doesNotMatch(member, /MEMBERS ENROLLED/);
-  assert.match(creator, /MEMBERS ENROLLED/);
+  assert.match(creator, /Members Registered/);
   assert.match(creator, /qualifiedAudienceCount/);
 });
 

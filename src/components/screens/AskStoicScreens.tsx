@@ -295,7 +295,7 @@ type CommunityPost = { id: string; authorName: string; body: string | null; imag
 export function FeedScreen({
   master = false,
   isMaster = false,
-  canCreateChannels = false,
+  canManageChannels = false,
   canPost = false,
   memberName,
   platformRole,
@@ -304,19 +304,24 @@ export function FeedScreen({
   channels = [],
   posts = [],
   routeBase = "",
+  activeNavigationLabel,
+  title,
 }: {
-  master?: boolean; isMaster?: boolean; canCreateChannels?: boolean; canPost?: boolean;
+  master?: boolean; isMaster?: boolean; canManageChannels?: boolean; canPost?: boolean;
   memberName?: string; platformRole?: string; currentTier?: number;
   notifications?: import("@/components/layout/AppShell").Notification[];
   channels?: CommunityChannel[]; posts?: CommunityPost[];
   routeBase?: string;
+  activeNavigationLabel?: string;
+  title?: string;
 }) {
 
   return (
-    <AppShell active={master ? "Master Zone" : "Community"} title={master ? "Master Zone" : "Community Feed"} isMaster={isMaster} memberName={memberName} platformRole={platformRole} currentTier={currentTier} notifications={notifications} routeBase={routeBase}>
+    <AppShell active={master ? "Master Zone" : activeNavigationLabel ?? "Communities"} title={master ? "Master Zone" : title ?? "Community Feed"} isMaster={isMaster} memberName={memberName} platformRole={platformRole} currentTier={currentTier} notifications={notifications} routeBase={routeBase}>
       <main className="grid min-h-[calc(100vh-4rem)] md:grid-cols-[18rem_1fr]">
-        <aside className="border-b border-surgical-steel bg-surface-container-low p-4 md:border-b-0 md:border-r">
-          {canCreateChannels && (
+        <aside aria-label="Channel selector" className="border-b border-surgical-steel bg-surface-container-low p-4 md:border-b-0 md:border-r">
+          <p className="mb-3 px-3 font-label text-[10px] uppercase tracking-[0.16em] text-fog-muted">Channel selector</p>
+          {canManageChannels && (
             <button className="mb-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary-container px-4 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider transition hover:brightness-105 active:scale-[0.98]">
               <Plus size={16} />
               New Channel
@@ -418,7 +423,7 @@ export function EventsScreen({ isMaster = false }: { isMaster?: boolean }) {
             <p className="font-label-sm text-label-sm uppercase tracking-[0.16em] text-primary-container">Live schedule</p>
             <h2 className="mt-2 font-headline text-2xl font-bold text-white md:text-3xl">Upcoming sessions and gated rooms</h2>
           </div>
-          <ButtonLink href="/community" variant="outline">
+          <ButtonLink href="/dashboard/community" variant="outline">
             <Plus size={16} />
             Create Event
           </ButtonLink>
