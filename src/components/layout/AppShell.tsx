@@ -46,7 +46,6 @@ const EMPTY_NOTIFICATIONS: Notification[] = [];
 
 export function AppShell({
   active,
-  title,
   isMaster = false,
   memberName = "Practitioner",
   platformRole = "member",
@@ -180,7 +179,14 @@ export function AppShell({
         if (!controller.signal.aborted) setSearching(false);
       }
     }, 250);
-    return () => { controller.abort(); window.clearTimeout(timeout); };
+    return () => {
+      try {
+        controller.abort();
+      } catch (e) {
+        // Ignored
+      }
+      window.clearTimeout(timeout);
+    };
   }, [query, isSearchOpen, routeBase]);
 
   async function openNotifications() {
@@ -306,9 +312,9 @@ export function AppShell({
       {/* Main Workspace Column */}
       <div className="min-w-0 flex-1 flex flex-col">
         {/* Desktop Header */}
-        <header className="sticky top-0 z-20 hidden md:flex min-h-16 items-center justify-between border-b border-surgical-steel bg-surface px-8">
+        <header className="hidden" aria-hidden="true">
           <div>
-            <h1 className="font-headline text-lg text-white font-extrabold">{title}</h1>
+            <h1 className="font-headline text-lg text-white font-extrabold">{active}</h1>
             <p className="font-label text-[10px] text-fog-muted uppercase tracking-wider">Level 0{currentTier} • {isMaster ? "Master Account" : "Practitioner Access"}</p>
           </div>
           <div className="flex items-center gap-3">

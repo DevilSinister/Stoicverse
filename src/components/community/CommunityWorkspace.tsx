@@ -47,7 +47,7 @@ export async function renderCommunityWorkspace({ nextPath, workspace, selectedCh
   }
   const permittedChannelIds = channels.filter((channel) => !channel.isLocked && !channel.isArchived).map((channel) => channel.id);
   const { data: postRows, error: postError } = permittedChannelIds.length
-    ? await supabase.from("posts").select("id,channel_id,body,image_url,is_pinned,created_at,profiles!posts_author_id_fkey(full_name),reactions(emoji,user_id)").in("channel_id", permittedChannelIds).eq("is_deleted", false).order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(100)
+    ? await supabase.from("posts").select("id,channel_id,body,image_url,is_pinned,created_at,profiles!posts_author_id_fkey(full_name),reactions(emoji,user_id)").in("channel_id", permittedChannelIds).eq("is_deleted", false).order("created_at", { ascending: true }).limit(100)
     : { data: [], error: null };
   if (postError) throw new Error("Unable to load channel posts.");
   const rawPosts = postRows ?? [];

@@ -42,3 +42,40 @@ test("creator management and member channel browsing use the shared secure surfa
   assert.match(reactions, /toggleReaction/);
   assert.match(reactions, /Moderator or influencer access is required/);
 });
+
+test("staff post deletion permits the soft-deleted row through RLS", async () => {
+  const migration = await read("supabase/migrations/20260722000000_allow_staff_soft_delete_posts.sql");
+  assert.match(migration, /using \(public\.is_staff\(\) and public\.can_view_channel\(channel_id\)\)/);
+  assert.match(migration, /with check \(public\.is_staff\(\) and \(is_deleted or public\.can_view_channel\(channel_id\)\)\)/);
+  assert.match(migration, /create or replace function public\.soft_delete_post\(target_post_id uuid\)/);
+  assert.match(migration, /grant execute on function public\.soft_delete_post\(uuid\) to authenticated/);
+});
+
+test("community mentions create notifications for all members or an exact tier", async () => {
+  const migration = await read("supabase/migrations/20260722070000_community_mention_notifications.sql");
+  assert.match(migration, /create or replace function public\.notify_community_mentions\(\)/);
+  assert.match(migration, /@\(all\|tier-\[1-5\]\)/);
+  assert.match(migration, /membership\.status = 'active'/);
+  assert.match(migration, /case when tier\.is_master then 5 else tier\.current_tier end/);
+  assert.match(migration, /create trigger posts_notify_mentions/);
+});
+
+test("pinned community messages keep chronological placement and can be filtered in-channel", async () => {
+  const [workspace, surface] = await Promise.all([
+    read("src/components/community/CommunityWorkspace.tsx"),
+    read("src/components/community/CommunitySurface.tsx"),
+  ]);
+  assert.doesNotMatch(workspace, /order\("is_pinned"/);
+  assert.match(surface, /const \[showPinned, setShowPinned\] = useState\(false\)/);
+  assert.match(surface, /posts\.filter\(\(post\) => post\.isPinned\)/);
+});
+
+test("community timeline keeps new messages at the bottom and signals unseen arrivals", async () => {
+  const [workspace, surface] = await Promise.all([
+    read("src/components/community/CommunityWorkspace.tsx"),
+    read("src/components/community/CommunitySurface.tsx"),
+  ]);
+  assert.match(workspace, /order\("created_at", \{ ascending: true \}\)/);
+  assert.match(surface, /const \[newMessageCount, setNewMessageCount\] = useState\(0\)/);
+  assert.match(surface, /new \{newMessageCount === 1 \? "message" : "messages"\}/);
+});
