@@ -30,6 +30,7 @@ type SearchResult = {
 export interface AppShellProps {
   active: string;
   title: string;
+  terminalHeader?: boolean;
   isMaster?: boolean;
   memberName?: string;
   platformRole?: string;
@@ -46,6 +47,8 @@ const EMPTY_NOTIFICATIONS: Notification[] = [];
 
 export function AppShell({
   active,
+  title,
+  terminalHeader = false,
   isMaster = false,
   memberName = "Practitioner",
   platformRole = "member",
@@ -312,15 +315,15 @@ export function AppShell({
       {/* Main Workspace Column */}
       <div className="min-w-0 flex-1 flex flex-col">
         {/* Desktop Header */}
-        <header className="hidden" aria-hidden="true">
-          <div>
-            <h1 className="font-headline text-lg text-white font-extrabold">{active}</h1>
-            <p className="font-label text-[10px] text-fog-muted uppercase tracking-wider">Level 0{currentTier} • {isMaster ? "Master Account" : "Practitioner Access"}</p>
-          </div>
+        <header className={`hidden h-16 items-center justify-between border-b border-surgical-steel bg-surface-container-low px-6 lg:px-8 ${terminalHeader ? "md:flex" : ""}`}>
+          <button onClick={() => setSearchOpen(true)} className="flex min-w-[19rem] items-center gap-3 rounded-full border border-surgical-steel bg-surface-container-lowest px-4 py-2 text-left text-sm text-fog-muted transition hover:border-primary-container hover:text-on-surface focus-ring" aria-label="Search lessons and events">
+            <Search size={15} />
+            <span>Search curriculum, sessions, or tools...</span>
+          </button>
           <div className="flex items-center gap-3">
-            <button onClick={() => setSearchOpen(true)} aria-label="Search lessons and events" className="grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant hover:border-primary-container hover:text-primary-container focus-ring transition-colors">
-              <Search size={18} />
-            </button>
+            <span className="hidden rounded-full border border-primary-container/30 bg-primary-container/10 px-3 py-1.5 font-label text-[10px] font-semibold uppercase tracking-wider text-primary-container lg:inline-flex">
+              {isMaster ? "Master access" : `Tier 0${currentTier} access`}
+            </span>
             <button onClick={openNotifications} aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} className="relative grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant hover:border-primary-container hover:text-primary-container focus-ring transition-colors">
               <Bell size={18} />
               {unreadCount > 0 && <span className="absolute -right-1 -top-1 grid min-w-5 size-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>}

@@ -57,24 +57,19 @@ export async function renderVideoPage({
     <AppShell
       active="Courses"
       title="Watch Video"
+      terminalHeader
       memberName={profile?.full_name?.trim() || "Practitioner"}
       platformRole={profile?.platform_role ?? "member"}
       currentTier={currentTier}
       isMaster={isMaster}
       routeBase={routeBase}
     >
-      <main className="mx-auto max-w-7xl px-4 py-6 md:px-8 space-y-5">
-        <div>
-          <Link
-            href={withRouteBase(routeBase, `/courses/${id}`)}
-            className="text-xs uppercase tracking-wider text-primary-container hover:underline"
-          >
-            &larr; Back to course
-          </Link>
+      <main className="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+        <div className="mb-8 border-b border-surgical-steel pb-5">
+          <Link href={withRouteBase(routeBase, `/courses/${id}`)} className="font-label text-xs uppercase tracking-wider text-fog-muted transition hover:text-primary-container">&larr; Back to course</Link>
         </div>
 
-        <CourseVideoPlayer videoId={video.id} title={video.title} courseId={id} courseTitle={courseResult.data.title} videos={playlist} initialProgress={initialProgress} routeBase={routeBase} />
-        {video.description && <p className="max-w-3xl text-sm leading-6 text-on-surface-variant">{video.description}</p>}
+        <CourseVideoPlayer videoId={video.id} title={video.title} description={video.description} courseId={id} courseTitle={courseResult.data.title} videos={playlist} initialProgress={initialProgress} routeBase={routeBase} />
       </main>
     </AppShell>
   );

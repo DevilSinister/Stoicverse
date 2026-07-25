@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckCircle2, Lock, PlayCircle, Info, Users, Clapperboard, Clock, Award } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ChevronRight, Lock, PlayCircle, Info, Users, Clapperboard, Clock, Award } from "lucide-react";
 import { requireActiveMembership } from "@/lib/supabase/access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AppShell } from "@/components/layout/AppShell";
@@ -104,6 +104,16 @@ export async function renderCourseDetailPage({
     : `${Math.ceil(totalSeconds / 60)} min`;
 
   let previousComplete = true;
+
+  const lessonItems: CourseLesson[] = videos.map((video, index) => {
+    const item = progress.get(video.id);
+    const isCompleted = !!item?.is_completed;
+    const isUnlocked = isEnrolled && !isLocked && previousComplete;
+    previousComplete = isCompleted || video.is_optional;
+    return { id: video.id, title: video.title, description: video.description, durationSeconds: video.duration_seconds, isOptional: video.is_optional, index, isCompleted, isUnlocked, watchedPercent: Number(item?.completion_percentage ?? 0) };
+  });
+
+  return <CourseDetailWorkspace course={{ id: course.id, title: course.title, description: course.description, minTier: course.min_tier, completionTier: course.completion_tier, isFinished: course.is_finished }} lessons={lessonItems} routeBase={routeBase} memberName={profile?.full_name?.trim() || "Practitioner"} platformRole={profile?.platform_role ?? "member"} currentTier={currentTier} isMaster={isMaster} isEnrolled={isEnrolled} isLocked={isLocked} progressPercent={progressPercent} completedRequired={completedRequired} totalRequired={totalRequired} totalDuration={totalDurationStr} enrollmentCount={enrollmentCount} missingCourses={missingCourses} completionCurrent={!!enrollmentResult.data?.completion_current} />;
 
   return (
     <AppShell
@@ -298,4 +308,33 @@ export async function renderCourseDetailPage({
       </main>
     </AppShell>
   );
+}
+
+type CourseLesson = { id: string; title: string; description: string | null; durationSeconds: number; isOptional: boolean; index: number; isCompleted: boolean; isUnlocked: boolean; watchedPercent: number };
+type CourseDetail = { id: string; title: string; description: string | null; minTier: number; completionTier: number | null; isFinished: boolean };
+
+function CourseDetailWorkspace({ course, lessons, routeBase, memberName, platformRole, currentTier, isMaster, isEnrolled, isLocked, progressPercent, completedRequired, totalRequired, totalDuration, enrollmentCount, missingCourses, completionCurrent }: { course: CourseDetail; lessons: CourseLesson[]; routeBase: string; memberName: string; platformRole: string; currentTier: number; isMaster: boolean; isEnrolled: boolean; isLocked: boolean; progressPercent: number; completedRequired: number; totalRequired: number; totalDuration: string; enrollmentCount: number; missingCourses: string[]; completionCurrent: boolean }) {
+  const tierNames = ["Basic", "Beginner", "Intermediate", "Advanced"];
+  const tierName = tierNames[course.minTier - 1] ?? `Tier ${course.minTier}`;
+  const nextLesson = lessons.find((lesson) => lesson.isUnlocked && !lesson.isCompleted);
+
+  return <AppShell active="Courses" title={course.title} terminalHeader memberName={memberName} platformRole={platformRole} currentTier={currentTier} isMaster={isMaster} routeBase={routeBase}>
+    <main className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+      <Link href={withRouteBase(routeBase, "/courses")} className="inline-flex min-h-10 items-center gap-2 font-label text-xs uppercase tracking-wider text-fog-muted transition hover:text-primary-container"><ArrowLeft size={15} />Learning path</Link>
+      <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <div className="min-w-0 space-y-6">
+          <section className="terminal-card overflow-hidden"><div className="border-b border-surgical-steel px-6 py-4 sm:px-7"><div className="flex flex-wrap items-center gap-x-4 gap-y-2"><span className="font-label text-xs uppercase tracking-wider text-primary-container">{tierName} course</span><span className="text-xs text-fog-muted">{lessons.length} lessons · {totalDuration}</span><span className="text-xs text-fog-muted">{enrollmentCount} studying</span></div></div><div className="px-6 py-7 sm:px-7"><h1 className="max-w-3xl font-headline text-3xl font-semibold tracking-tight text-white sm:text-4xl [text-wrap:balance]">{course.title}</h1><p className="mt-4 max-w-3xl text-sm leading-relaxed text-on-surface-variant sm:text-base">{course.description || "A focused sequence of lessons for this stage of your learning path."}</p>{isEnrolled && !isLocked && <div className="mt-7 border-t border-surgical-steel pt-4"><div className="flex items-center justify-between gap-4 text-sm"><span className="text-on-surface-variant">Course progress · {completedRequired} of {totalRequired} required lessons</span><span className="font-label text-xs text-primary-container">{progressPercent}%</span></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-container-highest"><div className="h-full rounded-full bg-primary-container transition-[width] duration-200 motion-reduce:transition-none" style={{ width: `${progressPercent}%` }} /></div></div>}</div></section>
+
+          <section className="terminal-card overflow-hidden"><header className="flex flex-wrap items-end justify-between gap-4 border-b border-surgical-steel px-6 py-5 sm:px-7"><div><h2 className="font-headline text-xl font-semibold text-white">Course curriculum</h2><p className="mt-1 text-sm text-fog-muted">Complete each required lesson to open the next one.</p></div><span className="font-label text-xs text-fog-muted">{lessons.length} lessons</span></header><div className="divide-y divide-surgical-steel">{lessons.map((lesson) => <LessonRow key={lesson.id} lesson={lesson} courseId={course.id} routeBase={routeBase} />)}{!lessons.length && <p className="px-6 py-12 text-center text-sm text-fog-muted">No lessons have been published in this course yet.</p>}</div></section>
+        </div>
+        <aside className="space-y-4 lg:sticky lg:top-6 lg:h-fit"><section className="terminal-card p-6"><p className="terminal-label">Course access</p>{isLocked ? <><h2 className="mt-3 font-headline text-xl font-semibold text-white">Locked for now</h2><p className="mt-2 text-sm leading-relaxed text-fog-muted">{missingCourses.length ? `Complete ${missingCourses.join(", ")} to unlock this course.` : `This course opens at ${tierName}.`}</p><div className="mt-5 rounded-lg border border-surgical-steel bg-surface-container-lowest p-4 text-sm text-on-surface-variant">Your current tier: <span className="font-semibold text-white">{tierNames[currentTier - 1] ?? `Tier ${currentTier}`}</span></div></> : !isEnrolled ? <><h2 className="mt-3 font-headline text-xl font-semibold text-white">Ready when you are</h2><p className="mt-2 text-sm leading-relaxed text-fog-muted">Enroll to open the lessons and record your progress.</p><div className="mt-5"><EnrollButton courseId={course.id} /></div></> : <><h2 className="mt-3 font-headline text-xl font-semibold text-white">{completionCurrent ? "Course complete" : "Continue your study"}</h2><p className="mt-2 text-sm leading-relaxed text-fog-muted">{completionCurrent ? "You can revisit any available lesson whenever you need it." : nextLesson ? `Next up: ${nextLesson.title}` : "Your next lesson will appear here when it becomes available."}</p>{nextLesson && <Link href={withRouteBase(routeBase, `/courses/${course.id}/video/${nextLesson.id}`)} className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary-container px-4 font-label text-xs font-semibold uppercase tracking-wider text-on-primary-fixed transition hover:brightness-110">Continue lesson <ChevronRight size={14} /></Link>}</>}</section><section className="terminal-card p-6"><p className="terminal-label">Course details</p><dl className="mt-4 space-y-3 text-sm"><div className="flex items-center justify-between gap-4"><dt className="text-fog-muted">Level</dt><dd className="text-white">{tierName}</dd></div><div className="flex items-center justify-between gap-4"><dt className="text-fog-muted">Study time</dt><dd className="text-white">{totalDuration}</dd></div><div className="flex items-center justify-between gap-4"><dt className="text-fog-muted">Lessons</dt><dd className="text-white">{lessons.length}</dd></div></dl></section></aside>
+      </div>
+    </main>
+  </AppShell>;
+}
+
+function LessonRow({ lesson, courseId, routeBase }: { lesson: CourseLesson; courseId: string; routeBase: string }) {
+  const status = lesson.isCompleted ? "Completed" : lesson.isUnlocked ? "Ready" : "Locked";
+  const Icon = lesson.isCompleted ? CheckCircle2 : lesson.isUnlocked ? PlayCircle : Lock;
+  return <article className={`grid gap-4 px-6 py-5 transition-colors sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:items-center sm:px-7 ${lesson.isUnlocked ? "hover:bg-surface-container-high/35" : "bg-surface-container-low/25"}`}><div className={`grid size-10 place-items-center rounded-full ${lesson.isCompleted ? "bg-primary-container/15 text-primary-container" : lesson.isUnlocked ? "bg-surface-container-high text-primary-container" : "bg-surface-container-high text-fog-muted"}`}><Icon size={18} /></div><div className="min-w-0"><div className="flex flex-wrap items-center gap-x-3 gap-y-1"><span className={`font-label text-[10px] uppercase tracking-wider ${lesson.isUnlocked ? "text-primary-container" : "text-fog-muted"}`}>Lesson {String(lesson.index + 1).padStart(2, "0")}</span><span className="text-xs text-fog-muted">{Math.ceil(lesson.durationSeconds / 60)} min · {lesson.isOptional ? "Optional" : "Required"}</span></div><h3 className="mt-1 font-headline text-base font-semibold text-white [text-wrap:balance]">{lesson.title}</h3>{lesson.description && <p className="mt-1 max-w-2xl text-sm leading-relaxed text-on-surface-variant line-clamp-2">{lesson.description}</p>}{lesson.isUnlocked && !lesson.isCompleted && lesson.watchedPercent > 0 && <div className="mt-3 flex items-center gap-3"><div className="h-1.5 w-full max-w-52 overflow-hidden rounded-full bg-surface-container-highest"><div className="h-full rounded-full bg-primary-container" style={{ width: `${lesson.watchedPercent}%` }} /></div><span className="font-label text-xs text-primary-container">{lesson.watchedPercent.toFixed(0)}%</span></div>}</div><div className="flex items-center gap-3 sm:justify-self-end"><span className="hidden font-label text-[10px] uppercase tracking-wider text-fog-muted lg:inline">{status}</span>{lesson.isUnlocked ? <Link href={withRouteBase(routeBase, `/courses/${courseId}/video/${lesson.id}`)} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-primary-container px-4 font-label text-xs font-semibold uppercase tracking-wider text-primary-container transition hover:bg-primary-container/10">{lesson.isCompleted ? "Review" : "Watch"}<ChevronRight size={14} /></Link> : <span className="inline-flex min-h-10 items-center rounded-full border border-surgical-steel px-4 font-label text-xs uppercase tracking-wider text-fog-muted">Locked</span>}</div></article>;
 }

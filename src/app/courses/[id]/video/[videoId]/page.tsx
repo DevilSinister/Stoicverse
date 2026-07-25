@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { renderVideoPage } from "./VideoPage";
 
 export default async function VideoPage({
   params,
@@ -6,5 +6,5 @@ export default async function VideoPage({
   params: Promise<{ id: string; videoId: string }>;
 }) {
   const { id, videoId } = await params;
-  redirect(`/dashboard/courses/${id}/video/${videoId}`);
+  return renderVideoPage({ id, videoId });
 }

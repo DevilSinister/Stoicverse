@@ -25,7 +25,7 @@ export type CourseCard = {
   progressPercent: number;
 };
 
-export function CourseCatalog({
+function LegacyCourseCatalog({
   courses,
   memberName,
   platformRole,
@@ -319,3 +319,5 @@ export function CourseCatalog({
     </AppShell>
   );
 }
+
+export { LearningPathCatalog as CourseCatalog } from "./LearningPathCatalog";

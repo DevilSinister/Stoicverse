@@ -19,7 +19,7 @@ function formatDuration(seconds: number) {
   return `${minutes}:${String(remainder).padStart(2, "0")}`;
 }
 
-export function CourseVideoPlayer({
+function LegacyCourseVideoPlayer({
   videoId,
   title,
   courseId,
@@ -188,3 +188,5 @@ export function CourseVideoPlayer({
     </section>
   );
 }
+
+export { LessonWorkspacePlayer as CourseVideoPlayer } from "./LessonWorkspacePlayer";

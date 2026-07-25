@@ -28,7 +28,7 @@ export type DashboardData = {
   currentTierCompleted: number;
   currentTierTotal: number;
   activeLesson: { id: string; title: string; description: string | null; progress: number; completedVideos: number; totalVideos: number; remainingMinutes: number; isCompleted: boolean } | null;
-  enrolledCourses: { id: string; title: string; description: string | null; progress: number; completedVideos: number; totalVideos: number; remainingMinutes: number; isCompleted: boolean }[];
+  enrolledCourses: { id: string; title: string; description: string | null; progress: number; completedVideos: number; totalVideos: number; remainingMinutes: number; isCompleted: boolean; thumbnailVideoId: string | null }[];
   upcomingEvent: Event | null;
   notifications: Notification[];
   tierProgressDetails: TierProgressDetail[];
@@ -37,7 +37,7 @@ export type DashboardData = {
 const roleName = (role: string) => role.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 
-export function DashboardView({ data, routeBase = "" }: { data: DashboardData; routeBase?: string }) {
+function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; routeBase?: string }) {
   const roles = useMemo(() => ["Subscriber", roleName(data.platformRole), data.isMaster ? "Master" : `Tier ${data.currentTier} (${data.currentTierTitle})`], [data]);
 
   const getTierTitle = (level: number) => {
@@ -351,3 +351,5 @@ function Metric({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+export { TerminalDashboard as DashboardView } from "./TerminalDashboard";

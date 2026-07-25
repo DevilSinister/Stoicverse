@@ -45,7 +45,7 @@ export async function renderDashboardPage({ nextPath = "/dashboard", routeBase =
     const watchedPercent = requiredVideos.length ? Math.round(requiredVideos.reduce((sum, video) => sum + Number(videoProgress.get(video.id)?.completion_percentage ?? 0), 0) / requiredVideos.length) : 0;
     const completedVideos = requiredVideos.filter((video) => videoProgress.get(video.id)?.is_completed).length;
     const remainingSeconds = requiredVideos.reduce((sum, video) => sum + Math.ceil(video.duration_seconds * (1 - Number(videoProgress.get(video.id)?.completion_percentage ?? 0) / 100)), 0);
-    return [{ id: course.id, title: course.title, description: course.description, progress: enrollment.completion_current ? 100 : watchedPercent, completedVideos, totalVideos: requiredVideos.length, remainingMinutes: Math.ceil(remainingSeconds / 60), isCompleted: enrollment.completion_current }];
+    return [{ id: course.id, title: course.title, description: course.description, progress: enrollment.completion_current ? 100 : watchedPercent, completedVideos, totalVideos: requiredVideos.length, remainingMinutes: Math.ceil(remainingSeconds / 60), isCompleted: enrollment.completion_current, thumbnailVideoId: requiredVideos[0]?.id ?? null }];
   });
   const activeLesson = enrolledCourses.find((course) => !course.isCompleted) ?? enrolledCourses[0] ?? null;
   const currentTier = tier?.current_tier ?? 1;
