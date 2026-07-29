@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { safeNextPath as toSafePath } from "@/lib/security/safe-path";
 import { getSupabaseConfig } from "@/lib/supabase/env";
 
 const authRoutes = ["/login", "/signup"];
@@ -15,8 +16,12 @@ function isRouteMatch(path: string, routes: string[]) {
 
 function safeNextPath(request: NextRequest) {
   const next = request.nextUrl.searchParams.get("next");
+  if (next === null) return null;
 
-  return next?.startsWith("/") && !next.startsWith("//") ? next : null;
+  // toSafePath always returns a same-origin path; a rejected value collapses to
+  // the sentinel fallback, which the callers below treat as "no destination".
+  const resolved = toSafePath(next, "");
+  return resolved === "" ? null : resolved;
 }
 
 function copyResponseState(source: NextResponse, target: NextResponse) {

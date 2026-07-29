@@ -19,13 +19,23 @@ export type Notification = {
   created_at: string;
 };
 
+type SearchKind = "lesson" | "event" | "post" | "channel" | "member";
+
 type SearchResult = {
   id: string;
   title: string;
   description: string | null;
   href: string;
-  kind: "lesson" | "event";
+  kind: SearchKind;
 };
+
+const SEARCH_GROUPS: { kind: SearchKind; label: string }[] = [
+  { kind: "lesson", label: "Lessons" },
+  { kind: "event", label: "Events" },
+  { kind: "post", label: "Community posts" },
+  { kind: "channel", label: "Channels" },
+  { kind: "member", label: "Members" },
+];
 
 export interface AppShellProps {
   active: string;
@@ -341,13 +351,13 @@ export function AppShell({
       {isSearchOpen && (
         <Modal title="Search Stoicverse" onClose={() => setSearchOpen(false)}>
           <div className="space-y-4">
-            <label className="sr-only" htmlFor="dashboard-search">Search lessons and events</label>
+            <label className="sr-only" htmlFor="dashboard-search">Search lessons, events, posts and channels</label>
             <input
               ref={searchInput}
               id="dashboard-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search lessons and events…"
+              placeholder="Search lessons, events, posts…"
               className="w-full rounded border border-surgical-steel bg-surface-container-lowest p-3.5 text-on-surface outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
             />
             {searching && (
@@ -356,19 +366,29 @@ export function AppShell({
                 <span>Searching…</span>
               </div>
             )}
-            <div className="divide-y divide-surgical-steel max-h-[40vh] overflow-y-auto">
-              {visibleResults.map((result) => (
-                <Link
-                  onClick={() => setSearchOpen(false)}
-                  href={result.href}
-                  key={`${result.kind}-${result.id}`}
-                  className="block py-3 group hover:text-primary-container transition"
-                >
-                  <p className="font-label text-[10px] uppercase text-primary-container font-semibold tracking-wider">{result.kind}</p>
-                  <p className="mt-1 font-headline text-sm font-semibold text-white group-hover:text-primary-container transition">{result.title}</p>
-                  {result.description && <p className="mt-1 font-body text-xs text-fog-muted line-clamp-1">{result.description}</p>}
-                </Link>
-              ))}
+            <div className="max-h-[40vh] space-y-4 overflow-y-auto">
+              {SEARCH_GROUPS.map(({ kind, label }) => {
+                const items = visibleResults.filter((result) => result.kind === kind);
+                if (!items.length) return null;
+                return (
+                  <section key={kind}>
+                    <p className="font-label text-[10px] uppercase text-primary-container font-semibold tracking-wider">{label}</p>
+                    <div className="mt-1 divide-y divide-surgical-steel">
+                      {items.map((result) => (
+                        <Link
+                          onClick={() => setSearchOpen(false)}
+                          href={result.href}
+                          key={`${result.kind}-${result.id}`}
+                          className="block py-3 group hover:text-primary-container transition"
+                        >
+                          <p className="font-headline text-sm font-semibold text-white group-hover:text-primary-container transition line-clamp-2">{result.title}</p>
+                          {result.description && <p className="mt-1 font-body text-xs text-fog-muted line-clamp-1">{result.description}</p>}
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
               {query.trim().length >= 2 && !searching && visibleResults.length === 0 && (
                 <div className="py-6 text-center text-sm text-fog-muted">
                   <AlertCircle size={20} className="mx-auto mb-2 opacity-50" />

@@ -1,20 +1,22 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { safeNextPath } from "@/lib/security/safe-path";
 import { getSupabaseConfig } from "@/lib/supabase/env";
-
-function safeNextPath(next: string | null) {
-  return next?.startsWith("/") && !next.startsWith("//") ? next : null;
-}
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = safeNextPath(url.searchParams.get("next"));
+  const requestedNext = url.searchParams.get("next");
+  // Distinguish "no next supplied" from "next supplied but rejected", so a
+  // rejected value falls back to the default instead of skipping the role
+  // routing below.
+  const validated = requestedNext === null ? null : safeNextPath(requestedNext, "/dashboard");
+  const next = validated === "/dashboard" ? null : validated;
   const destination = new URL(next ?? "/dashboard", request.url);
 
   if (!code) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/login?error=link_expired", request.url));
   }
 
   const response = NextResponse.redirect(destination);
@@ -37,8 +39,15 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const { data: exchange } = await supabase.auth.exchangeCodeForSession(code);
-  if (!exchange.user || next) {
+  const { data: exchange, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+  // A failed exchange must not still perform the caller-supplied redirect —
+  // that turned this route into an unauthenticated redirector.
+  if (exchangeError || !exchange.user) {
+    return NextResponse.redirect(new URL("/login?error=link_expired", request.url));
+  }
+
+  if (next) {
     return response;
   }
 
