@@ -40,30 +40,25 @@ export async function addLesson(_formData: FormData): Promise<ActionResult> {
 export async function enrollInCourse(courseId: string): Promise<ActionResult> {
   if (!uuid(courseId)) return { error: "Invalid course." };
   const { error } = await (await createClient()).rpc("enroll_in_course", { target_course_id: courseId });
-  if (error) return { error: "You do not currently meet this course's requirements." };
+  if (error) return { error: "This course is not currently available." };
   refreshCourses(); return { success: true };
 }
 
 export async function createCourse(formData: FormData): Promise<ActionResult> {
-  const title = value(formData, "title"), minTier = value(formData, "minTier"), rewardTier = value(formData, "rewardTier"), status = value(formData, "status");
-  const prerequisiteIds = formData.getAll("prerequisiteIds").filter((item): item is string => typeof item === "string" && uuid(item));
-  if (!title || !numberInRange(minTier, 1, 5) || !numberInRange(rewardTier, 1, 5) || !["draft", "published"].includes(status)) return { error: "Enter a title, valid tier settings, and publish state." };
+  const title = value(formData, "title"), rewardTier = value(formData, "rewardTier"), status = value(formData, "status");
+  if (!title || !numberInRange(rewardTier, 1, 5) || !["draft", "published"].includes(status)) return { error: "Enter a title, achievement reward, and publish state." };
   const { supabase, user } = await requireInfluencer();
-  const { data: course, error } = await supabase.from("courses").insert({ title, description: value(formData, "description") || null, min_tier: Number(minTier), completion_tier: Number(rewardTier), status, created_by: user.id }).select("id").single();
+  const { data: course, error } = await supabase.from("courses").insert({ title, description: value(formData, "description") || null, min_tier: 1, completion_tier: Number(rewardTier), status, created_by: user.id }).select("id").single();
   if (error || !course) return { error: error?.message ?? "Unable to create the course." };
-  if (prerequisiteIds.length) { const { error: prerequisiteError } = await supabase.from("course_prerequisites").insert(prerequisiteIds.map((prerequisite_course_id) => ({ course_id: course.id, prerequisite_course_id }))); if (prerequisiteError) return { error: "Course created, but its prerequisites could not be saved." }; }
   refreshCourses(); return { success: true };
 }
 
 export async function updateCourse(formData: FormData): Promise<ActionResult> {
-  const courseId = value(formData, "courseId"), title = value(formData, "title"), minTier = value(formData, "minTier"), rewardTier = value(formData, "rewardTier"), status = value(formData, "status");
-  if (!uuid(courseId) || !title || !numberInRange(minTier, 1, 5) || !numberInRange(rewardTier, 1, 5) || !["draft", "published", "archived"].includes(status)) return { error: "Invalid course details." };
+  const courseId = value(formData, "courseId"), title = value(formData, "title"), rewardTier = value(formData, "rewardTier"), status = value(formData, "status");
+  if (!uuid(courseId) || !title || !numberInRange(rewardTier, 1, 5) || !["draft", "published", "archived"].includes(status)) return { error: "Invalid course details." };
   const { supabase } = await requireInfluencer();
-  const { error } = await supabase.from("courses").update({ title, description: value(formData, "description") || null, min_tier: Number(minTier), completion_tier: Number(rewardTier), status }).eq("id", courseId);
+  const { error } = await supabase.from("courses").update({ title, description: value(formData, "description") || null, completion_tier: Number(rewardTier), status }).eq("id", courseId);
   if (error) return { error: error.message };
-  const prerequisiteIds = [...new Set(formData.getAll("prerequisiteIds").filter((item): item is string => typeof item === "string" && uuid(item) && item !== courseId))];
-  const { error: deleteError } = await supabase.from("course_prerequisites").delete().eq("course_id", courseId); if (deleteError) return { error: deleteError.message };
-  if (prerequisiteIds.length) { const { error: insertError } = await supabase.from("course_prerequisites").insert(prerequisiteIds.map((prerequisite_course_id) => ({ course_id: courseId, prerequisite_course_id }))); if (insertError) return { error: insertError.message }; }
   refreshCourses(); return { success: true };
 }
 

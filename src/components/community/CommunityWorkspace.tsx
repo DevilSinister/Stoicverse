@@ -4,11 +4,6 @@ import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supab
 export type CommunityWorkspace = "member" | "creator";
 
 type CommunityWorkspaceOptions = { nextPath: string; workspace: CommunityWorkspace; selectedChannelId?: string };
-type DirectoryRow = { category_id: string; category_name: string; category_description: string | null; category_sort_order: number; channel_id: string; channel_name: string; channel_type: string; channel_description: string | null; channel_sort_order: number; min_tier: number; is_locked: boolean };
-type CategoryRow = { id: string; name: string; description: string | null; sort_order: number; default_min_tier: number; default_allowed_roles: string[]; default_visibility_mode: string; is_archived: boolean };
-type ChannelRow = { id: string; category_id: string; name: string; type: string; description: string | null; sort_order: number; min_tier: number; allowed_roles: string[]; visibility_mode: string; is_archived: boolean };
-type QueryResult<T> = { data: T[] | null; error: { message: string } | null };
-
 const capabilities = {
   member: { routeBase: "/dashboard", activeNavigationLabel: "Communities" },
   creator: { routeBase: "/creator", activeNavigationLabel: "Channels" },
@@ -47,10 +42,22 @@ export async function renderCommunityWorkspace({ nextPath, workspace, selectedCh
   }
   const permittedChannelIds = channels.filter((channel) => !channel.isLocked && !channel.isArchived).map((channel) => channel.id);
   const { data: postRows, error: postError } = permittedChannelIds.length
-    ? await supabase.from("posts").select("id,channel_id,body,image_url,is_pinned,created_at,profiles!posts_author_id_fkey(full_name),reactions(emoji,user_id)").in("channel_id", permittedChannelIds).eq("is_deleted", false).order("created_at", { ascending: true }).limit(100)
+    ? await supabase.from("posts").select("id,channel_id,author_id,body,image_url,is_pinned,created_at,profiles!posts_author_id_fkey(full_name),reactions(emoji,user_id)").in("channel_id", permittedChannelIds).eq("is_deleted", false).order("created_at", { ascending: true }).limit(100)
     : { data: [], error: null };
   if (postError) throw new Error("Unable to load channel posts.");
   const rawPosts = postRows ?? [];
+  const authorIds = [...new Set(rawPosts.map((post) => post.author_id).filter((authorId): authorId is string => Boolean(authorId)))];
+  const [roleResult, assignmentResult] = await Promise.all([
+    supabase.from("cosmetic_roles").select("id,name,color,priority").order("priority", { ascending: false }),
+    authorIds.length ? supabase.from("cosmetic_role_assignments").select("role_id,user_id").in("user_id", authorIds) : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (roleResult.error || assignmentResult.error) throw new Error("Unable to load community role badges.");
+  const assignedRoleIdsByUser = new Map<string, Set<string>>();
+  for (const assignment of assignmentResult.data ?? []) {
+    const assignedRoleIds = assignedRoleIdsByUser.get(assignment.user_id) ?? new Set<string>();
+    assignedRoleIds.add(assignment.role_id);
+    assignedRoleIdsByUser.set(assignment.user_id, assignedRoleIds);
+  }
   const attachmentPaths = rawPosts.map((post) => post.image_url).filter((path): path is string => Boolean(path && !path.startsWith("http")));
   const { data: signedAttachments } = attachmentPaths.length ? await supabase.storage.from("community-posts").createSignedUrls(attachmentPaths, 60 * 60) : { data: [] };
   const signedAttachmentByPath = new Map((signedAttachments ?? []).map((attachment, index) => [attachmentPaths[index], attachment.signedUrl]));
@@ -75,7 +82,11 @@ export async function renderCommunityWorkspace({ nextPath, workspace, selectedCh
     return {
       id: post.id,
       channelId: post.channel_id,
-      authorName: authorProfile?.full_name?.trim() || "Community staff",
+      authorName: post.author_id ? authorProfile?.full_name?.trim() || "Community staff" : "Deleted member",
+      authorRoles: (roleResult.data ?? [])
+        .filter((role) => post.author_id ? assignedRoleIdsByUser.get(post.author_id)?.has(role.id) : false)
+        .map((role) => ({ id: role.id, name: role.name, color: role.color }))
+        .slice(0, 3),
       body: post.body,
       imageUrl: post.image_url ? (post.image_url.startsWith("http") ? post.image_url : signedAttachmentByPath.get(post.image_url) ?? null) : null,
       createdAt: post.created_at,

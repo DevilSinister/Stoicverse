@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   ChevronDown,
   FileUp,
@@ -18,14 +18,11 @@ import {
   Settings,
   FolderPlus,
   AtSign,
-  BookOpen,
-  ImagePlus,
   MoreHorizontal,
   Paperclip,
   Pin,
   Copy,
   Check,
-  Bell,
 } from "lucide-react";
 
 import { createStaffPost, toggleReaction, editStaffPost, deleteStaffPost, togglePostHighlight } from "@/app/community/actions";
@@ -67,6 +64,7 @@ export type CommunityPost = {
   id: string;
   channelId: string;
   authorName: string;
+  authorRoles?: { id: string; name: string; color: string }[];
   body: string | null;
   imageUrl: string | null;
   createdAt: string;
@@ -257,22 +255,17 @@ function renderFormattedBody(text: string | null) {
 function PostComposer({ channelId, onNotice }: { channelId: string; onNotice: (value: string) => void }) {
   const [body, setBody] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showMentionPopup, setShowMentionPopup] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [pending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (!file) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
+  const previewUrl = useMemo(() => file ? URL.createObjectURL(file) : null, [file]);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   const addMention = (mention: string) => {
     setBody((current) => {
@@ -557,8 +550,11 @@ function Feed({
   };
 
   useEffect(() => {
-    setNewMessageCount(0);
-    requestAnimationFrame(() => messageScrollRef.current?.scrollTo({ top: messageScrollRef.current?.scrollHeight ?? 0 }));
+    const frame = requestAnimationFrame(() => {
+      setNewMessageCount(0);
+      messageScrollRef.current?.scrollTo({ top: messageScrollRef.current?.scrollHeight ?? 0 });
+    });
+    return () => cancelAnimationFrame(frame);
   }, [channel?.id]);
 
   useEffect(() => {
@@ -924,6 +920,7 @@ function Feed({
                         Staff
                       </span>
                     )}
+                    {post.authorRoles?.map((role) => <span key={role.id} className="rounded-full border px-2 py-0.5 text-[9px] font-semibold" style={{ borderColor: role.color, color: role.color, backgroundColor: `${role.color}1A` }}>{role.name}</span>)}
                   </div>
 
                   {isEditing ? (

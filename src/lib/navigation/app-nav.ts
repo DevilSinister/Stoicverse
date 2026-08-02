@@ -1,4 +1,4 @@
-import { BarChart3, CalendarDays, CircleDollarSign, GraduationCap, LayoutDashboard, MessageSquare, Settings, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, Bell, CalendarDays, CircleDollarSign, GraduationCap, LayoutDashboard, MessageSquare, Settings, Users, type LucideIcon } from "lucide-react";
 
 import { withRouteBase } from "@/lib/navigation/paths";
 
@@ -28,8 +28,7 @@ export function buildAppNav({ routeBase = "" }: { routeBase?: string }): AppNavI
     { href: withRouteBase(routeBase, "/events"), label: "Events", icon: CalendarDays },
     { href: withRouteBase(routeBase, "/courses"), label: "Courses", icon: GraduationCap },
     { href: withRouteBase(routeBase, "/community"), label: "Communities", icon: MessageSquare },
-    { href: withRouteBase(routeBase, "/messages"), label: "Messages", icon: MessageSquare },
-    { href: withRouteBase(routeBase, "/notifications"), label: "Notifications", icon: BarChart3 },
+    { href: withRouteBase(routeBase, "/notifications"), label: "Notifications", icon: Bell },
     { href: withRouteBase(routeBase, "/settings"), label: "Settings", icon: Settings },
   ];
 }

@@ -33,50 +33,15 @@ export async function createStaffPost(data: FormData): Promise<Result> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to post." };
   if (attachmentPath && (!attachmentPath.startsWith(`${user.id}/`) || attachmentPath.includes(".."))) return { error: "Invalid attachment." };
-  const { data: profile, error: profileError } = await supabase.from("profiles").select("full_name,platform_role,is_suspended").eq("id", user.id).maybeSingle();
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("platform_role,is_suspended").eq("id", user.id).maybeSingle();
   if (profileError || !profile || profile.is_suspended || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) return { error: "Moderator or influencer access is required." };
-  const { data: channel, error: channelError } = await supabase.from("channels").select("name,type").eq("id", channelId).maybeSingle();
+  const { data: channel, error: channelError } = await supabase.from("channels").select("type").eq("id", channelId).maybeSingle();
   if (channelError || !channel) return { error: "You cannot post in this channel." };
-  const { data: newPost, error } = await supabase.from("posts").insert({ channel_id: channelId, author_id: user.id, body: body || null, image_url: attachmentPath || null, post_type: channel.type === "announcements" ? "announcement" : "post" }).select("id").maybeSingle();
+  const { error } = await supabase.from("posts").insert({ channel_id: channelId, author_id: user.id, body: body || null, image_url: attachmentPath || null, post_type: channel.type === "announcements" ? "announcement" : "post" });
   if (error) return { error: error.message };
-
-  // Dispatch mention notifications if body contains @
-  if (body.includes("@")) {
-    const authorName = profile.full_name?.trim() || "Community Staff";
-    const postSnippet = body.length > 80 ? `${body.slice(0, 80)}…` : body;
-
-    // Check for @all or @tier-X
-    const lowerBody = body.toLowerCase();
-    const hasAll = lowerBody.includes("@all");
-    const tierMatches = lowerBody.match(/@tier-(\d+)/g);
-    const targetTiers = tierMatches ? tierMatches.map((t) => parseInt(t.replace("@tier-", ""), 10)).filter((num) => !isNaN(num) && num >= 1 && num <= 5) : [];
-
-    let targetUserIds: string[] = [];
-
-    if (hasAll) {
-      const { data: allProfiles } = await supabase.from("profiles").select("id").neq("id", user.id).limit(200);
-      if (allProfiles) targetUserIds = allProfiles.map((p) => p.id);
-    } else if (targetTiers.length > 0) {
-      const minTier = Math.min(...targetTiers);
-      const { data: tierMembers } = await supabase.from("member_tiers").select("user_id").gte("current_tier", minTier).neq("user_id", user.id).limit(200);
-      if (tierMembers) targetUserIds = tierMembers.map((m) => m.user_id);
-    }
-
-    if (targetUserIds.length > 0) {
-      const notificationRows = targetUserIds.map((targetId) => ({
-        user_id: targetId,
-        type: "community_mention",
-        title: `Mentioned in #${channel.name}`,
-        body: `${authorName}: "${postSnippet}"`,
-        action_url: `/dashboard/community?channel=${channelId}`,
-      }));
-      await supabase.from("notifications").insert(notificationRows);
-    }
-  }
 
   revalidatePath("/dashboard/community");
   revalidatePath("/creator/channels");
-  revalidatePath("/creator/community");
   revalidatePath("/creator/community");
   return { success: true };
 }

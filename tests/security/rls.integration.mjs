@@ -30,11 +30,11 @@ test("anonymous, suspended, and inactive identities cannot read protected record
   }
 });
 
-test("tier gates apply to events, lessons, and provider identifiers", { skip }, async () => {
+test("tier gates remain for events while course and lesson content is open", { skip }, async () => {
   const lowTier = client(process.env.RLS_TIER1_JWT);
   await expectNoRows(await lowTier.from("events").select("id").eq("id", process.env.RLS_HIGH_TIER_EVENT_ID));
-  await expectNoRows(await lowTier.from("lessons").select("id").eq("id", process.env.RLS_HIGH_TIER_LESSON_ID));
-  assert.notEqual((await lowTier.rpc("get_lesson_video_file_id", { target_lesson_id: process.env.RLS_HIGH_TIER_LESSON_ID })).error, null);
+  assert.equal((await lowTier.from("lessons").select("id").eq("id", process.env.RLS_HIGH_TIER_LESSON_ID)).error, null);
+  assert.equal((await lowTier.rpc("get_lesson_video_file_id", { target_lesson_id: process.env.RLS_HIGH_TIER_LESSON_ID })).error, null);
 
   const qualified = client(process.env.RLS_QUALIFIED_JWT);
   assert.equal((await qualified.from("events").select("id").eq("id", process.env.RLS_HIGH_TIER_EVENT_ID)).error, null);
@@ -58,11 +58,11 @@ test("course writes and provider assets remain influencer-only", { skip }, async
   assert.notEqual((await member.from("course_video_assets").select("video_file_id")).error, null);
 });
 
-test("course enrollment and video progress are validated by database functions", { skip }, async () => {
+test("active members can enroll in and watch any released course", { skip }, async () => {
   const lowTier = client(process.env.RLS_TIER1_JWT);
-  assert.notEqual((await lowTier.rpc("enroll_in_course", { target_course_id: process.env.RLS_HIGH_TIER_COURSE_ID })).error, null);
-  assert.notEqual((await lowTier.rpc("get_course_video_file_id", { target_video_id: process.env.RLS_LOCKED_COURSE_VIDEO_ID })).error, null);
-  assert.notEqual((await lowTier.rpc("record_course_video_progress", { target_video_id: process.env.RLS_LOCKED_COURSE_VIDEO_ID, elapsed_seconds: 15 })).error, null);
+  assert.equal((await lowTier.rpc("enroll_in_course", { target_course_id: process.env.RLS_HIGH_TIER_COURSE_ID })).error, null);
+  assert.equal((await lowTier.rpc("get_course_video_file_id", { target_video_id: process.env.RLS_LOCKED_COURSE_VIDEO_ID })).error, null);
+  assert.equal((await lowTier.rpc("record_course_video_progress", { target_video_id: process.env.RLS_LOCKED_COURSE_VIDEO_ID, elapsed_seconds: 15 })).error, null);
 });
 
 test("notification updates remain scoped to the signed-in member", { skip }, async () => {

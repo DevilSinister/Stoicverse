@@ -61,9 +61,10 @@ test("member and creator route trees expose separate navigation and guards", () 
   const memberCommunity = read("src/app/community/page.tsx");
   const communityWorkspace = read("src/components/community/CommunityWorkspace.tsx");
 
-  for (const path of ["events", "courses", "community", "messages", "notifications", "settings"]) {
+  for (const path of ["events", "courses", "community", "notifications", "settings"]) {
     assert.match(read(`src/app/dashboard/${path}/page.tsx`), /requireActiveMembership|render/);
   }
+  assert.match(read("src/app/dashboard/messages/page.tsx"), /permanentRedirect\("\/dashboard\/community"\)/);
   for (const path of ["members", "analytics", "revenue", "settings", "notifications"]) {
     assert.match(read(`src/app/creator/${path}/page.tsx`), /requireInfluencerWorkspace/);
   }
@@ -71,7 +72,7 @@ test("member and creator route trees expose separate navigation and guards", () 
   assert.match(nav, /label: "Overview"/);
   assert.match(nav, /label: "Revenue"/);
   assert.match(nav, /label: "Community settings"/);
-  assert.match(nav, /label: "Messages"/);
+  assert.doesNotMatch(nav, /label: "Messages"/);
   assert.match(memberCommunity, /redirect\("\/dashboard\/community"/);
   assert.match(communityWorkspace, /community_channel_directory/);
   assert.match(communityWorkspace, /workspace === "creator"/);

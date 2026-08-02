@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, LockKeyhole, Play } from "lucide-react";
+import { ArrowRight, CheckCircle2, Play } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type PlaylistVideo = { id: string; title: string; durationSeconds: number; isOptional: boolean; isCompleted: boolean; isUnlocked: boolean };
@@ -15,9 +15,9 @@ export function LessonWorkspacePlayer({ videoId, title, description, courseId, c
   const [completedIds, setCompletedIds] = useState(() => new Set(videos.filter((video) => video.isCompleted).map((video) => video.id)));
   const [error, setError] = useState<string | null>(null);
   const [sourceError, setSourceError] = useState<string | null>(null);
-  const queue = useMemo(() => videos.map((video, index) => ({ ...video, isCompleted: completedIds.has(video.id), isUnlocked: videos.slice(0, index).every((previous) => previous.isOptional || completedIds.has(previous.id)) })), [videos, completedIds]);
+  const queue = useMemo(() => videos.map((video) => ({ ...video, isCompleted: completedIds.has(video.id), isUnlocked: true })), [videos, completedIds]);
   const activeIndex = queue.findIndex((video) => video.id === videoId);
-  const nextVideo = queue.slice(activeIndex + 1).find((video) => video.isUnlocked);
+  const nextVideo = queue[activeIndex + 1];
 
   useEffect(() => { void fetch(`/api/courses/videos/${videoId}/video`, { method: "POST" }); }, [videoId]);
   const saveProgress = useCallback(async (force = false) => {
@@ -51,7 +51,7 @@ export function LessonWorkspacePlayer({ videoId, title, description, courseId, c
         <h1 className="font-headline text-3xl font-medium leading-tight text-white sm:text-4xl">{title}</h1>
         {description && <p className="mt-4 max-w-3xl text-sm leading-7 text-on-surface-variant">{description}</p>}
         <section className="mt-7 border-t border-surgical-steel pt-6"><h2 className="terminal-label">Lesson resources</h2><div className="mt-4 border border-surgical-steel bg-surface-container-low p-4 text-sm text-fog-muted">Lesson materials will appear here when they are attached to this session.</div></section>
-        <section className="mt-7 border-t border-surgical-steel pt-6"><div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className="font-headline text-lg font-medium text-white">Video watch progress</h2><span className="font-label text-sm text-primary-container">{progress.toFixed(0)}%</span></div><p className="mt-1 text-sm text-fog-muted">Watch 80% of this video to unlock the next session.</p><div className="mt-4 h-2 overflow-hidden rounded-full bg-surface-container-high" role="progressbar" aria-label="Video watch progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}><div className="h-full rounded-full bg-primary-container transition-[width] duration-200 motion-reduce:transition-none" style={{ width: `${Math.min(100, progress)}%` }} /></div></section>
+        <section className="mt-7 border-t border-surgical-steel pt-6"><div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className="font-headline text-lg font-medium text-white">Video watch progress</h2><span className="font-label text-sm text-primary-container">{progress.toFixed(0)}%</span></div><p className="mt-1 text-sm text-fog-muted">Watch 80% of this video to mark the session complete.</p><div className="mt-4 h-2 overflow-hidden rounded-full bg-surface-container-high" role="progressbar" aria-label="Video watch progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}><div className="h-full rounded-full bg-primary-container transition-[width] duration-200 motion-reduce:transition-none" style={{ width: `${Math.min(100, progress)}%` }} /></div></section>
       </div>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-y border-surgical-steel py-4">
         <span className="font-label text-xs uppercase tracking-wider text-fog-muted">Protected playback</span>
@@ -64,6 +64,6 @@ export function LessonWorkspacePlayer({ videoId, title, description, courseId, c
 }
 
 function QueueItem({ item, index, active, courseId, routeBase }: { item: PlaylistVideo; index: number; active: boolean; courseId: string; routeBase: string }) {
-  const content = <><span className={`grid size-7 shrink-0 place-items-center rounded-full ${active ? "bg-primary-container/15 text-primary-container" : item.isCompleted ? "text-primary-container" : "text-fog-muted"}`}>{item.isCompleted ? <CheckCircle2 size={17} /> : !item.isUnlocked ? <LockKeyhole size={15} /> : active ? <Play size={15} fill="currentColor" /> : index + 1}</span><span className="min-w-0"><span className={`block truncate text-sm ${active ? "font-semibold text-primary-container" : "font-medium text-on-surface-variant"}`}>{index + 1}. {item.title}</span><span className="mt-1 block font-label text-[10px] uppercase tracking-wider text-fog-muted">{formatDuration(item.durationSeconds)}{active ? " · Watching" : item.isOptional ? " · Optional" : ""}</span></span></>;
-  return <li>{item.isUnlocked ? <Link href={`${routeBase}/courses/${courseId}/video/${item.id}`} aria-current={active ? "page" : undefined} className={`flex min-h-16 items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${active ? "border-primary-container bg-primary-container/15" : "border-transparent hover:bg-surface-container-high"}`}>{content}</Link> : <div className="flex min-h-16 items-center gap-3 rounded-lg border border-transparent px-4 py-3 opacity-45">{content}</div>}</li>;
+  const content = <><span className={`grid size-7 shrink-0 place-items-center rounded-full ${active ? "bg-primary-container/15 text-primary-container" : item.isCompleted ? "text-primary-container" : "text-fog-muted"}`}>{item.isCompleted ? <CheckCircle2 size={17} /> : active ? <Play size={15} fill="currentColor" /> : index + 1}</span><span className="min-w-0"><span className={`block truncate text-sm ${active ? "font-semibold text-primary-container" : "font-medium text-on-surface-variant"}`}>{index + 1}. {item.title}</span><span className="mt-1 block font-label text-[10px] uppercase tracking-wider text-fog-muted">{formatDuration(item.durationSeconds)}{active ? " · Watching" : item.isOptional ? " · Optional" : ""}</span></span></>;
+  return <li><Link href={`${routeBase}/courses/${courseId}/video/${item.id}`} aria-current={active ? "page" : undefined} className={`flex min-h-16 items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${active ? "border-primary-container bg-primary-container/15" : "border-transparent hover:bg-surface-container-high"}`}>{content}</Link></li>;
 }

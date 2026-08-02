@@ -36,19 +36,15 @@ export async function renderVideoPage({
   const currentTier = tierResult.data?.current_tier ?? 1;
   const isMaster = tierResult.data?.is_master ?? false;
   const progress = new Map((progressResult.data ?? []).map((item) => [item.video_id, item]));
-  let previousComplete = true;
   const playlist = (videosResult.data ?? []).map((item) => {
     const itemProgress = progress.get(item.id);
-    const isUnlocked = previousComplete;
-    // Optional items are recommended; required items hold the sequence.
-    previousComplete = !!itemProgress?.is_completed || item.is_optional;
     return {
       id: item.id,
       title: item.title,
       durationSeconds: item.duration_seconds,
       isOptional: item.is_optional,
       isCompleted: !!itemProgress?.is_completed,
-      isUnlocked,
+      isUnlocked: true,
     };
   });
   const initialProgress = Number(progress.get(video.id)?.completion_percentage ?? 0);

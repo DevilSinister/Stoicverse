@@ -12,16 +12,20 @@ export async function requireActiveMembership(nextPath: string) {
     redirect(`/login?next=${encodeURIComponent(nextPath)}`);
   }
 
-  const [{ data: membership, error: membershipError }, { data: profile, error: profileError }] = await Promise.all([
+  const [{ data: membership, error: membershipError }, { data: profile, error: profileError }, { data: deletionRequest, error: deletionError }] = await Promise.all([
     supabase.from("memberships").select("id, expires_at").eq("user_id", user.id).eq("status", "active").maybeSingle(),
     supabase.from("profiles").select("is_suspended, platform_role").eq("id", user.id).maybeSingle(),
+    supabase.from("account_deletion_requests").select("id").eq("user_id", user.id).in("status", ["pending", "processing", "failed"]).limit(1).maybeSingle(),
   ]);
 
-  if (membershipError || profileError) {
+  if (membershipError || profileError || deletionError) {
     console.error("Membership Error:", membershipError);
     console.error("Profile Error:", profileError);
+    console.error("Deletion Error:", deletionError);
     throw new Error("Unable to validate membership.");
   }
+
+  if (deletionRequest) redirect("/account/deletion-pending");
 
   if (profile?.platform_role === "influencer" && !profile.is_suspended) {
     redirect("/creator");

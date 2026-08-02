@@ -17,7 +17,7 @@ export async function renderDashboardPage({ nextPath = "/dashboard", routeBase =
     supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
     supabase.from("member_tiers").select("current_tier, is_master").eq("user_id", user.id).maybeSingle(),
     supabase.from("course_enrollments").select("course_id, completion_current, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }),
-    supabase.from("courses").select("id, title, description, min_tier").eq("status", "published").order("min_tier"),
+    supabase.from("courses").select("id, title, description, min_tier, created_at").eq("status", "published").order("created_at"),
     supabase.from("course_videos").select("id,course_id,duration_seconds,is_optional,sort_order").order("sort_order"),
     supabase.from("course_video_progress").select("video_id,completion_percentage,is_completed").eq("user_id", user.id),
     supabase.from("events").select("id, title, description, starts_at, min_tier, status").in("status", ["upcoming", "live"]).gte("starts_at", now).order("starts_at").limit(1),

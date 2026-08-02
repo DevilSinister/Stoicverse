@@ -1,6 +1,6 @@
 # Stoicverse Design System
 
-**Last updated:** July 27, 2026
+**Last updated:** August 2, 2026
 
 This document describes the system **as it is implemented**. Tokens are defined in
 `src/app/globals.css` (`@theme` block); fonts are loaded in `src/app/layout.tsx`.
@@ -73,6 +73,36 @@ caps around 4.75rem. Body measure stays in the 65–75 character band.
   auth surfaces as a background material. Fade it with a `mask-image` rather
   than letting it hard-cut at a section edge.
 
+### Identity command center
+
+Member settings are a dedicated workspace, not a modal stack. At wide desktop
+sizes they use three visible regions: a compact category rail, one focused
+editor, and a live identity preview. Medium layouts retain the rail and editor;
+the preview is supporting context and may collapse first. The rail owns global
+settings navigation and keeps logout visually separated below the categories.
+
+The editor shows one category at a time and divides related forms with hairlines
+instead of nesting every form in a separate card. The live preview is a truthful
+read-only mirror of account identity: avatar, display name, email, membership
+status, and cosmetic community badges. A cosmetic badge communicates identity
+only; it must never be presented as a permission, lock, or progression tier.
+
+### Notification preview and inbox
+
+The AppShell bell opens a compact, bounded preview (up to 24rem wide) of the five
+newest notifications. It includes the unread count, distinct unread markers,
+loading/error/empty states, and one persistent “View all notifications” exit.
+Keep this surface scan-first: title, at most two lines of body copy, timestamp,
+and direction affordance. Opening the preview may acknowledge the visible five;
+it must not visually imply that the entire inbox was cleared.
+
+The full notification inbox is a quiet chronological queue. Use the All, Unread,
+and Mentions controls as a roving tablist, group rows under Today, Yesterday, and
+Earlier, and append history with “Load older” rather than infinite scroll. Every
+data state is a first-class composition: skeleton rows for initial loading, a
+retry action for failure, view-specific empty copy, and an inline alert when a
+refresh fails while usable rows remain.
+
 ## Interaction and accessibility
 
 - Motion is quiet and purposeful, 150–300ms for state changes and up to ~1s for
@@ -83,6 +113,13 @@ caps around 4.75rem. Body measure stays in the 65–75 character band.
 - All motion is disabled under `prefers-reduced-motion: reduce`.
 - Focus uses the shared `.focus-ring` utility: a 2px emerald outline at 2px
   offset, on `:focus-visible` only. Do not hand-roll focus styles.
+- Temporary shell surfaces move focus into their first action when opened, trap
+  Tab within the surface, close on Escape, and restore focus to the trigger.
+  Mobile settings detail moves focus to its back control, then restores focus to
+  the category that launched it when returning to the category list.
+- Tab sets use one tab stop and support Left/Right Arrow, Home, and End. Async
+  results use `status` or `alert` semantics and must remain understandable when
+  pulse, spin, and transition animation are suppressed.
 - Shadows carry a real offset and blur. `.emerald-glow` is the primary-action
   shadow: `0 8px 24px -12px` emerald plus a 1px inset top highlight. Zero-offset
   colored halos are not part of the system.
@@ -101,6 +138,11 @@ caps around 4.75rem. Body measure stays in the 65–75 character band.
   four-step context rail so the email-confirmation step is not a surprise; the
   rail is `hidden lg:flex`, so phones get the same sequence as a segmented
   stepper rather than losing it.
+- **Member settings** (`AccountSettingsWorkspace`) — Operate. An identity command
+  center with a category rail, focused editor, and supporting live preview.
+- **Member notifications** (`NotificationCenter` and the AppShell bell preview) —
+  Operate. A compact recency preview opens into a filterable chronological inbox;
+  state changes are communicated by copy, color, and semantics, never motion alone.
 
 ## Mobile
 
@@ -112,6 +154,10 @@ caps around 4.75rem. Body measure stays in the 65–75 character band.
 - Full-bleed surfaces pad with `max(<value>, env(safe-area-inset-*))` so content
   clears notches and the home indicator.
 - Anything hidden behind `lg:` must have a mobile equivalent, not simply vanish.
+- Member settings become list-to-detail navigation below `md`: begin with the
+  category list, push into one section, and provide an explicit “All settings”
+  back control. Preserve the selected category and restore keyboard focus when
+  returning; do not compress the desktop rail and editor side by side.
 - **Checkout** (`src/components/checkout/CheckoutScreen.tsx`) — Operate. Payment
   happens on Stripe Checkout. This surface reviews the order and hands off; it
   must never render card, CVC, or billing-address inputs. Cardholder data must

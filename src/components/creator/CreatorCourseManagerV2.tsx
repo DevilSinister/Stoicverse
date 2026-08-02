@@ -14,7 +14,7 @@ import {
 } from "@/app/courses/actions";
 import { AppShell } from "@/components/layout/AppShell";
 import { 
-  ArrowLeft, Plus, Edit, Clock, Video, Layers,
+  ArrowLeft, Plus, Edit, Clock, Video,
   X, AlertCircle, LoaderCircle, CheckCircle,
   GripVertical, ChevronDown, Trash2, AlertTriangle
 } from "lucide-react";
@@ -35,12 +35,10 @@ export type ManagedCourse = {
   id: string; 
   title: string; 
   description: string | null; 
-  min_tier: number; 
   completion_tier: number | null; 
   status: string; 
   is_finished: boolean; 
   finished_at: string | null; 
-  prerequisiteIds: string[]; 
   videos: ManagedVideo[]; 
 };
 
@@ -294,7 +292,7 @@ export function CreatorCourseManagerV2({
               <div className="text-center py-20 border border-dashed border-surgical-steel rounded-2xl bg-surface-container-low/5">
                 <Video size={48} className="mx-auto text-fog-muted mb-4 opacity-40" />
                 <h2 className="font-sans text-lg font-bold text-white">No courses created yet</h2>
-                <p className="text-sm text-fog-muted mt-1 max-w-md mx-auto">Get started by creating your first course and defining its minimum access tier.</p>
+                <p className="text-sm text-fog-muted mt-1 max-w-md mx-auto">Get started by creating your first open-access member course.</p>
                 <button 
                   onClick={() => {
                     setModalError(null);
@@ -317,7 +315,7 @@ export function CreatorCourseManagerV2({
                       {/* Top Badges Row */}
                       <div className="flex items-center justify-between">
                         <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full font-label text-[10px] uppercase font-bold border border-primary-container/30 bg-primary-container/10 text-primary-container">
-                          Tier 0{course.min_tier}
+                          Open Access
                         </span>
                         <div className="flex gap-2">
                           <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded font-label text-[9px] uppercase font-bold ${course.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
@@ -346,12 +344,7 @@ export function CreatorCourseManagerV2({
                         <Video size={13} className="text-primary-container" />
                         {course.videos.length} {course.videos.length === 1 ? "Video" : "Videos"}
                       </span>
-                      {course.prerequisiteIds.length > 0 && (
-                        <span className="flex items-center gap-1.5">
-                          <Layers size={13} />
-                          {course.prerequisiteIds.length} {course.prerequisiteIds.length === 1 ? "Prereq" : "Prereqs"}
-                        </span>
-                      )}
+                      <span>All members</span>
                     </div>
                   </article>
                 ))}
@@ -376,11 +369,11 @@ export function CreatorCourseManagerV2({
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center justify-center px-3 py-1 rounded-full font-label text-xs uppercase font-bold border border-primary-container/30 bg-primary-container/10 text-primary-container">
-                      Tier 0{selectedCourse.min_tier} Access
+                      Open to All Members
                     </span>
                     {selectedCourse.completion_tier && (
                       <span className="inline-flex items-center justify-center px-3 py-1 rounded-full font-label text-xs uppercase font-bold border border-surgical-steel bg-surface-container-high text-fog-muted">
-                        Reward: Tier 0{selectedCourse.completion_tier}
+                        Achievement: Tier 0{selectedCourse.completion_tier}
                       </span>
                     )}
                     <span className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded font-label text-xs uppercase font-bold ${selectedCourse.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
@@ -410,24 +403,6 @@ export function CreatorCourseManagerV2({
                     {selectedCourse.description || "No description provided."}
                   </p>
                 </div>
-
-                {/* Prerequisites metadata */}
-                {selectedCourse.prerequisiteIds.length > 0 && (
-                  <div className="pt-4 border-t border-surgical-steel/40">
-                    <h3 className="font-label text-xs uppercase tracking-wider text-fog-muted mb-2">Required Prerequisites</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedCourse.prerequisiteIds.map(prereqId => {
-                        const prereq = courses.find(c => c.id === prereqId);
-                        return (
-                          <span key={prereqId} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-surgical-steel bg-surface-container-high/40 text-xs text-white">
-                            <Layers size={11} className="text-primary-container shrink-0" />
-                            {prereq?.title || "Unknown Course"}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
 
                 {/* Action Rules Row */}
                 <div className="pt-6 border-t border-surgical-steel/40 flex flex-wrap gap-3">
@@ -549,7 +524,6 @@ export function CreatorCourseManagerV2({
       {activeModal === 'create-course' && (
         <Modal title="Create Course" onClose={() => setActiveModal(null)}>
           <CourseCreateForm 
-            courses={courses}
             action={runFormAction(createCourse)}
             pending={pending}
             modalError={modalError}
@@ -562,7 +536,6 @@ export function CreatorCourseManagerV2({
       {activeModal === 'edit-course' && selectedCourse && (
         <Modal title="Edit Course Details" onClose={() => setActiveModal(null)}>
           <CourseEditForm 
-            courses={courses}
             course={selectedCourse}
             action={runFormAction(updateCourse)}
             pending={pending}
@@ -622,28 +595,18 @@ function Modal({ title, children, onClose }: { title: string; children: React.Re
 
 /* ================= COURSE CREATE FORM SUB-COMPONENT ================= */
 function CourseCreateForm({
-  courses,
   action,
   pending,
   modalError,
   onClose
 }: {
-  courses: ManagedCourse[];
   action: (data: FormData) => void;
   pending: boolean;
   modalError: string | null;
   onClose: () => void;
 }) {
-  const [minTier, setMinTier] = useState<number>(1);
   const [rewardTier, setRewardTier] = useState<number>(2);
   const [status, setStatus] = useState<string>("draft");
-  const [selectedPrereqs, setSelectedPrereqs] = useState<string[]>([]);
-
-  const togglePrereq = (id: string) => {
-    setSelectedPrereqs(prev => 
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    );
-  };
 
   return (
     <form action={action} className="space-y-4">
@@ -654,12 +617,8 @@ function CourseCreateForm({
         </div>
       )}
       
-      <input type="hidden" name="minTier" value={minTier} />
       <input type="hidden" name="rewardTier" value={rewardTier} />
       <input type="hidden" name="status" value={status} />
-      {selectedPrereqs.map(id => (
-        <input key={id} type="hidden" name="prerequisiteIds" value={id} />
-      ))}
 
       <div className="space-y-1">
         <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Title</label>
@@ -671,18 +630,12 @@ function CourseCreateForm({
         <textarea className={`${textareaClass} h-28`} name="description" placeholder="Summarize course milestones and learnings..." />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <CustomSelect 
-          label="Min Access Tier"
-          value={minTier}
-          onChange={(val) => setMinTier(Number(val))}
-          options={[1, 2, 3, 4, 5].map(t => ({ value: t, label: `Tier 0${t}` }))}
-        />
-        <CustomSelect 
-          label="Completion Reward"
+          label="Completion Achievement"
           value={rewardTier}
           onChange={(val) => setRewardTier(Number(val))}
-          options={[1, 2, 3, 4, 5].map(t => ({ value: t, label: `Raise to Tier 0${t}` }))}
+          options={[1, 2, 3, 4, 5].map(t => ({ value: t, label: `Award Tier 0${t}` }))}
         />
         <CustomSelect 
           label="Publish State"
@@ -693,32 +646,6 @@ function CourseCreateForm({
             { value: "published", label: "Published" }
           ]}
         />
-      </div>
-
-      {/* Prerequisites Field */}
-      <div className="space-y-2 pt-2 border-t border-surgical-steel/40">
-        <span className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Required Prerequisites</span>
-        <div className="grid gap-2 sm:grid-cols-2 max-h-40 overflow-y-auto pr-1">
-          {courses.map(item => {
-            const isSelected = selectedPrereqs.includes(item.id);
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => togglePrereq(item.id)}
-                className={`flex items-center justify-between p-3 rounded-xl border text-xs font-label uppercase tracking-wider transition-all duration-200 cursor-pointer text-left ${isSelected ? "border-primary-container bg-primary-container/10 text-white" : "border-surgical-steel bg-surface-container-low/20 text-fog-muted hover:border-white/20 hover:text-white"}`}
-              >
-                <span className="truncate pr-2">{item.title}</span>
-                <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 border transition-all ${isSelected ? "border-primary-container bg-primary-container text-on-primary-fixed" : "border-surgical-steel bg-transparent"}`}>
-                  {isSelected && <CheckCircle size={10} className="stroke-[3]" />}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-        {courses.length === 0 && (
-          <p className="text-xs text-fog-muted italic">No other courses available.</p>
-        )}
       </div>
 
       <div className="pt-4 flex items-center justify-end gap-3 border-t border-surgical-steel">
@@ -735,7 +662,6 @@ function CourseCreateForm({
 
 /* ================= COURSE EDIT FORM SUB-COMPONENT ================= */
 function CourseEditForm({
-  courses,
   course,
   action,
   pending,
@@ -743,7 +669,6 @@ function CourseEditForm({
   onClose,
   onDelete
 }: {
-  courses: ManagedCourse[];
   course: ManagedCourse;
   action: (data: FormData) => void;
   pending: boolean;
@@ -751,17 +676,9 @@ function CourseEditForm({
   onClose: () => void;
   onDelete: (id: string) => void;
 }) {
-  const [minTier, setMinTier] = useState<number>(course.min_tier);
   const [rewardTier, setRewardTier] = useState<number>(course.completion_tier || 2);
   const [status, setStatus] = useState<string>(course.status);
-  const [selectedPrereqs, setSelectedPrereqs] = useState<string[]>(course.prerequisiteIds);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  const togglePrereq = (id: string) => {
-    setSelectedPrereqs(prev => 
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    );
-  };
 
   if (showDeleteConfirm) {
     return (
@@ -771,7 +688,7 @@ function CourseEditForm({
           <div className="space-y-1">
             <h4 className="font-sans font-bold text-white text-base">Delete course: {course.title}?</h4>
             <p className="text-sm text-red-200">
-              This will permanently delete the course, all of its video settings, and unlock prerequisite dependencies for other courses.
+              This will permanently delete the course, its video settings, and related curriculum records.
             </p>
           </div>
         </div>
@@ -806,12 +723,8 @@ function CourseEditForm({
       )}
       
       <input type="hidden" name="courseId" value={course.id} />
-      <input type="hidden" name="minTier" value={minTier} />
       <input type="hidden" name="rewardTier" value={rewardTier} />
       <input type="hidden" name="status" value={status} />
-      {selectedPrereqs.map(id => (
-        <input key={id} type="hidden" name="prerequisiteIds" value={id} />
-      ))}
 
       <div className="space-y-1">
         <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Title</label>
@@ -823,18 +736,12 @@ function CourseEditForm({
         <textarea className={`${textareaClass} h-28`} name="description" defaultValue={course.description ?? ""} placeholder="Summarize course milestones and learnings..." />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <CustomSelect 
-          label="Min Access Tier"
-          value={minTier}
-          onChange={(val) => setMinTier(Number(val))}
-          options={[1, 2, 3, 4, 5].map(t => ({ value: t, label: `Tier 0${t}` }))}
-        />
-        <CustomSelect 
-          label="Completion Reward"
+          label="Completion Achievement"
           value={rewardTier}
           onChange={(val) => setRewardTier(Number(val))}
-          options={[1, 2, 3, 4, 5].map(t => ({ value: t, label: `Raise to Tier 0${t}` }))}
+          options={[1, 2, 3, 4, 5].map(t => ({ value: t, label: `Award Tier 0${t}` }))}
         />
         <CustomSelect 
           label="Publish State"
@@ -846,32 +753,6 @@ function CourseEditForm({
             { value: "archived", label: "Archived" }
           ]}
         />
-      </div>
-
-      {/* Prerequisites Field */}
-      <div className="space-y-2 pt-2 border-t border-surgical-steel/40">
-        <span className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Required Prerequisites</span>
-        <div className="grid gap-2 sm:grid-cols-2 max-h-40 overflow-y-auto pr-1">
-          {courses.filter(item => item.id !== course.id).map(item => {
-            const isSelected = selectedPrereqs.includes(item.id);
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => togglePrereq(item.id)}
-                className={`flex items-center justify-between p-3 rounded-xl border text-xs font-label uppercase tracking-wider transition-all duration-200 cursor-pointer text-left ${isSelected ? "border-primary-container bg-primary-container/10 text-white" : "border-surgical-steel bg-surface-container-low/20 text-fog-muted hover:border-white/20 hover:text-white"}`}
-              >
-                <span className="truncate pr-2">{item.title}</span>
-                <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 border transition-all ${isSelected ? "border-primary-container bg-primary-container text-on-primary-fixed" : "border-surgical-steel bg-transparent"}`}>
-                  {isSelected && <CheckCircle size={10} className="stroke-[3]" />}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-        {courses.filter(item => item.id !== course.id).length === 0 && (
-          <p className="text-xs text-fog-muted italic">No other courses available.</p>
-        )}
       </div>
 
       <div className="pt-6 border-t border-surgical-steel flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

@@ -1,4 +1,5 @@
-import { CreatorTierManager, type ManagedTier } from "@/components/creator/CreatorTierManager";
-import { requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { redirect } from "next/navigation";
 
-export default async function CreatorTiersPage() { const { supabase, user } = await requireInfluencerWorkspace("/creator/tiers"); const [profile, tierRows, courses] = await Promise.all([supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(), supabase.from("tiers").select("id,level,title,description,required_lesson_count").order("level"), supabase.from("courses").select("min_tier,completion_tier")]); if (profile.error || tierRows.error || courses.error) throw new Error("Unable to load tiers."); const tiers: ManagedTier[] = (tierRows.data ?? []).map((tier) => ({ ...tier, courseCount: (courses.data ?? []).filter((course) => course.min_tier === tier.level || course.completion_tier === tier.level).length })); return <CreatorTierManager tiers={tiers} memberName={profile.data?.full_name?.trim() || "Creator"} />; }
+export default function CreatorTiersPage() {
+  redirect("/creator/members");
+}
