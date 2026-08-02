@@ -3,7 +3,7 @@
 ## Stoicverse
 
 **Last updated:** July 12, 2026
-**Authoritative scope:** One global Stoicverse community.
+**Authoritative scope:** One single global Stoicverse community.
 
 ## Implemented foundation
 
@@ -31,7 +31,7 @@
 ### Community and curriculum
 
 - Implement channel, post, reaction, pin, deletion, image-upload, moderator-management, and lesson-management mutations.
-- Implement the authenticated Drive preview endpoint/player, 15-second watch progress recording, 85% completion, sequential unlocks, atomic tier progression, and Master unlock.
+- Maintain the authenticated course-video Drive preview endpoint/player, 15-second progress recording, 80% sequential unlocks, prerequisite-aware enrolment, influencer finalization/revisions, and atomic tier rewards.
 - Create notifications and realtime updates rather than only rendering stored notification rows.
 
 ### Workflows and operations

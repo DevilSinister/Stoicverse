@@ -1,5 +1,5 @@
-import { renderCommunityPage } from "@/app/community/page";
+import { renderCommunityWorkspace } from "@/components/community/CommunityWorkspace";
 
-export default function DashboardCommunityPage() {
-  return renderCommunityPage({ nextPath: "/dashboard/community", routeBase: "/dashboard" });
+export default async function DashboardCommunityPage({ searchParams }: { searchParams: Promise<{ channel?: string }> }) {
+  return renderCommunityWorkspace({ nextPath: "/dashboard/community", workspace: "member", selectedChannelId: (await searchParams).channel });
 }

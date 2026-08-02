@@ -317,7 +317,8 @@ export function CreatorEventsView({
         <EventEditor 
           event={editing} 
           pending={pending} 
-          onClose={() => { setCreating(false); setEditing(null); }} 
+          error={message}
+          onClose={() => { setCreating(false); setEditing(null); setMessage(null); }} 
           onSubmit={submit} 
         />
       )}
@@ -452,15 +453,16 @@ function Notice({ text, onClose }: { text: string; onClose?: () => void }) {
 function EventEditor({ 
   event, 
   pending, 
+  error,
   onClose, 
   onSubmit 
 }: { 
   event: CreatorEventRecord | null; 
   pending: boolean; 
+  error?: string | null;
   onClose: () => void; 
   onSubmit: (data: FormData, mode: "draft" | "publish" | "update") => void 
 }) { 
-  const [mode, setMode] = useState<"draft" | "publish" | "update">(event?.publishedAt ? "update" : "draft"); 
   const [dirty, setDirty] = useState(false); 
   const close = useDialog(() => { 
     if (!dirty || window.confirm("Discard unsaved event changes?")) onClose(); 
@@ -480,7 +482,9 @@ function EventEditor({
       <form 
         onSubmit={(e) => { 
           e.preventDefault(); 
-          onSubmit(new FormData(e.currentTarget), mode); 
+          const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
+          const intent = (submitter?.value as "draft" | "publish" | "update") || (event?.publishedAt ? "update" : "draft");
+          onSubmit(new FormData(e.currentTarget), intent); 
         }} 
         onChange={() => setDirty(true)} 
         onMouseDown={(e) => e.stopPropagation()} 
@@ -503,6 +507,12 @@ function EventEditor({
             <X size={20} />
           </button>
         </div>
+
+        {error && (
+          <div className="px-6 pt-6 pb-2">
+            <Notice text={error} onClose={onClose} />
+          </div>
+        )}
 
         {/* Modal Body */}
         <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
@@ -656,8 +666,9 @@ function EventEditor({
             {!event?.publishedAt && (
               <button 
                 type="submit" 
+                name="intent"
+                value="draft"
                 disabled={pending} 
-                onClick={() => setMode("draft")} 
                 className="min-h-10 px-5 font-label text-xs uppercase tracking-wider text-primary-container border border-primary-container/30 hover:border-primary-container rounded hover:bg-primary-container/5 transition disabled:opacity-60 cursor-pointer"
               >
                 Save Draft
@@ -666,8 +677,9 @@ function EventEditor({
             
             <button 
               type="submit" 
+              name="intent"
+              value={event?.publishedAt ? "update" : "publish"}
               disabled={pending} 
-              onClick={() => setMode(event?.publishedAt ? "update" : "publish")} 
               className="min-h-10 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition disabled:opacity-60 cursor-pointer"
             >
               {pending ? "Saving…" : event?.publishedAt ? "Save Changes" : "Publish Event"}

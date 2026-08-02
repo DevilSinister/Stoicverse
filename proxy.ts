@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { safeNextPath as toSafePath } from "@/lib/security/safe-path";
 import { getSupabaseConfig } from "@/lib/supabase/env";
 
 const authRoutes = ["/login", "/signup"];
@@ -8,6 +9,7 @@ const creatorRoute = "/creator";
 const memberRoutes = ["/dashboard"];
 const creatorRoutes = ["/creator"];
 const adminRoutes = ["/admin"];
+const deletionPendingRoute = "/account/deletion-pending";
 
 function isRouteMatch(path: string, routes: string[]) {
   return routes.some((route) => path === route || path.startsWith(`${route}/`));
@@ -15,8 +17,12 @@ function isRouteMatch(path: string, routes: string[]) {
 
 function safeNextPath(request: NextRequest) {
   const next = request.nextUrl.searchParams.get("next");
+  if (next === null) return null;
 
-  return next?.startsWith("/") && !next.startsWith("//") ? next : null;
+  // toSafePath always returns a same-origin path; a rejected value collapses to
+  // the sentinel fallback, which the callers below treat as "no destination".
+  const resolved = toSafePath(next, "");
+  return resolved === "" ? null : resolved;
 }
 
 function copyResponseState(source: NextResponse, target: NextResponse) {
@@ -80,7 +86,16 @@ export async function proxy(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
+
+  if (authError) {
+    request.cookies.getAll().forEach(({ name }) => {
+      if (name.startsWith("sb-")) {
+        response.cookies.delete(name);
+      }
+    });
+  }
 
   const path = request.nextUrl.pathname;
   const isCheckoutRoute = path === "/checkout";
@@ -88,9 +103,10 @@ export async function proxy(request: NextRequest) {
   const isAdminRoute = isRouteMatch(path, adminRoutes);
   const requiresMembership = isRouteMatch(path, memberRoutes);
   const isAuthRoute = authRoutes.includes(path);
+  const isDeletionPendingRoute = path === deletionPendingRoute;
   const currentPath = `${path}${request.nextUrl.search}`;
 
-  if ((isCheckoutRoute || requiresMembership || isCreatorRoute || isAdminRoute) && !user) {
+  if ((isCheckoutRoute || requiresMembership || isCreatorRoute || isAdminRoute || isDeletionPendingRoute) && !user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", currentPath);
     return redirectWithState(response, loginUrl);
@@ -100,27 +116,38 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  const needsSubscriptionCheck = isCheckoutRoute || requiresMembership || isAuthRoute || isCreatorRoute || isAdminRoute;
+  const needsSubscriptionCheck = isCheckoutRoute || requiresMembership || isAuthRoute || isCreatorRoute || isAdminRoute || isDeletionPendingRoute;
   if (!needsSubscriptionCheck) {
     return response;
   }
 
-  const [{ data: membership, error: membershipError }, { data: profile, error: profileError }] = await Promise.all([
-    supabase.from("memberships").select("id").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle(),
+  const [{ data: membership, error: membershipError }, { data: profile, error: profileError }, { data: deletionRequest, error: deletionError }] = await Promise.all([
+    supabase.from("memberships").select("id, expires_at").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle(),
     supabase.from("profiles").select("is_suspended, platform_role").eq("id", user.id).maybeSingle(),
+    supabase.from("account_deletion_requests").select("id").eq("user_id", user.id).in("status", ["pending", "processing", "failed"]).limit(1).maybeSingle(),
   ]);
 
-  if (membershipError || profileError) {
+  if (membershipError || profileError || deletionError) {
     return unavailableWithState(response);
   }
 
-  const hasActiveMembership = Boolean(membership) && !profile?.is_suspended;
+  if (deletionRequest && !isDeletionPendingRoute) {
+    return redirectWithState(response, new URL(deletionPendingRoute, request.url));
+  }
+
+  const hasActiveMembership = Boolean(membership) && (!membership?.expires_at || new Date(membership.expires_at) > new Date()) && !profile?.is_suspended;
 
   const isInfluencer = profile?.platform_role === "influencer" && !profile?.is_suspended;
   const isAdmin = profile?.platform_role === "super_admin" && !profile?.is_suspended;
+  const isModerator = profile?.platform_role === "moderator" && !profile?.is_suspended;
+  const hasMemberWorkspaceAccess = hasActiveMembership || isModerator;
+
+  if (isDeletionPendingRoute && !deletionRequest) {
+    return redirectWithState(response, new URL(isAdmin ? "/admin" : isInfluencer ? creatorRoute : hasMemberWorkspaceAccess ? "/dashboard" : "/checkout", request.url));
+  }
 
   if (isAdminRoute && !isAdmin) {
-    return redirectWithState(response, new URL(isInfluencer ? creatorRoute : hasActiveMembership ? "/dashboard" : "/checkout", request.url));
+    return redirectWithState(response, new URL(isInfluencer ? creatorRoute : hasMemberWorkspaceAccess ? "/dashboard" : "/checkout", request.url));
   }
 
   if (isAdmin) {
@@ -131,7 +158,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isCreatorRoute && !isInfluencer) {
-    return redirectWithState(response, new URL(hasActiveMembership ? "/dashboard" : "/checkout", request.url));
+    return redirectWithState(response, new URL(hasMemberWorkspaceAccess ? "/dashboard" : "/checkout", request.url));
   }
 
   if (requiresMembership && isInfluencer) {
@@ -142,11 +169,11 @@ export async function proxy(request: NextRequest) {
     return redirectWithState(response, new URL(creatorRoute, request.url));
   }
 
-  if (isCheckoutRoute && hasActiveMembership) {
+  if (isCheckoutRoute && hasMemberWorkspaceAccess) {
     return redirectWithState(response, new URL("/dashboard", request.url));
   }
 
-  if (requiresMembership && !hasActiveMembership) {
+  if (requiresMembership && !hasMemberWorkspaceAccess) {
     return redirectWithState(response, new URL("/checkout", request.url));
   }
 

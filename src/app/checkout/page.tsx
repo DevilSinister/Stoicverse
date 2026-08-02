@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { CheckoutScreen } from "@/components/screens/AskStoicScreens";
+import { CheckoutScreen } from "@/components/checkout/CheckoutScreen";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function CheckoutPage({
@@ -9,7 +9,8 @@ export default async function CheckoutPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
-  const product = params.product;
+  const product = params.product === "mentorship" ? "mentorship" : "membership";
+  const cancelled = params.checkout === "cancelled";
 
   const supabase = await createClient();
   const {
@@ -20,8 +21,9 @@ export default async function CheckoutPage({
     redirect("/login?next=/checkout");
   }
 
-  // If we are checking out standard membership (default), check if already active
-  if (product !== "mentorship" && product !== "annual") {
+  // Only the recurring membership can already be owned; mentorship is a
+  // separate purchase and is not gated on an existing membership.
+  if (product === "membership") {
     const { data: membership, error } = await supabase
       .from("memberships")
       .select("id")
@@ -40,5 +42,5 @@ export default async function CheckoutPage({
     }
   }
 
-  return <CheckoutScreen />;
+  return <CheckoutScreen product={product} email={user.email} cancelled={cancelled} />;
 }

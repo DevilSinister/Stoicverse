@@ -52,6 +52,7 @@ export function EventsView({
   enrollmentAvailable,
   currentTier,
   isMaster,
+  isStaff = false,
   memberName,
   routeBase = "",
 }: {
@@ -59,6 +60,7 @@ export function EventsView({
   enrollmentAvailable: boolean;
   currentTier: number;
   isMaster: boolean;
+  isStaff?: boolean;
   memberName?: string;
   routeBase?: string;
 }) {
@@ -97,19 +99,29 @@ export function EventsView({
     });
   };
 
-  const upcoming = events.filter((event) => ["upcoming", "live"].includes(state(event, now)));
-  const recent = events.filter(
-    (event) =>
-      state(event, now) === "completed" &&
+  const upcoming = events.filter((event) => {
+    const s = state(event, now);
+    return ["upcoming", "live"].includes(s);
+  });
+
+  const recent = events.filter((event) => {
+    const s = state(event, now);
+    if (s === "cancelled") {
+      const cancelledTime = event.cancelledAt ? new Date(event.cancelledAt).getTime() : new Date(event.startsAt).getTime();
+      return cancelledTime > now - 86_400_000;
+    }
+    return (
+      s === "completed" &&
       new Date(event.endsAt ?? event.startsAt).getTime() > now - 86_400_000
-  );
+    );
+  });
+
   const cancelled = events.filter(
     (event) =>
       state(event, now) === "cancelled" &&
       event.cancelledAt &&
       new Date(event.cancelledAt).getTime() > now - 86_400_000
   );
-
   return (
     <AppShell
       active="Events"
@@ -159,18 +171,20 @@ export function EventsView({
             now={now}
             currentTier={currentTier}
             isMaster={isMaster}
+            isStaff={isStaff}
             pending={pending}
             enrollmentAvailable={enrollmentAvailable}
           />
           {recent.length > 0 && (
             <EventList
-              title="Recently concluded"
+              title={recent.some(e => e.status === "cancelled") ? "Concluded & cancelled" : "Recently concluded"}
               events={recent}
               onOpen={setSelected}
               onEnroll={enroll}
               now={now}
               currentTier={currentTier}
               isMaster={isMaster}
+              isStaff={isStaff}
               pending={pending}
               enrollmentAvailable={enrollmentAvailable}
             />
@@ -196,6 +210,7 @@ export function EventsView({
           event={selected}
           currentTier={currentTier}
           isMaster={isMaster}
+          isStaff={isStaff}
           pending={pending}
           enrollmentAvailable={enrollmentAvailable}
           onClose={() => setSelected(null)}
@@ -215,6 +230,7 @@ function EventList({
   now,
   currentTier,
   isMaster,
+  isStaff,
   pending,
   enrollmentAvailable,
 }: {
@@ -225,6 +241,7 @@ function EventList({
   now: number;
   currentTier: number;
   isMaster: boolean;
+  isStaff: boolean;
   pending: boolean;
   enrollmentAvailable: boolean;
 }) {
@@ -236,63 +253,91 @@ function EventList({
       </div>
 
       {events.length ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in">
           {events.map((event) => {
             const isLive = state(event, now) === "live";
-            const permitted = isMaster || currentTier >= event.minTier;
+            const permitted = isStaff || isMaster || currentTier >= event.minTier;
+            const isCancelled = event.status === "cancelled";
+            const isConcluded = event.endsAt && new Date(event.endsAt).getTime() <= now;
+
             return (
-              <div
+              <article
                 key={event.id}
                 onClick={() => onOpen(event)}
-                className="group relative flex flex-col justify-between text-left rounded-xl border border-surgical-steel bg-monolith-surface p-6 hover:border-primary-container/40 active:scale-[0.99] transition-all duration-200 cursor-pointer"
+                className={`group relative flex flex-col justify-between text-left rounded-xl border p-6 transition-all duration-200 cursor-pointer ${
+                  isCancelled
+                    ? "border-red-500/20 bg-red-500/5 hover:border-red-500/30 opacity-75"
+                    : isLive
+                    ? "border-primary-container/40 bg-surface-container-high/40 hover:border-primary-container"
+                    : "border-surgical-steel bg-monolith-surface hover:border-surgical-steel/80"
+                }`}
               >
                 <div className="space-y-4 w-full">
                   <div className="flex justify-between items-center text-xs font-label">
-                    <span className="border border-surgical-steel bg-surface-container-high px-2.5 py-0.5 rounded font-semibold text-primary-container">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                      isCancelled 
+                        ? "border-red-500/30 bg-red-500/10 text-red-400"
+                        : "border-surgical-steel bg-surface-container-high text-fog-muted"
+                    }`}>
                       {label(event.minTier)}
                     </span>
                     <div className="flex items-center gap-2">
                       {isLive && (
-                        <span className="flex h-2 w-2 relative">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-container"></span>
+                        <span className="relative inline-flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-container opacity-75" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-primary-container" />
                         </span>
                       )}
-                      <span className={`font-bold tracking-wider ${isLive ? 'text-primary-container' : 'text-fog-muted'}`}>
-                        {isLive ? "LIVE NOW" : event.status.toUpperCase()}
+                      <span className={`text-[10px] font-extrabold tracking-widest uppercase px-2.5 py-0.5 rounded-full border ${
+                        isCancelled
+                          ? "border-red-500/30 bg-red-500/10 text-red-400"
+                          : isLive
+                          ? "border-primary-container/20 bg-primary-container/10 text-primary-container"
+                          : isConcluded
+                          ? "border-surgical-steel bg-surface-container-high/30 text-fog-muted/70"
+                          : "border-surgical-steel bg-surface-container-high text-white"
+                      }`}>
+                        {isLive ? "Live Now" : isCancelled ? "Cancelled" : isConcluded ? "Concluded" : "Upcoming"}
                       </span>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="font-headline text-xl font-bold text-white group-hover:text-primary-container transition-colors leading-snug">
+                    <h3 className="font-headline text-2xl font-bold text-white group-hover:text-primary-container transition-colors leading-snug">
                       {event.title}
                     </h3>
-                    <p className="text-sm text-on-surface-variant line-clamp-2">
+                    <p className="text-xs text-on-surface-variant font-body leading-relaxed line-clamp-2">
                       {event.description || "A focused live session for the Stoicverse community."}
+                    </p>
+                    <p className="text-[11px] text-fog-muted font-body">
+                      Hosted by <span className="text-white/90 font-medium">{event.hostName ?? "Stoicverse Team"}</span>
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-surgical-steel/60 w-full flex justify-between items-center text-xs font-label">
-                  <div className="flex items-center gap-2 text-fog-muted">
-                    <CalendarDays size={14} className="text-primary-container/70" />
+                  <div className="flex items-center gap-2 text-fog-muted font-mono text-[11px]">
+                    <CalendarDays size={13} className="text-primary-container/70 shrink-0" />
                     <span>{formatter.format(new Date(event.startsAt))}</span>
                   </div>
 
                   <div className="shrink-0">
-                    {event.status === "cancelled" ? (
-                      <span className="text-red-400 font-bold uppercase tracking-wider text-[10px]">Cancelled</span>
-                    ) : event.endsAt && new Date(event.endsAt).getTime() <= now ? (
-                      <span className="text-fog-muted font-bold uppercase tracking-wider text-[10px]">Concluded</span>
+                    {isCancelled ? (
+                      <span className="text-red-400 border border-red-500/20 bg-red-500/5 py-1 px-3 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                        Cancelled
+                      </span>
+                    ) : isConcluded ? (
+                      <span className="text-fog-muted/60 border border-surgical-steel bg-surface-container-high/30 py-1 px-3 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                        Concluded
+                      </span>
                     ) : !permitted ? (
-                      <div className="flex items-center gap-1 text-fog-muted bg-surface-container-high/65 border border-surgical-steel/80 py-1.5 px-3 rounded-full text-[10px] font-semibold uppercase tracking-wider">
-                        <Lock size={12} className="text-red-400/80" />
+                      <div className="flex items-center gap-1 text-fog-muted bg-surface-container-high/65 border border-surgical-steel/80 py-1 px-3 rounded-full text-[10px] font-semibold uppercase tracking-wider">
+                        <Lock size={11} className="text-red-400/80 shrink-0" />
                         <span>{label(event.minTier)} Only</span>
                       </div>
                     ) : event.enrolled ? (
-                      <span className="flex items-center gap-1 text-primary-container bg-primary-container/5 border border-primary-container/20 py-1.5 px-3 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                        <CheckCircle size={12} />
+                      <span className="flex items-center gap-1 text-primary-container bg-primary-container/5 border border-primary-container/20 py-1 px-3 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                        <CheckCircle size={11} className="shrink-0" />
                         Enrolled
                       </span>
                     ) : (
@@ -310,7 +355,7 @@ function EventList({
                     )}
                   </div>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
@@ -327,6 +372,7 @@ function MemberEventDetails({
   event,
   currentTier,
   isMaster,
+  isStaff,
   pending,
   enrollmentAvailable,
   onClose,
@@ -336,6 +382,7 @@ function MemberEventDetails({
   event: EventRecord;
   currentTier: number;
   isMaster: boolean;
+  isStaff: boolean;
   pending: boolean;
   enrollmentAvailable: boolean;
   onClose: () => void;
@@ -351,7 +398,7 @@ function MemberEventDetails({
     return () => window.removeEventListener("keydown", key);
   }, [onClose]);
 
-  const permitted = isMaster || currentTier >= event.minTier;
+  const permitted = isStaff || isMaster || currentTier >= event.minTier;
   const isLive = state(event, now) === "live";
 
   const join = async () => {

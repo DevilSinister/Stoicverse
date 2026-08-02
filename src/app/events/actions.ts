@@ -25,7 +25,7 @@ function isApprovedZoomUrl(input: string) {
 }
 
 function revalidateEvents() {
-  for (const path of ["/events", "/dashboard/events", "/creator/events", "/creator/dashboard", "/community", "/creator/community"]) revalidatePath(path);
+  for (const path of ["/dashboard/events", "/creator/events", "/creator/dashboard", "/dashboard/community", "/creator/channels"]) revalidatePath(path);
 }
 
 export async function enrollInEvent(eventId: string): Promise<ActionResult> {
@@ -48,7 +48,8 @@ export async function saveCreatorEvent(formData: FormData, eventId?: string, pub
   const zoomUrl = value(formData, "zoomUrl");
   if (!title || title.length > 160) return { error: "Enter an event title up to 160 characters." };
   if (!startsAt || !endsAt) return { error: "Enter valid start and end times." };
-  if (new Date(startsAt) <= new Date() || new Date(endsAt) <= new Date(startsAt)) return { error: "Use a future start time and an end time after it." };
+  if (!eventId && new Date(startsAt) <= new Date()) return { error: "Use a future start time." };
+  if (new Date(endsAt) <= new Date(startsAt)) return { error: "End time must be after start time." };
   if (publishAtRaw && !publishAt) return { error: "Enter a valid intended publish time." };
   if (!Number.isInteger(minTier) || minTier < 1 || minTier > 5) return { error: "Choose a valid access level." };
   if (zoomUrl && !isApprovedZoomUrl(zoomUrl)) return { error: "Use an HTTPS Zoom meeting URL, or leave it blank for now." };

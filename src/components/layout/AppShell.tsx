@@ -2,34 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, Menu, Search, X, Crown, LogOut, AlertCircle, Settings } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { AlertCircle, Bell, ChevronRight, LoaderCircle, Menu, RefreshCw, Search, Settings, X } from "lucide-react";
 
 import { buildAppNav } from "@/lib/navigation/app-nav";
 import { withRouteBase } from "@/lib/navigation/paths";
+import { safeNotificationHref, type NotificationItem } from "@/lib/notifications/model";
 import { createClient } from "@/lib/supabase/client";
 
-export type Notification = {
-  id: string;
-  type: string;
-  title: string;
-  body: string | null;
-  action_url: string | null;
-  is_read: boolean;
-  created_at: string;
-};
+export type Notification = NotificationItem;
 
-type SearchResult = {
-  id: string;
-  title: string;
-  description: string | null;
-  href: string;
-  kind: "lesson" | "event";
-};
+type SearchKind = "lesson" | "event" | "post" | "channel" | "member";
+type SearchResult = { id: string; title: string; description: string | null; href: string; kind: SearchKind };
+type NotificationResponse = { notifications?: Notification[]; unreadCount?: number; error?: string };
+
+const SEARCH_GROUPS: { kind: SearchKind; label: string }[] = [
+  { kind: "lesson", label: "Lessons" },
+  { kind: "event", label: "Events" },
+  { kind: "post", label: "Community posts" },
+  { kind: "channel", label: "Channels" },
+  { kind: "member", label: "Members" },
+];
 
 export interface AppShellProps {
   active: string;
   title: string;
+  terminalHeader?: boolean;
   isMaster?: boolean;
   memberName?: string;
   platformRole?: string;
@@ -39,132 +37,136 @@ export interface AppShellProps {
   children: React.ReactNode;
 }
 
-const roleName = (role: string) => role.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
-
 const EMPTY_NOTIFICATIONS: Notification[] = [];
+const roleName = (role: string) => role.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 
-export function AppShell({
-  active,
-  title,
-  isMaster = false,
-  memberName = "Practitioner",
-  platformRole = "member",
-  currentTier = 1,
-  notifications: initialNotifications = EMPTY_NOTIFICATIONS,
-  routeBase = "",
-  children,
-}: AppShellProps) {
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
-  const [isNotificationsOpen, setNotificationsOpen] = useState(false);
-  const [isSearchOpen, setSearchOpen] = useState(false);
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+export function AppShell({ active, title, memberName = "Practitioner", platformRole = "member", notifications: initialNotifications = EMPTY_NOTIFICATIONS, routeBase = "", children }: AppShellProps) {
+  const pathname = usePathname();
+  const supabase = useMemo(() => createClient(), []);
+  const navItems = useMemo(() => buildAppNav({ routeBase }), [routeBase]);
+  const searchInput = useRef<HTMLInputElement>(null);
+  const notificationPanel = useRef<HTMLDivElement>(null);
+  const notificationTrigger = useRef<HTMLButtonElement | null>(null);
+  const mobileMenuTrigger = useRef<HTMLButtonElement>(null);
+  const mobileDrawer = useRef<HTMLElement>(null);
+
+  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications.slice(0, 5));
+  const [unreadCount, setUnreadCount] = useState(initialNotifications.filter((item) => !item.is_read).length);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [notificationsError, setNotificationsError] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
-  const searchInput = useRef<HTMLInputElement>(null);
-  const pathname = usePathname();
 
-  const [isSettingsOpen, setSettingsOpen] = useState(false);
-  const [isUpgradeOpen, setUpgradeOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [newName, setNewName] = useState(memberName);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [settingsLoading, setSettingsLoading] = useState(false);
-  const [settingsError, setSettingsError] = useState<string | null>(null);
-  const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
+  const loadNotifications = useCallback(async (markVisibleRead = false) => {
+    setNotificationsLoading(true);
+    setNotificationsError(null);
+    try {
+      const response = await fetch("/api/dashboard/notifications?limit=5", { cache: "no-store" });
+      const payload = await response.json() as NotificationResponse;
+      if (!response.ok) throw new Error(payload.error || "Unable to load notifications");
+      const preview = payload.notifications ?? [];
+      setNotifications(preview);
+      setUnreadCount(payload.unreadCount ?? 0);
 
-  const supabase = useMemo(() => createClient(), []);
+      const unreadIds = markVisibleRead ? preview.filter((item) => !item.is_read).map((item) => item.id) : [];
+      if (unreadIds.length) {
+        setNotifications((current) => current.map((item) => unreadIds.includes(item.id) ? { ...item, is_read: true } : item));
+        setUnreadCount((count) => Math.max(0, count - unreadIds.length));
+        const update = await fetch("/api/dashboard/notifications", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "mark_read", ids: unreadIds }),
+        });
+        if (!update.ok) {
+          setNotifications((current) => current.map((item) => unreadIds.includes(item.id) ? { ...item, is_read: false } : item));
+          setUnreadCount(payload.unreadCount ?? 0);
+          setNotificationsError("The preview opened, but read status could not be saved.");
+        }
+      }
+    } catch (reason) {
+      setNotificationsError(reason instanceof Error ? reason.message : "Unable to load notifications");
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    async function loadUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setEmail(user.email || "");
+    const timer = window.setTimeout(() => { void loadNotifications(false); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadNotifications]);
+
+  useEffect(() => {
+    const refresh = () => { void loadNotifications(false); };
+    const channel = supabase
+      .channel("app-shell-notifications")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, refresh)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "notifications" }, refresh)
+      .subscribe();
+
+    return () => { void supabase.removeChannel(channel); };
+  }, [loadNotifications, supabase]);
+
+  useEffect(() => {
+    if (!notificationsOpen) return;
+    const focusTimer = window.setTimeout(() => {
+      notificationPanel.current?.querySelector<HTMLElement>("button, a[href]")?.focus();
+    }, 0);
+    function closeOnOutside(event: MouseEvent) {
+      if (!notificationPanel.current?.contains(event.target as Node) && !notificationTrigger.current?.contains(event.target as Node)) closeNotifications(false);
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeNotifications();
+        return;
+      }
+      if (event.key !== "Tab" || !notificationPanel.current) return;
+      const focusable = Array.from(notificationPanel.current.querySelectorAll<HTMLElement>("button, a[href]")).filter((element) => !element.hasAttribute("disabled"));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     }
-    loadUser();
-  }, [supabase]);
-
-  const currentName = settingsSuccess === "Username updated successfully." ? newName : memberName;
-
-  const handleUpdateName = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSettingsLoading(true);
-    setSettingsError(null);
-    setSettingsSuccess(null);
-    try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error("Not authenticated");
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ full_name: newName })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
-      setSettingsSuccess("Username updated successfully.");
-    } catch (error: unknown) {
-      setSettingsError(error instanceof Error ? error.message : "Failed to update username");
-    } finally {
-      setSettingsLoading(false);
-    }
-  };
-
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      setSettingsError("Passwords do not match");
-      return;
-    }
-    if (newPassword.length < 8) {
-      setSettingsError("Password must be at least 8 characters");
-      return;
-    }
-    setSettingsLoading(true);
-    setSettingsError(null);
-    setSettingsSuccess(null);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-
-      setNewPassword("");
-      setConfirmPassword("");
-      setSettingsSuccess("Password updated successfully.");
-    } catch (error: unknown) {
-      setSettingsError(error instanceof Error ? error.message : "Failed to update password");
-    } finally {
-      setSettingsLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    setSettingsLoading(true);
-    setSettingsError(null);
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      setSettingsOpen(false);
-      window.location.href = "/login";
-    } catch (error: unknown) {
-      setSettingsError(error instanceof Error ? error.message : "Failed to sign out");
-      setSettingsLoading(false);
-    }
-  };
-
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
-  const navItems = useMemo(() => buildAppNav({ routeBase }), [routeBase]);
-  const visibleResults = query.trim().length >= 2 ? results : [];
+    document.addEventListener("mousedown", closeOnOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("mousedown", closeOnOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [notificationsOpen]);
 
   useEffect(() => {
-    if (isSearchOpen) searchInput.current?.focus();
-  }, [isSearchOpen]);
+    if (!mobileMenuOpen) return;
+    const focusTimer = window.setTimeout(() => mobileDrawer.current?.querySelector<HTMLElement>("a[href], button")?.focus(), 0);
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") closeMobileMenu();
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobileMenuOpen]);
 
-  // Search logic
+  useEffect(() => { if (searchOpen) searchInput.current?.focus(); }, [searchOpen]);
+
   useEffect(() => {
-    if (!isSearchOpen || query.trim().length < 2) return;
+    if (!searchOpen || query.trim().length < 2) {
+      const timer = window.setTimeout(() => setResults([]), 0);
+      return () => window.clearTimeout(timer);
+    }
     const controller = new AbortController();
     const timeout = window.setTimeout(async () => {
       setSearching(true);
@@ -175,488 +177,81 @@ export function AppShell({
         const payload = await response.json() as { results?: SearchResult[] };
         setResults(response.ok ? payload.results ?? [] : []);
       } catch {
-        // Ignored
+        if (!controller.signal.aborted) setResults([]);
       } finally {
         if (!controller.signal.aborted) setSearching(false);
       }
     }, 250);
     return () => { controller.abort(); window.clearTimeout(timeout); };
-  }, [query, isSearchOpen, routeBase]);
+  }, [query, routeBase, searchOpen]);
 
-  async function openNotifications() {
-    setNotificationsOpen(true);
-    const unreadIds = notifications.filter((n) => !n.is_read).map((n) => n.id);
-    if (!unreadIds.length) return;
-    
-    // Optimistic update
-    setNotifications((prev) => prev.map((n) => unreadIds.includes(n.id) ? { ...n, is_read: true } : n));
-    
-    try {
-      const response = await fetch("/api/dashboard/notifications", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: unreadIds })
-      });
-      if (!response.ok) {
-        // Rollback
-        setNotifications((prev) => prev.map((n) => unreadIds.includes(n.id) ? { ...n, is_read: false } : n));
-      }
-    } catch {
-      setNotifications((prev) => prev.map((n) => unreadIds.includes(n.id) ? { ...n, is_read: false } : n));
-    }
+  function closeNotifications(restoreFocus = true) {
+    setNotificationsOpen(false);
+    if (restoreFocus) window.setTimeout(() => notificationTrigger.current?.focus(), 0);
   }
 
-  // Sidebar Render Component
-  const renderSidebar = () => (
+  function openNotifications(event: ReactMouseEvent<HTMLButtonElement>) {
+    notificationTrigger.current = event.currentTarget;
+    if (notificationsOpen) {
+      closeNotifications();
+      return;
+    }
+    setNotificationsOpen(true);
+    void loadNotifications(true);
+  }
+
+  function closeMobileMenu(restoreFocus = true) {
+    setMobileMenuOpen(false);
+    if (restoreFocus) window.setTimeout(() => mobileMenuTrigger.current?.focus(), 0);
+  }
+
+  const settingsHref = withRouteBase(routeBase, "/settings");
+  const notificationsHref = withRouteBase(routeBase, "/notifications");
+
+  const sidebar = (
     <>
-      <div className="border-b border-sidebar-border p-4 flex items-center justify-between">
-        <Link href="/" className="block">
-          <div className="font-headline text-lg text-white font-extrabold tracking-tight">Stoicverse</div>
-          <div className="mt-1 font-label text-[10px] text-fog-muted uppercase tracking-[0.12em]">Community Hub</div>
-        </Link>
+      <div className="flex items-center justify-between border-b border-sidebar-border p-4">
+        <Link href="/" className="block focus-ring rounded-lg"><div className="text-lg font-extrabold tracking-tight text-white">Stoicverse</div><div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-fog-muted">Community Hub</div></Link>
       </div>
-      <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || active === item.label;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`flex min-h-11 items-center justify-between px-4 py-2 rounded-full font-label text-xs uppercase tracking-wider transition ${isActive ? "bg-sidebar-accent text-sidebar-primary border-r-2 border-sidebar-primary font-bold" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-primary"}`}
-            >
-              <div className="flex items-center gap-3">
-                <Icon size={16} />
-                <span>{item.label}</span>
-              </div>
-              {item.label === "Community" && unreadCount > 0 && (
-                <span className="grid min-w-5 h-5 place-items-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white uppercase tracking-normal animate-pulse shrink-0">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4" aria-label="Workspace navigation">
+        {navItems.map((item) => { const Icon = item.icon; const selected = pathname === item.href || active === item.label; return <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)} className={`focus-ring flex min-h-11 items-center justify-between rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wider transition ${selected ? "bg-sidebar-accent text-sidebar-primary" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-primary"}`}><span className="flex items-center gap-3"><Icon size={16}/>{item.label}</span>{item.label === "Notifications" && unreadCount > 0 && <span className="grid min-w-5 size-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}</Link>; })}
       </nav>
-      <div className="border-t border-sidebar-border p-4 space-y-4 bg-sidebar/80">
-        <div className="flex items-center justify-between gap-2 px-2">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="size-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary border border-sidebar-border font-bold shrink-0">
-              {currentName[0]?.toUpperCase() || "P"}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-bold text-white">{currentName}</p>
-              <p className="truncate text-[10px] text-fog-muted capitalize font-label">{roleName(platformRole)}</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            aria-label="Open settings"
-            className="grid size-8 shrink-0 place-items-center rounded-full text-sidebar-foreground hover:text-white hover:bg-sidebar-accent transition-colors group"
-          >
-            <Settings size={15} className="transition-transform duration-500 group-hover:rotate-90" />
-          </button>
-        </div>
-        <button
-          onClick={() => setUpgradeOpen(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-sidebar-primary hover:bg-opacity-90 py-3 font-label text-xs text-on-primary-fixed uppercase tracking-wider transition duration-200 shadow-md hover:brightness-105"
-        >
-          <Crown size={14} />
-          <span>Upgrade Plan</span>
-        </button>
+      <div className="border-t border-sidebar-border bg-sidebar/80 p-4">
+        <div className="flex items-center justify-between gap-3 px-2"><div className="flex min-w-0 items-center gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-full border border-sidebar-border bg-sidebar-accent font-bold text-sidebar-primary">{memberName[0]?.toUpperCase() || "P"}</div><div className="min-w-0"><p className="truncate text-xs font-bold text-white">{memberName}</p><p className="truncate text-[10px] text-fog-muted">{roleName(platformRole)}</p><p className="mt-1 text-[9px] font-semibold text-primary-container">Member profile</p></div></div><Link href={settingsHref} aria-label="Open account settings" className="focus-ring group grid size-9 shrink-0 place-items-center rounded-full text-sidebar-foreground transition hover:bg-sidebar-accent hover:text-white"><Settings size={16} className="transition-transform duration-500 group-hover:rotate-90"/></Link></div>
       </div>
     </>
   );
 
   return (
     <div className="min-h-screen bg-surface text-on-surface md:flex">
-      {/* Mobile Top Bar */}
       <header className="flex h-16 items-center justify-between border-b border-surgical-steel bg-sidebar px-4 md:hidden">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setMobileMenuOpen(true)} className="text-on-surface-variant hover:text-primary-container" aria-label="Open menu">
-            <Menu size={24} />
-          </button>
-          <span className="font-headline text-lg font-extrabold text-white tracking-tight">Stoicverse</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setSearchOpen(true)} aria-label="Search" className="p-2 text-on-surface-variant hover:text-primary-container">
-            <Search size={18} />
-          </button>
-          <button onClick={openNotifications} aria-label="Notifications" className="relative p-2 text-on-surface-variant hover:text-primary-container">
-            <Bell size={18} />
-            {unreadCount > 0 && <span className="absolute right-1 top-1 size-2 rounded-full bg-red-500" />}
-          </button>
-        </div>
+        <div className="flex items-center gap-3"><button ref={mobileMenuTrigger} type="button" onClick={() => setMobileMenuOpen(true)} className="focus-ring grid size-10 place-items-center rounded-full text-on-surface-variant" aria-label="Open menu" aria-expanded={mobileMenuOpen} aria-controls="mobile-workspace-navigation"><Menu size={22}/></button><span className="text-lg font-extrabold tracking-tight text-white">Stoicverse</span></div>
+        <div className="flex items-center gap-1"><button type="button" onClick={() => setSearchOpen(true)} className="focus-ring grid size-10 place-items-center rounded-full text-on-surface-variant" aria-label="Search"><Search size={18}/></button><BellButton unreadCount={unreadCount} open={notificationsOpen} onClick={openNotifications}/></div>
       </header>
 
-      {/* Mobile Sidebar Slide-out */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm md:hidden" onClick={() => setMobileMenuOpen(false)} />
-      )}
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 md:hidden ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        {renderSidebar()}
-      </aside>
+      {mobileMenuOpen && <button type="button" aria-label="Close menu" className="fixed inset-0 z-40 bg-black/80 md:hidden" onClick={() => closeMobileMenu()}/>}
+      {mobileMenuOpen && <aside ref={mobileDrawer} id="mobile-workspace-navigation" className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar md:hidden">{sidebar}</aside>}
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">{sidebar}</aside>
 
-      {/* Desktop Sidebar (Fixed) */}
-      <aside className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar md:flex md:h-screen md:sticky md:top-0 md:flex-col">
-        {renderSidebar()}
-      </aside>
-
-      {/* Main Workspace Column */}
-      <div className="min-w-0 flex-1 flex flex-col">
-        {/* Desktop Header */}
-        <header className="sticky top-0 z-20 hidden md:flex min-h-16 items-center justify-between border-b border-surgical-steel bg-surface px-8">
-          <div>
-            <h1 className="font-headline text-lg text-white font-extrabold">{title}</h1>
-            <p className="font-label text-[10px] text-fog-muted uppercase tracking-wider">Level 0{currentTier} • {isMaster ? "Master Account" : "Practitioner Access"}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSearchOpen(true)} aria-label="Search lessons and events" className="grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant hover:border-primary-container hover:text-primary-container focus-ring transition-colors">
-              <Search size={18} />
-            </button>
-            <button onClick={openNotifications} aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} className="relative grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant hover:border-primary-container hover:text-primary-container focus-ring transition-colors">
-              <Bell size={18} />
-              {unreadCount > 0 && <span className="absolute -right-1 -top-1 grid min-w-5 size-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>}
-            </button>
-          </div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="hidden h-16 items-center justify-between border-b border-surgical-steel bg-surface-container-low px-6 md:flex lg:px-8">
+          <button type="button" onClick={() => setSearchOpen(true)} className="focus-ring flex min-w-[19rem] items-center gap-3 rounded-full border border-surgical-steel bg-surface-container-lowest px-4 py-2 text-left text-sm text-fog-muted transition hover:border-primary-container hover:text-on-surface"><Search size={15}/><span>Search curriculum, sessions, or community…</span></button>
+          <div className="flex items-center gap-4"><span className="hidden text-sm font-semibold text-on-surface lg:block">{title}</span><BellButton unreadCount={unreadCount} open={notificationsOpen} onClick={openNotifications}/></div>
         </header>
-
-        {/* Content Body */}
-        <div className="flex-1 bg-surface relative overflow-y-auto">
-          {children}
-        </div>
+        <div className="relative flex-1 bg-surface">{children}</div>
       </div>
 
-      {/* Search Modal */}
-      {isSearchOpen && (
-        <Modal title="Search Stoicverse" onClose={() => setSearchOpen(false)}>
-          <div className="space-y-4">
-            <label className="sr-only" htmlFor="dashboard-search">Search lessons and events</label>
-            <input
-              ref={searchInput}
-              id="dashboard-search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search lessons and events…"
-              className="w-full rounded border border-surgical-steel bg-surface-container-lowest p-3.5 text-on-surface outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
-            />
-            {searching && (
-              <div className="flex items-center gap-2 text-sm text-fog-muted">
-                <div className="size-4 border-2 border-primary-container border-t-transparent rounded-full animate-spin" />
-                <span>Searching…</span>
-              </div>
-            )}
-            <div className="divide-y divide-surgical-steel max-h-[40vh] overflow-y-auto">
-              {visibleResults.map((result) => (
-                <Link
-                  onClick={() => setSearchOpen(false)}
-                  href={result.href}
-                  key={`${result.kind}-${result.id}`}
-                  className="block py-3 group hover:text-primary-container transition"
-                >
-                  <p className="font-label text-[10px] uppercase text-primary-container font-semibold tracking-wider">{result.kind}</p>
-                  <p className="mt-1 font-headline text-sm font-semibold text-white group-hover:text-primary-container transition">{result.title}</p>
-                  {result.description && <p className="mt-1 font-body text-xs text-fog-muted line-clamp-1">{result.description}</p>}
-                </Link>
-              ))}
-              {query.trim().length >= 2 && !searching && visibleResults.length === 0 && (
-                <div className="py-6 text-center text-sm text-fog-muted">
-                  <AlertCircle size={20} className="mx-auto mb-2 opacity-50" />
-                  <span>No accessible results found.</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </Modal>
-      )}
+      {notificationsOpen && <div ref={notificationPanel} id="notification-preview" role="dialog" aria-label="Notification preview" aria-modal="false" className="fixed right-3 top-[4.5rem] z-[60] w-[min(24rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-surgical-steel bg-monolith-surface shadow-[0_18px_48px_-20px_rgba(0,0,0,0.9)] md:right-8 md:top-14"><div className="flex items-center justify-between border-b border-surgical-steel px-4 py-3"><div><h2 className="text-sm font-semibold text-white">Notifications</h2><p className="mt-0.5 text-xs text-fog-muted">{unreadCount ? `${unreadCount} unread` : "Caught up"}</p></div><button type="button" onClick={() => void loadNotifications(false)} aria-label="Refresh notification preview" className="focus-ring grid size-9 place-items-center rounded-full text-fog-muted transition hover:bg-surface-container-high hover:text-white"><RefreshCw size={15}/></button></div><div className="max-h-[28rem] overflow-y-auto">{notificationsLoading && notifications.length === 0 ? <div className="flex min-h-40 items-center justify-center gap-2 text-sm text-fog-muted"><LoaderCircle size={17} className="animate-spin"/>Loading updates…</div> : notificationsError && notifications.length === 0 ? <div className="p-6 text-center"><AlertCircle className="mx-auto text-error" size={22}/><p className="mt-3 text-sm text-error">{notificationsError}</p><button type="button" onClick={() => void loadNotifications(false)} className="mt-3 text-sm font-semibold text-white underline underline-offset-4">Try again</button></div> : notifications.length ? <div className="divide-y divide-surgical-steel">{notifications.map((item) => <Link key={item.id} href={safeNotificationHref(item.action_url, notificationsHref)} onClick={() => setNotificationsOpen(false)} className="focus-ring group flex gap-3 px-4 py-4 transition hover:bg-surface-container-high"><span className={`mt-1.5 size-2 shrink-0 rounded-full ${item.is_read ? "bg-surgical-steel" : "bg-primary-container"}`}/><span className="min-w-0 flex-1"><span className="block text-sm font-semibold leading-5 text-white">{item.title}</span>{item.body && <span className="mt-1 block line-clamp-2 text-xs leading-5 text-on-surface-variant">{item.body}</span>}<span className="mt-2 block text-[11px] text-fog-muted">{eventDate(item.created_at)}</span></span><ChevronRight size={16} className="mt-2 shrink-0 text-fog-muted transition group-hover:translate-x-0.5 group-hover:text-primary-container"/></Link>)}</div> : <div className="px-6 py-10 text-center"><Bell className="mx-auto text-primary-container" size={24}/><p className="mt-3 text-sm font-semibold text-white">You are all caught up</p><p className="mt-1 text-xs leading-5 text-fog-muted">New activity will appear here.</p></div>}</div>{notificationsError && notifications.length > 0 && <p role="alert" className="border-t border-error/30 bg-error/10 px-4 py-2 text-xs text-error">{notificationsError}</p>}<Link href={notificationsHref} onClick={() => setNotificationsOpen(false)} className="focus-ring flex min-h-12 items-center justify-center gap-2 border-t border-surgical-steel text-sm font-semibold text-primary-container transition hover:bg-surface-container-high">View all notifications <ChevronRight size={15}/></Link></div>}
 
-      {/* Notifications Modal */}
-      {isNotificationsOpen && (
-        <Modal title="Notifications" onClose={() => setNotificationsOpen(false)}>
-          <div className="space-y-6">
-            <section className="border-b border-surgical-steel pb-4">
-              <p className="font-label text-xs uppercase text-primary-container font-semibold tracking-wider">Account access</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="border border-surgical-steel bg-surface-container-low px-2.5 py-1 rounded font-label text-xs">
-                  {roleName(platformRole)}
-                </span>
-                <span className="border border-surgical-steel bg-surface-container-low px-2.5 py-1 rounded font-label text-xs">
-                  {isMaster ? "Master Status" : `Tier 0${currentTier}`}
-                </span>
-              </div>
-            </section>
-            
-            <div className="divide-y divide-surgical-steel max-h-[50vh] overflow-y-auto pr-1">
-              {notifications.map((notification) => (
-                <article key={notification.id} className="py-4 first:pt-0 last:pb-0">
-                  <div className="flex gap-3">
-                    <span className={`mt-1.5 size-2 shrink-0 rounded-full ${notification.is_read ? "bg-surgical-steel" : "bg-red-500"}`} />
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <p className="text-sm font-semibold text-white leading-snug">{notification.title}</p>
-                      {notification.body && <p className="font-body text-xs text-fog-muted leading-relaxed">{notification.body}</p>}
-                      <div className="flex items-center justify-between pt-2">
-                        {notification.action_url && (
-                          <Link href={notification.action_url} className="font-label text-xs text-primary-container hover:underline uppercase tracking-wider font-semibold">
-                            View details
-                          </Link>
-                        )}
-                        <p className="font-label text-[10px] text-fog-muted">{eventDate(notification.created_at)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              ))}
-              {notifications.length === 0 && (
-                <div className="py-8 text-center text-fog-muted">
-                  <p className="font-headline text-base font-semibold text-white">You are all caught up</p>
-                  <p className="font-body text-xs mt-1">Account, role, and event updates will appear here.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {/* Settings Modal */}
-      {isSettingsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in" onMouseDown={() => {
-          setSettingsOpen(false);
-          setSettingsError(null);
-          setSettingsSuccess(null);
-        }}>
-          <div className="relative w-full max-w-md overflow-hidden rounded-lg border border-surgical-steel bg-surface-container-low text-on-surface shadow-2xl animate-in zoom-in-95 duration-200" onMouseDown={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-surgical-steel px-6 py-4">
-              <h2 className="font-headline text-lg font-bold text-white flex items-center gap-2">
-                <Settings className="text-primary-container transition-transform duration-500 hover:rotate-90" size={18} />
-                Account Settings
-              </h2>
-              <button
-                onClick={() => {
-                  setSettingsOpen(false);
-                  setSettingsError(null);
-                  setSettingsSuccess(null);
-                }}
-                className="text-on-surface-variant hover:text-white transition-colors"
-                aria-label="Close"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Scrollable Container */}
-            <div className="max-h-[70vh] overflow-y-auto px-6 py-6 space-y-6">
-              {settingsSuccess && (
-                <div className="flex items-center gap-2 rounded bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-400">
-                  <span>{settingsSuccess}</span>
-                </div>
-              )}
-
-              {settingsError && (
-                <div className="flex items-center gap-2 rounded bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
-                  <AlertCircle size={16} className="shrink-0" />
-                  <span>{settingsError}</span>
-                </div>
-              )}
-
-              {/* Read-Only Details */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block font-label text-[10px] uppercase tracking-wider text-fog-muted">Email Address</label>
-                  <p className="mt-1 font-body text-sm text-white select-all">{email || "Retrieving session email..."}</p>
-                </div>
-                <div>
-                  <label className="block font-label text-[10px] uppercase tracking-wider text-fog-muted">Access Tier</label>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="border border-surgical-steel bg-surface-container-high px-2.5 py-1 rounded-full font-label text-[10px] text-primary-container uppercase">
-                      Level 0{currentTier} • {isMaster ? "Master" : "Practitioner"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <hr className="border-surgical-steel" />
-
-              {/* Username Update Form */}
-              <form onSubmit={handleUpdateName} className="space-y-3">
-                <h3 className="font-headline text-sm font-semibold text-white">Update Profile</h3>
-                <div>
-                  <label htmlFor="settings-username" className="block font-label text-[10px] uppercase tracking-wider text-fog-muted mb-1.5">Username</label>
-                  <input
-                    id="settings-username"
-                    type="text"
-                    required
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    className="w-full rounded border border-surgical-steel bg-surface-container-lowest px-4 py-2.5 text-sm text-white outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={settingsLoading || newName === currentName}
-                  className="flex min-h-10 items-center justify-center rounded-full bg-primary-container px-5 font-label text-xs uppercase tracking-wider text-on-primary-fixed transition-all hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Save Profile
-                </button>
-              </form>
-
-              <hr className="border-surgical-steel" />
-
-              {/* Password Update Form */}
-              <form onSubmit={handleUpdatePassword} className="space-y-3">
-                <h3 className="font-headline text-sm font-semibold text-white">Change Password</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label htmlFor="settings-new-password" className="block font-label text-[10px] uppercase tracking-wider text-fog-muted mb-1.5">New Password</label>
-                    <input
-                      id="settings-new-password"
-                      type="password"
-                      required
-                      placeholder="Minimum 8 characters"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full rounded border border-surgical-steel bg-surface-container-lowest px-4 py-2.5 text-sm text-white outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all placeholder:text-fog-muted"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="settings-confirm-password" className="block font-label text-[10px] uppercase tracking-wider text-fog-muted mb-1.5">Confirm New Password</label>
-                    <input
-                      id="settings-confirm-password"
-                      type="password"
-                      required
-                      placeholder="Verify new password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full rounded border border-surgical-steel bg-surface-container-lowest px-4 py-2.5 text-sm text-white outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all placeholder:text-fog-muted"
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  disabled={settingsLoading || !newPassword}
-                  className="flex min-h-10 items-center justify-center rounded-full border border-primary-container px-5 font-label text-xs uppercase tracking-wider text-primary-container transition-all hover:bg-primary-container/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Update Password
-                </button>
-              </form>
-
-              <hr className="border-surgical-steel" />
-
-              {/* Logout Button */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  disabled={settingsLoading}
-                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 font-label-md text-label-md text-red-400 uppercase tracking-wider transition hover:bg-red-500/20 active:scale-[0.98] disabled:opacity-50"
-                >
-                  <LogOut size={16} />
-                  Log Out Session
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Upgrade Plan Modal */}
-      {isUpgradeOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in" onMouseDown={() => setUpgradeOpen(false)}>
-          <div className="relative w-full max-w-xl overflow-hidden rounded-lg border border-surgical-steel bg-surface-container-low text-on-surface shadow-2xl animate-in zoom-in-95 duration-200" onMouseDown={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-surgical-steel px-6 py-4">
-              <h2 className="font-headline text-lg font-bold text-white flex items-center gap-2">
-                <Crown className="text-primary-container" size={18} />
-                Upgrade Membership
-              </h2>
-              <button onClick={() => setUpgradeOpen(false)} className="text-on-surface-variant hover:text-white transition-colors" aria-label="Close">
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Content Container */}
-            <div className="p-6 space-y-6">
-              {/* Current Active Plan */}
-              <div className="border border-surgical-steel bg-surface-container-high/30 p-4 rounded-lg space-y-2">
-                <span className="font-label text-[9px] uppercase tracking-wider text-fog-muted">Current Plan</span>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-headline text-base font-bold text-white">Platform Membership</h3>
-                    <p className="font-body text-xs text-on-surface-variant">Level 0{currentTier} • Practitioner Access</p>
-                  </div>
-                  <span className="font-headline text-sm font-bold text-emerald-400">ACTIVE • $10.00/mo</span>
-                </div>
-              </div>
-
-              {/* Available Plans */}
-              <div className="space-y-4">
-                <h4 className="font-label text-[10px] uppercase tracking-wider text-fog-muted border-b border-surgical-steel pb-2">Available Plans</h4>
-                
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {/* Annual Membership Card */}
-                  <div className="border border-surgical-steel bg-surface-container-high/10 p-5 rounded-lg flex flex-col justify-between space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-headline text-sm font-bold text-white">Annual Membership</h4>
-                        <span className="border border-primary-container/20 bg-primary-container/10 px-2 py-0.5 rounded-full font-label text-[8px] text-primary-container uppercase font-semibold">Save 16%</span>
-                      </div>
-                      <p className="font-body text-xs text-on-surface-variant">Lock in a full year of Stoic study, reflections, events, and curriculum progression.</p>
-                    </div>
-                    <div>
-                      <div className="font-headline text-lg font-bold text-primary-container mb-3">$100.00<span className="text-xs font-normal text-fog-muted">/yr</span></div>
-                      <Link
-                        href={withRouteBase("", "/checkout?product=annual")}
-                        onClick={() => setUpgradeOpen(false)}
-                        className="flex min-h-9 w-full items-center justify-center rounded-full bg-primary-container font-label text-xs uppercase tracking-wider text-on-primary-fixed hover:brightness-105 active:scale-[0.98] transition"
-                      >
-                        Upgrade Now
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Mentorship Card */}
-                  <div className="border border-surgical-steel bg-surface-container-high/10 p-5 rounded-lg flex flex-col justify-between space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-headline text-sm font-bold text-white">Private Mentorship</h4>
-                        <span className="border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 rounded-full font-label text-[8px] text-emerald-400 uppercase font-semibold">1-on-1 Slots</span>
-                      </div>
-                      <p className="font-body text-xs text-on-surface-variant">Work directly with a Master Stoic. Daily log reviews, bi-weekly private reflection calls.</p>
-                    </div>
-                    <div>
-                      <div className="font-headline text-lg font-bold text-emerald-400 mb-3">$1,000.00<span className="text-xs font-normal text-fog-muted">/2mo</span></div>
-                      <Link
-                        href={withRouteBase("", "/checkout?product=mentorship")}
-                        onClick={() => setUpgradeOpen(false)}
-                        className="flex min-h-9 w-full items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 font-label text-xs uppercase tracking-wider text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.98] transition"
-                      >
-                        Enroll Now
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {searchOpen && <Modal title="Search Stoicverse" onClose={() => setSearchOpen(false)}><label className="sr-only" htmlFor="dashboard-search">Search lessons, events, posts, channels and members</label><input ref={searchInput} id="dashboard-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search lessons, events, posts…" className="focus-ring w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-3.5 text-base text-on-surface placeholder:text-fog-muted"/>{searching && <div className="mt-4 flex items-center gap-2 text-sm text-fog-muted"><LoaderCircle size={16} className="animate-spin"/>Searching…</div>}<div className="mt-5 max-h-[50vh] space-y-5 overflow-y-auto">{SEARCH_GROUPS.map(({ kind, label }) => { const items = results.filter((result) => result.kind === kind); if (!items.length) return null; return <section key={kind}><h3 className="text-xs font-semibold text-primary-container">{label}</h3><div className="mt-2 divide-y divide-surgical-steel">{items.map((result) => <Link key={`${result.kind}-${result.id}`} href={result.href} onClick={() => setSearchOpen(false)} className="focus-ring block rounded-lg py-3 transition hover:text-primary-container"><p className="text-sm font-semibold text-white">{result.title}</p>{result.description && <p className="mt-1 line-clamp-1 text-xs text-fog-muted">{result.description}</p>}</Link>)}</div></section>; })}{query.trim().length >= 2 && !searching && results.length === 0 && <div className="py-8 text-center text-sm text-fog-muted"><AlertCircle size={20} className="mx-auto mb-2 opacity-60"/>No accessible results found.</div>}</div></Modal>}
     </div>
   );
 }
 
+function BellButton({ unreadCount, open, onClick }: { unreadCount: number; open: boolean; onClick: (event: ReactMouseEvent<HTMLButtonElement>) => void }) {
+  return <button type="button" onClick={onClick} aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} aria-expanded={open} aria-controls="notification-preview" className="focus-ring relative grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant transition hover:border-primary-container hover:text-primary-container"><Bell size={18}/>{unreadCount > 0 && <span className="absolute -right-1 -top-1 grid min-w-5 size-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>}</button>;
+}
+
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
-  return (
-    <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-50 grid place-items-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200" onMouseDown={onClose}>
-      <div className="max-h-[85vh] w-full max-w-xl overflow-auto border border-surgical-steel bg-monolith-surface p-6 rounded-lg shadow-2xl animate-in zoom-in-95 duration-200" onMouseDown={(event) => event.stopPropagation()}>
-        <div className="mb-6 flex items-center justify-between border-b border-surgical-steel pb-4">
-          <h2 className="font-headline text-lg font-bold text-white">{title}</h2>
-          <button onClick={onClose} className="p-1 text-on-surface-variant hover:text-primary-container transition" aria-label="Close">
-            <X size={20} />
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
+  return <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[70] grid place-items-center bg-black/80 p-4" onMouseDown={onClose}><div className="max-h-[85vh] w-full max-w-xl overflow-auto rounded-xl border border-surgical-steel bg-monolith-surface p-6 shadow-2xl" onMouseDown={(event) => event.stopPropagation()}><div className="mb-6 flex items-center justify-between border-b border-surgical-steel pb-4"><h2 className="text-lg font-bold text-white">{title}</h2><button type="button" onClick={onClose} className="focus-ring grid size-9 place-items-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high hover:text-primary-container" aria-label="Close"><X size={18}/></button></div>{children}</div></div>;
 }

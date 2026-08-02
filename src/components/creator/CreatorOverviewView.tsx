@@ -291,7 +291,7 @@ export function CreatorOverviewView({ memberName, notifications }: { memberName:
   const [activeMetric, setActiveMetric] = useState<"revenue" | "totalMembers" | "newMembers">("revenue");
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
     
     async function loadOverview() {
@@ -314,18 +314,18 @@ export function CreatorOverviewView({ memberName, notifications }: { memberName:
         else if (metricsFilter === "last_3_months") periodVal = 90;
         params.append("period", String(periodVal));
 
-        const response = await fetch(`/api/creator/overview?${params}`, { cache: "no-store", signal: controller.signal });
+        const response = await fetch(`/api/creator/overview?${params}`, { cache: "no-store" });
         const payload = await response.json() as { data?: OverviewData; error?: string };
         if (!response.ok || !payload.data) throw new Error(payload.error ?? "Unable to load creator overview.");
-        setData(payload.data);
+        if (active) setData(payload.data);
       } catch (cause) {
-        if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : "Unable to load creator overview.");
+        if (active) setError(cause instanceof Error ? cause.message : "Unable to load creator overview.");
       } finally {
-        if (!controller.signal.aborted) setLoading(false);
+        if (active) setLoading(false);
       }
     }
     loadOverview();
-    return () => controller.abort();
+    return () => { active = false; };
   }, [metricsFilter, metricsCustomRange, trendsFilter, trendsCustomRange]);
 
   return <AppShell active="Overview" title="Creator overview" memberName={memberName} platformRole="influencer" notifications={notifications} routeBase="/creator">

@@ -8,7 +8,7 @@ export default function Header() {
       </Link>
       <div className="hidden md:flex items-center gap-8">
         <Link className="text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] transition-colors duration-200 focus-ring" href="#curriculum">Curriculum</Link>
-        <Link className="text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] transition-colors duration-200 focus-ring" href="/community">Stoicverse</Link>
+        <Link className="text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] transition-colors duration-200 focus-ring" href="/dashboard/community">Stoicverse</Link>
         <Link className="text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] transition-colors duration-200 focus-ring" href="/philosophers">Philosophers</Link>
         <Link className="text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] transition-colors duration-200 focus-ring" href="#pricing">Pricing</Link>
       </div>
