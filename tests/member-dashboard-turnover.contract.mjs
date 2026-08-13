@@ -40,3 +40,20 @@ test("settings uses fixed desktop regions and phone list-to-detail navigation", 
   assert.match(settings, /All settings/);
   assert.match(settings, /Back to dashboard/);
 });
+
+test("workspace loading states stream useful dashboard-shaped skeletons without repeating page access checks", async () => {
+  const [dashboardLoading, creatorLoading, dashboardLayout, creatorLayout, appShell] = await Promise.all([
+    read("src/app/dashboard/loading.tsx"),
+    read("src/app/creator/loading.tsx"),
+    read("src/app/dashboard/layout.tsx"),
+    read("src/app/creator/layout.tsx"),
+    read("src/components/layout/AppShell.tsx"),
+  ]);
+
+  assert.match(dashboardLoading, /aria-busy="true"/);
+  assert.match(dashboardLoading, /MetricSkeleton/);
+  assert.match(creatorLoading, /MetricSkeleton/);
+  assert.doesNotMatch(dashboardLayout, /requireActiveMembership/);
+  assert.doesNotMatch(creatorLayout, /requireInfluencerWorkspace/);
+  assert.doesNotMatch(appShell, /window\.setTimeout\(\(\) => \{ void loadNotifications\(false\); \}, 0\)/);
+});

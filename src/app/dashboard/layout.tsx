@@ -1,6 +1,3 @@
-import { requireActiveMembership } from "@/lib/supabase/access";
-
-export default async function MemberWorkspaceLayout({ children }: { children: React.ReactNode }) {
-  await requireActiveMembership("/dashboard");
+export default function MemberWorkspaceLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

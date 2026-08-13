@@ -96,11 +96,6 @@ export function AppShell({ active, title, memberName = "Practitioner", platformR
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => { void loadNotifications(false); }, 0);
-    return () => window.clearTimeout(timer);
-  }, [loadNotifications]);
-
-  useEffect(() => {
     const refresh = () => { void loadNotifications(false); };
     const channel = supabase
       .channel("app-shell-notifications")
