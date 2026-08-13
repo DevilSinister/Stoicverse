@@ -13,7 +13,7 @@ export async function renderDashboardPage({ nextPath = "/dashboard", routeBase =
     : await requireActiveMembership(nextPath);
 
   const now = new Date().toISOString();
-  const [profileResult, tierResult, enrollmentResult, coursesResult, courseVideosResult, videoProgressResult, eventsResult, notificationsResult] = await Promise.all([
+  const [profileResult, tierResult, enrollmentResult, coursesResult, courseVideosResult, videoProgressResult, eventsResult, notificationsResult, turnoverResult] = await Promise.all([
     supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
     supabase.from("member_tiers").select("current_tier, is_master").eq("user_id", user.id).maybeSingle(),
     supabase.from("course_enrollments").select("course_id, completion_current, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }),
@@ -22,6 +22,7 @@ export async function renderDashboardPage({ nextPath = "/dashboard", routeBase =
     supabase.from("course_video_progress").select("video_id,completion_percentage,is_completed").eq("user_id", user.id),
     supabase.from("events").select("id, title, description, starts_at, min_tier, status").in("status", ["upcoming", "live"]).gte("starts_at", now).order("starts_at").limit(1),
     supabase.from("notifications").select("id, type, title, body, action_url, is_read, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
+    supabase.from("member_dashboard_turnover").select("turnover_this_week,all_time_turnover,updated_at").eq("id", true).maybeSingle(),
   ]);
 
   const results = [profileResult, tierResult, enrollmentResult, coursesResult, courseVideosResult, videoProgressResult, eventsResult, notificationsResult];
@@ -91,6 +92,9 @@ export async function renderDashboardPage({ nextPath = "/dashboard", routeBase =
     upcomingEvent: eventsResult.data?.[0] ?? null,
     notifications: notificationsResult.data ?? [],
     tierProgressDetails,
+    turnoverThisWeek: Number(turnoverResult.data?.turnover_this_week ?? 0),
+    allTimeTurnover: Number(turnoverResult.data?.all_time_turnover ?? 0),
+    turnoverUpdatedAt: turnoverResult.data?.updated_at ?? null,
   };
 
   return <DashboardView data={data} routeBase={routeBase} />;

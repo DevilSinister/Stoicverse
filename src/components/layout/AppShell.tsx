@@ -225,8 +225,8 @@ export function AppShell({ active, title, memberName = "Practitioner", platformR
   return (
     <div className="min-h-screen bg-surface text-on-surface md:flex">
       <header className="flex h-16 items-center justify-between border-b border-surgical-steel bg-sidebar px-4 md:hidden">
-        <div className="flex items-center gap-3"><button ref={mobileMenuTrigger} type="button" onClick={() => setMobileMenuOpen(true)} className="focus-ring grid size-10 place-items-center rounded-full text-on-surface-variant" aria-label="Open menu" aria-expanded={mobileMenuOpen} aria-controls="mobile-workspace-navigation"><Menu size={22}/></button><span className="text-lg font-extrabold tracking-tight text-white">Stoicverse</span></div>
-        <div className="flex items-center gap-1"><button type="button" onClick={() => setSearchOpen(true)} className="focus-ring grid size-10 place-items-center rounded-full text-on-surface-variant" aria-label="Search"><Search size={18}/></button><BellButton unreadCount={unreadCount} open={notificationsOpen} onClick={openNotifications}/></div>
+        <div className="flex items-center gap-3"><button ref={mobileMenuTrigger} type="button" onClick={() => setMobileMenuOpen(true)} className="focus-ring grid size-11 place-items-center rounded-full text-on-surface-variant" aria-label="Open menu" aria-expanded={mobileMenuOpen} aria-controls="mobile-workspace-navigation"><Menu size={22}/></button><span className="text-lg font-extrabold tracking-tight text-white">Stoicverse</span></div>
+        <div className="flex items-center gap-1"><button type="button" onClick={() => setSearchOpen(true)} className="focus-ring grid size-11 place-items-center rounded-full text-on-surface-variant" aria-label="Search"><Search size={18}/></button><BellButton unreadCount={unreadCount} open={notificationsOpen} onClick={openNotifications}/></div>
       </header>
 
       {mobileMenuOpen && <button type="button" aria-label="Close menu" className="fixed inset-0 z-40 bg-black/80 md:hidden" onClick={() => closeMobileMenu()}/>}
@@ -249,7 +249,7 @@ export function AppShell({ active, title, memberName = "Practitioner", platformR
 }
 
 function BellButton({ unreadCount, open, onClick }: { unreadCount: number; open: boolean; onClick: (event: ReactMouseEvent<HTMLButtonElement>) => void }) {
-  return <button type="button" onClick={onClick} aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} aria-expanded={open} aria-controls="notification-preview" className="focus-ring relative grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant transition hover:border-primary-container hover:text-primary-container"><Bell size={18}/>{unreadCount > 0 && <span className="absolute -right-1 -top-1 grid min-w-5 size-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>}</button>;
+  return <button type="button" onClick={onClick} aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} aria-expanded={open} aria-controls="notification-preview" className="focus-ring relative grid size-11 place-items-center rounded-full border border-surgical-steel text-on-surface-variant transition hover:border-primary-container hover:text-primary-container"><Bell size={18}/>{unreadCount > 0 && <span className="absolute -right-1 -top-1 grid min-w-5 size-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>}</button>;
 }
 
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {

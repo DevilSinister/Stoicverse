@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 import { AppShell, type Notification } from "@/components/layout/AppShell";
+import { TurnoverMetricsEditor, type TurnoverMetrics } from "@/components/dashboard/TurnoverMetricsEditor";
 
 type ScheduleEvent = { id: string; title: string; startsAt: string; status: "upcoming" | "live"; enrollmentCount: number };
 type OverviewData = {
@@ -277,7 +278,7 @@ function PremiumDateFilter({
   );
 }
 
-export function CreatorOverviewView({ memberName, notifications }: { memberName: string; notifications: Notification[] }) {
+export function CreatorOverviewView({ memberName, notifications, turnoverMetrics }: { memberName: string; notifications: Notification[]; turnoverMetrics: TurnoverMetrics }) {
   void periods;
   const [metricsFilter, setMetricsFilter] = useState<FilterOption>("last_month");
   const [metricsCustomRange, setMetricsCustomRange] = useState<{ start: string; end: string } | null>(null);
@@ -335,6 +336,7 @@ export function CreatorOverviewView({ memberName, notifications }: { memberName:
           <h2 className="font-sans text-2xl font-semibold text-white">Overview</h2>
           <p className="mt-1 font-body text-sm text-fog-muted">Monitor growth, revenue, and the work that needs your attention today.</p>
         </div>
+        <TurnoverMetricsEditor metrics={turnoverMetrics} />
       </div>
 
       {error ? (

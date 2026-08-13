@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { ArrowLeft, Bell, Camera, Check, ChevronRight, CircleUserRound, KeyRound, Laptop, LoaderCircle, LockKeyhole, LogOut, Mail, MonitorSmartphone, ShieldAlert, ShieldCheck, Trash2, UserRound, X } from "lucide-react";
+import { ArrowLeft, Bell, Camera, Check, ChevronRight, CircleUserRound, KeyRound, Laptop, LoaderCircle, LockKeyhole, LogOut, Mail, MonitorSmartphone, ShieldAlert, ShieldCheck, Trash2, UserRound } from "lucide-react";
 
 import {
   EMPTY_SETTINGS_ACTION_STATE,
@@ -73,32 +73,40 @@ export function AccountSettingsWorkspace({ data, initialSection, returnTo }: { d
   }
 
   return (
-    <main className="min-h-svh bg-surface text-on-surface">
+    <main className="min-h-svh bg-surface text-on-surface md:h-svh md:overflow-hidden">
       <span aria-hidden="true" className="hidden" dangerouslySetInnerHTML={{ __html: "<!-- THESIS: Account settings are an identity command center, not a stack of modal forms. OWN-WORLD: deep navy regions, emerald action, and surgical hairlines. STORY: choose a category, make one precise change, verify identity at a glance. FIRST VIEWPORT: category rail, focused editor, live member preview, with close control above. FORM: dedicated three-column settings workspace; selected shape seed ff507120. -->" }} />
-      <header className="flex h-16 items-center justify-between border-b border-surgical-steel bg-surface-container-low px-4 sm:px-6 lg:px-8">
+      <header className="relative z-30 flex h-16 items-center justify-between border-b border-surgical-steel bg-surface-container-low px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3"><div className="grid size-9 place-items-center rounded-full border border-primary-container/40 bg-primary-container/10 text-primary-container"><CircleUserRound size={18}/></div><div><p className="text-sm font-semibold text-white">Account settings</p><p className="text-xs text-fog-muted">Member control center</p></div></div>
-        <Link href={returnTo} aria-label="Close account settings" className="focus-ring grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant transition hover:border-primary-container hover:text-primary-container"><X size={18}/></Link>
+        <Link href={returnTo} className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-surgical-steel px-3 text-sm font-semibold text-on-surface-variant transition hover:border-primary-container hover:text-primary-container sm:px-4"><ArrowLeft size={17}/><span className="hidden sm:inline">Back to dashboard</span><span className="sr-only sm:hidden">Back to dashboard</span></Link>
       </header>
 
-      <div className="mx-auto grid w-full max-w-[92rem] md:min-h-[calc(100svh-4rem)] md:grid-cols-[15rem_minmax(0,1fr)] xl:grid-cols-[15rem_minmax(30rem,1fr)_19rem]">
-        <aside className={`${mobileDetail ? "hidden" : "block"} border-r-0 border-surgical-steel bg-surface-container-low px-4 py-6 md:block md:border-r md:px-3 lg:py-8`}>
-          <p className="mb-3 px-3 text-xs font-semibold text-fog-muted">Account categories</p>
-          <nav className="space-y-1" aria-label="Account settings categories">
-            {sections.map((item) => { const Icon = item.icon; const selected = section === item.id; return <button ref={(element) => { categoryButtons.current[item.id] = element; }} key={item.id} type="button" onClick={() => chooseSection(item.id)} className={`focus-ring flex min-h-14 w-full items-center gap-3 rounded-lg px-3 text-left transition ${selected ? "bg-surface-container-high text-white" : "text-on-surface-variant hover:bg-surface-container-high/70 hover:text-white"}`}><Icon size={17} className={selected ? "text-primary-container" : "text-fog-muted"}/><span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{item.label}</span><span className="mt-0.5 block truncate text-xs text-fog-muted">{item.description}</span></span><ChevronRight size={15} className="md:hidden"/></button>; })}
+      <div className="mx-auto grid w-full max-w-[92rem] md:h-[calc(100svh-4rem)] md:min-h-0 md:grid-cols-[16rem_minmax(0,1fr)] xl:grid-cols-[16rem_minmax(30rem,1fr)_20rem]">
+        <aside className={`${mobileDetail ? "hidden" : "flex"} min-h-[calc(100svh-4rem)] flex-col border-r-0 border-surgical-steel bg-surface-container-low px-4 py-5 md:flex md:h-full md:min-h-0 md:overflow-y-auto md:border-r md:px-3 lg:py-6`}>
+          <div className="mb-5 md:hidden"><h1 className="text-2xl font-semibold tracking-[-0.02em] text-white">Settings</h1><p className="mt-1 text-sm text-fog-muted">Choose what you want to review or change.</p></div>
+          <div className="mb-5 flex items-center gap-3 rounded-xl border border-surgical-steel bg-monolith-surface p-3 md:mx-1">
+            <Avatar value={avatarPreview} name={data.fullName} className="size-11 text-sm"/>
+            <div className="min-w-0"><p className="truncate text-sm font-semibold text-white">{data.fullName}</p><p className="mt-0.5 truncate text-xs text-fog-muted">{data.email}</p></div>
+          </div>
+          <p className="mb-2 px-3 text-xs font-semibold text-fog-muted">Account categories</p>
+          <nav className="space-y-1.5" aria-label="Account settings categories">
+            {sections.map((item) => { const Icon = item.icon; const selected = section === item.id; return <button ref={(element) => { categoryButtons.current[item.id] = element; }} key={item.id} type="button" onClick={() => chooseSection(item.id)} aria-current={selected ? "page" : undefined} className={`focus-ring group flex min-h-[4.25rem] w-full items-center gap-3 rounded-xl border px-3 text-left transition ${selected ? "border-surgical-steel bg-surface-container-high text-white" : "border-transparent text-on-surface-variant hover:border-surgical-steel hover:bg-surface-container-high/70 hover:text-white"}`}><span className={`grid size-9 shrink-0 place-items-center rounded-full ${selected ? "bg-primary-container/10 text-primary-container" : "bg-surface-container-high text-fog-muted group-hover:text-white"}`}><Icon size={17}/></span><span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{item.label}</span><span className="mt-0.5 block text-xs leading-4 text-fog-muted md:truncate">{item.description}</span></span><ChevronRight size={16} className="shrink-0 text-fog-muted md:hidden"/></button>; })}
           </nav>
-          <form action={logoutAction} className="mt-8 border-t border-surgical-steel pt-4"><button type="submit" className="focus-ring flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-high hover:text-white"><LogOut size={17}/>Log out</button></form>
+          <div className="mt-6 border-t border-surgical-steel px-3 pt-4 md:mt-auto"><p className="text-xs font-semibold text-on-surface">{data.membershipStatus}</p>{data.membershipExpiresAt && <p className="mt-1 text-xs text-fog-muted">Through {new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(data.membershipExpiresAt))}</p>}</div>
+          <form action={logoutAction} className="mt-3"><button type="submit" className="focus-ring flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-high hover:text-white"><LogOut size={17}/>Log out</button></form>
         </aside>
 
-        <section className={`${mobileDetail ? "block" : "hidden"} min-w-0 px-4 py-6 md:block md:px-8 lg:px-10 lg:py-10`}>
-          <button ref={mobileBackButton} type="button" onClick={showCategories} className="focus-ring mb-5 inline-flex min-h-10 items-center gap-2 rounded-full pr-3 text-sm font-semibold text-on-surface-variant md:hidden"><ArrowLeft size={17}/>All settings</button>
-          {section === "account" && <AccountSection data={data} avatarPreview={avatarPreview} setAvatarPreview={setAvatarPreview}/>} 
-          {section === "notifications" && <NotificationsSection preferences={data.preferences}/>} 
-          {section === "sessions" && <SessionsSection currentDevice={data.currentDevice}/>} 
-          {section === "deletion" && <DeletionSection canDelete={data.canDelete}/>} 
+        <section className={`${mobileDetail ? "block" : "hidden"} min-w-0 px-4 py-5 md:block md:h-full md:overflow-y-auto md:px-8 md:py-8 lg:px-10 lg:py-10`}>
+          <div className="mx-auto max-w-3xl">
+            <button ref={mobileBackButton} type="button" onClick={showCategories} className="focus-ring mb-5 inline-flex min-h-11 items-center gap-2 rounded-full pr-3 text-sm font-semibold text-on-surface-variant md:hidden"><ArrowLeft size={17}/>All settings</button>
+            {section === "account" && <AccountSection data={data} avatarPreview={avatarPreview} setAvatarPreview={setAvatarPreview}/>}
+            {section === "notifications" && <NotificationsSection preferences={data.preferences}/>}
+            {section === "sessions" && <SessionsSection currentDevice={data.currentDevice}/>}
+            {section === "deletion" && <DeletionSection canDelete={data.canDelete}/>}
+          </div>
         </section>
 
-        <aside className="hidden border-l border-surgical-steel bg-surface-container-low px-6 py-10 xl:block">
-          <div className="sticky top-10">
+        <aside className="hidden h-full overflow-y-auto border-l border-surgical-steel bg-surface-container-low px-6 py-8 xl:block">
+          <div>
             <p className="text-xs font-semibold text-fog-muted">Live identity</p>
             <div className="mt-4 overflow-hidden rounded-2xl border border-surgical-steel bg-monolith-surface">
               <div className="h-20 bg-surface-container-high"/>

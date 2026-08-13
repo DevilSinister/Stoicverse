@@ -1,25 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BookOpen, CalendarDays, CheckCircle2, Clock3, Play, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, Clock3, Play, Sparkles, TrendingUp } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { TurnoverMetricsEditor } from "@/components/dashboard/TurnoverMetricsEditor";
 import { withRouteBase } from "@/lib/navigation/paths";
 import type { DashboardData } from "./DashboardView";
 
 const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
+const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
 
 export function TerminalDashboard({ data, routeBase = "" }: { data: DashboardData; routeBase?: string }) {
   const courseHref = (courseId?: string) => withRouteBase(routeBase, courseId ? `/courses/${courseId}` : "/courses");
-  const activeCount = data.enrolledCourses.filter((course) => !course.isCompleted).length;
+  const canEditTurnover = data.platformRole === "moderator" || data.platformRole === "influencer";
+  const turnoverMetrics = { turnoverThisWeek: data.turnoverThisWeek, allTimeTurnover: data.allTimeTurnover, updatedAt: data.turnoverUpdatedAt };
 
   return <AppShell active="Dashboard" title="Member overview" terminalHeader isMaster={data.isMaster} memberName={data.memberName} platformRole={data.platformRole} currentTier={data.currentTier} notifications={data.notifications} routeBase={routeBase}>
     <main className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
       <header className="mb-8"><p className="terminal-label">Member home</p><h1 className="mt-2 font-headline text-3xl font-semibold tracking-tight text-white sm:text-4xl">Welcome back, {data.memberName}</h1><p className="mt-3 max-w-2xl text-sm leading-relaxed text-on-surface-variant sm:text-base">Your complete Stoic curriculum is open. Continue a course or choose any released lesson that fits today’s practice.</p></header>
 
       <div className="grid gap-6 lg:grid-cols-12">
-        <section className="terminal-card p-6 lg:col-span-4"><div className="flex items-start justify-between gap-5"><div><p className="terminal-label">Course library</p><h2 className="mt-2 font-headline text-2xl font-semibold text-white">{data.totalLessons} available</h2><p className="mt-2 text-sm text-fog-muted">Every published course is open to active members.</p></div><BookOpen size={24} className="text-primary-container" /></div><Link href={courseHref()} className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary-container">Browse all courses <ArrowRight size={14} /></Link></section>
-        <section className="terminal-card p-6 lg:col-span-4"><p className="terminal-label">Your progress</p><h2 className="mt-2 font-headline text-2xl font-semibold text-white">{data.completedLessons} completed</h2><p className="mt-2 text-sm text-fog-muted">{activeCount ? `${activeCount} course${activeCount === 1 ? " is" : "s are"} currently in progress.` : "Start any course to begin tracking progress."}</p><div className="mt-6 h-1.5 overflow-hidden rounded-full bg-surface-container-highest"><div className="h-full rounded-full bg-primary-container" style={{ width: `${data.totalLessons ? Math.round((data.completedLessons / data.totalLessons) * 100) : 0}%` }} /></div></section>
+        <section aria-label="Member turnover" className="lg:col-span-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:gap-6">
+            <TurnoverMetricCard label="Turnover this week" value={currency.format(data.turnoverThisWeek)} detail="Current weekly figure" />
+            <TurnoverMetricCard label="All-time turnover" value={currency.format(data.allTimeTurnover)} detail={data.turnoverUpdatedAt ? `Updated ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(data.turnoverUpdatedAt))}` : "Lifetime reported figure"} />
+          </div>
+          {canEditTurnover && <TurnoverMetricsEditor metrics={turnoverMetrics} />}
+        </section>
         <section className="terminal-card border-t-2 border-t-primary-container p-6 lg:col-span-4"><p className="terminal-label text-primary-container">No learning gates</p><h2 className="mt-3 font-headline text-lg font-semibold text-white">Study in your own order</h2><p className="mt-2 text-sm leading-relaxed text-on-surface-variant">Course tiers and prerequisites no longer restrict what you can watch. Scheduled lessons appear when their release time arrives.</p></section>
 
         <section className="terminal-card overflow-hidden lg:col-span-8 lg:grid lg:min-h-[315px] lg:grid-cols-2"><div className="flex flex-col justify-center p-7 sm:p-8"><p className="terminal-label">Continue learning</p><h2 className="mt-3 font-headline text-2xl font-semibold leading-tight text-white">{data.activeLesson?.title ?? "Choose your next course"}</h2><p className="mt-4 text-sm leading-relaxed text-on-surface-variant">{data.activeLesson?.description ?? "Browse the full library and begin with the subject most useful to your current practice."}</p>{data.activeLesson && <p className="mt-4 text-xs font-semibold text-primary-container">{data.activeLesson.completedVideos} / {data.activeLesson.totalVideos} lessons complete · {data.activeLesson.remainingMinutes} min remaining</p>}<Link href={courseHref(data.activeLesson?.id)} className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-primary-container px-6 py-3 text-xs font-bold uppercase tracking-wider text-on-primary-fixed"><Play size={14} fill="currentColor" />{data.activeLesson ? "Resume course" : "Browse courses"}</Link></div><CoursePreview progress={data.activeLesson?.progress ?? 0} title={data.activeLesson?.title ?? "Open curriculum"} /></section>
@@ -31,6 +39,10 @@ export function TerminalDashboard({ data, routeBase = "" }: { data: DashboardDat
       </div>
     </main>
   </AppShell>;
+}
+
+function TurnoverMetricCard({ label, value, detail }: { label: string; value: string; detail: string }) {
+  return <div className="terminal-card flex min-h-[10.5rem] flex-col justify-between p-6"><div className="flex items-start justify-between gap-4"><p className="terminal-label">{label}</p><TrendingUp size={20} className="shrink-0 text-primary-container" /></div><div><h2 className="font-label text-[clamp(1.65rem,4vw,2.35rem)] font-semibold tracking-[-0.03em] text-white tabular-nums">{value}</h2><p className="mt-2 text-xs text-fog-muted">{detail}</p></div></div>;
 }
 
 function CoursePreview({ progress, title }: { progress: number; title: string }) { return <div className="relative min-h-[220px] overflow-hidden border-t border-surgical-steel bg-surface-container-highest lg:min-h-0 lg:border-l lg:border-t-0"><div className="absolute inset-0 bg-primary-container/[0.06]" /><div className="relative flex h-full min-h-[220px] flex-col justify-end p-7"><p className="terminal-label">Active course</p><p className="mt-2 text-sm font-semibold uppercase tracking-wider text-white line-clamp-2">{title}</p><div className="mt-5 h-1.5 overflow-hidden rounded-full bg-surface-container-lowest"><div className="h-full bg-primary-container" style={{ width: `${progress}%` }} /></div><p className="mt-2 text-xs text-primary-container">{progress}% complete</p></div></div>; }

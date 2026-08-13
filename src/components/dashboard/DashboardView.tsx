@@ -32,6 +32,9 @@ export type DashboardData = {
   upcomingEvent: Event | null;
   notifications: Notification[];
   tierProgressDetails: TierProgressDetail[];
+  turnoverThisWeek: number;
+  allTimeTurnover: number;
+  turnoverUpdatedAt: string | null;
 };
 
 const roleName = (role: string) => role.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
