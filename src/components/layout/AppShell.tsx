@@ -12,11 +12,13 @@ import { createClient } from "@/lib/supabase/client";
 
 export type Notification = NotificationItem;
 
-type SearchKind = "lesson" | "event" | "post" | "channel" | "member";
+type SearchKind = "course" | "video" | "lesson" | "event" | "post" | "channel" | "member";
 type SearchResult = { id: string; title: string; description: string | null; href: string; kind: SearchKind };
 type NotificationResponse = { notifications?: Notification[]; unreadCount?: number; error?: string };
 
 const SEARCH_GROUPS: { kind: SearchKind; label: string }[] = [
+  { kind: "course", label: "Courses" },
+  { kind: "video", label: "Videos" },
   { kind: "lesson", label: "Lessons" },
   { kind: "event", label: "Events" },
   { kind: "post", label: "Community posts" },
@@ -248,5 +250,5 @@ function BellButton({ unreadCount, open, onClick }: { unreadCount: number; open:
 }
 
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
-  return <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[70] grid place-items-center bg-black/80 p-4" onMouseDown={onClose}><div className="max-h-[85vh] w-full max-w-xl overflow-auto rounded-xl border border-surgical-steel bg-monolith-surface p-6 shadow-2xl" onMouseDown={(event) => event.stopPropagation()}><div className="mb-6 flex items-center justify-between border-b border-surgical-steel pb-4"><h2 className="text-lg font-bold text-white">{title}</h2><button type="button" onClick={onClose} className="focus-ring grid size-9 place-items-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high hover:text-primary-container" aria-label="Close"><X size={18}/></button></div>{children}</div></div>;
+  return <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[70] grid items-end bg-black/80 sm:place-items-center sm:p-4" onMouseDown={onClose}><div className="max-h-[calc(100svh-1rem)] w-full max-w-xl overflow-auto rounded-t-xl border border-surgical-steel bg-monolith-surface p-4 shadow-2xl sm:max-h-[85vh] sm:rounded-xl sm:p-6" onMouseDown={(event) => event.stopPropagation()}><div className="mb-5 flex items-center justify-between border-b border-surgical-steel pb-4 sm:mb-6"><h2 className="text-lg font-bold text-white">{title}</h2><button type="button" onClick={onClose} className="focus-ring grid size-11 place-items-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high hover:text-primary-container" aria-label="Close"><X size={18}/></button></div>{children}</div></div>;
 }

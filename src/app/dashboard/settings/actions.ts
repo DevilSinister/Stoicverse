@@ -9,8 +9,7 @@ import { isRateLimited } from "@/lib/security/request";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-export type SettingsActionState = { ok?: boolean; message?: string; error?: string };
-export const EMPTY_SETTINGS_ACTION_STATE: SettingsActionState = {};
+import { type SettingsActionState } from "./types";
 
 async function authenticatedMember() {
   const supabase = await createClient();

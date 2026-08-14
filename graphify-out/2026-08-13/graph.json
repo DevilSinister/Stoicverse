@@ -562,8 +562,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "package_dependencies_class_variance_authority",
-      "community": 14,
-      "community_name": "dependencies",
+      "community": 128,
+      "community_name": "class-variance-authority",
       "norm_label": "class-variance-authority"
     },
     {
@@ -573,8 +573,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "class_variance_authority",
-      "community": 14,
-      "community_name": "dependencies",
+      "community": 128,
+      "community_name": "class-variance-authority",
       "norm_label": "class-variance-authority"
     },
     {
@@ -584,8 +584,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "package_dependencies_clsx",
-      "community": 16,
-      "community_name": "clsx",
+      "community": 14,
+      "community_name": "dependencies",
       "norm_label": "clsx"
     },
     {
@@ -595,8 +595,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "clsx",
-      "community": 16,
-      "community_name": "clsx",
+      "community": 14,
+      "community_name": "dependencies",
       "norm_label": "clsx"
     },
     {
@@ -1277,8 +1277,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_courses_videos_id_stream_route",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 126,
+      "community_name": "stream/route.ts",
       "norm_label": "stream/route.ts"
     },
     {
@@ -1288,8 +1288,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_courses_videos_id_stream_route_runtime",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 126,
+      "community_name": "stream/route.ts",
       "norm_label": "runtime"
     },
     {
@@ -1299,8 +1299,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_app_api_courses_videos_id_stream_route_get",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 126,
+      "community_name": "stream/route.ts",
       "norm_label": "get()"
     },
     {
@@ -1310,8 +1310,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_courses_videos_id_video_route",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "videos/[id]/video/route.ts"
     },
     {
@@ -1321,8 +1321,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_app_api_courses_videos_id_video_route_runtime",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "runtime"
     },
     {
@@ -1332,8 +1332,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_api_courses_videos_id_video_route_get",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "get()"
     },
     {
@@ -1343,8 +1343,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_app_api_courses_videos_id_video_route_post",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "post()"
     },
     {
@@ -1354,8 +1354,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_creator_overview_route",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 127,
+      "community_name": "overview/route.ts",
       "norm_label": "overview/route.ts"
     },
     {
@@ -1365,8 +1365,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_creator_overview_route_dynamic",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 127,
+      "community_name": "overview/route.ts",
       "norm_label": "dynamic"
     },
     {
@@ -1376,8 +1376,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_app_api_creator_overview_route_periods",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 127,
+      "community_name": "overview/route.ts",
       "norm_label": "periods"
     },
     {
@@ -1387,8 +1387,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_api_creator_overview_route_get",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 127,
+      "community_name": "overview/route.ts",
       "norm_label": "get()"
     },
     {
@@ -1398,8 +1398,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_dashboard_notifications_route",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 124,
+      "community_name": "notifications/route.ts",
       "norm_label": "notifications/route.ts"
     },
     {
@@ -1409,8 +1409,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_app_api_dashboard_notifications_route_get",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 124,
+      "community_name": "notifications/route.ts",
       "norm_label": "get()"
     },
     {
@@ -1431,8 +1431,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_dashboard_search_route",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "search/route.ts"
     },
     {
@@ -1442,8 +1442,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_app_api_dashboard_search_route_searchkind",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "searchkind"
     },
     {
@@ -1453,8 +1453,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_app_api_dashboard_search_route_searchresult",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "searchresult"
     },
     {
@@ -1464,8 +1464,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_api_dashboard_search_route_directoryrow",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "directoryrow"
     },
     {
@@ -1475,8 +1475,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_app_api_dashboard_search_route_memberrow",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "memberrow"
     },
     {
@@ -1486,8 +1486,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_api_dashboard_search_route_embedded",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "embedded"
     },
     {
@@ -1497,8 +1497,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_app_api_dashboard_search_route_rolename",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "rolename()"
     },
     {
@@ -1508,8 +1508,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_app_api_dashboard_search_route_firstof",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "firstof()"
     },
     {
@@ -1519,8 +1519,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_app_api_dashboard_search_route_snippet",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "snippet()"
     },
     {
@@ -1530,8 +1530,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_app_api_dashboard_search_route_get",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "get()"
     },
     {
@@ -1563,8 +1563,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stripe_webhook_route",
-      "community": 17,
-      "community_name": "LearningPathCatalog.tsx",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "webhook/route.ts"
     },
     {
@@ -1574,8 +1574,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_api_stripe_webhook_route_runtime",
-      "community": 17,
-      "community_name": "LearningPathCatalog.tsx",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "runtime"
     },
     {
@@ -1585,8 +1585,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_api_stripe_webhook_route_stripeevent",
-      "community": 17,
-      "community_name": "LearningPathCatalog.tsx",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "stripeevent"
     },
     {
@@ -1596,8 +1596,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_app_api_stripe_webhook_route_verifiedevent",
-      "community": 17,
-      "community_name": "LearningPathCatalog.tsx",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "verifiedevent()"
     },
     {
@@ -1607,8 +1607,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_app_api_stripe_webhook_route_post",
-      "community": 17,
-      "community_name": "LearningPathCatalog.tsx",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "post()"
     },
     {
@@ -1618,8 +1618,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_auth_actions",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 4,
+      "community_name": "AuthForm.tsx",
       "norm_label": "auth/actions.ts"
     },
     {
@@ -1629,8 +1629,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_app_auth_actions_authactionstate",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 4,
+      "community_name": "AuthForm.tsx",
       "norm_label": "authactionstate"
     },
     {
@@ -1640,8 +1640,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_app_auth_actions_clientkey",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 4,
+      "community_name": "AuthForm.tsx",
       "norm_label": "clientkey()"
     },
     {
@@ -1651,8 +1651,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_app_auth_actions_apporigin",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 4,
+      "community_name": "AuthForm.tsx",
       "norm_label": "apporigin()"
     },
     {
@@ -1662,8 +1662,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_app_auth_actions_loginaction",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 4,
+      "community_name": "AuthForm.tsx",
       "norm_label": "loginaction()"
     },
     {
@@ -1673,8 +1673,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_app_auth_actions_signupaction",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 4,
+      "community_name": "AuthForm.tsx",
       "norm_label": "signupaction()"
     },
     {
@@ -1684,8 +1684,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_auth_callback_route",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "callback/route.ts"
     },
     {
@@ -1695,8 +1695,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_app_auth_callback_route_get",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "get()"
     },
     {
@@ -1706,8 +1706,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_checkout_page",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 125,
+      "community_name": "checkout/page.tsx",
       "norm_label": "checkout/page.tsx"
     },
     {
@@ -1717,8 +1717,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_app_checkout_page_checkoutpage",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 125,
+      "community_name": "checkout/page.tsx",
       "norm_label": "checkoutpage()"
     },
     {
@@ -1893,8 +1893,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_courses_id_coursedetailpage",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "coursedetailpage.tsx"
     },
     {
@@ -1904,8 +1904,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_courses_id_coursedetailpage_rendercoursedetailpage",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "rendercoursedetailpage()"
     },
     {
@@ -1959,8 +1959,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_courses_id_video_videoid_videopage",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 20,
+      "community_name": "VideoPage.tsx",
       "norm_label": "videopage.tsx"
     },
     {
@@ -1970,8 +1970,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_courses_id_video_videoid_videopage_rendervideopage",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 20,
+      "community_name": "VideoPage.tsx",
       "norm_label": "rendervideopage()"
     },
     {
@@ -1981,8 +1981,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_courses_id_video_videoid_page",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 20,
+      "community_name": "VideoPage.tsx",
       "norm_label": "app/courses/[id]/video/[videoid]/page.tsx"
     },
     {
@@ -1992,8 +1992,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_courses_id_video_videoid_page_videopage",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 20,
+      "community_name": "VideoPage.tsx",
       "norm_label": "videopage()"
     },
     {
@@ -2553,8 +2553,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_creator_dashboard_page",
-      "community": 10,
-      "community_name": "CreatorOverviewView.tsx",
+      "community": 0,
+      "community_name": "access.ts",
       "norm_label": "creator/dashboard/page.tsx"
     },
     {
@@ -2564,8 +2564,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_app_creator_dashboard_page_creatordashboardpage",
-      "community": 10,
-      "community_name": "CreatorOverviewView.tsx",
+      "community": 0,
+      "community_name": "access.ts",
       "norm_label": "creatordashboardpage()"
     },
     {
@@ -2575,8 +2575,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_app_creator_dashboard_page_legacycreatordashboardpage",
-      "community": 10,
-      "community_name": "CreatorOverviewView.tsx",
+      "community": 0,
+      "community_name": "access.ts",
       "norm_label": "legacycreatordashboardpage()"
     },
     {
@@ -2630,19 +2630,19 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_creator_layout",
-      "community": 19,
-      "community_name": "creator/layout.tsx",
+      "community": 0,
+      "community_name": "access.ts",
       "norm_label": "creator/layout.tsx"
     },
     {
       "label": "CreatorWorkspaceLayout()",
       "file_type": "code",
       "source_file": "src/app/creator/layout.tsx",
-      "source_location": "L1",
+      "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_creator_layout_creatorworkspacelayout",
-      "community": 19,
-      "community_name": "creator/layout.tsx",
+      "community": 0,
+      "community_name": "access.ts",
       "norm_label": "creatorworkspacelayout()"
     },
     {
@@ -2660,23 +2660,12 @@
       "label": "CreatorLoading()",
       "file_type": "code",
       "source_file": "src/app/creator/loading.tsx",
-      "source_location": "L3",
+      "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_creator_loading_creatorloading",
       "community": 79,
       "community_name": "creator/loading.tsx",
       "norm_label": "creatorloading()"
-    },
-    {
-      "label": "MetricSkeleton()",
-      "file_type": "code",
-      "source_file": "src/app/creator/loading.tsx",
-      "source_location": "L14",
-      "_origin": "ast",
-      "id": "src_app_creator_loading_metricskeleton",
-      "community": 79,
-      "community_name": "creator/loading.tsx",
-      "norm_label": "metricskeleton()"
     },
     {
       "label": "creator/master/page.tsx",
@@ -2872,8 +2861,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_creator_page",
-      "community": 10,
-      "community_name": "CreatorOverviewView.tsx",
+      "community": 0,
+      "community_name": "access.ts",
       "norm_label": "creator/page.tsx"
     },
     {
@@ -2883,8 +2872,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_creator_page_creatoroverviewpage",
-      "community": 10,
-      "community_name": "CreatorOverviewView.tsx",
+      "community": 0,
+      "community_name": "access.ts",
       "norm_label": "creatoroverviewpage()"
     },
     {
@@ -3114,8 +3103,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_dashboard_courses_id_page",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "dashboard/courses/[id]/page.tsx"
     },
     {
@@ -3125,8 +3114,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_dashboard_courses_id_page_dashboardcoursepage",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "dashboardcoursepage()"
     },
     {
@@ -3136,8 +3125,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_dashboard_courses_id_video_videoid_page",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 20,
+      "community_name": "VideoPage.tsx",
       "norm_label": "dashboard/courses/[id]/video/[videoid]/page.tsx"
     },
     {
@@ -3147,8 +3136,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_dashboard_courses_id_video_videoid_page_dashboardvideopage",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 20,
+      "community_name": "VideoPage.tsx",
       "norm_label": "dashboardvideopage()"
     },
     {
@@ -3224,19 +3213,19 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_dashboard_layout",
-      "community": 25,
-      "community_name": "dashboard/layout.tsx",
+      "community": 0,
+      "community_name": "access.ts",
       "norm_label": "dashboard/layout.tsx"
     },
     {
       "label": "MemberWorkspaceLayout()",
       "file_type": "code",
       "source_file": "src/app/dashboard/layout.tsx",
-      "source_location": "L1",
+      "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_dashboard_layout_memberworkspacelayout",
-      "community": 25,
-      "community_name": "dashboard/layout.tsx",
+      "community": 0,
+      "community_name": "access.ts",
       "norm_label": "memberworkspacelayout()"
     },
     {
@@ -3254,23 +3243,12 @@
       "label": "DashboardLoading()",
       "file_type": "code",
       "source_file": "src/app/dashboard/loading.tsx",
-      "source_location": "L3",
+      "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_dashboard_loading_dashboardloading",
       "community": 82,
       "community_name": "dashboard/loading.tsx",
       "norm_label": "dashboardloading()"
-    },
-    {
-      "label": "MetricSkeleton()",
-      "file_type": "code",
-      "source_file": "src/app/dashboard/loading.tsx",
-      "source_location": "L17",
-      "_origin": "ast",
-      "id": "src_app_dashboard_loading_metricskeleton",
-      "community": 82,
-      "community_name": "dashboard/loading.tsx",
-      "norm_label": "metricskeleton()"
     },
     {
       "label": "messages/page.tsx",
@@ -3301,8 +3279,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_dashboard_notifications_page",
-      "community": 0,
-      "community_name": "access.ts",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "dashboard/notifications/page.tsx"
     },
     {
@@ -3312,8 +3290,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_dashboard_notifications_page_notificationspage",
-      "community": 0,
-      "community_name": "access.ts",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "notificationspage()"
     },
     {
@@ -3928,8 +3906,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_page",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "app/page.tsx"
     },
     {
@@ -3939,8 +3917,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_page_metadata",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "metadata"
     },
     {
@@ -3950,8 +3928,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_app_page_home",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "home()"
     },
     {
@@ -4291,8 +4269,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_checkout_checkoutscreen",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 125,
+      "community_name": "checkout/page.tsx",
       "norm_label": "checkoutscreen.tsx"
     },
     {
@@ -4302,8 +4280,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_checkout_checkoutscreen_product",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 125,
+      "community_name": "checkout/page.tsx",
       "norm_label": "product"
     },
     {
@@ -4313,8 +4291,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_checkout_checkoutscreen_offers",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 125,
+      "community_name": "checkout/page.tsx",
       "norm_label": "offers"
     },
     {
@@ -4324,8 +4302,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_components_checkout_checkoutscreen_includeicon",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 125,
+      "community_name": "checkout/page.tsx",
       "norm_label": "includeicon()"
     },
     {
@@ -4335,8 +4313,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_components_checkout_checkoutscreen_checkoutscreen",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 125,
+      "community_name": "checkout/page.tsx",
       "norm_label": "checkoutscreen()"
     },
     {
@@ -4633,7 +4611,7 @@
       "_origin": "ast",
       "id": "src_components_courses_coursevideoplayer",
       "community": 20,
-      "community_name": "CourseVideoPlayer.tsx",
+      "community_name": "VideoPage.tsx",
       "norm_label": "coursevideoplayer.tsx"
     },
     {
@@ -4644,7 +4622,7 @@
       "_origin": "ast",
       "id": "src_components_courses_coursevideoplayer_playlistvideo",
       "community": 20,
-      "community_name": "CourseVideoPlayer.tsx",
+      "community_name": "VideoPage.tsx",
       "norm_label": "playlistvideo"
     },
     {
@@ -4655,7 +4633,7 @@
       "_origin": "ast",
       "id": "src_components_courses_coursevideoplayer_formatduration",
       "community": 20,
-      "community_name": "CourseVideoPlayer.tsx",
+      "community_name": "VideoPage.tsx",
       "norm_label": "formatduration()"
     },
     {
@@ -4666,7 +4644,7 @@
       "_origin": "ast",
       "id": "src_components_courses_coursevideoplayer_legacycoursevideoplayer",
       "community": 20,
-      "community_name": "CourseVideoPlayer.tsx",
+      "community_name": "VideoPage.tsx",
       "norm_label": "legacycoursevideoplayer()"
     },
     {
@@ -4742,8 +4720,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_courses_learningpathview",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "learningpathview.tsx"
     },
     {
@@ -4753,8 +4731,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_courses_learningpathview_lessonprogressitem",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "lessonprogressitem"
     },
     {
@@ -4764,8 +4742,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_courses_learningpathview_tierprogressitem",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "tierprogressitem"
     },
     {
@@ -4775,8 +4753,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_components_courses_learningpathview_learningpathdata",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "learningpathdata"
     },
     {
@@ -4786,8 +4764,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_components_courses_learningpathview_filtertype",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "filtertype"
     },
     {
@@ -4797,8 +4775,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_components_courses_learningpathview_learningpathview",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "learningpathview()"
     },
     {
@@ -4831,7 +4809,7 @@
       "_origin": "ast",
       "id": "src_components_courses_lessonworkspaceplayer",
       "community": 20,
-      "community_name": "CourseVideoPlayer.tsx",
+      "community_name": "VideoPage.tsx",
       "norm_label": "lessonworkspaceplayer.tsx"
     },
     {
@@ -4842,7 +4820,7 @@
       "_origin": "ast",
       "id": "src_components_courses_lessonworkspaceplayer_playlistvideo",
       "community": 20,
-      "community_name": "CourseVideoPlayer.tsx",
+      "community_name": "VideoPage.tsx",
       "norm_label": "playlistvideo"
     },
     {
@@ -4853,7 +4831,7 @@
       "_origin": "ast",
       "id": "src_components_courses_lessonworkspaceplayer_formatduration",
       "community": 20,
-      "community_name": "CourseVideoPlayer.tsx",
+      "community_name": "VideoPage.tsx",
       "norm_label": "formatduration()"
     },
     {
@@ -4864,7 +4842,7 @@
       "_origin": "ast",
       "id": "src_components_courses_lessonworkspaceplayer_lessonworkspaceplayer",
       "community": 20,
-      "community_name": "CourseVideoPlayer.tsx",
+      "community_name": "VideoPage.tsx",
       "norm_label": "lessonworkspaceplayer()"
     },
     {
@@ -4875,7 +4853,7 @@
       "_origin": "ast",
       "id": "src_components_courses_lessonworkspaceplayer_queueitem",
       "community": 20,
-      "community_name": "CourseVideoPlayer.tsx",
+      "community_name": "VideoPage.tsx",
       "norm_label": "queueitem()"
     },
     {
@@ -5479,8 +5457,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_dashboard_dashboardview",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "dashboardview.tsx"
     },
     {
@@ -5490,8 +5468,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_dashboard_dashboardview_event",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "event"
     },
     {
@@ -5501,8 +5479,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_dashboard_dashboardview_tierprogressdetail",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "tierprogressdetail"
     },
     {
@@ -5523,8 +5501,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_components_dashboard_dashboardview_rolename",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "rolename()"
     },
     {
@@ -5534,8 +5512,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_components_dashboard_dashboardview_eventdate",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "eventdate()"
     },
     {
@@ -5545,8 +5523,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_components_dashboard_dashboardview_legacydashboardview",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "legacydashboardview()"
     },
     {
@@ -5556,8 +5534,8 @@
       "source_location": "L338",
       "_origin": "ast",
       "id": "src_components_dashboard_dashboardview_panel",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "panel()"
     },
     {
@@ -5567,8 +5545,8 @@
       "source_location": "L349",
       "_origin": "ast",
       "id": "src_components_dashboard_dashboardview_metric",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "metric()"
     },
     {
@@ -5578,8 +5556,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_dashboard_terminaldashboard",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "terminaldashboard.tsx"
     },
     {
@@ -5589,8 +5567,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_dashboard_terminaldashboard_eventdate",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "eventdate()"
     },
     {
@@ -5600,8 +5578,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_dashboard_terminaldashboard_currency",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "currency"
     },
     {
@@ -5611,8 +5589,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_dashboard_terminaldashboard_terminaldashboard",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "terminaldashboard()"
     },
     {
@@ -5622,8 +5600,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_dashboard_terminaldashboard_turnovermetriccard",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "turnovermetriccard()"
     },
     {
@@ -5633,8 +5611,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "src_components_dashboard_terminaldashboard_coursepreview",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "coursepreview()"
     },
     {
@@ -5644,8 +5622,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_components_dashboard_terminaldashboard_recordedcourse",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 25,
+      "community_name": "DashboardView.tsx",
       "norm_label": "recordedcourse()"
     },
     {
@@ -5971,7 +5949,7 @@
       "label": "BellButton()",
       "file_type": "code",
       "source_file": "src/components/layout/AppShell.tsx",
-      "source_location": "L246",
+      "source_location": "L251",
       "_origin": "ast",
       "id": "src_components_layout_appshell_bellbutton",
       "community": 13,
@@ -5982,7 +5960,7 @@
       "label": "Modal()",
       "file_type": "code",
       "source_file": "src/components/layout/AppShell.tsx",
-      "source_location": "L250",
+      "source_location": "L255",
       "_origin": "ast",
       "id": "src_components_layout_appshell_modal",
       "community": 13,
@@ -6073,8 +6051,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_notifications_notificationcenter",
-      "community": 2,
-      "community_name": "CommunitySurface.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "notificationcenter.tsx"
     },
     {
@@ -6084,8 +6062,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_notifications_notificationcenter_feedresponse",
-      "community": 2,
-      "community_name": "CommunitySurface.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "feedresponse"
     },
     {
@@ -6095,8 +6073,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_notifications_notificationcenter_views",
-      "community": 2,
-      "community_name": "CommunitySurface.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "views"
     },
     {
@@ -6106,8 +6084,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_notifications_notificationcenter_iconfor",
-      "community": 2,
-      "community_name": "CommunitySurface.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "iconfor()"
     },
     {
@@ -6117,8 +6095,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_components_notifications_notificationcenter_grouplabel",
-      "community": 2,
-      "community_name": "CommunitySurface.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "grouplabel()"
     },
     {
@@ -6128,8 +6106,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_components_notifications_notificationcenter_relativetime",
-      "community": 2,
-      "community_name": "CommunitySurface.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "relativetime"
     },
     {
@@ -6139,8 +6117,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_notifications_notificationcenter_timeago",
-      "community": 2,
-      "community_name": "CommunitySurface.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "timeago()"
     },
     {
@@ -6150,8 +6128,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "src_components_notifications_notificationcenter_notificationcenter",
-      "community": 2,
-      "community_name": "CommunitySurface.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "notificationcenter()"
     },
     {
@@ -6381,8 +6359,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_screens_landingscreen",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "landingscreen.tsx"
     },
     {
@@ -6392,8 +6370,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_screens_landingscreen_stages",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "stages"
     },
     {
@@ -6403,8 +6381,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_components_screens_landingscreen_included",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "included"
     },
     {
@@ -6414,8 +6392,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "src_components_screens_landingscreen_faqs",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "faqs"
     },
     {
@@ -6425,8 +6403,8 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "src_components_screens_landingscreen_gridfield",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "gridfield()"
     },
     {
@@ -6436,8 +6414,8 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_screens_landingscreen_arrowicon",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "arrowicon()"
     },
     {
@@ -6447,8 +6425,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "src_components_screens_landingscreen_checkicon",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "checkicon()"
     },
     {
@@ -6458,8 +6436,8 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "src_components_screens_landingscreen_plusicon",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "plusicon()"
     },
     {
@@ -6469,8 +6447,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "src_components_screens_landingscreen_landingscreen",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "landingscreen()"
     },
     {
@@ -6733,8 +6711,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_email",
-      "community": 17,
-      "community_name": "LearningPathCatalog.tsx",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "email.ts"
     },
     {
@@ -6744,8 +6722,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_lib_email_email",
-      "community": 17,
-      "community_name": "LearningPathCatalog.tsx",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "email"
     },
     {
@@ -6755,8 +6733,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_lib_email_sendtransactionalemail",
-      "community": 17,
-      "community_name": "LearningPathCatalog.tsx",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "sendtransactionalemail()"
     },
     {
@@ -6766,8 +6744,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_navigation_app_nav",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "app-nav.ts"
     },
     {
@@ -6777,8 +6755,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_lib_navigation_app_nav_appnavitem",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "appnavitem"
     },
     {
@@ -6788,8 +6766,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_lib_navigation_app_nav_buildappnav",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "buildappnav()"
     },
     {
@@ -6799,8 +6777,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_navigation_paths",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "paths.ts"
     },
     {
@@ -6810,8 +6788,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_navigation_paths_withroutebase",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 19,
+      "community_name": "withRouteBase",
       "norm_label": "withroutebase()"
     },
     {
@@ -6821,8 +6799,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_lib_navigation_paths_normalizesearchbase",
-      "community": 13,
-      "community_name": "AppShell.tsx",
+      "community": 28,
+      "community_name": "search/route.ts",
       "norm_label": "normalizesearchbase()"
     },
     {
@@ -6832,8 +6810,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_notifications_cursor",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 124,
+      "community_name": "notifications/route.ts",
       "norm_label": "cursor.ts"
     },
     {
@@ -6843,8 +6821,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_lib_notifications_cursor_encodenotificationcursor",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 124,
+      "community_name": "notifications/route.ts",
       "norm_label": "encodenotificationcursor()"
     },
     {
@@ -6854,8 +6832,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_lib_notifications_cursor_decodenotificationcursor",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 124,
+      "community_name": "notifications/route.ts",
       "norm_label": "decodenotificationcursor()"
     },
     {
@@ -6865,8 +6843,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_notifications_model",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 124,
+      "community_name": "notifications/route.ts",
       "norm_label": "model.ts"
     },
     {
@@ -6876,8 +6854,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_lib_notifications_model_notificationitem",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 124,
+      "community_name": "notifications/route.ts",
       "norm_label": "notificationitem"
     },
     {
@@ -6887,8 +6865,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_lib_notifications_model_notificationview",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 124,
+      "community_name": "notifications/route.ts",
       "norm_label": "notificationview"
     },
     {
@@ -7074,8 +7052,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_supabase_admin",
-      "community": 17,
-      "community_name": "LearningPathCatalog.tsx",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "admin.ts"
     },
     {
@@ -7085,8 +7063,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_lib_supabase_admin_createadminclient",
-      "community": 17,
-      "community_name": "LearningPathCatalog.tsx",
+      "community": 68,
+      "community_name": "createAdminClient",
       "norm_label": "createadminclient()"
     },
     {
@@ -7096,8 +7074,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_supabase_client",
-      "community": 2,
-      "community_name": "CommunitySurface.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "client.ts"
     },
     {
@@ -7107,8 +7085,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_supabase_client_createclient",
-      "community": 2,
-      "community_name": "CommunitySurface.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "createclient()"
     },
     {
@@ -7118,8 +7096,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_supabase_env",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "env.ts"
     },
     {
@@ -7129,8 +7107,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_supabase_env_hassupabaseconfig",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 123,
+      "community_name": "LandingScreen.tsx",
       "norm_label": "hassupabaseconfig()"
     },
     {
@@ -7140,8 +7118,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_lib_supabase_env_getsupabaseconfig",
-      "community": 4,
-      "community_name": "AuthForm.tsx",
+      "community": 16,
+      "community_name": "NotificationCenter.tsx",
       "norm_label": "getsupabaseconfig()"
     },
     {
@@ -7195,8 +7173,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_video_googledrive",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 126,
+      "community_name": "stream/route.ts",
       "norm_label": "googledrive.ts"
     },
     {
@@ -7206,8 +7184,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_lib_video_googledrive_getgoogledrivedownloadurl",
-      "community": 1,
-      "community_name": "createClient",
+      "community": 126,
+      "community_name": "stream/route.ts",
       "norm_label": "getgoogledrivedownloadurl()"
     },
     {
@@ -9433,8 +9411,8 @@
       "community": 30,
       "norm_label": "member journey",
       "_origin": "semantic",
-      "community_name": "App Flow",
-      "id": "03_app_flow_member_journey"
+      "id": "03_app_flow_member_journey",
+      "community_name": "App Flow"
     },
     {
       "label": "Staff Journey",
@@ -9448,8 +9426,8 @@
       "community": 30,
       "norm_label": "staff journey",
       "_origin": "semantic",
-      "community_name": "App Flow",
-      "id": "03_app_flow_staff_journey"
+      "id": "03_app_flow_staff_journey",
+      "community_name": "App Flow"
     },
     {
       "label": "Notifications",
@@ -9925,8 +9903,8 @@
       "community": 58,
       "norm_label": "production security checklist",
       "_origin": "semantic",
-      "community_name": "Production Security Checklist",
-      "id": "security_deployment_production_security_checklist"
+      "id": "security_deployment_production_security_checklist",
+      "community_name": "Production Security Checklist"
     },
     {
       "label": "UI_UX.md",
@@ -9951,8 +9929,8 @@
       "community": 41,
       "norm_label": "ui/ux standards",
       "_origin": "semantic",
-      "community_name": "UI/UX Standards",
-      "id": "ui_ux_ui_ux_standards"
+      "id": "ui_ux_ui_ux_standards",
+      "community_name": "UI/UX Standards"
     },
     {
       "label": "Information design",
@@ -10010,8 +9988,8 @@
       "community": 35,
       "norm_label": "client screen inventory",
       "_origin": "semantic",
-      "community_name": "Client Screen Inventory",
-      "id": "docs_client_screen_inventory_client_screen_inventory"
+      "id": "docs_client_screen_inventory_client_screen_inventory",
+      "community_name": "Client Screen Inventory"
     },
     {
       "label": "Notes",
@@ -10366,8 +10344,8 @@
       "community": 106,
       "norm_label": "security integration fixtures",
       "_origin": "semantic",
-      "community_name": "security/README.md",
-      "id": "tests_security_readme_security_integration_fixtures"
+      "id": "tests_security_readme_security_integration_fixtures",
+      "community_name": "security/README.md"
     },
     {
       "label": "Graphify",
@@ -10381,8 +10359,8 @@
       "community": 22,
       "norm_label": "graphify",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_claude_graphify"
+      "id": "_claude_claude_graphify",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Graphify Workflow",
@@ -10396,8 +10374,8 @@
       "community": 22,
       "norm_label": "graphify workflow",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_skill_graphify_workflow"
+      "id": "_claude_skills_graphify_skill_graphify_workflow",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Semantic Extraction",
@@ -10411,8 +10389,8 @@
       "community": 22,
       "norm_label": "semantic extraction",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_skill_semantic_extraction"
+      "id": "_claude_skills_graphify_skill_semantic_extraction",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Structural Extraction",
@@ -10426,8 +10404,8 @@
       "community": 22,
       "norm_label": "structural extraction",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_skill_structural_extraction"
+      "id": "_claude_skills_graphify_skill_structural_extraction",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Community Detection",
@@ -10441,8 +10419,8 @@
       "community": 22,
       "norm_label": "community detection",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_skill_community_detection"
+      "id": "_claude_skills_graphify_skill_community_detection",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Incremental Update",
@@ -10456,8 +10434,8 @@
       "community": 22,
       "norm_label": "incremental update",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_references_add_watch_incremental_update"
+      "id": "_claude_skills_graphify_references_add_watch_incremental_update",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Graph Exports",
@@ -10471,8 +10449,8 @@
       "community": 22,
       "norm_label": "graph exports",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_references_exports_graph_exports"
+      "id": "_claude_skills_graphify_references_exports_graph_exports",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Extraction Schema",
@@ -10486,8 +10464,8 @@
       "community": 22,
       "norm_label": "extraction schema",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_references_extraction_spec_extraction_schema"
+      "id": "_claude_skills_graphify_references_extraction_spec_extraction_schema",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Multi-repository Merge",
@@ -10501,8 +10479,8 @@
       "community": 22,
       "norm_label": "multi-repository merge",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_references_github_and_merge_multi_repository_merge"
+      "id": "_claude_skills_graphify_references_github_and_merge_multi_repository_merge",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Post-commit Rebuild",
@@ -10516,8 +10494,8 @@
       "community": 22,
       "norm_label": "post-commit rebuild",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_references_hooks_post_commit_rebuild"
+      "id": "_claude_skills_graphify_references_hooks_post_commit_rebuild",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Graph Query",
@@ -10531,8 +10509,8 @@
       "community": 22,
       "norm_label": "graph query",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_references_query_graph_query"
+      "id": "_claude_skills_graphify_references_query_graph_query",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Transcription",
@@ -10546,8 +10524,8 @@
       "community": 22,
       "norm_label": "transcription",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_references_transcribe_transcription"
+      "id": "_claude_skills_graphify_references_transcribe_transcription",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Incremental Rebuild",
@@ -10561,8 +10539,8 @@
       "community": 22,
       "norm_label": "incremental rebuild",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "_claude_skills_graphify_references_update_incremental_rebuild"
+      "id": "_claude_skills_graphify_references_update_incremental_rebuild",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Membership Activation",
@@ -10576,8 +10554,8 @@
       "community": 23,
       "norm_label": "membership activation",
       "_origin": "semantic",
-      "community_name": "Product Requirements Document",
-      "id": "01_prd_membership_activation"
+      "id": "01_prd_membership_activation",
+      "community_name": "Product Requirements Document"
     },
     {
       "label": "Curriculum Progression",
@@ -10591,8 +10569,8 @@
       "community": 23,
       "norm_label": "curriculum progression",
       "_origin": "semantic",
-      "community_name": "Product Requirements Document",
-      "id": "01_prd_curriculum_progression"
+      "id": "01_prd_curriculum_progression",
+      "community_name": "Product Requirements Document"
     },
     {
       "label": "Authorization Boundary",
@@ -10607,8 +10585,8 @@
       "community": 23,
       "norm_label": "authorization boundary",
       "_origin": "semantic",
-      "community_name": "Product Requirements Document",
-      "id": "01_prd_authorization_boundary"
+      "id": "01_prd_authorization_boundary",
+      "community_name": "Product Requirements Document"
     },
     {
       "label": "Creator Workspace",
@@ -10622,8 +10600,8 @@
       "community": 23,
       "norm_label": "creator workspace",
       "_origin": "semantic",
-      "community_name": "Product Requirements Document",
-      "id": "01_prd_creator_workspace"
+      "id": "01_prd_creator_workspace",
+      "community_name": "Product Requirements Document"
     },
     {
       "label": "Mentorship",
@@ -10637,8 +10615,8 @@
       "community": 23,
       "norm_label": "mentorship",
       "_origin": "semantic",
-      "community_name": "Product Requirements Document",
-      "id": "01_prd_mentorship"
+      "id": "01_prd_mentorship",
+      "community_name": "Product Requirements Document"
     },
     {
       "label": "Application Stack",
@@ -10652,8 +10630,8 @@
       "community": 42,
       "norm_label": "application stack",
       "_origin": "semantic",
-      "community_name": "Row Level Security",
-      "id": "02_trd_application_stack"
+      "id": "02_trd_application_stack",
+      "community_name": "Row Level Security"
     },
     {
       "label": "Row Level Security",
@@ -10667,8 +10645,8 @@
       "community": 42,
       "norm_label": "row level security",
       "_origin": "semantic",
-      "community_name": "Row Level Security",
-      "id": "02_trd_row_level_security"
+      "id": "02_trd_row_level_security",
+      "community_name": "Row Level Security"
     },
     {
       "label": "Stripe Webhook",
@@ -10682,8 +10660,8 @@
       "community": 42,
       "norm_label": "stripe webhook",
       "_origin": "semantic",
-      "community_name": "Row Level Security",
-      "id": "02_trd_stripe_webhook"
+      "id": "02_trd_stripe_webhook",
+      "community_name": "Row Level Security"
     },
     {
       "label": "Google Drive Preview",
@@ -10697,8 +10675,8 @@
       "community": 42,
       "norm_label": "google drive preview",
       "_origin": "semantic",
-      "community_name": "Row Level Security",
-      "id": "02_trd_google_drive_preview"
+      "id": "02_trd_google_drive_preview",
+      "community_name": "Row Level Security"
     },
     {
       "label": "Public Onboarding",
@@ -10712,8 +10690,8 @@
       "community": 30,
       "norm_label": "public onboarding",
       "_origin": "semantic",
-      "community_name": "App Flow",
-      "id": "03_app_flow_public_onboarding"
+      "id": "03_app_flow_public_onboarding",
+      "community_name": "App Flow"
     },
     {
       "label": "In-app Notifications",
@@ -10727,8 +10705,8 @@
       "community": 30,
       "norm_label": "in-app notifications",
       "_origin": "semantic",
-      "community_name": "App Flow",
-      "id": "03_app_flow_in_app_notifications"
+      "id": "03_app_flow_in_app_notifications",
+      "community_name": "App Flow"
     },
     {
       "label": "Single-community Model",
@@ -10743,8 +10721,8 @@
       "community": 107,
       "norm_label": "single-community model",
       "_origin": "semantic",
-      "community_name": "Single-community Model",
-      "id": "04_database_schema_single_community_model"
+      "id": "04_database_schema_single_community_model",
+      "community_name": "Single-community Model"
     },
     {
       "label": "Profiles",
@@ -10758,8 +10736,8 @@
       "community": 43,
       "norm_label": "profiles",
       "_origin": "semantic",
-      "community_name": "Memberships",
-      "id": "04_database_schema_profiles"
+      "id": "04_database_schema_profiles",
+      "community_name": "Memberships"
     },
     {
       "label": "Memberships",
@@ -10773,8 +10751,8 @@
       "community": 43,
       "norm_label": "memberships",
       "_origin": "semantic",
-      "community_name": "Memberships",
-      "id": "04_database_schema_memberships"
+      "id": "04_database_schema_memberships",
+      "community_name": "Memberships"
     },
     {
       "label": "Course Video Assets",
@@ -10788,8 +10766,8 @@
       "community": 43,
       "norm_label": "course video assets",
       "_origin": "semantic",
-      "community_name": "Memberships",
-      "id": "04_database_schema_course_video_assets"
+      "id": "04_database_schema_course_video_assets",
+      "community_name": "Memberships"
     },
     {
       "label": "Atomic Progression",
@@ -10804,8 +10782,8 @@
       "community": 43,
       "norm_label": "atomic progression",
       "_origin": "semantic",
-      "community_name": "Memberships",
-      "id": "04_database_schema_atomic_progression"
+      "id": "04_database_schema_atomic_progression",
+      "community_name": "Memberships"
     },
     {
       "label": "MVP Launch Gaps",
@@ -10819,8 +10797,8 @@
       "community": 53,
       "norm_label": "mvp launch gaps",
       "_origin": "semantic",
-      "community_name": "MVP Launch Gaps",
-      "id": "05_implementation_plan_mvp_launch_gaps"
+      "id": "05_implementation_plan_mvp_launch_gaps",
+      "community_name": "MVP Launch Gaps"
     },
     {
       "label": "Data Safety",
@@ -10835,8 +10813,8 @@
       "community": 53,
       "norm_label": "data safety",
       "_origin": "semantic",
-      "community_name": "MVP Launch Gaps",
-      "id": "05_implementation_plan_data_safety"
+      "id": "05_implementation_plan_data_safety",
+      "community_name": "MVP Launch Gaps"
     },
     {
       "label": "Payments and Account Lifecycle",
@@ -10850,8 +10828,8 @@
       "community": 53,
       "norm_label": "payments and account lifecycle",
       "_origin": "semantic",
-      "community_name": "MVP Launch Gaps",
-      "id": "05_implementation_plan_payments_account_lifecycle"
+      "id": "05_implementation_plan_payments_account_lifecycle",
+      "community_name": "MVP Launch Gaps"
     },
     {
       "label": "Next.js Agent Rules",
@@ -10866,8 +10844,8 @@
       "community": 108,
       "norm_label": "next.js agent rules",
       "_origin": "semantic",
-      "community_name": "Next.js Agent Rules",
-      "id": "agents_nextjs_agent_rules"
+      "id": "agents_nextjs_agent_rules",
+      "community_name": "Next.js Agent Rules"
     },
     {
       "label": "Graphify Query Guidance",
@@ -10882,8 +10860,8 @@
       "community": 22,
       "norm_label": "graphify query guidance",
       "_origin": "semantic",
-      "community_name": "Graphify Workflow",
-      "id": "claude_graphify_query_guidance"
+      "id": "claude_graphify_query_guidance",
+      "community_name": "Graphify Workflow"
     },
     {
       "label": "Identity Command Center",
@@ -10897,8 +10875,8 @@
       "community": 24,
       "norm_label": "identity command center",
       "_origin": "semantic",
-      "community_name": "Stoicverse Design System",
-      "id": "design_identity_command_center"
+      "id": "design_identity_command_center",
+      "community_name": "Stoicverse Design System"
     },
     {
       "label": "Notification Inbox",
@@ -10912,8 +10890,8 @@
       "community": 24,
       "norm_label": "notification inbox",
       "_origin": "semantic",
-      "community_name": "Stoicverse Design System",
-      "id": "design_notification_inbox"
+      "id": "design_notification_inbox",
+      "community_name": "Stoicverse Design System"
     },
     {
       "label": "Accessible Interaction",
@@ -10928,8 +10906,8 @@
       "community": 24,
       "norm_label": "accessible interaction",
       "_origin": "semantic",
-      "community_name": "Stoicverse Design System",
-      "id": "design_accessible_interaction"
+      "id": "design_accessible_interaction",
+      "community_name": "Stoicverse Design System"
     },
     {
       "label": "Global Roles",
@@ -10943,8 +10921,8 @@
       "community": 32,
       "norm_label": "global roles",
       "_origin": "semantic",
-      "community_name": "Stoicverse Product Context",
-      "id": "product_global_roles"
+      "id": "product_global_roles",
+      "community_name": "Stoicverse Product Context"
     },
     {
       "label": "Structured Learning Path",
@@ -10959,8 +10937,8 @@
       "community": 32,
       "norm_label": "structured learning path",
       "_origin": "semantic",
-      "community_name": "Stoicverse Product Context",
-      "id": "product_structured_learning_path"
+      "id": "product_structured_learning_path",
+      "community_name": "Stoicverse Product Context"
     },
     {
       "label": "Role and Tier Access Model",
@@ -10975,8 +10953,8 @@
       "community": 48,
       "norm_label": "role and tier access model",
       "_origin": "semantic",
-      "community_name": "Gifted Membership",
-      "id": "influncer_implementation_role_tier_access_model"
+      "id": "influncer_implementation_role_tier_access_model",
+      "community_name": "Gifted Membership"
     },
     {
       "label": "Gifted Membership",
@@ -10991,8 +10969,8 @@
       "community": 48,
       "norm_label": "gifted membership",
       "_origin": "semantic",
-      "community_name": "Gifted Membership",
-      "id": "influncer_implementation_gifted_membership"
+      "id": "influncer_implementation_gifted_membership",
+      "community_name": "Gifted Membership"
     },
     {
       "label": "Membership Lapse Preservation",
@@ -11007,8 +10985,8 @@
       "community": 48,
       "norm_label": "membership lapse preservation",
       "_origin": "semantic",
-      "community_name": "Gifted Membership",
-      "id": "influncer_implementation_membership_lapse"
+      "id": "influncer_implementation_membership_lapse",
+      "community_name": "Gifted Membership"
     },
     {
       "label": "Stoic Methodology",
@@ -11022,8 +11000,8 @@
       "community": 56,
       "norm_label": "stoic methodology",
       "_origin": "semantic",
-      "community_name": "Stoic Methodology",
-      "id": "landing_page_stoic_methodology"
+      "id": "landing_page_stoic_methodology",
+      "community_name": "Stoic Methodology"
     },
     {
       "label": "Membership Checkout Screen",
@@ -11037,8 +11015,8 @@
       "community": 58,
       "norm_label": "membership checkout screen",
       "_origin": "semantic",
-      "community_name": "Production Security Checklist",
-      "id": "stitch_screens_ask_stoic___checkout_checkout_screen"
+      "id": "stitch_screens_ask_stoic___checkout_checkout_screen",
+      "community_name": "Production Security Checklist"
     },
     {
       "label": "Desktop Checkout Screen",
@@ -11052,8 +11030,8 @@
       "community": 35,
       "norm_label": "desktop checkout screen",
       "_origin": "semantic",
-      "community_name": "Client Screen Inventory",
-      "id": "stitch_screens_ask_stoic___checkout_desktop_checkout_desktop_screen"
+      "id": "stitch_screens_ask_stoic___checkout_desktop_checkout_desktop_screen",
+      "community_name": "Client Screen Inventory"
     },
     {
       "label": "Mobile Checkout Screen",
@@ -11067,8 +11045,8 @@
       "community": 114,
       "norm_label": "mobile checkout screen",
       "_origin": "semantic",
-      "community_name": "Mobile Checkout Screen",
-      "id": "stitch_screens_ask_stoic___checkout_mobile_checkout_mobile_screen"
+      "id": "stitch_screens_ask_stoic___checkout_mobile_checkout_mobile_screen",
+      "community_name": "Mobile Checkout Screen"
     },
     {
       "label": "Master Zone Community Feed",
@@ -11082,8 +11060,8 @@
       "community": 35,
       "norm_label": "master zone community feed",
       "_origin": "semantic",
-      "community_name": "Client Screen Inventory",
-      "id": "stitch_screens_ask_stoic___community_feed_community_feed_screen"
+      "id": "stitch_screens_ask_stoic___community_feed_community_feed_screen",
+      "community_name": "Client Screen Inventory"
     },
     {
       "label": "Desktop Member Dashboard",
@@ -11097,8 +11075,8 @@
       "community": 35,
       "norm_label": "desktop member dashboard",
       "_origin": "semantic",
-      "community_name": "Client Screen Inventory",
-      "id": "stitch_screens_ask_stoic___dashboard_desktop_dashboard_desktop_screen"
+      "id": "stitch_screens_ask_stoic___dashboard_desktop_dashboard_desktop_screen",
+      "community_name": "Client Screen Inventory"
     },
     {
       "label": "Desktop Dashboard with Discord Sidebar",
@@ -11112,8 +11090,8 @@
       "community": 115,
       "norm_label": "desktop dashboard with discord sidebar",
       "_origin": "semantic",
-      "community_name": "Desktop Dashboard with Discord Sidebar",
-      "id": "stitch_screens_ask_stoic___dashboard_desktop__discord_sidebar_dashboard_discord_sidebar_screen"
+      "id": "stitch_screens_ask_stoic___dashboard_desktop__discord_sidebar_dashboard_discord_sidebar_screen",
+      "community_name": "Desktop Dashboard with Discord Sidebar"
     },
     {
       "label": "Mobile Member Dashboard",
@@ -11127,8 +11105,8 @@
       "community": 116,
       "norm_label": "mobile member dashboard",
       "_origin": "semantic",
-      "community_name": "Mobile Member Dashboard",
-      "id": "stitch_screens_ask_stoic___dashboard_mobile_dashboard_mobile_screen"
+      "id": "stitch_screens_ask_stoic___dashboard_mobile_dashboard_mobile_screen",
+      "community_name": "Mobile Member Dashboard"
     },
     {
       "label": "Events Directory Screen",
@@ -11142,8 +11120,8 @@
       "community": 35,
       "norm_label": "events directory screen",
       "_origin": "semantic",
-      "community_name": "Client Screen Inventory",
-      "id": "stitch_screens_ask_stoic___events_directory_events_directory_screen"
+      "id": "stitch_screens_ask_stoic___events_directory_events_directory_screen",
+      "community_name": "Client Screen Inventory"
     },
     {
       "label": "Influencer Dashboard Screen",
@@ -11157,8 +11135,8 @@
       "community": 48,
       "norm_label": "influencer dashboard screen",
       "_origin": "semantic",
-      "community_name": "Gifted Membership",
-      "id": "stitch_screens_ask_stoic___influencer_cm_dashboard_influencer_dashboard_screen"
+      "id": "stitch_screens_ask_stoic___influencer_cm_dashboard_influencer_dashboard_screen",
+      "community_name": "Gifted Membership"
     },
     {
       "label": "Stoic Landing Page Screen",
@@ -11172,8 +11150,8 @@
       "community": 56,
       "norm_label": "stoic landing page screen",
       "_origin": "semantic",
-      "community_name": "Stoic Methodology",
-      "id": "stitch_screens_ask_stoic___landing_page_landing_page_screen"
+      "id": "stitch_screens_ask_stoic___landing_page_landing_page_screen",
+      "community_name": "Stoic Methodology"
     },
     {
       "label": "Trading Learning Roadmap",
@@ -11187,8 +11165,8 @@
       "community": 56,
       "norm_label": "trading learning roadmap",
       "_origin": "semantic",
-      "community_name": "Stoic Methodology",
-      "id": "stitch_screens_ask_stoic___landing_page_mobile_trading_learning_roadmap"
+      "id": "stitch_screens_ask_stoic___landing_page_mobile_trading_learning_roadmap",
+      "community_name": "Stoic Methodology"
     },
     {
       "label": "Learning Path",
@@ -11202,8 +11180,8 @@
       "community": 50,
       "norm_label": "learning path",
       "_origin": "semantic",
-      "community_name": "Learning Path",
-      "id": "stitch_screens_ask_stoic___learning_path_desktop_learning_path"
+      "id": "stitch_screens_ask_stoic___learning_path_desktop_learning_path",
+      "community_name": "Learning Path"
     },
     {
       "label": "Learning Path with Discord Sidebar",
@@ -11217,8 +11195,8 @@
       "community": 50,
       "norm_label": "learning path with discord sidebar",
       "_origin": "semantic",
-      "community_name": "Learning Path",
-      "id": "stitch_screens_ask_stoic___learning_path_desktop__discord_sidebar_learning_path"
+      "id": "stitch_screens_ask_stoic___learning_path_desktop__discord_sidebar_learning_path",
+      "community_name": "Learning Path"
     },
     {
       "label": "Learning Path Mobile",
@@ -11232,8 +11210,8 @@
       "community": 50,
       "norm_label": "learning path mobile",
       "_origin": "semantic",
-      "community_name": "Learning Path",
-      "id": "stitch_screens_ask_stoic___learning_path_mobile_learning_path"
+      "id": "stitch_screens_ask_stoic___learning_path_mobile_learning_path",
+      "community_name": "Learning Path"
     },
     {
       "label": "Advanced Position Sizing Lesson",
@@ -11247,8 +11225,8 @@
       "community": 59,
       "norm_label": "advanced position sizing lesson",
       "_origin": "semantic",
-      "community_name": "Advanced Position Sizing Lesson",
-      "id": "stitch_screens_ask_stoic___lesson_page_desktop_advanced_position_sizing"
+      "id": "stitch_screens_ask_stoic___lesson_page_desktop_advanced_position_sizing",
+      "community_name": "Advanced Position Sizing Lesson"
     },
     {
       "label": "Advanced Position Sizing Lesson with Discord Sidebar",
@@ -11262,8 +11240,8 @@
       "community": 59,
       "norm_label": "advanced position sizing lesson with discord sidebar",
       "_origin": "semantic",
-      "community_name": "Advanced Position Sizing Lesson",
-      "id": "stitch_screens_ask_stoic___lesson_page_desktop__discord_sidebar_advanced_position_sizing"
+      "id": "stitch_screens_ask_stoic___lesson_page_desktop__discord_sidebar_advanced_position_sizing",
+      "community_name": "Advanced Position Sizing Lesson"
     },
     {
       "label": "Lesson Page Mobile",
@@ -11277,8 +11255,8 @@
       "community": 59,
       "norm_label": "lesson page mobile",
       "_origin": "semantic",
-      "community_name": "Advanced Position Sizing Lesson",
-      "id": "stitch_screens_ask_stoic___lesson_page_mobile_lesson_page"
+      "id": "stitch_screens_ask_stoic___lesson_page_mobile_lesson_page",
+      "community_name": "Advanced Position Sizing Lesson"
     },
     {
       "label": "Live Sessions",
@@ -11292,8 +11270,8 @@
       "community": 51,
       "norm_label": "live sessions",
       "_origin": "semantic",
-      "community_name": "Live Sessions",
-      "id": "stitch_screens_ask_stoic___live_sessions_desktop_live_sessions"
+      "id": "stitch_screens_ask_stoic___live_sessions_desktop_live_sessions",
+      "community_name": "Live Sessions"
     },
     {
       "label": "Live Sessions with Discord Sidebar",
@@ -11307,8 +11285,8 @@
       "community": 51,
       "norm_label": "live sessions with discord sidebar",
       "_origin": "semantic",
-      "community_name": "Live Sessions",
-      "id": "stitch_screens_ask_stoic___live_sessions_desktop__discord_sidebar_live_sessions"
+      "id": "stitch_screens_ask_stoic___live_sessions_desktop__discord_sidebar_live_sessions",
+      "community_name": "Live Sessions"
     },
     {
       "label": "Live Sessions Mobile",
@@ -11322,8 +11300,8 @@
       "community": 51,
       "norm_label": "live sessions mobile",
       "_origin": "semantic",
-      "community_name": "Live Sessions",
-      "id": "stitch_screens_ask_stoic___live_sessions_mobile_live_sessions"
+      "id": "stitch_screens_ask_stoic___live_sessions_mobile_live_sessions",
+      "community_name": "Live Sessions"
     },
     {
       "label": "Return to Silence Login",
@@ -11337,8 +11315,8 @@
       "community": 60,
       "norm_label": "return to silence login",
       "_origin": "semantic",
-      "community_name": "Login",
-      "id": "stitch_screens_ask_stoic___log_in_return_to_silence"
+      "id": "stitch_screens_ask_stoic___log_in_return_to_silence",
+      "community_name": "Login"
     },
     {
       "label": "Login",
@@ -11352,8 +11330,8 @@
       "community": 60,
       "norm_label": "login",
       "_origin": "semantic",
-      "community_name": "Login",
-      "id": "stitch_screens_ask_stoic___login_page_login"
+      "id": "stitch_screens_ask_stoic___login_page_login",
+      "community_name": "Login"
     },
     {
       "label": "Login Mobile",
@@ -11367,8 +11345,8 @@
       "community": 60,
       "norm_label": "login mobile",
       "_origin": "semantic",
-      "community_name": "Login",
-      "id": "stitch_screens_ask_stoic___login_page_mobile_login"
+      "id": "stitch_screens_ask_stoic___login_page_mobile_login",
+      "community_name": "Login"
     },
     {
       "label": "Master Zone Dashboard",
@@ -11382,8 +11360,8 @@
       "community": 51,
       "norm_label": "master zone dashboard",
       "_origin": "semantic",
-      "community_name": "Live Sessions",
-      "id": "stitch_screens_ask_stoic___master_zone_dashboard_master_zone"
+      "id": "stitch_screens_ask_stoic___master_zone_dashboard_master_zone",
+      "community_name": "Live Sessions"
     },
     {
       "label": "Member Dashboard",
@@ -11397,8 +11375,8 @@
       "community": 50,
       "norm_label": "member dashboard",
       "_origin": "semantic",
-      "community_name": "Learning Path",
-      "id": "stitch_screens_ask_stoic___member_dashboard_member_dashboard"
+      "id": "stitch_screens_ask_stoic___member_dashboard_member_dashboard",
+      "community_name": "Learning Path"
     },
     {
       "label": "Institutional Mentorship",
@@ -11412,8 +11390,8 @@
       "community": 61,
       "norm_label": "institutional mentorship",
       "_origin": "semantic",
-      "community_name": "Institutional Mentorship",
-      "id": "stitch_screens_ask_stoic___mentors_and_team_desktop_institutional_mentorship"
+      "id": "stitch_screens_ask_stoic___mentors_and_team_desktop_institutional_mentorship",
+      "community_name": "Institutional Mentorship"
     },
     {
       "label": "Institutional Mentors Mobile",
@@ -11427,8 +11405,8 @@
       "community": 61,
       "norm_label": "institutional mentors mobile",
       "_origin": "semantic",
-      "community_name": "Institutional Mentorship",
-      "id": "stitch_screens_ask_stoic___mentors_and_team_mobile_institutional_mentors"
+      "id": "stitch_screens_ask_stoic___mentors_and_team_mobile_institutional_mentors",
+      "community_name": "Institutional Mentorship"
     },
     {
       "label": "Institutional Mentorship with Discord Sidebar",
@@ -11442,8 +11420,8 @@
       "community": 61,
       "norm_label": "institutional mentorship with discord sidebar",
       "_origin": "semantic",
-      "community_name": "Institutional Mentorship",
-      "id": "stitch_screens_ask_stoic___mentors_desktop__discord_sidebar_institutional_mentorship"
+      "id": "stitch_screens_ask_stoic___mentors_desktop__discord_sidebar_institutional_mentorship",
+      "community_name": "Institutional Mentorship"
     },
     {
       "label": "Premium Account Registration",
@@ -11457,8 +11435,8 @@
       "community": 97,
       "norm_label": "premium account registration",
       "_origin": "semantic",
-      "community_name": "Premium Account Registration",
-      "id": "stitch_screens_ask_stoic___registration_page_desktop_premium_account_registration"
+      "id": "stitch_screens_ask_stoic___registration_page_desktop_premium_account_registration",
+      "community_name": "Premium Account Registration"
     },
     {
       "label": "Account Registration Mobile",
@@ -11472,8 +11450,8 @@
       "community": 97,
       "norm_label": "account registration mobile",
       "_origin": "semantic",
-      "community_name": "Premium Account Registration",
-      "id": "stitch_screens_ask_stoic___registration_page_mobile_create_your_account"
+      "id": "stitch_screens_ask_stoic___registration_page_mobile_create_your_account",
+      "community_name": "Premium Account Registration"
     },
     {
       "label": "Sign-up Form",
@@ -11487,8 +11465,8 @@
       "community": 118,
       "norm_label": "sign-up form",
       "_origin": "semantic",
-      "community_name": "Sign-up Form",
-      "id": "stitch_screens_ask_stoic___sign_up_signup_form"
+      "id": "stitch_screens_ask_stoic___sign_up_signup_form",
+      "community_name": "Sign-up Form"
     },
     {
       "label": "Community Selection",
@@ -11502,8 +11480,8 @@
       "community": 117,
       "norm_label": "community selection",
       "_origin": "semantic",
-      "community_name": "Community Selection",
-      "id": "stitch_screens_ask_stoic___sign_up__community_selection__community_selection"
+      "id": "stitch_screens_ask_stoic___sign_up__community_selection__community_selection",
+      "community_name": "Community Selection"
     },
     {
       "label": "Billing Interval Toggle",
@@ -11517,8 +11495,8 @@
       "community": 98,
       "norm_label": "billing interval toggle",
       "_origin": "semantic",
-      "community_name": "Billing Interval Toggle",
-      "id": "stitch_screens_ask_stoic___subscription__annual_vs_monthly__billing_interval_toggle"
+      "id": "stitch_screens_ask_stoic___subscription__annual_vs_monthly__billing_interval_toggle",
+      "community_name": "Billing Interval Toggle"
     },
     {
       "label": "Subscription Payment Form",
@@ -11532,8 +11510,8 @@
       "community": 98,
       "norm_label": "subscription payment form",
       "_origin": "semantic",
-      "community_name": "Billing Interval Toggle",
-      "id": "stitch_screens_ask_stoic___subscription__annual_vs_monthly__subscription_payment_form"
+      "id": "stitch_screens_ask_stoic___subscription__annual_vs_monthly__subscription_payment_form",
+      "community_name": "Billing Interval Toggle"
     },
     {
       "label": "Subscription Commitment",
@@ -11547,8 +11525,8 @@
       "community": 119,
       "norm_label": "subscription commitment",
       "_origin": "semantic",
-      "community_name": "Subscription Commitment",
-      "id": "stitch_screens_ask_stoic___subscription_commitment_subscription_commitment"
+      "id": "stitch_screens_ask_stoic___subscription_commitment_subscription_commitment",
+      "community_name": "Subscription Commitment"
     },
     {
       "label": "Super Admin Dashboard",
@@ -11562,8 +11540,8 @@
       "community": 120,
       "norm_label": "super admin dashboard",
       "_origin": "semantic",
-      "community_name": "Super Admin Dashboard",
-      "id": "stitch_screens_ask_stoic___super_admin_dashboard_super_admin_dashboard"
+      "id": "stitch_screens_ask_stoic___super_admin_dashboard_super_admin_dashboard",
+      "community_name": "Super Admin Dashboard"
     },
     {
       "label": "Trading Education Platform",
@@ -11577,8 +11555,8 @@
       "community": 62,
       "norm_label": "trading education platform",
       "_origin": "semantic",
-      "community_name": "Learning Roadmap",
-      "id": "stitch_screens_ask_stoic___trading_education_platform_trading_education_platform"
+      "id": "stitch_screens_ask_stoic___trading_education_platform_trading_education_platform",
+      "community_name": "Learning Roadmap"
     },
     {
       "label": "Learning Roadmap",
@@ -11592,8 +11570,8 @@
       "community": 62,
       "norm_label": "learning roadmap",
       "_origin": "semantic",
-      "community_name": "Learning Roadmap",
-      "id": "stitch_screens_ask_stoic___trading_education_platform_learning_roadmap"
+      "id": "stitch_screens_ask_stoic___trading_education_platform_learning_roadmap",
+      "community_name": "Learning Roadmap"
     },
     {
       "label": "Learn Apply Master Progression",
@@ -11607,8 +11585,8 @@
       "community": 62,
       "norm_label": "learn apply master progression",
       "_origin": "semantic",
-      "community_name": "Learning Roadmap",
-      "id": "stitch_screens_ask_stoic___trading_education_platform_progression_model"
+      "id": "stitch_screens_ask_stoic___trading_education_platform_progression_model",
+      "community_name": "Learning Roadmap"
     },
     {
       "label": "Video Lesson Player",
@@ -11622,8 +11600,8 @@
       "community": 121,
       "norm_label": "video lesson player",
       "_origin": "semantic",
-      "community_name": "Video Lesson Player",
-      "id": "stitch_screens_ask_stoic___video_lesson_player_video_lesson_player"
+      "id": "stitch_screens_ask_stoic___video_lesson_player_video_lesson_player",
+      "community_name": "Video Lesson Player"
     },
     {
       "label": "AskStoic Design System",
@@ -11637,8 +11615,8 @@
       "community": 63,
       "norm_label": "askstoic design system",
       "_origin": "semantic",
-      "community_name": "AskStoic Design System",
-      "id": "stitch_screens_design_md_askstoic_design_system"
+      "id": "stitch_screens_design_md_askstoic_design_system",
+      "community_name": "AskStoic Design System"
     },
     {
       "label": "Institutional Stoic Methodical Brand",
@@ -11652,8 +11630,8 @@
       "community": 63,
       "norm_label": "institutional stoic methodical brand",
       "_origin": "semantic",
-      "community_name": "AskStoic Design System",
-      "id": "stitch_screens_design_md_institutional_stoic_methodical_brand"
+      "id": "stitch_screens_design_md_institutional_stoic_methodical_brand",
+      "community_name": "AskStoic Design System"
     },
     {
       "label": "Terminal Dark Design",
@@ -11667,8 +11645,8 @@
       "community": 63,
       "norm_label": "terminal dark design",
       "_origin": "semantic",
-      "community_name": "AskStoic Design System",
-      "id": "stitch_screens_design_md_terminal_dark_design"
+      "id": "stitch_screens_design_md_terminal_dark_design",
+      "community_name": "AskStoic Design System"
     },
     {
       "label": "Cairn Design System Reference",
@@ -11682,8 +11660,8 @@
       "community": 69,
       "norm_label": "cairn design system reference",
       "_origin": "semantic",
-      "community_name": "Cairn Design System Reference",
-      "id": "cover_design_system_reference"
+      "id": "cover_design_system_reference",
+      "community_name": "Cairn Design System Reference"
     },
     {
       "label": "Cairn Pricing Page Reference",
@@ -11697,8 +11675,8 @@
       "community": 69,
       "norm_label": "cairn pricing page reference",
       "_origin": "semantic",
-      "community_name": "Cairn Design System Reference",
-      "id": "preview_desktop_pricing_page_reference"
+      "id": "preview_desktop_pricing_page_reference",
+      "community_name": "Cairn Design System Reference"
     },
     {
       "label": "File Icon",
@@ -11712,8 +11690,8 @@
       "community": 109,
       "norm_label": "file icon",
       "_origin": "semantic",
-      "community_name": "File Icon",
-      "id": "public_file_file_icon"
+      "id": "public_file_file_icon",
+      "community_name": "File Icon"
     },
     {
       "label": "Globe Icon",
@@ -11727,8 +11705,8 @@
       "community": 110,
       "norm_label": "globe icon",
       "_origin": "semantic",
-      "community_name": "Globe Icon",
-      "id": "public_globe_globe_icon"
+      "id": "public_globe_globe_icon",
+      "community_name": "Globe Icon"
     },
     {
       "label": "Next.js Logo",
@@ -11742,8 +11720,8 @@
       "community": 111,
       "norm_label": "next.js logo",
       "_origin": "semantic",
-      "community_name": "Next.js Logo",
-      "id": "public_next_nextjs_logo"
+      "id": "public_next_nextjs_logo",
+      "community_name": "Next.js Logo"
     },
     {
       "label": "Vercel Logo",
@@ -11757,8 +11735,8 @@
       "community": 112,
       "norm_label": "vercel logo",
       "_origin": "semantic",
-      "community_name": "Vercel Logo",
-      "id": "public_vercel_vercel_logo"
+      "id": "public_vercel_vercel_logo",
+      "community_name": "Vercel Logo"
     },
     {
       "label": "Window Icon",
@@ -11772,8 +11750,8 @@
       "community": 113,
       "norm_label": "window icon",
       "_origin": "semantic",
-      "community_name": "Window Icon",
-      "id": "public_window_window_icon"
+      "id": "public_window_window_icon",
+      "community_name": "Window Icon"
     }
   ],
   "links": [
@@ -18165,7 +18143,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/creator/layout.tsx",
-      "source_location": "L1",
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_creator_layout",
@@ -18173,25 +18151,50 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "imports_from",
+      "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "src/app/creator/loading.tsx",
-      "source_location": "L3",
+      "source_file": "src/app/creator/layout.tsx",
+      "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_app_creator_loading",
-      "target": "src_app_creator_loading_creatorloading",
+      "source": "src_app_creator_layout",
+      "target": "src_lib_supabase_access",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/creator/layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_creator_layout",
+      "target": "src_lib_supabase_access_requireinfluencerworkspace",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/app/creator/layout.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_creator_layout_creatorworkspacelayout",
+      "target": "src_lib_supabase_access_requireinfluencerworkspace"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/creator/loading.tsx",
-      "source_location": "L14",
+      "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_creator_loading",
-      "target": "src_app_creator_loading_metricskeleton",
+      "target": "src_app_creator_loading_creatorloading",
       "confidence_score": 1.0
     },
     {
@@ -19498,7 +19501,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/dashboard/layout.tsx",
-      "source_location": "L1",
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_dashboard_layout",
@@ -19506,25 +19509,50 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "imports_from",
+      "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "src/app/dashboard/loading.tsx",
-      "source_location": "L3",
+      "source_file": "src/app/dashboard/layout.tsx",
+      "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_app_dashboard_loading",
-      "target": "src_app_dashboard_loading_dashboardloading",
+      "source": "src_app_dashboard_layout",
+      "target": "src_lib_supabase_access",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/dashboard/layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_dashboard_layout",
+      "target": "src_lib_supabase_access_requireactivemembership",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/app/dashboard/layout.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_dashboard_layout_memberworkspacelayout",
+      "target": "src_lib_supabase_access_requireactivemembership"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/dashboard/loading.tsx",
-      "source_location": "L17",
+      "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_dashboard_loading",
-      "target": "src_app_dashboard_loading_metricskeleton",
+      "target": "src_app_dashboard_loading_dashboardloading",
       "confidence_score": 1.0
     },
     {
@@ -24644,7 +24672,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/layout/AppShell.tsx",
-      "source_location": "L246",
+      "source_location": "L251",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_layout_appshell",
@@ -24677,7 +24705,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/layout/AppShell.tsx",
-      "source_location": "L250",
+      "source_location": "L255",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_layout_appshell",
@@ -24911,7 +24939,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/layout/AppShell.tsx",
-      "source_location": "L215",
+      "source_location": "L220",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_layout_appshell_appshell",
@@ -24923,7 +24951,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/layout/AppShell.tsx",
-      "source_location": "L239",
+      "source_location": "L244",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_layout_appshell_appshell",
@@ -24948,7 +24976,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/layout/AppShell.tsx",
-      "source_location": "L203",
+      "source_location": "L208",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_layout_appshell_appshell",
@@ -24960,7 +24988,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/layout/AppShell.tsx",
-      "source_location": "L239",
+      "source_location": "L244",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_layout_appshell_appshell",
@@ -30026,5 +30054,5 @@
       "source_file": "stitch_screens/ask_stoic___trading_education_platform.html"
     }
   ],
-  "built_at_commit": "e1427ca17516716c6049c0f00884fa1b9a92d1ee"
+  "built_at_commit": "aac2faf24170c3e46e564e42328b1aff202a3fda"
 }

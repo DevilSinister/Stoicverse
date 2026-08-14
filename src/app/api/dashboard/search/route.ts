@@ -3,11 +3,13 @@ import { NextResponse } from "next/server";
 import { normalizeSearchBase, withRouteBase } from "@/lib/navigation/paths";
 import { createClient } from "@/lib/supabase/server";
 
-type SearchKind = "lesson" | "event" | "post" | "channel" | "member";
+type SearchKind = "course" | "video" | "lesson" | "event" | "post" | "channel" | "member";
 type SearchResult = { id: string; title: string; description: string | null; href: string; kind: SearchKind };
 type DirectoryRow = { channel_id: string; channel_name: string; channel_description: string | null; min_tier: number; is_locked: boolean };
 type MemberRow = { id: string; full_name: string | null; platform_role: string };
 type Embedded<T> = T | T[] | null;
+type CourseRow = { id: string; title: string; description: string | null };
+type CourseVideoRow = { id: string; course_id: string; title: string; description: string | null; courses: Embedded<{ title: string }> };
 
 const roleName = (role: string) => role.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const firstOf = <T>(value: Embedded<T>): T | null => (Array.isArray(value) ? value[0] ?? null : value);
@@ -46,7 +48,11 @@ export async function GET(request: Request) {
   const canSearchMembers = isStaff && base === "/creator";
   const communityHref = base === "/creator" ? "/creator/community" : "/dashboard/community";
 
-  const [lessons, events, posts, directory, members] = await Promise.all([
+  const [courses, videos, lessons, events, posts, directory, members] = await Promise.all([
+    // Course and video RLS policies only expose published, released curriculum the caller
+    // can open. Keeping these queries on the member client preserves those access rules.
+    supabase.from("courses").select("id, title, description").eq("status", "published").or(`title.ilike.${pattern},description.ilike.${pattern}`).limit(8),
+    supabase.from("course_videos").select("id, course_id, title, description, courses!course_videos_course_id_fkey(title)").or(`title.ilike.${pattern},description.ilike.${pattern}`).limit(8),
     supabase.from("lessons").select("id, title, description").eq("status", "published").or(`title.ilike.${pattern},description.ilike.${pattern}`).or(`release_at.is.null,release_at.lte.${now}`).limit(8),
     supabase.from("events").select("id, title, description").in("status", ["upcoming", "live"]).gte("starts_at", now).or(`title.ilike.${pattern},description.ilike.${pattern}`).limit(8),
     // `posts_read` restricts this to channels the caller can actually view, so tier-gated
@@ -60,13 +66,18 @@ export async function GET(request: Request) {
       : Promise.resolve({ data: [] as MemberRow[], error: null }),
   ]);
 
-  if (lessons.error || events.error || posts.error || directory.error || members.error) return NextResponse.json({ error: "Search unavailable" }, { status: 500 });
+  if (courses.error || videos.error || lessons.error || events.error || posts.error || directory.error || members.error) return NextResponse.json({ error: "Search unavailable" }, { status: 500 });
 
   const channels = ((directory.data ?? []) as DirectoryRow[])
     .filter((row) => row.channel_name.toLowerCase().includes(needle) || (row.channel_description ?? "").toLowerCase().includes(needle))
     .slice(0, 6);
 
   const results: SearchResult[] = [
+    ...((courses.data ?? []) as CourseRow[]).map((item) => ({ id: item.id, title: item.title, description: snippet(item.description), href: withRouteBase(base, `/courses/${item.id}`), kind: "course" as const })),
+    ...((videos.data ?? []) as CourseVideoRow[]).map((item) => {
+      const course = firstOf(item.courses);
+      return { id: item.id, title: item.title, description: course ? `Video in ${course.title}` : snippet(item.description), href: withRouteBase(base, `/courses/${item.course_id}/video/${item.id}`), kind: "video" as const };
+    }),
     ...(lessons.data ?? []).map((item) => ({ id: item.id, title: item.title, description: snippet(item.description), href: withRouteBase(base, `/courses/lesson/${item.id}`), kind: "lesson" as const })),
     ...(events.data ?? []).map((item) => ({ id: item.id, title: item.title, description: snippet(item.description), href: withRouteBase(base, "/events"), kind: "event" as const })),
     ...(posts.data ?? []).map((item) => {

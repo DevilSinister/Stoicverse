@@ -6,7 +6,6 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { ArrowLeft, Bell, Camera, Check, ChevronRight, CircleUserRound, KeyRound, Laptop, LoaderCircle, LockKeyhole, LogOut, Mail, MonitorSmartphone, ShieldAlert, ShieldCheck, Trash2, UserRound } from "lucide-react";
 
 import {
-  EMPTY_SETTINGS_ACTION_STATE,
   logoutAction,
   removeAvatar,
   requestAccountDeletion,
@@ -16,8 +15,8 @@ import {
   updateEmail,
   updatePassword,
   uploadAvatar,
-  type SettingsActionState,
 } from "@/app/dashboard/settings/actions";
+import { type SettingsActionState, EMPTY_SETTINGS_ACTION_STATE } from "@/app/dashboard/settings/types";
 
 export type SettingsSection = "account" | "notifications" | "sessions" | "deletion";
 export type SettingsWorkspaceData = {

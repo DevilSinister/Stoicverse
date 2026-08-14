@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { CalendarClock, LoaderCircle, LogOut, RotateCcw, ShieldAlert } from "lucide-react";
 
-import { cancelAccountDeletion, EMPTY_SETTINGS_ACTION_STATE, logoutAction } from "@/app/dashboard/settings/actions";
+import { cancelAccountDeletion, logoutAction } from "@/app/dashboard/settings/actions";
+import { EMPTY_SETTINGS_ACTION_STATE } from "@/app/dashboard/settings/types";
 
 export function DeletionPendingScreen({ name, scheduledAt, status }: { name: string; scheduledAt: string; status: string }) {
   const [state, action, pending] = useActionState(cancelAccountDeletion, EMPTY_SETTINGS_ACTION_STATE);
