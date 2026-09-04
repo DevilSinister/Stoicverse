@@ -1,6 +1,6 @@
 # Stoicverse Design System
 
-**Last updated:** August 2, 2026
+**Last updated:** August 14, 2026
 
 This document describes the system **as it is implemented**. Tokens are defined in
 `src/app/globals.css` (`@theme` block); fonts are loaded in `src/app/layout.tsx`.
@@ -87,6 +87,29 @@ read-only mirror of account identity: avatar, display name, email, membership
 status, and cosmetic community badges. A cosmetic badge communicates identity
 only; it must never be presented as a permission, lock, or progression tier.
 
+### Member operations registry
+
+High-volume operational directories are search-first. Place one prominent,
+full-width search field before secondary filters, then render stable 50-row
+pages with dense desktop tables and equivalent compact rows on mobile. Keep the
+result surface quiet: hairline row separators, restrained status pills, and one
+clear details affordance per account. Names lead; exact account identifiers are
+supporting monospace metadata.
+
+Member mutations stay in one focused detail sheet so operators can inspect
+identity, access, roles, and turnover without losing their registry context.
+Use inline action states rather than nested dialogs. Destructive or access-
+changing actions expose their consequence before confirmation, require a reason
+where enforcement is involved, and announce pending, success, and error states.
+Catalog-level management, such as cosmetic role creation and deletion, belongs
+in a separate focused sheet opened from the page toolbar.
+
+Batch-edit workspaces establish a visible save boundary. Track changes only for
+the current page, freeze search, filters, and pagination while rows are dirty,
+and show a persistent save bar with the changed-row count and explicit Save and
+Discard actions. Pair editable current-period values with read-only derived
+totals so operators can distinguish input from history at a glance.
+
 ### Notification preview and inbox
 
 The AppShell bell opens a compact, bounded preview (up to 24rem wide) of the five
@@ -143,6 +166,13 @@ refresh fails while usable rows remain.
 - **Member notifications** (`NotificationCenter` and the AppShell bell preview) —
   Operate. A compact recency preview opens into a filterable chronological inbox;
   state changes are communicated by copy, color, and semantics, never motion alone.
+- **Creator member registry** (`MemberRegistry`, `MemberDetailModal`, and
+  `RoleManagerModal`) — Operate. Search and filters lead into cursor-paginated
+  member rows; focused sheets keep inspection and deliberate account actions in
+  context without stacking dialogs.
+- **Creator turnover workspace** (`TurnoverWorkspace`) — Operate. Current-week
+  amounts are edited as a page-scoped batch, lifetime totals remain read-only,
+  and a persistent Save/Discard bar owns the commit boundary.
 
 ## Mobile
 
@@ -158,6 +188,10 @@ refresh fails while usable rows remain.
   category list, push into one section, and provide an explicit “All settings”
   back control. Preserve the selected category and restore keyboard focus when
   returning; do not compress the desktop rail and editor side by side.
+- Member-operation tables become compact, complete rows below `md`; do not hide
+  account state or force horizontal table scrolling. Member detail and role
+  surfaces become full-height sheets (`100svh`) with safe-area padding, trapped
+  focus, Escape dismissal, and focus restoration to the launching control.
 - **Checkout** (`src/components/checkout/CheckoutScreen.tsx`) — Operate. Payment
   happens on Stripe Checkout. This surface reviews the order and hands off; it
   must never render card, CVC, or billing-address inputs. Cardholder data must

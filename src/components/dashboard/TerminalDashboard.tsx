@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, CheckCircle2, Clock3, Play, Sparkles, TrendingUp } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { TurnoverMetricsEditor } from "@/components/dashboard/TurnoverMetricsEditor";
 import { withRouteBase } from "@/lib/navigation/paths";
 import type { DashboardData } from "./DashboardView";
 
@@ -13,8 +12,6 @@ const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "
 
 export function TerminalDashboard({ data, routeBase = "" }: { data: DashboardData; routeBase?: string }) {
   const courseHref = (courseId?: string) => withRouteBase(routeBase, courseId ? `/courses/${courseId}` : "/courses");
-  const canEditTurnover = data.platformRole === "moderator" || data.platformRole === "influencer";
-  const turnoverMetrics = { turnoverThisWeek: data.turnoverThisWeek, allTimeTurnover: data.allTimeTurnover, updatedAt: data.turnoverUpdatedAt };
 
   return <AppShell active="Dashboard" title="Member overview" terminalHeader isMaster={data.isMaster} memberName={data.memberName} platformRole={data.platformRole} currentTier={data.currentTier} notifications={data.notifications} routeBase={routeBase}>
     <main className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
@@ -26,7 +23,6 @@ export function TerminalDashboard({ data, routeBase = "" }: { data: DashboardDat
             <TurnoverMetricCard label="Turnover this week" value={currency.format(data.turnoverThisWeek)} detail="Current weekly figure" />
             <TurnoverMetricCard label="All-time turnover" value={currency.format(data.allTimeTurnover)} detail={data.turnoverUpdatedAt ? `Updated ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(data.turnoverUpdatedAt))}` : "Lifetime reported figure"} />
           </div>
-          {canEditTurnover && <TurnoverMetricsEditor metrics={turnoverMetrics} />}
         </section>
         <section className="terminal-card border-t-2 border-t-primary-container p-6 lg:col-span-4"><p className="terminal-label text-primary-container">No learning gates</p><h2 className="mt-3 font-headline text-lg font-semibold text-white">Study in your own order</h2><p className="mt-2 text-sm leading-relaxed text-on-surface-variant">Course tiers and prerequisites no longer restrict what you can watch. Scheduled lessons appear when their release time arrives.</p></section>
 

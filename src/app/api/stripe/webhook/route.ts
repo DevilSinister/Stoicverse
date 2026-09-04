@@ -64,7 +64,7 @@ export async function POST(request: Request) {
         const renewalStart = currentExpiry > now ? currentExpiry : now;
         const expiresAt = new Date(renewalStart);
         expiresAt.setUTCMonth(expiresAt.getUTCMonth() + 1);
-        const { error } = await admin.from("memberships").upsert({ user_id: userId, status: "active", stripe_payment_intent: paymentIntent, amount_paid: amount, joined_at: existingMembership?.joined_at ?? now.toISOString(), expires_at: expiresAt.toISOString() }, { onConflict: "user_id" });
+        const { error } = await admin.from("memberships").upsert({ user_id: userId, status: "active", access_source: "stripe", stripe_payment_intent: paymentIntent, amount_paid: amount, joined_at: existingMembership?.joined_at ?? now.toISOString(), expires_at: expiresAt.toISOString() }, { onConflict: "user_id" });
         if (error) throw error;
       } else {
         const { error } = await admin.from("mentorships").upsert({ user_id: userId, stripe_payment_intent: paymentIntent, amount_paid: amount, status: "active" }, { onConflict: "stripe_payment_intent" });

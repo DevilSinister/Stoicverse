@@ -22,10 +22,10 @@ export async function renderDashboardPage({ nextPath = "/dashboard", routeBase =
     supabase.from("course_video_progress").select("video_id,completion_percentage,is_completed").eq("user_id", user.id),
     supabase.from("events").select("id, title, description, starts_at, min_tier, status").in("status", ["upcoming", "live"]).gte("starts_at", now).order("starts_at").limit(1),
     supabase.from("notifications").select("id, type, title, body, action_url, is_read, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
-    supabase.from("member_dashboard_turnover").select("turnover_this_week,all_time_turnover,updated_at").eq("id", true).maybeSingle(),
+    supabase.from("member_turnover_summary").select("current_week_turnover,all_time_turnover,updated_at").eq("user_id", user.id).maybeSingle(),
   ]);
 
-  const results = [profileResult, tierResult, enrollmentResult, coursesResult, courseVideosResult, videoProgressResult, eventsResult, notificationsResult];
+  const results = [profileResult, tierResult, enrollmentResult, coursesResult, courseVideosResult, videoProgressResult, eventsResult, notificationsResult, turnoverResult];
   if (results.some((result) => result.error)) {
     throw new Error("Unable to load your dashboard data.");
   }
@@ -92,7 +92,7 @@ export async function renderDashboardPage({ nextPath = "/dashboard", routeBase =
     upcomingEvent: eventsResult.data?.[0] ?? null,
     notifications: notificationsResult.data ?? [],
     tierProgressDetails,
-    turnoverThisWeek: Number(turnoverResult.data?.turnover_this_week ?? 0),
+    turnoverThisWeek: Number(turnoverResult.data?.current_week_turnover ?? 0),
     allTimeTurnover: Number(turnoverResult.data?.all_time_turnover ?? 0),
     turnoverUpdatedAt: turnoverResult.data?.updated_at ?? null,
   };

@@ -198,6 +198,7 @@ export function EventsView({
               now={now}
               currentTier={currentTier}
               isMaster={isMaster}
+              isStaff={isStaff}
               pending={pending}
               enrollmentAvailable={enrollmentAvailable}
             />
