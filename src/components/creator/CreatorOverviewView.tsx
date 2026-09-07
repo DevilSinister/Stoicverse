@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 import { AppShell, type Notification } from "@/components/layout/AppShell";
-import { TurnoverMetricsEditor, type TurnoverMetrics } from "@/components/dashboard/TurnoverMetricsEditor";
+
+type TurnoverMetrics = { turnoverThisWeek: number; allTimeTurnover: number; updatedAt: string | null };
 
 type ScheduleEvent = { id: string; title: string; startsAt: string; status: "upcoming" | "live"; enrollmentCount: number };
 type OverviewData = {
@@ -336,7 +337,7 @@ export function CreatorOverviewView({ memberName, notifications, turnoverMetrics
           <h2 className="font-sans text-2xl font-semibold text-white">Overview</h2>
           <p className="mt-1 font-body text-sm text-fog-muted">Monitor growth, revenue, and the work that needs your attention today.</p>
         </div>
-        <TurnoverMetricsEditor metrics={turnoverMetrics} />
+        <Link href="/creator/members/turnover" className="focus-ring inline-flex min-h-11 items-center gap-3 rounded-full border border-surgical-steel px-5 text-sm font-semibold text-white transition hover:border-primary-container hover:text-primary-container"><span className="font-mono tabular-nums">{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(turnoverMetrics.turnoverThisWeek)}</span><span className="text-fog-muted">this week</span></Link>
       </div>
 
       {error ? (

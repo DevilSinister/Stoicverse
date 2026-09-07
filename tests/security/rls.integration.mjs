@@ -7,7 +7,7 @@ const required = [
   "RLS_TIER1_JWT", "RLS_QUALIFIED_JWT", "RLS_MODERATOR_JWT", "RLS_INFLUENCER_JWT",
   "RLS_SUPER_ADMIN_JWT", "RLS_HIGH_TIER_EVENT_ID", "RLS_HIGH_TIER_LESSON_ID",
   "RLS_OTHER_NOTIFICATION_ID", "RLS_TIER1_USER_ID", "RLS_HIGH_TIER_COURSE_ID",
-  "RLS_LOCKED_COURSE_VIDEO_ID",
+  "RLS_LOCKED_COURSE_VIDEO_ID", "RLS_OTHER_MEMBER_ID",
 ];
 const missing = required.filter((name) => !process.env[name]);
 const skip = missing.length ? `Missing isolated Supabase RLS fixture variables: ${missing.join(", ")}` : false;
@@ -50,6 +50,23 @@ test("members cannot forge progress or mutate protected records", { skip }, asyn
   assert.notEqual((await member.from("profiles").update({ platform_role: "super_admin" }).eq("id", "00000000-0000-4000-8000-000000000001")).error, null);
   assert.notEqual((await member.from("memberships").update({ status: "active" }).neq("user_id", "00000000-0000-4000-8000-000000000001")).error, null);
   assert.notEqual((await member.from("payments").insert({})).error, null);
+  assert.notEqual((await member.rpc("gift_member_subscription", { target_user_id: process.env.RLS_OTHER_MEMBER_ID, gift_duration_months: 1 })).error, null);
+  assert.notEqual((await member.rpc("record_member_moderation", { target_user_id: process.env.RLS_OTHER_MEMBER_ID, moderation_action: "suspend", moderation_reason: "forged" })).error, null);
+  assert.notEqual((await member.rpc("set_member_platform_role", { target_user_id: process.env.RLS_OTHER_MEMBER_ID, desired_role: "moderator" })).error, null);
+  assert.notEqual((await member.from("member_weekly_turnover").upsert({ user_id: process.env.RLS_OTHER_MEMBER_ID, week_start: "2026-08-10", amount_usd: 50, updated_by: process.env.RLS_TIER1_USER_ID })).error, null);
+});
+
+test("members see only their turnover while the influencer can search the directory", { skip }, async () => {
+  const member = client(process.env.RLS_TIER1_JWT);
+  const ownSummary = await member.from("member_turnover_summary").select("user_id,current_week_turnover,all_time_turnover");
+  assert.equal(ownSummary.error, null, ownSummary.error?.message);
+  assert.ok(ownSummary.data.every((row) => row.user_id === process.env.RLS_TIER1_USER_ID));
+  assert.deepEqual((await member.rpc("search_creator_members", { page_size: 2 })).data, []);
+
+  const influencer = client(process.env.RLS_INFLUENCER_JWT);
+  const directory = await influencer.rpc("search_creator_members", { page_size: 2 });
+  assert.equal(directory.error, null, directory.error?.message);
+  assert.ok(Array.isArray(directory.data));
 });
 
 test("course writes and provider assets remain influencer-only", { skip }, async () => {
