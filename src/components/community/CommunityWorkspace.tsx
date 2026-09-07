@@ -1,4 +1,5 @@
-import { CommunitySurface, type CommunityCategory, type CommunityChannel, type CommunityPost } from "@/components/community/CommunitySurface";
+import { CommunitySurface } from "@/components/community/CommunitySurface";
+import type { CommunityCategory, CommunityChannel, CommunityPost } from "@/components/community/types";
 import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
 
 export type CommunityWorkspace = "member" | "creator";
@@ -42,7 +43,7 @@ export async function renderCommunityWorkspace({ nextPath, workspace, selectedCh
   }
   const permittedChannelIds = channels.filter((channel) => !channel.isLocked && !channel.isArchived).map((channel) => channel.id);
   const { data: postRows, error: postError } = permittedChannelIds.length
-    ? await supabase.from("posts").select("id,channel_id,author_id,body,image_url,is_pinned,created_at,profiles!posts_author_id_fkey(full_name),reactions(emoji,user_id)").in("channel_id", permittedChannelIds).eq("is_deleted", false).order("created_at", { ascending: true }).limit(100)
+    ? await supabase.from("posts").select("id,channel_id,author_id,body,image_url,is_pinned,created_at,profiles!posts_author_id_fkey(full_name,platform_role),reactions(emoji,user_id)").in("channel_id", permittedChannelIds).eq("is_deleted", false).order("created_at", { ascending: true }).limit(100)
     : { data: [], error: null };
   if (postError) throw new Error("Unable to load channel posts.");
   const rawPosts = postRows ?? [];
@@ -82,6 +83,8 @@ export async function renderCommunityWorkspace({ nextPath, workspace, selectedCh
     return {
       id: post.id,
       channelId: post.channel_id,
+      authorId: post.author_id ?? null,
+      authorRole: post.author_id ? authorProfile?.platform_role ?? null : null,
       authorName: post.author_id ? authorProfile?.full_name?.trim() || "Community staff" : "Deleted member",
       authorRoles: (roleResult.data ?? [])
         .filter((role) => post.author_id ? assignedRoleIdsByUser.get(post.author_id)?.has(role.id) : false)
