@@ -1,0 +1,82 @@
+{
+  "$comment": "Shared vectors for resolveChannelPermissions (TypeScript) and public.community_permissions (SQL). Role ids are synthetic. Expected arrays are in catalog order.",
+  "everyoneRoleId": "00000000-0000-4000-8000-000000000001",
+  "roles": {
+    "tier1": "00000000-0000-4000-8000-000000000011",
+    "moderator": "00000000-0000-4000-8000-000000000016",
+    "admin": "00000000-0000-4000-8000-000000000020"
+  },
+  "cases": [
+    {
+      "name": "read-only default: everyone base, no overrides",
+      "base": ["view_channel", "read_message_history", "add_reactions", "use_custom_emojis"],
+      "memberRoleIds": [],
+      "overrides": [],
+      "expected": ["view_channel", "read_message_history", "add_reactions", "use_custom_emojis"]
+    },
+    {
+      "name": "everyone allow opens posting in one channel",
+      "base": ["view_channel", "read_message_history", "add_reactions", "use_custom_emojis"],
+      "memberRoleIds": [],
+      "overrides": [{ "roleId": "00000000-0000-4000-8000-000000000001", "allow": ["send_messages"], "deny": [] }],
+      "expected": ["view_channel", "read_message_history", "send_messages", "add_reactions", "use_custom_emojis"]
+    },
+    {
+      "name": "everyone deny of view_channel hides the channel entirely",
+      "base": ["view_channel", "read_message_history", "add_reactions", "use_custom_emojis"],
+      "memberRoleIds": [],
+      "overrides": [{ "roleId": "00000000-0000-4000-8000-000000000001", "allow": [], "deny": ["view_channel"] }],
+      "expected": []
+    },
+    {
+      "name": "role allow beats everyone deny (private channel a role can see)",
+      "base": ["view_channel", "read_message_history", "add_reactions", "use_custom_emojis"],
+      "memberRoleIds": ["00000000-0000-4000-8000-000000000011"],
+      "overrides": [
+        { "roleId": "00000000-0000-4000-8000-000000000001", "allow": [], "deny": ["view_channel"] },
+        { "roleId": "00000000-0000-4000-8000-000000000011", "allow": ["view_channel", "send_messages"], "deny": [] }
+      ],
+      "expected": ["view_channel", "read_message_history", "send_messages", "add_reactions", "use_custom_emojis"]
+    },
+    {
+      "name": "role deny removes a base grant, then another role's allow restores it",
+      "base": ["view_channel", "read_message_history", "send_messages", "add_reactions", "use_custom_emojis"],
+      "memberRoleIds": ["00000000-0000-4000-8000-000000000011", "00000000-0000-4000-8000-000000000016"],
+      "overrides": [
+        { "roleId": "00000000-0000-4000-8000-000000000011", "allow": [], "deny": ["send_messages"] },
+        { "roleId": "00000000-0000-4000-8000-000000000016", "allow": ["send_messages"], "deny": [] }
+      ],
+      "expected": ["view_channel", "read_message_history", "send_messages", "add_reactions", "use_custom_emojis"]
+    },
+    {
+      "name": "an override for a role the member does not hold is ignored",
+      "base": ["view_channel", "read_message_history", "add_reactions", "use_custom_emojis"],
+      "memberRoleIds": [],
+      "overrides": [{ "roleId": "00000000-0000-4000-8000-000000000016", "allow": ["send_messages"], "deny": [] }],
+      "expected": ["view_channel", "read_message_history", "add_reactions", "use_custom_emojis"]
+    },
+    {
+      "name": "administrator ignores every override",
+      "base": ["administrator", "view_channel"],
+      "memberRoleIds": ["00000000-0000-4000-8000-000000000020"],
+      "overrides": [{ "roleId": "00000000-0000-4000-8000-000000000001", "allow": [], "deny": ["view_channel"] }],
+      "expectedAll": true
+    },
+    {
+      "name": "rules channel strips posting unless the member manages channels",
+      "channelType": "rules",
+      "base": ["view_channel", "read_message_history", "send_messages", "create_threads", "add_reactions", "use_custom_emojis"],
+      "memberRoleIds": [],
+      "overrides": [],
+      "expected": ["view_channel", "read_message_history", "add_reactions", "use_custom_emojis"]
+    },
+    {
+      "name": "rules channel keeps posting for channel managers",
+      "channelType": "rules",
+      "base": ["view_channel", "read_message_history", "send_messages", "manage_channels", "add_reactions", "use_custom_emojis"],
+      "memberRoleIds": [],
+      "overrides": [],
+      "expected": ["view_channel", "read_message_history", "send_messages", "manage_channels", "add_reactions", "use_custom_emojis"]
+    }
+  ]
+}

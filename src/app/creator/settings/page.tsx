@@ -1,56 +1,18 @@
-import {
-  CommunitySettingsWorkspace,
-  type CommunitySettingsSection,
-} from "@/components/creator/settings/CommunitySettingsWorkspace";
-import { loadAuditPage, loadBlockedWords, loadCommunityRoles } from "@/lib/community-settings/governance";
-import { loadCommunityIdentity } from "@/lib/community-settings/server";
-import { loadCommunityStructure } from "@/lib/community-settings/structure";
+import { SettingsPageShell } from "@/components/community/settings/SettingsPageShell";
+import { loadSettingsWorkspace } from "@/lib/community-settings/workspace";
 import { requireInfluencerWorkspace } from "@/lib/supabase/access";
-
-/** Validated server-side: `?section=` comes from the URL bar as readily as from the rail. */
-const VALID_SECTIONS = new Set<CommunitySettingsSection>([
-  "identity",
-  "channels",
-  "roles",
-  "composer",
-  "moderation",
-  "audit",
-]);
 
 export default async function CreatorSettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ section?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { supabase } = await requireInfluencerWorkspace("/creator/settings");
-  const [params, structure, identity, roles, blocked, audit] = await Promise.all([
-    searchParams,
-    loadCommunityStructure(supabase),
-    loadCommunityIdentity(supabase),
-    loadCommunityRoles(supabase),
-    loadBlockedWords(supabase),
-    loadAuditPage(supabase),
-  ]);
-
-  const requested = params.section as CommunitySettingsSection | undefined;
-  const initialSection = requested && VALID_SECTIONS.has(requested) ? requested : "identity";
+  const { supabase, user } = await requireInfluencerWorkspace("/creator/settings");
+  // The loader validates `?section=` against what this viewer may see and
+  // loads only that section's data; a viewer with nothing to see is sent home.
+  const workspace = await loadSettingsWorkspace(supabase, user.id, await searchParams, { onForbidden: "/creator" });
 
   return (
-    <CommunitySettingsWorkspace
-      initialSection={initialSection}
-      categories={structure.categories}
-      channels={structure.channels}
-      identity={identity.identity}
-      composer={identity.composer}
-      moderation={identity.moderation}
-      roles={roles.roles}
-      blockedPhrases={blocked.phrases}
-      auditEvents={audit.events}
-      auditDegraded={audit.degraded}
-      logoUrl={identity.logoUrl}
-      // Each loader degrades independently; the banner names every read that
-      // failed, and every write it gates stays disabled.
-      degraded={[...identity.degraded, ...roles.degraded, ...blocked.degraded]}
-    />
+    <SettingsPageShell workspace={workspace} base="/creator/settings" routeBase="/creator" platformRole="influencer" />
   );
 }

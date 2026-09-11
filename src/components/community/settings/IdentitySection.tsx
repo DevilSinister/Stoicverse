@@ -4,8 +4,8 @@ import { useMemo, useState, useTransition } from "react";
 import { Loader2, Upload } from "lucide-react";
 
 import { saveCommunityIdentity } from "@/app/creator/settings/actions";
-import { AccentField } from "@/components/creator/settings/AccentField";
-import { IdentityPreview } from "@/components/creator/settings/IdentityPreview";
+import { AccentField } from "@/components/community/settings/AccentField";
+import { IdentityPreview } from "@/components/community/settings/IdentityPreview";
 import {
   contrastRatio,
   IDENTITY_LIMITS,

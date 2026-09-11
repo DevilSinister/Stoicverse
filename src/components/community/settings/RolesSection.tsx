@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Loader2, ShieldAlert } from "lucide-react";
 
 import { saveRolePermissions } from "@/app/creator/settings/actions";
-import { RolePermissionGrid } from "@/components/creator/settings/RolePermissionGrid";
+import { RolePermissionGrid } from "@/components/community/settings/RolePermissionGrid";
 import type { RoleWithPermissions } from "@/lib/community-settings/governance";
 import {
   MODERATOR_BASELINE,
