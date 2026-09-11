@@ -157,3 +157,30 @@ export async function requireInfluencer() {
   }
   return { supabase, user };
 }
+
+/**
+ * Re-authorize one community mutation against the permission resolver.
+ *
+ * `community_has` is the same function the RLS policies read, so this check and
+ * the database's check cannot disagree. It is not the boundary — the RPC is —
+ * it exists so a moderator without the grant gets a sentence instead of a
+ * policy error, and so the action fails before it writes anything.
+ */
+export async function requireCommunityPermission(permission: string, channelId?: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Authentication required.");
+
+  const { data, error } = await supabase.rpc("community_has", {
+    permission,
+    channel: channelId ?? null,
+  });
+
+  if (error) {
+    console.error("[community]", { code: error.code ?? null });
+    throw new Error("Your permissions could not be checked. Try again in a moment.");
+  }
+  if (data !== true) throw new Error("You do not have permission to do that.");
+
+  return { supabase, user };
+}

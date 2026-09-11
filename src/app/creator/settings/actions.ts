@@ -1,15 +1,10 @@
 "use server";
 
-import {
-  parseBlockedPhrase,
-  parseIdentity,
-  parseModeration,
-  PERMISSION_KEYS,
-  type PermissionConfig,
-} from "@/lib/community-settings/model";
+import { parseBlockedPhrase, parseIdentity, parseModeration } from "@/lib/community-settings/model";
+import { parseRoleInput } from "@/lib/community-settings/role-model";
 import { isUuid } from "@/lib/security/uuid";
 import { revalidateCommunity } from "@/lib/community-settings/revalidate";
-import { requireInfluencer } from "@/lib/supabase/access";
+import { requireCommunityPermission, requireInfluencer } from "@/lib/supabase/access";
 import { postgresMessage } from "@/lib/supabase/errors";
 
 type Result = { error?: string; success?: true };
@@ -75,34 +70,123 @@ export async function saveCommunityIdentity(data: FormData): Promise<Result> {
 
 
 /**
- * Save one role's permission grants.
+ * Create or edit one role.
  *
- * Only the seven known keys are written, and only as booleans. The database
- * CHECK enforces the same thing — this makes the failure legible instead of a
- * raw 23514, and keeps a typo from becoming a grant that silently never applies.
+ * Everything this validates the database validates again, and the database is
+ * the boundary: `community_role_save` re-checks the actor's permission, the
+ * hierarchy, and that no grant is made which the actor does not itself hold.
+ * Parsing here only buys a legible message instead of a 23514 or a P0001 about
+ * a column name.
  */
-export async function saveRolePermissions(data: FormData): Promise<Result> {
-  const { supabase } = await requireInfluencer();
+export async function saveRole(data: FormData): Promise<Result & { roleId?: string }> {
+  const { supabase } = await requireCommunityPermission("manage_roles");
 
   const roleId = value(data, "roleId");
-  if (!isUuid(roleId)) return { error: "That role could not be found." };
+  if (roleId && !isUuid(roleId)) return { error: "That role could not be found." };
 
-  const granted = new Set(data.getAll("permissions").map(String));
-  const permissions: PermissionConfig = {};
-  for (const key of PERMISSION_KEYS) permissions[key] = granted.has(key);
+  let role;
+  try {
+    role = parseRoleInput({
+      name: value(data, "name"),
+      color: value(data, "color"),
+      hoist: data.get("hoist") !== null,
+      mentionable: data.get("mentionable") !== null,
+      iconEmoji: value(data, "iconEmoji"),
+      iconPath: value(data, "iconPath"),
+      permissions: data.getAll("permissions").map(String),
+    });
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "That role could not be saved." };
+  }
 
-  const { error } = await supabase
-    .from("cosmetic_roles")
-    .update({ permission_config: permissions })
-    .eq("id", roleId);
+  const { data: saved, error } = await supabase.rpc("community_role_save", {
+    role_id: roleId || null,
+    role_name: role.name,
+    role_color: role.color,
+    role_hoist: role.hoist,
+    role_mentionable: role.mentionable,
+    role_icon_emoji: role.iconEmoji,
+    role_icon_path: role.iconPath,
+    role_permissions: role.permissions,
+  });
 
   if (error) {
     return {
       error: postgresMessage(
         error,
-        "Those permissions could not be saved. If this persists, migration 20260911020000 may not be applied yet.",
+        "That role could not be saved. If this persists, migration 20260912010000 may not be applied yet.",
       ),
     };
+  }
+
+  revalidateCommunity();
+  return { success: true, roleId: typeof saved === "string" ? saved : undefined };
+}
+
+export async function deleteRole(roleId: string): Promise<Result> {
+  const { supabase } = await requireCommunityPermission("manage_roles");
+  if (!isUuid(roleId)) return { error: "That role could not be found." };
+
+  const { error } = await supabase.rpc("community_role_delete", { role_id: roleId });
+  if (error) return { error: postgresMessage(error, "That role could not be deleted.") };
+
+  revalidateCommunity();
+  return { success: true };
+}
+
+/**
+ * Commit a whole reorder in one call.
+ *
+ * `ordered` is every role except @everyone, lowest position first. One action
+ * and one UPDATE, because Next dispatches Server Actions sequentially per
+ * client: a call per row would serialise into N round trips, and the unique
+ * constraint on position would reject every intermediate state.
+ */
+export async function reorderRoles(ordered: string[]): Promise<Result> {
+  const { supabase } = await requireCommunityPermission("manage_roles");
+
+  if (!Array.isArray(ordered) || ordered.length === 0 || ordered.length > 200) {
+    return { error: "That reorder could not be applied." };
+  }
+  if (ordered.some((id) => !isUuid(id)) || new Set(ordered).size !== ordered.length) {
+    return { error: "That reorder could not be applied." };
+  }
+
+  const { error } = await supabase.rpc("community_roles_reorder", { ordered });
+  if (error) return { error: postgresMessage(error, "The new order could not be saved.") };
+
+  revalidateCommunity();
+  return { success: true };
+}
+
+/**
+ * Add and remove people from one role in a single action.
+ *
+ * Same reason as the reorder: one action taking arrays, not one action per
+ * member. Removals run first so swapping the whole membership of a capped role
+ * cannot trip over its own additions.
+ */
+export async function setRoleMembers(
+  roleId: string,
+  changes: { add?: string[]; remove?: string[] },
+): Promise<Result> {
+  const { supabase } = await requireCommunityPermission("manage_roles");
+
+  const add = [...new Set(changes.add ?? [])];
+  const remove = [...new Set(changes.remove ?? [])];
+  if (!isUuid(roleId) || [...add, ...remove].some((id) => !isUuid(id))) {
+    return { error: "That member or role could not be found." };
+  }
+  if (add.length + remove.length === 0) return { success: true };
+  if (add.length + remove.length > 50) return { error: "Change at most 50 members at a time." };
+
+  for (const memberId of remove) {
+    const { error } = await supabase.rpc("community_role_unassign", { role_id: roleId, member_id: memberId });
+    if (error) return { error: postgresMessage(error, "That member could not be removed from the role.") };
+  }
+  for (const memberId of add) {
+    const { error } = await supabase.rpc("community_role_assign", { role_id: roleId, member_id: memberId });
+    if (error) return { error: postgresMessage(error, "That member could not be given the role.") };
   }
 
   revalidateCommunity();

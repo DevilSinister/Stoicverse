@@ -64,61 +64,10 @@ export const ACCENT_SWATCHES = [
 // Composer and reaction rules are platform constants, not settings — see
 // src/lib/community/constants.ts and migration 20260912000000.
 
-/** Mirrors the key list in `is_valid_permission_config`. A key here that is not there is silently never granted. */
-export const PERMISSION_KEYS = [
-  "post",
-  "pin",
-  "delete_others",
-  "manage_channels",
-  "mention_all",
-  "mention_tier",
-  "bypass_slow_mode",
-] as const;
-
-export type PermissionKey = (typeof PERMISSION_KEYS)[number];
-export type PermissionConfig = Partial<Record<PermissionKey, boolean>>;
-
-/**
- * What a moderator can do without any cosmetic role.
- *
- * `mention_all` and `manage_channels` are deliberately absent: @all reaches
- * every active member at once and channel management reshapes what everyone
- * sees. Both need an explicit grant.
- */
-export const MODERATOR_BASELINE: PermissionKey[] = ["post", "pin", "delete_others", "mention_tier"];
-
-export const PERMISSION_LABELS: Record<PermissionKey, { label: string; detail: string; escalating: boolean }> = {
-  post: { label: "Post", detail: "Write messages in channels they can already open.", escalating: false },
-  pin: { label: "Pin", detail: "Pin and unpin any message in those channels.", escalating: false },
-  delete_others: {
-    label: "Delete others' messages",
-    detail: "Hide anyone's message. The original text is kept in the audit log.",
-    escalating: true,
-  },
-  manage_channels: {
-    label: "Manage channels",
-    detail: "Create, rename, gate, archive and reorder every channel.",
-    escalating: true,
-  },
-  mention_all: { label: "Mention @all", detail: "Notify every active member at once.", escalating: true },
-  mention_tier: { label: "Mention @tier-N", detail: "Notify one tier at a time.", escalating: false },
-  bypass_slow_mode: {
-    label: "Bypass slow mode",
-    detail: "Post without waiting out the channel's pace limit.",
-    escalating: false,
-  },
-};
-
-/** Drop unknown keys and non-booleans, exactly as the database CHECK does. */
-export function parsePermissionConfig(input: unknown): PermissionConfig {
-  if (!input || typeof input !== "object" || Array.isArray(input)) return {};
-  const known = new Set<string>(PERMISSION_KEYS);
-  const result: PermissionConfig = {};
-  for (const [key, value] of Object.entries(input as Record<string, unknown>)) {
-    if (known.has(key) && typeof value === "boolean") result[key as PermissionKey] = value;
-  }
-  return result;
-}
+// Roles, their permission vocabulary and their validation live in
+// permissions.ts and role-model.ts as of migration 20260912010000. The
+// seven-key grants-only `permission_config` they replaced is gone from the
+// database, so a copy of it here would be a list nothing reads.
 
 export type CommunityModeration = {
   slowModeSeconds: number;

@@ -2,18 +2,6 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { parsePermissionConfig, type PermissionConfig } from "@/lib/community-settings/model";
-
-export type RoleWithPermissions = {
-  id: string;
-  name: string;
-  color: string | null;
-  priority: number;
-  permissions: PermissionConfig;
-  /** Shown beside every role, so no grant is made blind. */
-  memberCount: number;
-};
-
 export type AuditEvent = {
   id: string;
   action: string;
@@ -26,53 +14,6 @@ export type AuditEvent = {
 };
 
 export const AUDIT_PAGE_SIZE = 25;
-
-/**
- * Roles with their grants and how many people hold each.
- *
- * "Effective for N members" is not decoration: a permission grid with no
- * headcount invites granting `delete_others` to a role that turns out to have
- * forty people in it.
- */
-export async function loadCommunityRoles(
-  supabase: SupabaseClient,
-): Promise<{ roles: RoleWithPermissions[]; degraded: string[] }> {
-  const [roleResult, assignmentResult] = await Promise.all([
-    supabase
-      .from("cosmetic_roles")
-      .select("id,name,color,priority,permission_config")
-      .order("priority", { ascending: false }),
-    supabase.from("cosmetic_role_assignments").select("role_id"),
-  ]);
-
-  if (roleResult.error) {
-    console.error("[community-settings]", { code: roleResult.error.code ?? null });
-    return { roles: [], degraded: ["Roles could not be read."] };
-  }
-
-  const counts = new Map<string, number>();
-  if (assignmentResult.error) {
-    console.error("[community-settings]", { code: assignmentResult.error.code ?? null });
-  } else {
-    for (const row of assignmentResult.data ?? []) {
-      counts.set(row.role_id, (counts.get(row.role_id) ?? 0) + 1);
-    }
-  }
-
-  return {
-    roles: (roleResult.data ?? []).map((role) => ({
-      id: role.id,
-      name: role.name,
-      color: role.color,
-      priority: role.priority,
-      permissions: parsePermissionConfig(role.permission_config),
-      memberCount: counts.get(role.id) ?? 0,
-    })),
-    // A failed headcount must not hide the roles themselves, but it must be
-    // said out loud rather than rendered as "0 members".
-    degraded: assignmentResult.error ? ["Member counts per role could not be read."] : [],
-  };
-}
 
 export async function loadBlockedWords(
   supabase: SupabaseClient,

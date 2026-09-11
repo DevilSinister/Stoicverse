@@ -4,14 +4,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
-import {
-  loadAuditPage,
-  loadBlockedWords,
-  loadCommunityRoles,
-  type AuditEvent,
-  type RoleWithPermissions,
-} from "@/lib/community-settings/governance";
-import { PERMISSION_KEYS, type PermissionKey } from "@/lib/community-settings/permissions";
+import { loadAuditPage, loadBlockedWords, type AuditEvent } from "@/lib/community-settings/governance";
+import { isPermissionKey, type PermissionKey } from "@/lib/community-settings/permissions";
+import { loadCommunityRoles, type RolesLoad } from "@/lib/community-settings/roles";
 import {
   parseSettingsQuery,
   visibleSections,
@@ -33,12 +28,14 @@ export type SettingsViewer = {
   isInfluencer: boolean;
   /** Serialisable for client components; build a Set where membership checks matter. */
   permissions: PermissionKey[];
+  /** Highest role position held. The influencer sits above every role that can exist. */
+  highestPosition: number;
 };
 
 export type SettingsWorkspaceData = {
   identity?: IdentityLoad;
   structure?: { categories: CommunityCategory[]; channels: CommunityChannel[] };
-  roles?: RoleWithPermissions[];
+  roles?: RolesLoad;
   blockedPhrases?: { id: string; phrase: string }[];
   audit?: { events: AuditEvent[]; nextCursor: string | null; degraded: string[] };
 };
@@ -55,20 +52,35 @@ export type SettingsWorkspace = {
 type SearchParams = Record<string, string | string[] | undefined>;
 
 /**
- * Until the role resolver ships, only the influencer holds settings
- * permissions. Moderators keep their in-channel baseline and see no settings.
+ * What this viewer may do, resolved by the database rather than inferred here.
+ *
+ * `community_my_permissions` is the same function every policy reads, so the
+ * rail cannot offer a section whose writes the database will refuse. A failed
+ * read degrades to no permissions: showing nothing is recoverable, showing a
+ * control that then fails is not.
  */
 async function loadViewer(supabase: SupabaseClient, userId: string): Promise<SettingsViewer> {
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("platform_role, is_suspended")
-    .eq("id", userId)
-    .maybeSingle();
+  const [profileResult, permissionResult, ceilingResult] = await Promise.all([
+    supabase.from("profiles").select("platform_role, is_suspended").eq("id", userId).maybeSingle(),
+    supabase.rpc("community_my_permissions"),
+    supabase.rpc("community_highest_position", { target: userId }),
+  ]);
+
+  const profile = profileResult.data;
   const isInfluencer = profile?.platform_role === "influencer" && !profile.is_suspended;
+
+  if (permissionResult.error) {
+    console.error("[community-settings]", { code: permissionResult.error.code ?? null });
+  }
+  const permissions = Array.isArray(permissionResult.data)
+    ? (permissionResult.data as unknown[]).filter(isPermissionKey)
+    : [];
+
   return {
     userId,
     isInfluencer,
-    permissions: isInfluencer ? [...PERMISSION_KEYS] : [],
+    permissions,
+    highestPosition: typeof ceilingResult.data === "number" ? ceilingResult.data : 0,
   };
 }
 
@@ -97,8 +109,8 @@ export async function loadSettingsWorkspace(
       break;
     }
     case "roles": {
-      const roles = await loadCommunityRoles(supabase);
-      data.roles = roles.roles;
+      const roles = await loadCommunityRoles(supabase, userId);
+      data.roles = roles;
       degraded.push(...roles.degraded);
       break;
     }

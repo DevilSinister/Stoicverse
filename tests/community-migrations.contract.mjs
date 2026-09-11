@@ -43,7 +43,10 @@ test("every function pins search_path and every definer is revoked from PUBLIC",
     for (const [, fn] of definers) {
       assert.match(
         sql,
-        new RegExp(`revoke execute on function ${fn.replace(".", "\\.")}\\([^)]*\\) from public;`),
+        // `from public` may be followed by more roles. anon and authenticated
+        // each hold their own EXECUTE grant from Supabase's default privileges,
+        // and revoking PUBLIC does not touch either of them.
+        new RegExp(`revoke execute on function ${fn.replace(".", "\\.")}\\([^)]*\\) from public\\b`),
         `${name}: ${fn} must be revoked from PUBLIC, not just anon`,
       );
     }

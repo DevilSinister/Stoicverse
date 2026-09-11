@@ -81,7 +81,7 @@ export function RoleManagerModal({ roles, onClose, onChanged }: { roles: Cosmeti
                       <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-lg border border-surgical-steel bg-surface-container-lowest"><span className="size-4 rounded-full ring-4 ring-black/10" style={{ backgroundColor: role.color }} /></span>
                       <button type="button" onClick={() => openEdit(role)} className="focus-ring min-w-0 flex-1 rounded-lg py-1 text-left">
                         <p className="truncate text-sm font-semibold text-white">{role.name}</p>
-                        <p className="mt-1 font-mono text-[11px] tabular-nums text-fog-muted">Priority {role.priority} · {role.color.toUpperCase()}</p>
+                        <p className="mt-1 font-mono text-[11px] tabular-nums text-fog-muted">Position {role.priority} · {role.color.toUpperCase()}</p>
                       </button>
                       <div className="flex shrink-0 items-center gap-1">
                         <button type="button" onClick={() => openEdit(role)} className="focus-ring grid size-10 place-items-center rounded-full text-fog-muted transition hover:bg-surface-container-low hover:text-white" aria-label={`Edit ${role.name}`}><Pencil size={15} /></button>
@@ -121,7 +121,7 @@ function RoleForm({ role, pending, action, cancel }: { role?: CosmeticRole; pend
       {role && <input type="hidden" name="id" value={role.id} />}
       <label className="block text-xs font-semibold text-on-surface-variant">Role name<input data-autofocus name="name" defaultValue={role?.name} required minLength={2} maxLength={32} placeholder="e.g. Founding member" className="focus-ring mt-2 min-h-12 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white placeholder:text-fog-muted sm:text-sm" /></label>
       <div className="grid grid-cols-[minmax(0,1fr)_6.5rem] gap-3">
-        <label className="block text-xs font-semibold text-on-surface-variant">Priority<input name="priority" type="number" min="0" max="1000" defaultValue={role?.priority ?? 0} className="focus-ring mt-2 min-h-12 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white sm:text-sm" /></label>
+        
         <label className="block text-xs font-semibold text-on-surface-variant">Color<input name="color" type="color" defaultValue={role?.color ?? "#10B981"} className="mt-2 min-h-12 w-full cursor-pointer rounded-lg border border-surgical-steel bg-surface-container-lowest p-1.5" /></label>
       </div>
       <p className="rounded-lg border border-surgical-steel bg-surface-container-lowest/65 px-3 py-3 text-xs leading-5 text-fog-muted">Cosmetic roles are visual only. Use platform roles to grant moderation access.</p>

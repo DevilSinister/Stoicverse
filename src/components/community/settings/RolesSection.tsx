@@ -1,28 +1,50 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Loader2, ShieldAlert } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, Lock, Plus, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
 
-import { saveRolePermissions } from "@/app/creator/settings/actions";
-import { RolePermissionGrid } from "@/components/community/settings/RolePermissionGrid";
-import type { RoleWithPermissions } from "@/lib/community-settings/governance";
-import {
-  MODERATOR_BASELINE,
-  PERMISSION_KEYS,
-  PERMISSION_LABELS,
-  type PermissionConfig,
-  type PermissionKey,
-} from "@/lib/community-settings/model";
+import { deleteRole, reorderRoles, saveRole } from "@/app/creator/settings/actions";
+import { RoleEditor } from "@/components/community/settings/roles/RoleEditor";
+import { canMove, describeMove, moveWithin } from "@/lib/community-settings/order";
+import { canManageRole, type PermissionKey, type ViewerForGrants } from "@/lib/community-settings/permissions";
+import { isTierRole, ROLE_LIMITS, type CommunityRole } from "@/lib/community-settings/role-model";
+import type { RolesLoad } from "@/lib/community-settings/roles";
 
-export function RolesSection({ roles, canSave }: { roles: RoleWithPermissions[]; canSave: boolean }) {
-  const [selectedId, setSelectedId] = useState(roles[0]?.id ?? "");
-  const selected = roles.find((role) => role.id === selectedId);
+const COMMIT_DELAY_MS = 600;
 
-  if (!roles.length) {
+/**
+ * The role hierarchy.
+ *
+ * Highest first, @everyone pinned to the bottom where it belongs: it is the
+ * floor every other role stacks on top of, and showing it in the middle of the
+ * list would suggest it could be reordered.
+ */
+export function RolesSection({
+  data,
+  viewer,
+  canSave,
+}: {
+  data: RolesLoad;
+  viewer: { isInfluencer: boolean; permissions: PermissionKey[]; highestPosition: number };
+  canSave: boolean;
+}) {
+  const grants: ViewerForGrants = {
+    isOwner: viewer.isInfluencer,
+    permissions: new Set(viewer.permissions),
+    highestPosition: viewer.isInfluencer ? Number.MAX_SAFE_INTEGER : viewer.highestPosition,
+  };
+
+  const { order, status, announcement, move, canMoveRole } = useRoleOrder(data.roles, canSave);
+  const everyone = data.roles.find((role) => role.systemKey === "everyone") ?? null;
+
+  const [selectedId, setSelectedId] = useState(order[0]?.id ?? everyone?.id ?? "");
+  const selected = data.roles.find((role) => role.id === selectedId) ?? order[0] ?? everyone ?? null;
+
+  if (!data.roles.length) {
     return (
       <div className="rounded-xl border border-surgical-steel p-6">
         <p className="text-sm leading-6 text-on-surface-variant">
-          No roles exist yet. Create one in Members, then come back to decide what it can do.
+          Roles could not be read, so there is nothing to edit here yet.
         </p>
       </div>
     );
@@ -32,36 +54,68 @@ export function RolesSection({ roles, canSave }: { roles: RoleWithPermissions[];
     <div className="space-y-6">
       <Preamble />
 
-      <div className="md:grid md:grid-cols-[14rem_minmax(0,1fr)] md:gap-6">
-        <ul className="mb-4 space-y-1 md:mb-0">
-          {roles.map((role) => {
-            const current = role.id === selectedId;
-            return (
-              <li key={role.id}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedId(role.id)}
-                  aria-current={current ? "true" : undefined}
-                  className={`focus-ring flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm transition ${
-                    current
-                      ? "bg-surface-container-high text-white"
-                      : "text-on-surface-variant hover:bg-surface-container-high/50"
-                  }`}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="size-3 shrink-0 rounded-full border border-surgical-steel"
-                    style={role.color ? { background: role.color } : undefined}
-                  />
-                  <span className="min-w-0 flex-1 truncate font-semibold">{role.name}</span>
-                  <span className="shrink-0 text-xs text-fog-muted">{role.memberCount}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+      <div className="md:grid md:grid-cols-[17rem_minmax(0,1fr)] md:gap-6">
+        <div className="mb-6 md:mb-0">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">Roles</h2>
+            <CreateRoleButton disabled={!canSave} onCreated={setSelectedId} />
+          </div>
 
-        {selected && <RoleForm key={selected.id} role={selected} canSave={canSave} />}
+          <ul className="mt-2 space-y-1">
+            {order.map((role) => (
+              <RoleRow
+                key={role.id}
+                role={role}
+                iconUrl={data.iconUrls[role.id] ?? null}
+                current={role.id === selected?.id}
+                manageable={canManageRole(grants, role)}
+                canMoveUp={canMoveRole(role.id, "up")}
+                canMoveDown={canMoveRole(role.id, "down")}
+                onSelect={() => setSelectedId(role.id)}
+                onMove={move}
+              />
+            ))}
+            {everyone && (
+              <RoleRow
+                role={everyone}
+                iconUrl={null}
+                current={everyone.id === selected?.id}
+                manageable={canManageRole(grants, everyone)}
+                canMoveUp={false}
+                canMoveDown={false}
+                pinned
+                onSelect={() => setSelectedId(everyone.id)}
+                onMove={move}
+              />
+            )}
+          </ul>
+
+          <p aria-live="polite" className="sr-only">
+            {announcement}
+          </p>
+          {status === "failed" && (
+            <p role="alert" className="mt-2 text-xs leading-5 text-error">
+              The new order could not be saved, so the list has gone back to the saved one.
+            </p>
+          )}
+          {status === "saving" && <p className="mt-2 text-xs leading-5 text-fog-muted">Saving order…</p>}
+        </div>
+
+        {selected && (
+          <div className="min-w-0 space-y-6">
+            <RoleEditor
+              key={selected.id}
+              role={selected}
+              iconUrl={data.iconUrls[selected.id] ?? null}
+              viewer={grants}
+              editable={canManageRole(grants, selected) && !isTierRole(selected.systemKey)}
+              canSave={canSave}
+            />
+            {selected.systemKey === null && canManageRole(grants, selected) && (
+              <DeleteRoleCard role={selected} disabled={!canSave} onDeleted={() => setSelectedId(everyone?.id ?? "")} />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -72,110 +126,321 @@ function Preamble() {
   return (
     <div className="rounded-xl border border-surgical-steel bg-surface-container-low p-4">
       <p className="text-sm leading-6 text-on-surface">
-        Grants compose with channel access — they never bypass it. A role with <strong>Post</strong> still cannot open
-        a Tier 4 channel from Tier 1.
+        Roles stack. A member holds every role given to them and can do the union of what those roles allow — the
+        highest one that carries a colour sets the colour of their name.
       </p>
       <p className="mt-2 text-xs leading-5 text-fog-muted">
-        Moderators already hold {MODERATOR_BASELINE.map((key) => PERMISSION_LABELS[key].label).join(", ")} without any
-        role. Mentioning everyone and managing channels are deliberately not in that baseline — they need a grant here.
+        You can only edit, reorder and assign roles below your own highest role, and you cannot grant a permission you
+        do not hold yourself. The tier roles and Moderator are assigned automatically and cannot be handed out here.
       </p>
     </div>
   );
 }
 
-function RoleForm({ role, canSave }: { role: RoleWithPermissions; canSave: boolean }) {
-  const [permissions, setPermissions] = useState<PermissionConfig>(role.permissions);
-  const [baseline, setBaseline] = useState(() => JSON.stringify(role.permissions));
-  const [confirmation, setConfirmation] = useState("");
-  const [feedback, setFeedback] = useState<{ tone: "error" | "success"; message: string } | null>(null);
-  const [pending, startTransition] = useTransition();
-
-  const dirty = JSON.stringify(permissions) !== baseline;
-
-  // Only newly-added escalating grants need the confirm. Removing one, or
-  // saving one that was already in force, should not demand ceremony.
-  const newlyEscalating = PERMISSION_KEYS.filter(
-    (key) => PERMISSION_LABELS[key].escalating && permissions[key] === true && role.permissions[key] !== true,
+/**
+ * Local order with a debounced commit.
+ *
+ * A keyboard reorder has to feel immediate, so the list moves on keypress and
+ * the write follows. Holding Move up through nine roles would otherwise fire
+ * nine writes. On failure the list snaps back to the server order rather than
+ * leaving someone looking at an arrangement that was never saved.
+ */
+function useRoleOrder(serverRoles: CommunityRole[], enabled: boolean) {
+  // Highest first for display; @everyone is never in this list.
+  const build = useCallback(
+    (roles: CommunityRole[]) =>
+      roles
+        .filter((role) => role.systemKey !== "everyone")
+        .slice()
+        .sort((left, right) => right.position - left.position)
+        .map((role) => ({ ...role, isArchived: false })),
+    [],
   );
-  const needsConfirmation = newlyEscalating.length > 0;
-  const confirmed = !needsConfirmation || confirmation.trim() === role.name;
 
-  const toggle = (key: PermissionKey, next: boolean) =>
-    setPermissions((current) => ({ ...current, [key]: next }));
+  const [order, setOrder] = useState(() => build(serverRoles));
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "failed">("idle");
+  const [announcement, setAnnouncement] = useState("");
+
+  // Re-seed during render, not in an effect, so a revalidated page paints the
+  // server's order immediately instead of one frame of the stale local one.
+  const [seeded, setSeeded] = useState(serverRoles);
+  if (serverRoles !== seeded) {
+    setSeeded(serverRoles);
+    setOrder(build(serverRoles));
+    setStatus("idle");
+  }
+
+  const timer = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+    },
+    [],
+  );
+
+  const move = useCallback(
+    (id: string, direction: "up" | "down") => {
+      if (!enabled) return;
+      const next = moveWithin(order, id, direction);
+      if (next === order) return;
+      setOrder(next);
+
+      const index = next.findIndex((role) => role.id === id);
+      setAnnouncement(describeMove(next[index].name, index + 1, next.length));
+
+      if (timer.current !== null) window.clearTimeout(timer.current);
+      setStatus("saving");
+      timer.current = window.setTimeout(async () => {
+        timer.current = null;
+        // The RPC reads the array lowest-first, so index 1 lands at position 1
+        // and @everyone keeps 0. The list itself is displayed highest-first.
+        const result = await reorderRoles(next.map((role) => role.id).reverse());
+        if (result.error) {
+          setStatus("failed");
+          setOrder(build(serverRoles));
+          return;
+        }
+        setStatus("saved");
+      }, COMMIT_DELAY_MS);
+    },
+    [build, enabled, order, serverRoles],
+  );
+
+  const canMoveRole = useCallback((id: string, direction: "up" | "down") => canMove(order, id, direction), [order]);
+
+  return { order, status, announcement, move, canMoveRole };
+}
+
+function RoleRow({
+  role,
+  iconUrl,
+  current,
+  manageable,
+  canMoveUp,
+  canMoveDown,
+  pinned = false,
+  onSelect,
+  onMove,
+}: {
+  role: CommunityRole;
+  iconUrl: string | null;
+  current: boolean;
+  manageable: boolean;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  pinned?: boolean;
+  onSelect: () => void;
+  onMove: (id: string, direction: "up" | "down") => void;
+}) {
+  const automatic = role.systemKey !== null && role.systemKey !== "everyone";
+
+  return (
+    <li className={pinned ? "mt-2 border-t border-surgical-steel pt-2" : undefined}>
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-current={current ? "true" : undefined}
+          className={`focus-ring flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left text-sm transition ${
+            current
+              ? "bg-surface-container-high text-white"
+              : "text-on-surface-variant hover:bg-surface-container-high/50"
+          }`}
+        >
+          {role.iconEmoji ? (
+            <span aria-hidden="true" className="shrink-0 text-sm">
+              {role.iconEmoji}
+            </span>
+          ) : iconUrl ? (
+            <img src={iconUrl} alt="" aria-hidden="true" className="size-4 shrink-0 rounded object-contain" />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="size-3 shrink-0 rounded-full border border-surgical-steel"
+              style={{ background: role.color }}
+            />
+          )}
+          <span className="min-w-0 flex-1 truncate font-semibold">{role.name}</span>
+          {automatic && <Lock size={12} aria-hidden="true" className="shrink-0 text-fog-muted" />}
+          <span className="shrink-0 text-xs text-fog-muted">{role.memberCount}</span>
+        </button>
+
+        {!pinned && (
+          <span className="flex shrink-0 flex-col">
+            <button
+              type="button"
+              onClick={() => onMove(role.id, "up")}
+              disabled={!manageable || !canMoveUp}
+              aria-label={`Move ${role.name} up`}
+              className="focus-ring inline-flex size-6 items-center justify-center rounded text-fog-muted transition hover:text-white disabled:opacity-30"
+            >
+              <ChevronUp size={14} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onMove(role.id, "down")}
+              disabled={!manageable || !canMoveDown}
+              aria-label={`Move ${role.name} down`}
+              className="focus-ring inline-flex size-6 items-center justify-center rounded text-fog-muted transition hover:text-white disabled:opacity-30"
+            >
+              <ChevronDown size={14} aria-hidden="true" />
+            </button>
+          </span>
+        )}
+      </div>
+    </li>
+  );
+}
+
+function CreateRoleButton({ disabled, onCreated }: { disabled: boolean; onCreated: (roleId: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const nameId = useId();
 
   const submit = (data: FormData) =>
     startTransition(async () => {
-      const result = await saveRolePermissions(data);
+      const result = await saveRole(data);
       if (result.error) {
-        setFeedback({ tone: "error", message: result.error });
+        setError(result.error);
         return;
       }
-      setBaseline(JSON.stringify(permissions));
-      setConfirmation("");
-      setFeedback({
-        tone: "success",
-        message: `Saved. This applies to ${role.memberCount} ${
-          role.memberCount === 1 ? "member" : "members"
-        } on their next page load.`,
-      });
+      setError(null);
+      setOpen(false);
+      if (result.roleId) onCreated(result.roleId);
+    });
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen(true)}
+        className="focus-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-primary-container transition hover:bg-primary-container/10 disabled:opacity-40"
+      >
+        <Plus size={14} aria-hidden="true" />
+        New role
+      </button>
+    );
+  }
+
+  return (
+    <form action={submit} className="w-full space-y-2 rounded-lg border border-surgical-steel p-3">
+      {/* A new role starts with no grants at all: it is created, then opened,
+          and every permission on it is a deliberate second step. */}
+      <input type="hidden" name="color" value="#94A3B8" />
+      <label htmlFor={nameId} className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">
+        New role name
+      </label>
+      <input
+        id={nameId}
+        name="name"
+        required
+        autoFocus
+        minLength={ROLE_LIMITS.name.min}
+        maxLength={ROLE_LIMITS.name.max}
+        className="focus-ring h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none sm:text-sm"
+      />
+      {error && (
+        <p role="alert" className="text-xs leading-5 text-error">
+          {error}
+        </p>
+      )}
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className="focus-ring inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-primary-container px-3 text-sm font-semibold text-on-primary-fixed disabled:opacity-40"
+        >
+          {pending && <Loader2 size={14} aria-hidden="true" className="animate-spin" />}
+          Create
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="focus-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm text-fog-muted transition hover:text-white"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/**
+ * Deleting a role takes its grants away from everyone holding it, so the
+ * confirmation asks for the name whenever anyone does.
+ */
+function DeleteRoleCard({
+  role,
+  disabled,
+  onDeleted,
+}: {
+  role: CommunityRole;
+  disabled: boolean;
+  onDeleted: () => void;
+}) {
+  const [confirmation, setConfirmation] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const confirmId = useId();
+
+  const needsTyping = role.memberCount > 0;
+  const confirmed = !needsTyping || confirmation.trim() === role.name;
+
+  const remove = () =>
+    startTransition(async () => {
+      const result = await deleteRole(role.id);
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      onDeleted();
     });
 
   return (
-    <form action={submit} className="space-y-4">
-      <input type="hidden" name="roleId" value={role.id} />
+    <div className="rounded-xl border border-error/40 p-4">
+      <h3 className="text-sm font-semibold text-error">Delete {role.name}</h3>
+      <p className="mt-1 text-xs leading-5 text-fog-muted">
+        {needsTyping
+          ? `${role.memberCount} ${role.memberCount === 1 ? "member holds" : "members hold"} this role and will lose everything it grants. Type ${role.name} to confirm.`
+          : "Nobody holds this role, so nothing changes for any member."}
+      </p>
 
-      <div>
-        <h2 className="font-headline text-lg font-bold text-white">{role.name}</h2>
-        <p className="mt-0.5 text-xs leading-5 text-fog-muted">
-          Effective for {role.memberCount} {role.memberCount === 1 ? "member" : "members"}.
-        </p>
-      </div>
-
-      <RolePermissionGrid permissions={permissions} onToggle={toggle} disabled={pending} />
-
-      {needsConfirmation && (
-        <div className="rounded-lg border border-error/40 bg-error/10 p-3">
-          <p className="flex items-start gap-2 text-sm leading-6 text-error">
-            <ShieldAlert size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
-            <span>
-              You are granting {newlyEscalating.map((key) => PERMISSION_LABELS[key].label).join(" and ")} to{" "}
-              {role.memberCount} {role.memberCount === 1 ? "member" : "members"}. Type <strong>{role.name}</strong> to
-              confirm.
-            </span>
-          </p>
-          <label htmlFor="role-confirm" className="sr-only">
-            Type the role name to confirm
+      {needsTyping && (
+        <>
+          <label htmlFor={confirmId} className="sr-only">
+            Type the role name to confirm deletion
           </label>
           <input
-            id="role-confirm"
+            id={confirmId}
             value={confirmation}
             onChange={(event) => setConfirmation(event.target.value)}
             autoComplete="off"
             className="focus-ring mt-3 h-11 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none"
           />
-        </div>
+        </>
       )}
 
-      {feedback && (
-        <p
-          role={feedback.tone === "error" ? "alert" : "status"}
-          className={`text-sm leading-6 ${feedback.tone === "error" ? "text-error" : "text-primary-container"}`}
-        >
-          {feedback.message}
+      {error && (
+        <p role="alert" className="mt-2 text-sm leading-6 text-error">
+          {error}
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-surgical-steel pt-4">
-        <button
-          type="submit"
-          disabled={!canSave || !dirty || !confirmed || pending}
-          className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary-container px-5 text-sm font-semibold text-on-primary-fixed transition hover:brightness-110 disabled:opacity-40"
-        >
-          {pending && <Loader2 size={15} aria-hidden="true" className="animate-spin" />}
-          Save permissions
-        </button>
-        {!canSave && <span className="text-xs leading-5 text-error">Saving is unavailable right now.</span>}
-      </div>
-    </form>
+      <button
+        type="button"
+        onClick={remove}
+        disabled={disabled || !confirmed || pending}
+        className="focus-ring mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg border border-error/40 px-4 text-sm font-semibold text-error transition hover:bg-error/10 disabled:opacity-40"
+      >
+        {pending ? (
+          <Loader2 size={14} aria-hidden="true" className="animate-spin" />
+        ) : (
+          <Trash2 size={14} aria-hidden="true" />
+        )}
+        Delete role
+      </button>
+    </div>
   );
 }

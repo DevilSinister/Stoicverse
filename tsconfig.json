@@ -6,6 +6,11 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    // Lets a node-testable module import a sibling by its real filename.
+    // `node --test` loads these .ts files directly and resolves extensionless
+    // relative specifiers for type-only imports alone, so a value import between
+    // two of them has to name the extension.
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",

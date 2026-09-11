@@ -165,7 +165,11 @@ test("identity writes hard-fail and name the outstanding migration", async () =>
   assert.doesNotMatch(actions, /\.error\.message/);
 });
 
-test("permission grants are a union, never a deny list", async () => {
+test("the 2026-09-11 grant system was a union, never a deny list", async () => {
+  // Superseded by phase 2 (20260912010000), which introduces per-channel
+  // Allow/Neutral/Deny overrides under a fixed precedence. This keeps asserting
+  // what the earlier migration says — that file does not change — and the
+  // reasoning below is why the new denies are confined to channel scope.
   const migration = await read("supabase/migrations/20260911020000_community_role_permissions.sql");
 
   // A union is monotone, so "why can this person do X" always has a one-hop

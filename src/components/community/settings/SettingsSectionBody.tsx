@@ -36,7 +36,7 @@ export function SettingsSectionBody({ workspace }: { workspace: SettingsWorkspac
         </div>
       ) : null;
     case "roles":
-      return data.roles ? <RolesSection roles={data.roles} canSave={canSave} /> : null;
+      return data.roles ? <RolesSection data={data.roles} viewer={workspace.viewer} canSave={canSave} /> : null;
     case "safety":
       return data.identity && data.blockedPhrases ? (
         <ModerationSection moderation={data.identity.moderation} phrases={data.blockedPhrases} canSave={canSave} />

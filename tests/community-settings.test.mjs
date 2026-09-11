@@ -11,13 +11,9 @@ import {
   MIN_ACCENT_CONTRAST,
   matchesBlockedWord,
   MODERATION_LIMITS,
-  MODERATOR_BASELINE,
   parseBlockedPhrase,
   parseIdentity,
   parseModeration,
-  parsePermissionConfig,
-  PERMISSION_KEYS,
-  PERMISSION_LABELS,
   relativeLuminance,
   SURFACE_COLOR,
 } from "../src/lib/community-settings/model.ts";
@@ -112,36 +108,10 @@ const moderation = (overrides = {}) => ({
   ...overrides,
 });
 
-test("an unknown permission key is dropped, exactly as the database CHECK drops it", () => {
-  // A typo like mention_All would otherwise read as NULL in SQL: the grant
-  // silently never applies and nothing errors.
-  const parsed = parsePermissionConfig({ pin: true, mention_All: true, post: "yes", manage_channels: false });
-  assert.deepEqual(parsed, { pin: true, manage_channels: false });
-});
-
-test("parsePermissionConfig survives the shapes jsonb can actually hold", () => {
-  assert.deepEqual(parsePermissionConfig(null), {});
-  assert.deepEqual(parsePermissionConfig([]), {});
-  assert.deepEqual(parsePermissionConfig("pin"), {});
-});
-
-test("the moderator baseline withholds the two escalating grants", () => {
-  // @all reaches every active member at once and channel management reshapes
-  // what everyone sees. Neither is free with the moderator role.
-  assert.ok(!MODERATOR_BASELINE.includes("mention_all"));
-  assert.ok(!MODERATOR_BASELINE.includes("manage_channels"));
-  assert.deepEqual(MODERATOR_BASELINE, ["post", "pin", "delete_others", "mention_tier"]);
-});
-
-test("every permission key carries a label, and the escalating ones are marked", () => {
-  for (const key of PERMISSION_KEYS) {
-    assert.ok(PERMISSION_LABELS[key], `${key} has no label`);
-  }
-  assert.equal(PERMISSION_LABELS.delete_others.escalating, true);
-  assert.equal(PERMISSION_LABELS.manage_channels.escalating, true);
-  assert.equal(PERMISSION_LABELS.mention_all.escalating, true);
-  assert.equal(PERMISSION_LABELS.post.escalating, false);
-});
+// The seven-key permission_config these four tests covered was replaced in
+// phase 2 by the 24-key catalog. Its successors are the catalog and resolver
+// units in community-permissions.test.mjs and the SQL-to-TypeScript equality
+// assertion in community-roles.contract.mjs.
 
 test("word mode matches a whole word and ignores it inside a longer one", () => {
   assert.equal(matchesBlockedWord("a badword here", ["badword"], "word"), "badword");
