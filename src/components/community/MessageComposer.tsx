@@ -4,12 +4,19 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { AtSign, Loader2, Paperclip, SendHorizontal, Smile, X } from "lucide-react";
 
 import { createStaffPost } from "@/app/community/actions";
-import { REACTION_OPTIONS } from "@/components/community/types";
+import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
+import {
+  ATTACHMENT_MAX_BYTES,
+  formatBytes,
+  isAllowedAttachmentType,
+  MESSAGE_COUNTER_FROM,
+  MESSAGE_MAX_CHARS,
+} from "@/lib/community/constants";
 import { createClient } from "@/lib/supabase/client";
 
-const MAX_BODY = 10_000;
-const COUNTER_FROM = 8_000;
-const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
+// Platform constants, not settings: the same numbers the database enforces.
+const MAX_BODY = MESSAGE_MAX_CHARS;
+const COUNTER_FROM = MESSAGE_COUNTER_FROM;
 
 const MENTIONS = [
   { label: "@all", detail: "Everyone in the community" },
@@ -98,8 +105,13 @@ export function MessageComposer({
   const attach = useCallback(
     (candidate: File | null | undefined) => {
       if (!candidate) return;
-      if (candidate.size > MAX_ATTACHMENT_BYTES) {
-        onNotice("Attachments must be 20 MB or smaller.");
+      // Checked here rather than in `accept=`, because drop and paste bypass it.
+      if (!isAllowedAttachmentType(candidate.type)) {
+        onNotice("That file type cannot be attached here. Images, video and PDF are accepted.");
+        return;
+      }
+      if (candidate.size > ATTACHMENT_MAX_BYTES) {
+        onNotice(`Attachments must be ${formatBytes(ATTACHMENT_MAX_BYTES)} or smaller.`);
         return;
       }
       setFile(candidate);
@@ -292,23 +304,15 @@ export function MessageComposer({
       )}
 
       {emojiOpen && (
-        <div
-          ref={emojiRef}
-          className="absolute bottom-full left-0 z-[55] mb-2 w-[min(16rem,calc(100vw-2rem))] rounded-xl border border-surgical-steel bg-monolith-surface p-2 shadow-[0_18px_48px_-24px_rgba(0,0,0,0.9)]"
-        >
-          <div className="grid grid-cols-6 gap-1">
-            {REACTION_OPTIONS.map((emoji) => (
-              <button
-                key={emoji}
-                type="button"
-                onClick={() => insertEmoji(emoji)}
-                aria-label={`Insert ${emoji}`}
-                className="focus-ring grid size-9 place-items-center rounded-lg text-lg transition hover:bg-surface-container-high"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
+        <div ref={emojiRef} className="absolute bottom-full left-0 z-[55] mb-2">
+          <EmojiPicker
+            mode="insert"
+            onSelect={(selection) => {
+              if (selection.kind === "unicode") insertEmoji(selection.glyph);
+              else insertEmoji(`<:${selection.name}:${selection.id}>`);
+            }}
+            onClose={() => setEmojiOpen(false)}
+          />
         </div>
       )}
 

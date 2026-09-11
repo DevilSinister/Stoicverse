@@ -2,7 +2,6 @@
 
 import {
   parseBlockedPhrase,
-  parseComposer,
   parseIdentity,
   parseModeration,
   PERMISSION_KEYS,
@@ -74,54 +73,6 @@ export async function saveCommunityIdentity(data: FormData): Promise<Result> {
   return { success: true };
 }
 
-/**
- * Save the composer and reaction rules.
- *
- * Each of these is a real predicate: the emoji set is read by the reactions
- * policy, and the length, link and attachment rules by a `BEFORE INSERT OR
- * UPDATE` trigger. Nothing saved here is advisory.
- */
-export async function saveCommunityComposer(data: FormData): Promise<Result> {
-  const { supabase } = await requireInfluencer();
-
-  let composer;
-  try {
-    composer = parseComposer({
-      reactionEmojis: data.getAll("reactionEmojis").map(String),
-      maxBodyLength: value(data, "maxBodyLength"),
-      allowLinks: data.get("allowLinks") !== null,
-      allowAttachments: data.get("allowAttachments") !== null,
-      maxAttachmentBytes: value(data, "maxAttachmentBytes"),
-      allowedAttachmentTypes: data.getAll("allowedAttachmentTypes").map(String),
-    });
-  } catch (error) {
-    return { error: error instanceof Error ? error.message : "Those settings could not be saved." };
-  }
-
-  const { error } = await supabase
-    .from("community_settings")
-    .update({
-      reaction_emojis: composer.reactionEmojis,
-      max_body_length: composer.maxBodyLength,
-      allow_links: composer.allowLinks,
-      allow_attachments: composer.allowAttachments,
-      max_attachment_bytes: composer.maxAttachmentBytes,
-      allowed_attachment_types: composer.allowedAttachmentTypes,
-    })
-    .eq("id", true);
-
-  if (error) {
-    return {
-      error: postgresMessage(
-        error,
-        "Composer rules could not be saved. If this persists, migration 20260911010000 may not be applied yet.",
-      ),
-    };
-  }
-
-  revalidateCommunity();
-  return { success: true };
-}
 
 /**
  * Save one role's permission grants.

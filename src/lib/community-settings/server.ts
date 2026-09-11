@@ -3,17 +3,14 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import {
-  DEFAULT_COMMUNITY_COMPOSER,
   DEFAULT_COMMUNITY_IDENTITY,
   DEFAULT_COMMUNITY_MODERATION,
-  type CommunityComposer,
   type CommunityIdentity,
   type CommunityModeration,
 } from "@/lib/community-settings/model";
 
 export type IdentityLoad = {
   identity: CommunityIdentity;
-  composer: CommunityComposer;
   moderation: CommunityModeration;
   logoUrl: string | null;
   /** Human-readable notes about what could not be read. Empty when everything loaded. */
@@ -38,7 +35,7 @@ export async function loadCommunityIdentity(supabase: SupabaseClient): Promise<I
       // the type level, and a concatenated expression degrades every column to
       // GenericStringError.
       .select(
-        "tagline,logo_path,accent_color,welcome_message,rules,show_welcome,reaction_emojis,max_body_length,allow_links,allow_attachments,max_attachment_bytes,allowed_attachment_types,slow_mode_seconds,edit_window_minutes,delete_requires_reason,blocked_word_mode,blocked_word_match",
+        "tagline,logo_path,accent_color,welcome_message,rules,show_welcome,slow_mode_seconds,edit_window_minutes,delete_requires_reason,blocked_word_mode,blocked_word_match",
       )
       .maybeSingle(),
     supabase.from("platform_settings").select("community_name").maybeSingle(),
@@ -72,15 +69,6 @@ export async function loadCommunityIdentity(supabase: SupabaseClient): Promise<I
     ? supabase.storage.from("community-branding").getPublicUrl(identity.logoPath).data.publicUrl
     : null;
 
-  const composer: CommunityComposer = {
-    reactionEmojis: row?.reaction_emojis ?? DEFAULT_COMMUNITY_COMPOSER.reactionEmojis,
-    maxBodyLength: row?.max_body_length ?? DEFAULT_COMMUNITY_COMPOSER.maxBodyLength,
-    allowLinks: row?.allow_links ?? DEFAULT_COMMUNITY_COMPOSER.allowLinks,
-    allowAttachments: row?.allow_attachments ?? DEFAULT_COMMUNITY_COMPOSER.allowAttachments,
-    maxAttachmentBytes: row?.max_attachment_bytes ?? DEFAULT_COMMUNITY_COMPOSER.maxAttachmentBytes,
-    allowedAttachmentTypes: row?.allowed_attachment_types ?? DEFAULT_COMMUNITY_COMPOSER.allowedAttachmentTypes,
-  };
-
   const moderation: CommunityModeration = {
     slowModeSeconds: row?.slow_mode_seconds ?? DEFAULT_COMMUNITY_MODERATION.slowModeSeconds,
     editWindowMinutes: row?.edit_window_minutes ?? DEFAULT_COMMUNITY_MODERATION.editWindowMinutes,
@@ -91,5 +79,5 @@ export async function loadCommunityIdentity(supabase: SupabaseClient): Promise<I
       DEFAULT_COMMUNITY_MODERATION.blockedWordMatch,
   };
 
-  return { identity, composer, moderation, logoUrl, degraded };
+  return { identity, moderation, logoUrl, degraded };
 }

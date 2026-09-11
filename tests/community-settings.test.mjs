@@ -3,10 +3,7 @@ import test from "node:test";
 
 import {
   ACCENT_SWATCHES,
-  ATTACHMENT_TYPE_CHOICES,
-  COMPOSER_LIMITS,
   contrastRatio,
-  DEFAULT_COMMUNITY_COMPOSER,
   DEFAULT_COMMUNITY_IDENTITY,
   formatContrast,
   IDENTITY_LIMITS,
@@ -16,26 +13,14 @@ import {
   MODERATION_LIMITS,
   MODERATOR_BASELINE,
   parseBlockedPhrase,
-  parseComposer,
   parseIdentity,
   parseModeration,
   parsePermissionConfig,
   PERMISSION_KEYS,
   PERMISSION_LABELS,
-  REACTION_PALETTE,
   relativeLuminance,
   SURFACE_COLOR,
 } from "../src/lib/community-settings/model.ts";
-
-const composer = (overrides = {}) => ({
-  reactionEmojis: [...REACTION_PALETTE],
-  maxBodyLength: 10000,
-  allowLinks: true,
-  allowAttachments: true,
-  maxAttachmentBytes: 20971520,
-  allowedAttachmentTypes: ATTACHMENT_TYPE_CHOICES.map((choice) => choice.value),
-  ...overrides,
-});
 
 const valid = (overrides = {}) => ({
   name: "Stoicverse",
@@ -116,62 +101,6 @@ test("the limits the interface shows are the limits the validator enforces", () 
   assert.equal(IDENTITY_LIMITS.logoBytes, 2 * 1024 * 1024);
   assert.deepEqual([...IDENTITY_LIMITS.logoTypes], ["image/jpeg", "image/png", "image/webp", "image/svg+xml"]);
   assert.equal(formatContrast(4.567), "4.6:1");
-});
-
-test("an emoji outside the palette is dropped rather than stored", () => {
-  // The array reaches a row-level-security predicate. An arbitrary string there
-  // is a reaction that renders as a box for every member.
-  const result = parseComposer(composer({ reactionEmojis: ["👍", "🦄", "<script>", "🔥"] }));
-  assert.deepEqual(result.reactionEmojis, ["👍", "🔥"]);
-});
-
-test("duplicate emoji collapse, and an empty set is refused", () => {
-  assert.deepEqual(parseComposer(composer({ reactionEmojis: ["👍", "👍", "🔥"] })).reactionEmojis, ["👍", "🔥"]);
-  assert.throws(() => parseComposer(composer({ reactionEmojis: [] })), /at least one reaction/);
-  assert.throws(() => parseComposer(composer({ reactionEmojis: ["🦄"] })), /at least one reaction/);
-});
-
-test("message length is bounded to the same range as the database constraint", () => {
-  assert.throws(() => parseComposer(composer({ maxBodyLength: 199 })), /between 200 and 10000/);
-  assert.throws(() => parseComposer(composer({ maxBodyLength: 10001 })), /between 200 and 10000/);
-  assert.equal(parseComposer(composer({ maxBodyLength: "2500" })).maxBodyLength, 2500);
-});
-
-test("the attachment ceiling cannot exceed what the storage bucket accepts", () => {
-  // 20MB is the bucket's own file_size_limit. A larger number here is a promise
-  // storage refuses to keep.
-  assert.throws(() => parseComposer(composer({ maxAttachmentBytes: 20971521 })), /storage ceiling/);
-  assert.throws(() => parseComposer(composer({ maxAttachmentBytes: 1023 })), /storage ceiling/);
-  assert.equal(parseComposer(composer({ maxAttachmentBytes: 20971520 })).maxAttachmentBytes, 20971520);
-});
-
-test("attachments on with no types is refused, but off keeps a working list", () => {
-  assert.throws(
-    () => parseComposer(composer({ allowAttachments: true, allowedAttachmentTypes: [] })),
-    /at least one file type/,
-  );
-  // Turning attachments back on must not land on an empty, unusable list.
-  const off = parseComposer(composer({ allowAttachments: false, allowedAttachmentTypes: [] }));
-  assert.deepEqual(off.allowedAttachmentTypes, DEFAULT_COMMUNITY_COMPOSER.allowedAttachmentTypes);
-});
-
-test("an attachment type outside the bucket's own list is dropped", () => {
-  const result = parseComposer(composer({ allowedAttachmentTypes: ["image/png", "application/pdf"] }));
-  assert.deepEqual(result.allowedAttachmentTypes, ["image/png"]);
-});
-
-test("the checkbox forms map to booleans the same way both fields", () => {
-  assert.equal(parseComposer(composer({ allowLinks: "on", allowAttachments: "on" })).allowLinks, true);
-  assert.equal(parseComposer(composer({ allowLinks: undefined })).allowLinks, false);
-});
-
-test("the defaults match the migration's own defaults", () => {
-  // Drift here means the page shows one thing while the database holds another
-  // whenever the settings row cannot be read.
-  assert.equal(DEFAULT_COMMUNITY_COMPOSER.maxBodyLength, COMPOSER_LIMITS.body.max);
-  assert.equal(DEFAULT_COMMUNITY_COMPOSER.maxAttachmentBytes, 20971520);
-  assert.equal(DEFAULT_COMMUNITY_COMPOSER.reactionEmojis.length, 12);
-  assert.equal(REACTION_PALETTE.length, 12);
 });
 
 const moderation = (overrides = {}) => ({

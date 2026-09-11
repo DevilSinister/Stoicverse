@@ -2,6 +2,7 @@
 
 import { refresh } from "next/cache";
 
+import { isValidReactionToken, MESSAGE_MAX_CHARS } from "@/lib/community/constants";
 import { revalidateCommunity } from "@/lib/community-settings/revalidate";
 import { isUuid as uuid } from "@/lib/security/uuid";
 import { postgresMessage } from "@/lib/supabase/errors";
@@ -10,11 +11,10 @@ import { createClient } from "@/lib/supabase/server";
 type Result = { error?: string; success?: true; reactionAdded?: boolean };
 
 export async function toggleReaction(postId: string, emoji: string): Promise<Result> {
-  // The enabled set is a column the creator edits, so it cannot be a literal
-  // here: a copy would keep accepting an emoji the community had turned off.
-  // `reactions_own_write` carries the predicate and is the real gate; this only
-  // rejects obvious junk before a round trip.
-  if (!uuid(postId) || typeof emoji !== "string" || emoji.length === 0 || emoji.length > 8) return { error: "Invalid reaction." };
+  // Any Unicode emoji or a custom-emoji token is a valid reaction. The same
+  // format check lives in `community_reaction_token_is_valid`, which the
+  // `reactions_own_write` policy applies; this only saves a round trip.
+  if (!uuid(postId) || !isValidReactionToken(emoji)) return { error: "Invalid reaction." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to react." };
@@ -23,10 +23,10 @@ export async function toggleReaction(postId: string, emoji: string): Promise<Res
   const { error } = existing
     ? await supabase.from("reactions").delete().eq("id", existing.id)
     : await supabase.from("reactions").insert({ post_id: postId, user_id: user.id, emoji });
-  // 42501 is the policy refusing the insert, which after 20260911010000 almost
-  // always means the emoji is no longer in the community's enabled set.
+  // 42501 is the policy refusing the insert: the token failed the format check,
+  // or the post is no longer visible to this member.
   if (error) {
-    const fallback = error.code === "42501" ? "That reaction is not enabled in this community." : "That reaction could not be saved.";
+    const fallback = error.code === "42501" ? "That reaction cannot be added here." : "That reaction could not be saved.";
     return { error: postgresMessage(error, fallback) };
   }
   revalidateCommunity();
@@ -37,7 +37,7 @@ export async function createStaffPost(data: FormData): Promise<Result> {
   const channelId = typeof data.get("channelId") === "string" ? String(data.get("channelId")) : "";
   const body = typeof data.get("body") === "string" ? String(data.get("body")).trim() : "";
   const attachmentPath = typeof data.get("attachmentPath") === "string" ? String(data.get("attachmentPath")) : "";
-  if (!uuid(channelId) || (!body && !attachmentPath) || body.length > 10_000) return { error: "Write a post or attach media (up to 10,000 characters)." };
+  if (!uuid(channelId) || (!body && !attachmentPath) || body.length > MESSAGE_MAX_CHARS) return { error: `Write a post or attach media (up to ${MESSAGE_MAX_CHARS.toLocaleString("en-US")} characters).` };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to post." };

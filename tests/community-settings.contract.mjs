@@ -100,19 +100,52 @@ test("composer rules are database predicates, not client-side suggestions", asyn
   assert.match(migration, /validate constraint posts_body_length_check/);
 });
 
-test("the emoji palette has exactly one definition", async () => {
-  const [types, actions, model] = await Promise.all([
+test("composer and reaction rules are platform constants with exactly one definition", async () => {
+  const [types, actions, model, constants, composer, stream, picker, migration] = await Promise.all([
     read("src/components/community/types.ts"),
     read("src/app/community/actions.ts"),
     read("src/lib/community-settings/model.ts"),
+    read("src/lib/community/constants.ts"),
+    read("src/components/community/MessageComposer.tsx"),
+    read("src/components/community/MessageStream.tsx"),
+    read("src/components/community/emoji/EmojiPicker.tsx"),
+    read("supabase/migrations/20260912000000_community_global_composer_constants.sql"),
   ]);
 
-  // Three copies of this literal existed; a creator disabling an emoji would
-  // have been overruled by whichever copy the caller happened to read.
-  assert.match(model, /export const REACTION_PALETTE/);
-  assert.doesNotMatch(types, /"🚀"/);
+  // Three copies of the quick-pick literal once existed. Now it lives in the
+  // constants module and nowhere else; the settings model no longer knows it,
+  // and its one consumer is the picker's fallback for "Frequently used".
+  assert.match(constants, /export const QUICK_REACTIONS/);
+  assert.doesNotMatch(model, /REACTION_PALETTE|CommunityComposer|parseComposer/);
+  assert.doesNotMatch(types, /"🚀"|REACTION_OPTIONS/);
   assert.doesNotMatch(actions, /"🚀"/);
-  assert.match(types, /REACTION_PALETTE as REACTION_OPTIONS/);
+  assert.match(picker, /QUICK_REACTIONS/);
+
+  // One picker, rendered by both the composer and the reaction bar — no more
+  // twelve-button grids of their own.
+  for (const source of [composer, stream]) {
+    assert.match(source, /<EmojiPicker/);
+    assert.doesNotMatch(source, /REACTION_OPTIONS/);
+  }
+
+  // The composer reads the constants rather than carrying its own numbers.
+  assert.doesNotMatch(composer, /const MAX_BODY = 10_000|20 \* 1024 \* 1024/);
+  assert.match(composer, /isAllowedAttachmentType\(candidate\.type\)/, "type is checked in attach(), not accept=");
+
+  // The per-community columns are gone, the dead RPC with them, and the
+  // reaction predicate is a format check whose USING clause still ignores it.
+  assert.match(migration, /drop column if exists reaction_emojis/);
+  assert.match(migration, /drop function if exists public\.community_composer_rules\(\)/);
+  assert.match(migration, /file_size_limit = 26214400/);
+  const policyStart = migration.indexOf("create policy reactions_own_write");
+  const policy = migration.slice(policyStart, migration.indexOf(";", migration.indexOf("with check (", policyStart)));
+  const using = policy.slice(policy.indexOf("using ("), policy.indexOf("with check ("));
+  const withCheck = policy.slice(policy.indexOf("with check ("));
+  assert.match(withCheck, /community_reaction_token_is_valid\(reactions\.emoji\)/);
+  assert.doesNotMatch(using, /community_reaction_token_is_valid/);
+  // The trigger no longer reads dropped columns.
+  const trigger = migration.slice(migration.indexOf("create or replace function private.assert_post_content_allowed"));
+  assert.doesNotMatch(trigger, /max_body_length|allow_links|allow_attachments/);
 });
 
 test("identity writes hard-fail and name the outstanding migration", async () => {

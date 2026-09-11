@@ -3,7 +3,8 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Copy, Loader2, MoreHorizontal, Paperclip, Pencil, Pin, Smile, Trash2 } from "lucide-react";
 
-import { REACTION_OPTIONS, staffLabel, type CommunityPost } from "@/components/community/types";
+import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
+import { staffLabel, type CommunityPost } from "@/components/community/types";
 
 /** Consecutive messages from one author inside this window collapse under a
  *  single header, the way a spoken turn reads as one turn. */
@@ -421,26 +422,15 @@ export function MessageStream({
       )}
 
       {pickerFor && pickerAnchor && (
-        <div
-          style={pickerAnchor}
-          className="fixed z-[59] w-[232px] rounded-xl border border-surgical-steel bg-monolith-surface p-2 shadow-[0_18px_48px_-24px_rgba(0,0,0,0.9)]"
-        >
-          <div className="grid grid-cols-6 gap-1">
-            {REACTION_OPTIONS.map((emoji) => (
-              <button
-                key={emoji}
-                type="button"
-                aria-label={`React with ${emoji}`}
-                onClick={() => {
-                  onReact(pickerFor, emoji);
-                  closeOverlays();
-                }}
-                className="focus-ring grid size-8 place-items-center rounded-lg text-base transition hover:bg-surface-container-high"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
+        <div style={pickerAnchor} className="fixed z-[59]">
+          <EmojiPicker
+            mode="react"
+            onSelect={(selection) => {
+              onReact(pickerFor, selection.kind === "unicode" ? selection.glyph : `<:${selection.name}:${selection.id}>`);
+              closeOverlays();
+            }}
+            onClose={closeOverlays}
+          />
         </div>
       )}
 

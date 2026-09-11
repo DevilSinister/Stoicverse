@@ -41,13 +41,6 @@ export type CommunityPost = {
   reactions: { emoji: string; count: number; userReacted: boolean }[];
 };
 
-/**
- * The full palette, re-exported from the settings model so there is one
- * definition. Which of these are actually *enabled* is a database column the
- * creator edits — see `community_settings.reaction_emojis`.
- */
-export { REACTION_PALETTE as REACTION_OPTIONS } from "@/lib/community-settings/model";
-
 export const STAFF_ROLES = ["moderator", "influencer", "super_admin"];
 
 export function staffLabel(role: string | null) {
