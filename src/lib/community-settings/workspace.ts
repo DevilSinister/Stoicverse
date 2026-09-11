@@ -7,6 +7,7 @@ import type { CommunityCategory, CommunityChannel } from "@/components/community
 import { loadAuditPage, loadBlockedWords, type AuditEvent } from "@/lib/community-settings/governance";
 import { isPermissionKey, type PermissionKey } from "@/lib/community-settings/permissions";
 import { loadCommunityRoles, type RolesLoad } from "@/lib/community-settings/roles";
+import type { CommunityRole } from "@/lib/community-settings/role-model";
 import {
   parseSettingsQuery,
   visibleSections,
@@ -14,7 +15,7 @@ import {
   type SettingsSection,
 } from "@/lib/community-settings/sections";
 import { loadCommunityIdentity, type IdentityLoad } from "@/lib/community-settings/server";
-import { loadCommunityStructure } from "@/lib/community-settings/structure";
+import { loadChannelOverrides, loadCommunityStructure, type ChannelOverride } from "@/lib/community-settings/structure";
 
 /**
  * One loader for every settings shell: the /creator/settings page, the
@@ -34,7 +35,13 @@ export type SettingsViewer = {
 
 export type SettingsWorkspaceData = {
   identity?: IdentityLoad;
-  structure?: { categories: CommunityCategory[]; channels: CommunityChannel[] };
+  structure?: {
+    categories: CommunityCategory[];
+    channels: CommunityChannel[];
+    /** The permission grid needs both: which roles exist, and what overrides each target carries. */
+    roles: CommunityRole[];
+    overrides: ChannelOverride[];
+  };
   roles?: RolesLoad;
   blockedPhrases?: { id: string; phrase: string }[];
   audit?: { events: AuditEvent[]; nextCursor: string | null; degraded: string[] };
@@ -105,7 +112,13 @@ export async function loadSettingsWorkspace(
       break;
     }
     case "channels": {
-      data.structure = await loadCommunityStructure(supabase);
+      const [structure, roles, overrides] = await Promise.all([
+        loadCommunityStructure(supabase),
+        loadCommunityRoles(supabase, userId),
+        loadChannelOverrides(supabase),
+      ]);
+      data.structure = { ...structure, roles: roles.roles, overrides: overrides.overrides };
+      degraded.push(...roles.degraded, ...overrides.degraded);
       break;
     }
     case "roles": {

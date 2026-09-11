@@ -24,15 +24,27 @@ export async function renderCommunityWorkspace({ nextPath, workspace, selectedCh
   if (profileResult.error || tierResult.error || notificationResult.error) throw new Error("Unable to load community data.");
   let categories: CommunityCategory[] = [];
   let channels: CommunityChannel[] = [];
+
+  // The resolver answers both questions this page asks: may this person
+  // moderate, and may they post. Read once, before the channel list, because
+  // the creator projection reads base tables that carry no `can_send`.
+  const { data: viewerPermissions } = await supabase.rpc("community_my_permissions");
+  const permissions = Array.isArray(viewerPermissions) ? (viewerPermissions as string[]) : [];
+  const canModeratePosts = permissions.includes("manage_messages");
+
   if (workspace === "creator") {
     ({ categories, channels } = await loadCommunityStructure(supabase));
+    // Community-wide rather than per channel: the creator surface reads the
+    // base tables, and anyone who reaches it holds manage_channels anyway.
+    const canSendAnywhere = permissions.includes("send_messages");
+    channels = channels.map((channel) => ({ ...channel, canSend: canSendAnywhere }));
   } else {
     const directory = await supabase.rpc("community_channel_directory");
     if (directory.error) throw new Error("Unable to load channel directory.");
     const categoryById = new Map<string, CommunityCategory>();
     for (const row of directory.data ?? []) {
       if (!categoryById.has(row.category_id)) categoryById.set(row.category_id, { id: row.category_id, name: row.category_name, description: row.category_description, sortOrder: row.category_sort_order, minTier: 1, allowedRoles: ["member"], visibilityMode: "locked", isArchived: false });
-      channels.push({ id: row.channel_id, categoryId: row.category_id, name: row.channel_name, type: row.channel_type, description: row.channel_description, sortOrder: row.channel_sort_order, minTier: row.min_tier, allowedRoles: [], visibilityMode: "locked", isArchived: false, isLocked: row.is_locked });
+      channels.push({ id: row.channel_id, categoryId: row.category_id, name: row.channel_name, type: row.channel_type, description: row.channel_description, sortOrder: row.channel_sort_order, minTier: row.min_tier, allowedRoles: [], visibilityMode: "locked", isArchived: false, isLocked: row.is_locked, canSend: row.can_send ?? false, slowModeSeconds: row.slow_mode_seconds ?? 0, permissionsSynced: row.permissions_synced ?? true, unlockTier: row.unlock_tier ?? null });
     }
     categories = [...categoryById.values()];
   }
@@ -93,5 +105,6 @@ export async function renderCommunityWorkspace({ nextPath, workspace, selectedCh
     };
   });
   const platformRole = profileResult.data?.platform_role ?? "member";
-  return <CommunitySurface workspace={workspace} currentUserId={user.id} memberName={profileResult.data?.full_name?.trim() || "Practitioner"} platformRole={platformRole} currentTier={tierResult.data?.current_tier ?? 1} isMaster={tierResult.data?.is_master ?? false} canModeratePosts={["moderator", "influencer", "super_admin"].includes(platformRole)} notifications={notificationResult.data ?? []} routeBase={capability.routeBase} activeNavigationLabel={capability.activeNavigationLabel} selectedChannelId={selectedChannelId} categories={categories} channels={channels} posts={posts} />;
+
+  return <CommunitySurface workspace={workspace} currentUserId={user.id} memberName={profileResult.data?.full_name?.trim() || "Practitioner"} platformRole={platformRole} currentTier={tierResult.data?.current_tier ?? 1} isMaster={tierResult.data?.is_master ?? false} canModeratePosts={canModeratePosts} notifications={notificationResult.data ?? []} routeBase={capability.routeBase} activeNavigationLabel={capability.activeNavigationLabel} selectedChannelId={selectedChannelId} categories={categories} channels={channels} posts={posts} />;
 }

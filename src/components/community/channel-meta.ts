@@ -1,9 +1,10 @@
-import { Calendar, Crown, Hash, Megaphone, type LucideIcon } from "lucide-react";
+import { Calendar, Hash, Megaphone, ScrollText, type LucideIcon } from "lucide-react";
 
-/** The four channel types `saveChannel` accepts. Keep this list and the server
- *  validation in `src/app/creator/channels/actions.ts` in step. */
-export const CHANNEL_TYPES = ["text", "announcements", "events", "master"] as const;
-export type ChannelType = (typeof CHANNEL_TYPES)[number];
+/** Re-exported from the model so this file stays presentation only: the list
+ *  the database enforces lives in `model.ts` and the `channels_type_check`
+ *  constraint, and a second copy here is a fifth type waiting to happen. */
+export { CHANNEL_TYPES, type ChannelType } from "@/lib/community-settings/model";
+import type { ChannelType } from "@/lib/community-settings/model";
 
 type ChannelTypeMeta = {
   icon: LucideIcon;
@@ -42,13 +43,16 @@ const META: Record<ChannelType, ChannelTypeMeta> = {
     namePlaceholder: "live-sessions",
     descriptionPlaceholder: "When sessions run and how members join.",
   },
-  master: {
-    icon: Crown,
-    prefix: "^",
-    label: "Master",
-    hint: "Reserved for members who have reached Master. Set the minimum tier to match.",
-    namePlaceholder: "master-circle",
-    descriptionPlaceholder: "What Master members discuss here.",
+  rules: {
+    icon: ScrollText,
+    prefix: "§",
+    label: "Rules",
+    // The resolver strips send_messages, send_messages_in_threads and
+    // create_threads here for anyone without manage_channels, so this is
+    // describing enforcement rather than promising it.
+    hint: "Read-only for everyone but channel managers. Use it for the rules a member agrees to.",
+    namePlaceholder: "rules",
+    descriptionPlaceholder: "What a member agrees to by taking part.",
   },
 };
 

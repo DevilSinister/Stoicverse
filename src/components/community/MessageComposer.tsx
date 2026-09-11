@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useTransition } from "react";
 import { AtSign, Loader2, Paperclip, SendHorizontal, Smile, X } from "lucide-react";
 
-import { createStaffPost } from "@/app/community/actions";
+import { sendMessage } from "@/app/community/actions";
 import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
 import {
   ATTACHMENT_MAX_BYTES,
@@ -165,7 +165,10 @@ export function MessageComposer({
           return;
         }
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-        const path = `${auth.user.id}/${crypto.randomUUID()}-${safeName}`;
+        // {uid}/{channelId}/{file}: `community_posts_member_upload` reads the
+        // second segment and asks for `attach_files` on that channel, so the
+        // path is part of the policy, not just a naming convention.
+        const path = `${auth.user.id}/${channelId}/${crypto.randomUUID()}-${safeName}`;
         const { error: uploadError } = await supabase.storage
           .from("community-posts")
           .upload(path, file, { contentType: file.type, upsert: false });
@@ -176,7 +179,7 @@ export function MessageComposer({
         form.set("attachmentPath", path);
       }
 
-      const result = await createStaffPost(form);
+      const result = await sendMessage(form);
       if (result.error) {
         onNotice(result.error);
         return;

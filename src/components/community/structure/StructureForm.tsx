@@ -11,7 +11,10 @@ import {
 } from "@/app/creator/channels/actions";
 import { CHANNEL_TYPES, channelMeta, channelSlug } from "@/components/community/channel-meta";
 import { AccessFields } from "@/components/community/structure/AccessFields";
+import { ChannelPermissionsTab, SlowModeField } from "@/components/community/structure/ChannelPermissionsTab";
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
+import type { CommunityRole } from "@/lib/community-settings/role-model";
+import type { ChannelOverride } from "@/lib/community-settings/structure";
 
 /** Create or edit one category or channel. Every write goes through the creator channel actions. */
 export function StructureForm({
@@ -20,6 +23,8 @@ export function StructureForm({
   channel,
   categoryId,
   channelCount = 0,
+  roles = [],
+  overrides = [],
   onNotice,
   onDeleted,
 }: {
@@ -28,6 +33,9 @@ export function StructureForm({
   channel?: CommunityChannel;
   categoryId?: string;
   channelCount?: number;
+  /** Empty until the phase-3 migration is applied, which hides the tab entirely. */
+  roles?: CommunityRole[];
+  overrides?: ChannelOverride[];
   onNotice: (value: string) => void;
   onDeleted?: () => void;
 }) {
@@ -39,6 +47,11 @@ export function StructureForm({
   const meta = channelMeta(type);
   const slug = channelSlug(name);
   const isNew = !subject;
+
+  // Permissions belong to a row that exists. Offering the tab while creating
+  // one would be a grid with nothing to attach to.
+  const [tab, setTab] = useState<"overview" | "permissions">("overview");
+  const showPermissions = !isNew && roles.length > 0;
 
   const submit = (data: FormData) =>
     startTransition(async () => {
@@ -68,6 +81,24 @@ export function StructureForm({
       onDeleted?.();
     });
 
+  if (showPermissions && tab === "permissions") {
+    return (
+      <div className="space-y-6">
+        <FormHeader isNew={isNew} kind={kind} hint={kind === "category" ? CATEGORY_HINT : meta.hint} />
+        <StructureTabs tab={tab} onChange={setTab} />
+        <ChannelPermissionsTab
+          target={kind}
+          channel={channel}
+          category={category}
+          roles={roles}
+          overrides={overrides}
+          canSave
+          onNotice={onNotice}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -78,6 +109,8 @@ export function StructureForm({
             : meta.hint}
         </p>
       </div>
+
+      {showPermissions && <StructureTabs tab={tab} onChange={setTab} />}
 
       <form action={submit} className="space-y-5">
         {kind === "category" ? (
@@ -174,6 +207,15 @@ export function StructureForm({
 
         <AccessFields rule={subject} />
 
+        {kind === "channel" && channel && (
+          <SlowModeField
+            channelId={channel.id}
+            seconds={channel.slowModeSeconds}
+            disabled={pending}
+            onNotice={onNotice}
+          />
+        )}
+
         <div className="flex items-center justify-end border-t border-surgical-steel pt-4">
           <button
             type="submit"
@@ -227,6 +269,47 @@ export function StructureForm({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+const CATEGORY_HINT =
+  "A category groups channels in the sidebar and sets the default access for channels added to it.";
+
+function FormHeader({ isNew, kind, hint }: { isNew: boolean; kind: string; hint: string }) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-white">{isNew ? `New ${kind}` : `Edit ${kind}`}</h3>
+      <p className="mt-1 text-xs leading-5 text-fog-muted">{hint}</p>
+    </div>
+  );
+}
+
+function StructureTabs({
+  tab,
+  onChange,
+}: {
+  tab: "overview" | "permissions";
+  onChange: (next: "overview" | "permissions") => void;
+}) {
+  return (
+    <div role="tablist" aria-label="Channel settings" className="flex gap-1 border-b border-surgical-steel">
+      {(["overview", "permissions"] as const).map((entry) => (
+        <button
+          key={entry}
+          type="button"
+          role="tab"
+          aria-selected={tab === entry}
+          onClick={() => onChange(entry)}
+          className={`focus-ring -mb-px min-h-11 rounded-t-lg px-4 text-sm font-semibold capitalize transition ${
+            tab === entry
+              ? "border-b-2 border-primary-container text-white"
+              : "text-on-surface-variant hover:text-white"
+          }`}
+        >
+          {entry}
+        </button>
+      ))}
     </div>
   );
 }

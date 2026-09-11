@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { AtSign, ChevronDown, Hash, Lock, Menu, Pin } from "lucide-react";
 
-import { deleteStaffPost, editStaffPost, togglePostHighlight, toggleReaction } from "@/app/community/actions";
+import { deleteMessage, editMessage, togglePostHighlight, toggleReaction } from "@/app/community/actions";
 import { ChannelSidebar } from "@/components/community/ChannelSidebar";
 import { channelMeta, tierName } from "@/components/community/channel-meta";
 import { MessageComposer } from "@/components/community/MessageComposer";
@@ -395,7 +395,7 @@ function Feed({
 
   const saveEdit = useCallback(
     async (postId: string, body: string) => {
-      const result = await editStaffPost(postId, body);
+      const result = await editMessage(postId, body);
       if (result.error) {
         onNotice(result.error);
         return false;
@@ -410,7 +410,7 @@ function Feed({
     (postId: string) => {
       if (!window.confirm("Delete this message? Members will no longer see it.")) return;
       startTransition(async () => {
-        const result = await deleteStaffPost(postId);
+        const result = await deleteMessage(postId);
         if (result.error) onNotice(result.error);
         else setPosts((current) => current.filter((post) => post.id !== postId));
       });
@@ -476,7 +476,7 @@ function Feed({
       ? "No study prompts here yet. Mark a message as a study prompt to keep it at hand."
       : view === "mentions"
         ? "No message in this channel mentions the community or a tier."
-        : canModeratePosts
+        : channel.canSend
           ? "Nothing here yet. Your first message starts the channel."
           : "Nothing here yet. Check back for studies and reflections.";
 
@@ -565,7 +565,7 @@ function Feed({
 
       <div className="z-20 shrink-0 border-t border-surgical-steel bg-surface px-4 py-3 md:px-6">
         <div className="mx-auto max-w-4xl">
-          {canModeratePosts ? (
+          {channel.canSend ? (
             <MessageComposer
               channelId={channel.id}
               channelName={channel.name}
@@ -576,7 +576,9 @@ function Feed({
           ) : (
             <p className="flex items-center justify-center gap-2 rounded-xl border border-surgical-steel bg-surface-container-low px-4 py-3 text-sm text-fog-muted">
               <Lock size={14} aria-hidden="true" className="shrink-0 text-primary-container" />
-              Only staff publish here. You can still react to any message.
+              {/* Not "only staff": posting is a permission now, and who holds it
+                  is the community's choice rather than a platform role. */}
+              You do not have permission to post here. You can still react to any message.
             </p>
           )}
         </div>

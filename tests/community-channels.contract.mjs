@@ -64,11 +64,16 @@ test("creator management and member channel browsing use the shared secure surfa
   assert.match(list, /aria-label=\{`Move \$\{label\} up`\}/);
   assert.match(list, /aria-label=\{`Move \$\{label\} down`\}/);
   assert.match(list, /role="group"/);
-  assert.match(composer, /createStaffPost/);
+  assert.match(composer, /sendMessage/);
   assert.match(workspace, /community_channel_directory/);
   assert.match(workspace, /selectedChannelId/);
   assert.match(reactions, /toggleReaction/);
-  assert.match(reactions, /Moderator or influencer access is required/);
+  // Phase 3 replaced the platform-role copy with the permission the database
+  // actually asks for. A message action that still said "moderator access is
+  // required" would be describing a rule that no longer exists.
+  assert.doesNotMatch(reactions, /Moderator or influencer access is required/);
+  assert.match(reactions, /community_has/);
+  assert.match(reactions, /You do not have permission to post in this channel\./);
 });
 
 test("post edits are author-only, moderation is audited, and the soft-deleted row still passes RLS", async () => {

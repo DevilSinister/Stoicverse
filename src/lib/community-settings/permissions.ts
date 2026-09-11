@@ -371,3 +371,31 @@ export function overrideStateFor(override: RoleOverride | undefined, key: Channe
   if (override.allow.includes(key)) return "allow";
   return "neutral";
 }
+
+/**
+ * Turn a grid of tri-state controls into the two arrays the database stores.
+ *
+ * Neutral is the absence of an entry, not a third list: a row where every key
+ * is Neutral has no override at all, and `community_override_set` deletes it
+ * rather than storing two empty arrays. Unknown and non-channel keys are
+ * dropped exactly as the CHECK constraints drop them.
+ */
+export function parseOverrideGrid(grid: Record<string, unknown>): {
+  allow: ChannelPermissionKey[];
+  deny: ChannelPermissionKey[];
+} {
+  const allow: ChannelPermissionKey[] = [];
+  const deny: ChannelPermissionKey[] = [];
+
+  for (const key of CHANNEL_PERMISSION_KEYS) {
+    const state = grid[key];
+    if (state === "allow") allow.push(key);
+    else if (state === "deny") deny.push(key);
+  }
+  return { allow, deny };
+}
+
+/** True when the row says nothing — the signal to delete the override. */
+export function isEmptyOverride(override: { allow: readonly string[]; deny: readonly string[] }): boolean {
+  return override.allow.length === 0 && override.deny.length === 0;
+}

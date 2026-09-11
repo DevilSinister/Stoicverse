@@ -43,29 +43,9 @@ export function ModerationSection({
   return (
     <div className="max-w-2xl space-y-8">
       <form action={submit} className="space-y-6">
-        <div>
-          <label htmlFor="moderation-slow" className={label}>
-            Slow mode
-          </label>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <input
-              id="moderation-slow"
-              name="slowModeSeconds"
-              type="number"
-              min={MODERATION_LIMITS.slowModeSeconds.min}
-              max={MODERATION_LIMITS.slowModeSeconds.max}
-              value={values.slowModeSeconds}
-              onChange={(event) => set("slowModeSeconds", Number(event.target.value))}
-              className={numberField}
-            />
-            <span className="text-sm text-on-surface-variant">
-              seconds between messages {values.slowModeSeconds === 0 && "· off"}
-            </span>
-          </div>
-          <p className="mt-1 text-xs leading-5 text-fog-muted">
-            0 turns it off. Staff and anyone with Bypass slow mode are exempt.
-          </p>
-        </div>
+        {/* Slow mode moved to the channel in phase 3: it is a property of a
+            room, not of the whole community. Set it in Channels → the channel →
+            Overview, where `community_channel_set_slow_mode` writes it. */}
 
         <div>
           <label htmlFor="moderation-edit" className={label}>

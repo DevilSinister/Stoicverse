@@ -139,11 +139,13 @@ test("the matcher is honest about being a speed bump", () => {
 });
 
 test("moderation bounds mirror the database constraint", () => {
-  assert.throws(() => parseModeration(moderation({ slowModeSeconds: 21601 })), /0 seconds/);
+  // Slow mode left this function in phase 3: it is a property of a channel now,
+  // and its bounds are asserted by `parseSlowMode` in
+  // community-channel-permissions.contract.mjs.
   assert.throws(() => parseModeration(moderation({ editWindowMinutes: 10081 })), /0 minutes/);
   assert.throws(() => parseModeration(moderation({ blockedWordMode: "delete" })), /block the message or flag/);
   assert.throws(() => parseModeration(moderation({ blockedWordMatch: "regex" })), /whole words or any substring/);
-  assert.equal(parseModeration(moderation({ slowModeSeconds: 21600 })).slowModeSeconds, 21600);
+  assert.equal(parseModeration(moderation({ editWindowMinutes: 10080 })).editWindowMinutes, 10080);
 });
 
 test("blocked phrases are lowercased, trimmed and bounded", () => {

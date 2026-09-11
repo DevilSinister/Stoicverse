@@ -7,10 +7,15 @@ import { StructureForm } from "@/components/community/structure/StructureForm";
 import { StructureList, type StructureSelection } from "@/components/community/structure/StructureList";
 import { useStructureOrder } from "@/components/community/structure/useStructureOrder";
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
+import type { CommunityRole } from "@/lib/community-settings/role-model";
+import type { ChannelOverride } from "@/lib/community-settings/structure";
 
 type StructureEditorProps = {
   categories: CommunityCategory[];
   channels: CommunityChannel[];
+  /** Empty where the caller has no permissions data; the Permissions tab then hides. */
+  roles?: CommunityRole[];
+  overrides?: ChannelOverride[];
   onNotice: (value: string) => void;
 } & ({ variant: "modal"; onClose: () => void } | { variant: "inline"; onClose?: never });
 
@@ -23,7 +28,7 @@ type StructureEditorProps = {
  * gained a field.
  */
 export function StructureEditor(props: StructureEditorProps) {
-  const { categories, channels, onNotice } = props;
+  const { categories, channels, roles = [], overrides = [], onNotice } = props;
   const modal = props.variant === "modal";
   const onClose = props.variant === "modal" ? props.onClose : undefined;
 
@@ -36,7 +41,15 @@ export function StructureEditor(props: StructureEditorProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const panes = <StructurePanes categories={categories} channels={channels} onNotice={onNotice} />;
+  const panes = (
+    <StructurePanes
+      categories={categories}
+      channels={channels}
+      roles={roles}
+      overrides={overrides}
+      onNotice={onNotice}
+    />
+  );
 
   if (!modal) return panes;
 
@@ -77,10 +90,14 @@ export function StructureEditor(props: StructureEditorProps) {
 function StructurePanes({
   categories: serverCategories,
   channels: serverChannels,
+  roles,
+  overrides,
   onNotice,
 }: {
   categories: CommunityCategory[];
   channels: CommunityChannel[];
+  roles: CommunityRole[];
+  overrides: ChannelOverride[];
   onNotice: (value: string) => void;
 }) {
   const { categories, channels, status, announcement, moveCategory, moveChannel, retry } = useStructureOrder(
@@ -150,6 +167,8 @@ function StructurePanes({
             kind="category"
             category={selectedCategory}
             channelCount={channels.filter((channel) => channel.categoryId === selectedCategory.id).length}
+            roles={roles}
+            overrides={overrides}
             onNotice={onNotice}
             onDeleted={() => setSelection({ kind: "new-category" })}
           />
@@ -168,6 +187,8 @@ function StructurePanes({
             kind="channel"
             categoryId={selectedChannel.categoryId}
             channel={selectedChannel}
+            roles={roles}
+            overrides={overrides}
             onNotice={onNotice}
             onDeleted={() => setSelection({ kind: "category", id: selectedChannel.categoryId })}
           />

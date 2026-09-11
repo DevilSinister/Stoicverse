@@ -35,7 +35,7 @@ export async function loadCommunityIdentity(supabase: SupabaseClient): Promise<I
       // the type level, and a concatenated expression degrades every column to
       // GenericStringError.
       .select(
-        "tagline,logo_path,accent_color,welcome_message,rules,show_welcome,slow_mode_seconds,edit_window_minutes,delete_requires_reason,blocked_word_mode,blocked_word_match",
+        "tagline,logo_path,accent_color,welcome_message,rules,show_welcome,edit_window_minutes,delete_requires_reason,blocked_word_mode,blocked_word_match",
       )
       .maybeSingle(),
     supabase.from("platform_settings").select("community_name").maybeSingle(),
@@ -70,7 +70,6 @@ export async function loadCommunityIdentity(supabase: SupabaseClient): Promise<I
     : null;
 
   const moderation: CommunityModeration = {
-    slowModeSeconds: row?.slow_mode_seconds ?? DEFAULT_COMMUNITY_MODERATION.slowModeSeconds,
     editWindowMinutes: row?.edit_window_minutes ?? DEFAULT_COMMUNITY_MODERATION.editWindowMinutes,
     deleteRequiresReason: row?.delete_requires_reason ?? DEFAULT_COMMUNITY_MODERATION.deleteRequiresReason,
     blockedWordMode: (row?.blocked_word_mode as CommunityModeration["blockedWordMode"]) ??

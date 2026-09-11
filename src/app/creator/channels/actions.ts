@@ -1,8 +1,10 @@
 "use server";
 
+import { isChannelType, parseSlowMode } from "@/lib/community-settings/model";
+import { parseOverrideGrid } from "@/lib/community-settings/permissions";
 import { revalidateCommunity as refresh } from "@/lib/community-settings/revalidate";
 import { isUuid as uuid } from "@/lib/security/uuid";
-import { requireInfluencer } from "@/lib/supabase/access";
+import { requireCommunityPermission } from "@/lib/supabase/access";
 import { postgresMessage } from "@/lib/supabase/errors";
 
 type Result = { error?: string; success?: true };
@@ -12,7 +14,10 @@ const value = (data: FormData, key: string) => typeof data.get(key) === "string"
 const roles = (data: FormData): Role[] => [...new Set(data.getAll("allowedRoles").filter((role): role is Role => role === "member" || role === "moderator" || role === "influencer"))];
 
 async function creatorSupabase() {
-  const { supabase } = await requireInfluencer();
+  // `manage_channels`, not "is the influencer": the policies on `channels` and
+  // `channel_categories` ask the resolver the same question, so a moderator
+  // holding the grant reaches exactly the same surface.
+  const { supabase } = await requireCommunityPermission("manage_channels");
   return { supabase };
 }
 
@@ -44,7 +49,7 @@ export async function saveChannel(data: FormData): Promise<Result> {
   const name = value(data, "name");
   const type = value(data, "type");
   const rule = access(data);
-  if ((id && !uuid(id)) || !uuid(categoryId) || !name || name.length > 80 || !["text", "announcements", "events", "master"].includes(type) || !rule) return { error: "Enter a category, name, type, and valid access rule." };
+  if ((id && !uuid(id)) || !uuid(categoryId) || !name || name.length > 80 || !isChannelType(type) || !rule) return { error: "Enter a category, name, type, and valid access rule." };
   const { supabase } = await creatorSupabase();
   const { data: nextChannel } = await supabase.from("channels").select("sort_order").eq("category_id", categoryId).order("sort_order", { ascending: false }).limit(1).maybeSingle();
   const payload = { category_id: categoryId, name, type, description: value(data, "description") || null, ...rule, is_active: true, is_archived: false };
@@ -92,4 +97,72 @@ export async function reorderCommunityStructure(kind: "category" | "channel", id
     if (error) return { error: postgresMessage(error, "That order could not be saved.") };
   }
   refresh(); return { success: true };
+}
+
+/**
+ * Write every override for one channel or category in a single action.
+ *
+ * Next dispatches Server Actions sequentially per client, so a call per role
+ * would serialise into N round trips while the grid sat half-saved. An entry
+ * whose allow and deny are both empty deletes that role's override, which is
+ * what "every control back to Neutral" means.
+ */
+export async function setChannelOverrides(
+  targetKind: "channel" | "category",
+  targetId: string,
+  entries: { roleId: string; grid: Record<string, string> }[],
+): Promise<Result> {
+  if (!["channel", "category"].includes(targetKind) || !uuid(targetId)) return { error: "Invalid target." };
+  if (!Array.isArray(entries) || entries.length > 50) return { error: "Change at most 50 roles at a time." };
+  if (entries.some((entry) => !uuid(entry.roleId))) return { error: "Invalid role." };
+
+  const { supabase } = await creatorSupabase();
+  for (const entry of entries) {
+    const { allow, deny } = parseOverrideGrid(entry.grid ?? {});
+    const { error } = await supabase.rpc("community_override_set", {
+      target_kind: targetKind,
+      target_id: targetId,
+      role_id: entry.roleId,
+      allow_keys: allow,
+      deny_keys: deny,
+    });
+    if (error) return { error: postgresMessage(error, "Those channel permissions could not be saved.") };
+  }
+  refresh();
+  return { success: true };
+}
+
+export async function deleteChannelOverride(overrideId: string): Promise<Result> {
+  if (!uuid(overrideId)) return { error: "Invalid override." };
+  const { supabase } = await creatorSupabase();
+  const { error } = await supabase.rpc("community_override_delete", { override_id: overrideId });
+  if (error) return { error: postgresMessage(error, "That override could not be removed.") };
+  refresh();
+  return { success: true };
+}
+
+/** Re-syncing discards the channel's own overrides — the RPC says so and does it. */
+export async function setChannelPermissionSync(channelId: string, synced: boolean): Promise<Result> {
+  if (!uuid(channelId)) return { error: "Invalid channel." };
+  const { supabase } = await creatorSupabase();
+  const { error } = await supabase.rpc("community_channel_sync_permissions", { channel_id: channelId, synced });
+  if (error) return { error: postgresMessage(error, "That channel could not be re-synced.") };
+  refresh();
+  return { success: true };
+}
+
+export async function setChannelSlowMode(channelId: string, seconds: number): Promise<Result> {
+  if (!uuid(channelId)) return { error: "Invalid channel." };
+  let clean: number;
+  try {
+    clean = parseSlowMode(seconds);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Invalid slow mode." };
+  }
+
+  const { supabase } = await creatorSupabase();
+  const { error } = await supabase.rpc("community_channel_set_slow_mode", { channel_id: channelId, seconds: clean });
+  if (error) return { error: postgresMessage(error, "Slow mode could not be saved.") };
+  refresh();
+  return { success: true };
 }

@@ -21,6 +21,13 @@ export type CommunityChannel = {
   visibilityMode: "locked" | "hidden";
   isArchived: boolean;
   isLocked: boolean;
+  /** `send_messages` resolved for this viewer in this channel. */
+  canSend: boolean;
+  slowModeSeconds: number;
+  /** False once the channel carries its own overrides instead of its category's. */
+  permissionsSynced: boolean;
+  /** The tier that unlocks a locked teaser, or null when the channel is not tier-gated. */
+  unlockTier: number | null;
 };
 
 export type CommunityPost = {

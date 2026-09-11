@@ -70,7 +70,6 @@ export const ACCENT_SWATCHES = [
 // database, so a copy of it here would be a list nothing reads.
 
 export type CommunityModeration = {
-  slowModeSeconds: number;
   editWindowMinutes: number;
   deleteRequiresReason: boolean;
   blockedWordMode: "block" | "flag";
@@ -79,14 +78,12 @@ export type CommunityModeration = {
 
 /** Mirrors community_settings_moderation_bounds. */
 export const MODERATION_LIMITS = {
-  slowModeSeconds: { min: 0, max: 21600 },
   editWindowMinutes: { min: 0, max: 10080 },
   phrase: { min: 2, max: 60 },
   maxPhrases: 200,
 } as const;
 
 export const DEFAULT_COMMUNITY_MODERATION: CommunityModeration = {
-  slowModeSeconds: 0,
   editWindowMinutes: 0,
   deleteRequiresReason: false,
   blockedWordMode: "block",
@@ -124,15 +121,6 @@ export function matchesBlockedWord(
 }
 
 export function parseModeration(input: Record<string, unknown>): CommunityModeration {
-  const slowModeSeconds = Number.parseInt(String(input.slowModeSeconds ?? ""), 10);
-  if (
-    !Number.isInteger(slowModeSeconds) ||
-    slowModeSeconds < MODERATION_LIMITS.slowModeSeconds.min ||
-    slowModeSeconds > MODERATION_LIMITS.slowModeSeconds.max
-  ) {
-    throw new Error("Slow mode must be between 0 seconds (off) and 6 hours.");
-  }
-
   const editWindowMinutes = Number.parseInt(String(input.editWindowMinutes ?? ""), 10);
   if (
     !Number.isInteger(editWindowMinutes) ||
@@ -152,7 +140,6 @@ export function parseModeration(input: Record<string, unknown>): CommunityModera
   }
 
   return {
-    slowModeSeconds,
     editWindowMinutes,
     deleteRequiresReason: input.deleteRequiresReason === true || input.deleteRequiresReason === "on",
     blockedWordMode,
@@ -169,6 +156,42 @@ export function parseBlockedPhrase(raw: string): string {
     );
   }
   return phrase;
+}
+
+/**
+ * Channel kinds. `master` is gone: it was a type doing an access-control job,
+ * and tier access is a channel override now. `rules` is the channel a member
+ * must read but cannot reply in — the resolver strips the send permissions
+ * there for anyone without `manage_channels`.
+ */
+export const CHANNEL_TYPES = ["text", "announcements", "events", "rules"] as const;
+
+export type ChannelType = (typeof CHANNEL_TYPES)[number];
+
+export function isChannelType(value: unknown): value is ChannelType {
+  return typeof value === "string" && (CHANNEL_TYPES as readonly string[]).includes(value);
+}
+
+/** Mirrors `channels_slow_mode_seconds_check`. Slow mode is per channel now. */
+export const SLOW_MODE_LIMITS = { min: 0, max: 21600 } as const;
+
+/** The stops Discord offers, so the common values are one click rather than typed. */
+export const SLOW_MODE_STOPS = [0, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 21600] as const;
+
+export function parseSlowMode(input: unknown): number {
+  const seconds = Number.parseInt(String(input ?? ""), 10);
+  if (!Number.isInteger(seconds) || seconds < SLOW_MODE_LIMITS.min || seconds > SLOW_MODE_LIMITS.max) {
+    throw new Error("Slow mode must be between 0 seconds (off) and 6 hours.");
+  }
+  return seconds;
+}
+
+/** "Off", "5s", "10m", "6h" — the label beside the slider and on the channel header. */
+export function formatSlowMode(seconds: number): string {
+  if (seconds <= 0) return "Off";
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
+  return `${Math.round(seconds / 360) / 10}h`.replace(".0h", "h");
 }
 
 const HEX_PATTERN = /^#[0-9A-Fa-f]{6}$/;

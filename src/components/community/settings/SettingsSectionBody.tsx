@@ -31,6 +31,8 @@ export function SettingsSectionBody({ workspace }: { workspace: SettingsWorkspac
             variant="inline"
             categories={data.structure.categories}
             channels={data.structure.channels}
+            roles={data.structure.roles}
+            overrides={data.structure.overrides}
             onNotice={notice}
           />
         </div>

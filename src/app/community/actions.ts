@@ -33,17 +33,31 @@ export async function toggleReaction(postId: string, emoji: string): Promise<Res
   return { success: true, reactionAdded: !existing };
 }
 
-export async function createStaffPost(data: FormData): Promise<Result> {
+/**
+ * Post a message.
+ *
+ * Renamed from `createStaffPost` because it is no longer a staff action: the
+ * `posts_member_insert` policy asks `community_has('send_messages', channel)`,
+ * so anyone the community has granted that may post. This checks the same
+ * question first only to turn a policy refusal into a sentence.
+ */
+export async function sendMessage(data: FormData): Promise<Result> {
   const channelId = typeof data.get("channelId") === "string" ? String(data.get("channelId")) : "";
   const body = typeof data.get("body") === "string" ? String(data.get("body")).trim() : "";
   const attachmentPath = typeof data.get("attachmentPath") === "string" ? String(data.get("attachmentPath")) : "";
   if (!uuid(channelId) || (!body && !attachmentPath) || body.length > MESSAGE_MAX_CHARS) return { error: `Write a post or attach media (up to ${MESSAGE_MAX_CHARS.toLocaleString("en-US")} characters).` };
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to post." };
-  if (attachmentPath && (!attachmentPath.startsWith(`${user.id}/`) || attachmentPath.includes(".."))) return { error: "Invalid attachment." };
-  const { data: profile, error: profileError } = await supabase.from("profiles").select("platform_role,is_suspended").eq("id", user.id).maybeSingle();
-  if (profileError || !profile || profile.is_suspended || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) return { error: "Moderator or influencer access is required." };
+  // The upload policy reads the channel out of the path, so the path has to
+  // carry it: {uid}/{channelId}/{file}.
+  if (attachmentPath && (!attachmentPath.startsWith(`${user.id}/${channelId}/`) || attachmentPath.includes(".."))) return { error: "Invalid attachment." };
+
+  const { data: allowed, error: permissionError } = await supabase.rpc("community_has", { permission: "send_messages", channel: channelId });
+  if (permissionError) return { error: postgresMessage(permissionError, "Your permissions could not be checked.") };
+  if (allowed !== true) return { error: "You do not have permission to post in this channel." };
+
   const { data: channel, error: channelError } = await supabase.from("channels").select("type").eq("id", channelId).maybeSingle();
   if (channelError || !channel) return { error: "You cannot post in this channel." };
   const { error } = await supabase.from("posts").insert({ channel_id: channelId, author_id: user.id, body: body || null, image_url: attachmentPath || null, post_type: channel.type === "announcements" ? "announcement" : "post" });
@@ -53,7 +67,7 @@ export async function createStaffPost(data: FormData): Promise<Result> {
   return { success: true };
 }
 
-export async function editStaffPost(postId: string, body: string): Promise<Result> {
+export async function editMessage(postId: string, body: string): Promise<Result> {
   if (!uuid(postId) || !body.trim() || body.length > 10_000) return { error: "Write a valid post body (up to 10,000 characters)." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -81,10 +95,12 @@ export async function togglePostHighlight(postId: string): Promise<Result> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to manage messages." };
-  const { data: profile, error: profileError } = await supabase.from("profiles").select("platform_role,is_suspended").eq("id", user.id).maybeSingle();
-  if (profileError || !profile || profile.is_suspended || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) return { error: "Moderator or influencer access is required." };
-  const { data: post, error: postError } = await supabase.from("posts").select("is_pinned").eq("id", postId).eq("is_deleted", false).maybeSingle();
+  const { data: post, error: postError } = await supabase.from("posts").select("is_pinned,channel_id").eq("id", postId).eq("is_deleted", false).maybeSingle();
   if (postError || !post) return { error: "Message not found." };
+  // `pin_messages` on that channel — the same question posts_guard_update asks.
+  const { data: allowed, error: permissionError } = await supabase.rpc("community_has", { permission: "pin_messages", channel: post.channel_id });
+  if (permissionError) return { error: postgresMessage(permissionError, "Your permissions could not be checked.") };
+  if (allowed !== true) return { error: "You do not have permission to pin messages here." };
   const highlighted = !post.is_pinned;
   const { error } = await supabase.from("posts").update({ is_pinned: highlighted, pinned_at: highlighted ? new Date().toISOString() : null, updated_at: new Date().toISOString() }).eq("id", postId);
   if (error) return { error: postgresMessage(error, "That message could not be updated.") };
@@ -92,17 +108,14 @@ export async function togglePostHighlight(postId: string): Promise<Result> {
   return { success: true };
 }
 
-export async function deleteStaffPost(postId: string): Promise<Result> {
+export async function deleteMessage(postId: string): Promise<Result> {
   if (!uuid(postId)) return { error: "Invalid post identifier." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to delete." };
 
-  const { data: profile, error: profileError } = await supabase.from("profiles").select("platform_role,is_suspended").eq("id", user.id).maybeSingle();
-  if (profileError || !profile || profile.is_suspended || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) {
-    return { error: "Moderator or influencer access is required." };
-  }
-
+  // `soft_delete_post` re-checks author-or-manage_messages itself and raises a
+  // P0001 the client can read, so there is nothing useful to pre-check here.
   const { data: deleted, error } = await supabase.rpc("soft_delete_post", { target_post_id: postId });
   if (error) return { error: postgresMessage(error, "That message could not be deleted.") };
   if (!deleted) return { error: "Message not found or it has already been deleted." };

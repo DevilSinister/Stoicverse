@@ -200,7 +200,6 @@ export async function saveCommunityModeration(data: FormData): Promise<Result> {
   let moderation;
   try {
     moderation = parseModeration({
-      slowModeSeconds: value(data, "slowModeSeconds"),
       editWindowMinutes: value(data, "editWindowMinutes"),
       deleteRequiresReason: data.get("deleteRequiresReason") !== null,
       blockedWordMode: value(data, "blockedWordMode"),
@@ -213,7 +212,6 @@ export async function saveCommunityModeration(data: FormData): Promise<Result> {
   const { error } = await supabase
     .from("community_settings")
     .update({
-      slow_mode_seconds: moderation.slowModeSeconds,
       edit_window_minutes: moderation.editWindowMinutes,
       delete_requires_reason: moderation.deleteRequiresReason,
       blocked_word_mode: moderation.blockedWordMode,

@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
+import { isChannelPermissionKey, type ChannelPermissionKey } from "@/lib/community-settings/permissions";
 
 /**
  * The creator's view of community structure, in one place.
@@ -25,7 +26,7 @@ export async function loadCommunityStructure(
       .order("sort_order"),
     supabase
       .from("channels")
-      .select("id,category_id,name,type,description,sort_order,min_tier,allowed_roles,visibility_mode,is_archived")
+      .select("id,category_id,name,type,description,sort_order,min_tier,allowed_roles,visibility_mode,is_archived,permissions_synced,slow_mode_seconds,legacy_type")
       .order("sort_order"),
   ]);
 
@@ -54,6 +55,59 @@ export async function loadCommunityStructure(
       visibilityMode: channel.visibility_mode as "locked" | "hidden",
       isArchived: channel.is_archived,
       isLocked: false,
+      // The creator projection reads the base table, where "can this viewer
+      // send here" is not a column. The member path gets it from the directory.
+      canSend: false,
+      slowModeSeconds: channel.slow_mode_seconds ?? 0,
+      permissionsSynced: channel.permissions_synced ?? true,
+      unlockTier: null,
     })),
+  };
+}
+
+export type ChannelOverride = {
+  id: string;
+  channelId: string | null;
+  categoryId: string | null;
+  roleId: string;
+  allow: ChannelPermissionKey[];
+  deny: ChannelPermissionKey[];
+};
+
+/**
+ * Every override, for the permissions grid.
+ *
+ * Loaded whole rather than per channel: there is one row per (target, role)
+ * pair that is not entirely Neutral, so the table stays small by construction,
+ * and the grid needs a channel's own rows and its category's at the same time
+ * to render the "follows the category" mirror.
+ */
+export async function loadChannelOverrides(
+  supabase: SupabaseClient,
+): Promise<{ overrides: ChannelOverride[]; degraded: string[] }> {
+  const { data, error } = await supabase
+    .from("channel_permission_overrides")
+    .select("id,channel_id,category_id,role_id,allow,deny");
+
+  if (error) {
+    console.error("[community-settings]", { code: error.code ?? null });
+    return {
+      overrides: [],
+      degraded: ["Channel permissions could not be read. Saving them is disabled until migration 20260912020000 is applied."],
+    };
+  }
+
+  return {
+    overrides: (data ?? []).map((row) => ({
+      id: row.id,
+      channelId: row.channel_id,
+      categoryId: row.category_id,
+      // Normalised on read as well as on write: a row stored before a key was
+      // renamed should not reach the grid as an unrecognised checkbox.
+      allow: (row.allow ?? []).filter(isChannelPermissionKey),
+      deny: (row.deny ?? []).filter(isChannelPermissionKey),
+      roleId: row.role_id,
+    })),
+    degraded: [],
   };
 }
