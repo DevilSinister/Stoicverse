@@ -1011,3 +1011,12 @@ using (public.community_has('manage_channels'));
 revoke insert, update, delete, truncate on public.channel_permission_overrides from anon, authenticated;
 grant select on public.channel_permission_overrides to authenticated;
 grant all on public.channel_permission_overrides to service_role;
+
+-- --------------------------------------------------------- schema cache
+
+-- PostgREST caches the schema, and a migration that adds columns or a table can
+-- leave it serving the old shape: the column exists in PostgreSQL and the API
+-- still answers "column does not exist". That is exactly what happened after
+-- this migration was first applied — `/creator/settings` threw "Unable to load
+-- channel structure." while the same query succeeded against the database.
+notify pgrst, 'reload schema';

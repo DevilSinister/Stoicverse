@@ -1273,3 +1273,12 @@ on storage.objects
 for delete
 to authenticated
 using (bucket_id = 'community-role-icons' and public.community_has('manage_roles'));
+
+-- --------------------------------------------------------- schema cache
+
+-- PostgREST caches the schema, and a migration that adds columns or a table can
+-- leave it serving the old shape: the column exists in PostgreSQL and the API
+-- still answers "column does not exist". That is exactly what happened after
+-- this migration was first applied — `/creator/settings` threw "Unable to load
+-- channel structure." while the same query succeeded against the database.
+notify pgrst, 'reload schema';

@@ -30,7 +30,17 @@ export async function loadCommunityStructure(
       .order("sort_order"),
   ]);
 
-  if (categoryResult.error || channelResult.error) throw new Error("Unable to load channel structure.");
+  // The code is logged before the throw because the message that reaches the
+  // page says nothing. A stale PostgREST schema cache after a migration that
+  // adds columns fails here as PGRST204/42703, and without this line the only
+  // symptom is "Unable to load channel structure."
+  if (categoryResult.error || channelResult.error) {
+    console.error("[community-settings]", {
+      categoryCode: categoryResult.error?.code ?? null,
+      channelCode: channelResult.error?.code ?? null,
+    });
+    throw new Error("Unable to load channel structure.");
+  }
 
   return {
     categories: (categoryResult.data ?? []).map((category) => ({
