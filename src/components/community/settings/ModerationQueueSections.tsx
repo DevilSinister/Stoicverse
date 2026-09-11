@@ -110,7 +110,10 @@ export function ReportsSection({
             </p>
           </div>
 
-          <blockquote className="mt-3 rounded-lg border-l-2 border-surgical-steel bg-surface-container-low p-3">
+          {/* The fill is the separator. This sits inside a card that already has
+              its own border, so a rule down one edge would be a third boundary
+              doing what the first two already do. */}
+          <blockquote className="mt-3 rounded-lg bg-surface-container-low p-3">
             <p className="text-xs font-semibold text-on-surface-variant">{report.postAuthorName}</p>
             <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-on-surface">
               {report.postBody || "(no text)"}
