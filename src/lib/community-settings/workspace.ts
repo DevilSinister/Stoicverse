@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
 import { loadAuditPage, loadBlockedWords, type AuditEvent } from "@/lib/community-settings/governance";
 import { isPermissionKey, type PermissionKey } from "@/lib/community-settings/permissions";
+import { loadActiveBans, loadReportsQueue, type BanRow, type ReportRow } from "@/lib/community-settings/moderation";
 import { loadCommunityRoles, type RolesLoad } from "@/lib/community-settings/roles";
 import type { CommunityRole } from "@/lib/community-settings/role-model";
 import {
@@ -45,6 +46,8 @@ export type SettingsWorkspaceData = {
   roles?: RolesLoad;
   blockedPhrases?: { id: string; phrase: string }[];
   audit?: { events: AuditEvent[]; nextCursor: string | null; degraded: string[] };
+  reports?: { rows: ReportRow[]; nextCursor: string | null; status: "open" | "resolved" };
+  bans?: BanRow[];
 };
 
 export type SettingsWorkspace = {
@@ -132,6 +135,21 @@ export async function loadSettingsWorkspace(
       data.identity = identity;
       data.blockedPhrases = blocked.phrases;
       degraded.push(...identity.degraded, ...blocked.degraded);
+      break;
+    }
+    case "reports": {
+      // `?tab=resolved` is the only other queue; anything else reads as open,
+      // because a queue nobody can name is a queue nobody can link to.
+      const status = query.tab === "resolved" ? "resolved" : "open";
+      const page = await loadReportsQueue(supabase, { status, cursor: query.cursor });
+      data.reports = { rows: page.reports, nextCursor: page.nextCursor, status };
+      degraded.push(...page.degraded);
+      break;
+    }
+    case "bans": {
+      const page = await loadActiveBans(supabase);
+      data.bans = page.bans;
+      degraded.push(...page.degraded);
       break;
     }
     case "audit": {

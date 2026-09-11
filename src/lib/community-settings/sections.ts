@@ -86,7 +86,7 @@ export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
     blurb: "Members locked out of the community, and why.",
     group: "people",
     requires: "ban_members",
-    built: false,
+    built: true,
   },
   {
     id: "automod",
@@ -110,7 +110,7 @@ export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
     blurb: "Messages members have flagged, waiting for a decision.",
     group: "moderation",
     requires: "moderate_members",
-    built: false,
+    built: true,
   },
   {
     id: "audit",

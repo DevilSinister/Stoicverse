@@ -194,6 +194,95 @@ export function formatSlowMode(seconds: number): string {
   return `${Math.round(seconds / 360) / 10}h`.replace(".0h", "h");
 }
 
+/** Mirrors the `kind` CHECK on `community_mod_cases`. */
+export const CASE_KINDS = ["warn", "timeout", "untimeout", "ban", "unban", "note"] as const;
+export type CaseKind = (typeof CASE_KINDS)[number];
+
+export const REPORT_REASONS = ["spam", "harassment", "hate", "sexual", "scam", "other"] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number];
+
+export const REPORT_STATUSES = ["open", "resolved", "dismissed"] as const;
+export type ReportStatus = (typeof REPORT_STATUSES)[number];
+
+export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
+  spam: "Spam or advertising",
+  harassment: "Harassment or bullying",
+  hate: "Hate speech",
+  sexual: "Sexual content",
+  scam: "Scam or fraud",
+  other: "Something else",
+};
+
+export const CASE_KIND_LABELS: Record<CaseKind, string> = {
+  warn: "Warned",
+  timeout: "Timed out",
+  untimeout: "Timeout lifted",
+  ban: "Banned",
+  unban: "Unbanned",
+  note: "Note",
+};
+
+/** Mirrors the CHECK constraints and the `raise` bounds in 20260912030000. */
+export const SANCTION_LIMITS = {
+  reason: { min: 3, max: 500 },
+  details: { max: 500 },
+  duration: { min: 60, max: 2419200 },
+  bulkDelete: { max: 100 },
+} as const;
+
+/** The presets, plus a custom value up to 28 days. Discord's ladder. */
+export const TIMEOUT_PRESETS = [
+  { seconds: 60, label: "1 minute" },
+  { seconds: 300, label: "5 minutes" },
+  { seconds: 600, label: "10 minutes" },
+  { seconds: 3600, label: "1 hour" },
+  { seconds: 86400, label: "1 day" },
+  { seconds: 604800, label: "1 week" },
+] as const;
+
+export function parseTimeoutDuration(input: unknown): number {
+  const seconds = Number.parseInt(String(input ?? ""), 10);
+  if (!Number.isInteger(seconds) || seconds < SANCTION_LIMITS.duration.min || seconds > SANCTION_LIMITS.duration.max) {
+    throw new Error("A timeout must be between 1 minute and 28 days.");
+  }
+  return seconds;
+}
+
+/**
+ * The reason is the record. A sanction with no reason is a sanction nobody can
+ * review later, which is why the database refuses one for every kind that is
+ * not an undo or a note.
+ */
+export function parseModerationReason(input: unknown, { required = true } = {}): string | null {
+  const reason = typeof input === "string" ? input.trim() : "";
+  if (!reason) {
+    if (required) throw new Error(`A reason must be between ${SANCTION_LIMITS.reason.min} and ${SANCTION_LIMITS.reason.max} characters.`);
+    return null;
+  }
+  if (reason.length < SANCTION_LIMITS.reason.min || reason.length > SANCTION_LIMITS.reason.max) {
+    throw new Error(`A reason must be between ${SANCTION_LIMITS.reason.min} and ${SANCTION_LIMITS.reason.max} characters.`);
+  }
+  return reason;
+}
+
+export function isReportReason(value: unknown): value is ReportReason {
+  return typeof value === "string" && (REPORT_REASONS as readonly string[]).includes(value);
+}
+
+/** "2 days", "3 hours", "15 minutes" — how a timeout is described to the person serving it. */
+export function formatDuration(seconds: number): string {
+  if (seconds >= 86400) {
+    const days = Math.round(seconds / 86400);
+    return `${days} ${days === 1 ? "day" : "days"}`;
+  }
+  if (seconds >= 3600) {
+    const hours = Math.round(seconds / 3600);
+    return `${hours} ${hours === 1 ? "hour" : "hours"}`;
+  }
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  return `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
+}
+
 const HEX_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 
 export function isHexColor(value: string): boolean {

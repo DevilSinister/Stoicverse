@@ -114,7 +114,11 @@ test("the section registry is the only section list and filters by permission", 
     isInfluencer: false,
     permissions: new Set(["view_audit_log", "moderate_members"]),
   }).map((section) => section.id);
-  assert.deepEqual(auditor, ["audit"], "members and reports are not built yet; only audit shows");
+  // Reports became a built section in phase 4. Members still is not, so this
+  // keeps asserting that an unbuilt section stays invisible to someone who
+  // holds its permission — which is the property that matters, not the count.
+  assert.deepEqual(auditor, ["reports", "audit"], "a held permission reveals only built sections");
+  assert.ok(!auditor.includes("members"), "members is not built yet and must not render");
 
   assert.deepEqual(visibleSections({ isInfluencer: false, permissions: new Set(["send_messages"]) }), []);
   assert.equal(isSettingsSection("roles"), true);
