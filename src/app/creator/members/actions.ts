@@ -3,13 +3,12 @@
 import { revalidatePath } from "next/cache";
 
 import type { MemberActionResult, PlatformMemberRole, TurnoverChange } from "@/lib/member-operations/types";
+import { isUuid } from "@/lib/security/uuid";
 import { requireInfluencer } from "@/lib/supabase/access";
 
 const MAX_TURNOVER = 999_999_999_999.99;
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
 const value = (data: FormData, key: string) => typeof data.get(key) === "string" ? String(data.get(key)).trim() : "";
-const isUuid = (candidate: string) => UUID_PATTERN.test(candidate);
 
 function currentIsoWeekStart() {
   const now = new Date();

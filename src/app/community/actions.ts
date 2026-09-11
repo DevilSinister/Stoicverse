@@ -1,26 +1,35 @@
 "use server";
 
-import { refresh, revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 
+import { revalidateCommunity } from "@/lib/community-settings/revalidate";
+import { isUuid as uuid } from "@/lib/security/uuid";
+import { postgresMessage } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
 type Result = { error?: string; success?: true; reactionAdded?: boolean };
-const uuid = (candidate: string) => /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(candidate);
 
 export async function toggleReaction(postId: string, emoji: string): Promise<Result> {
-  if (!uuid(postId) || !["👍", "❤️", "🔥", "💡", "👏", "🎉", "🚀", "👀", "😮", "😢", "💯", "🙏"].includes(emoji)) return { error: "Invalid reaction." };
+  // The enabled set is a column the creator edits, so it cannot be a literal
+  // here: a copy would keep accepting an emoji the community had turned off.
+  // `reactions_own_write` carries the predicate and is the real gate; this only
+  // rejects obvious junk before a round trip.
+  if (!uuid(postId) || typeof emoji !== "string" || emoji.length === 0 || emoji.length > 8) return { error: "Invalid reaction." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to react." };
   const { data: existing, error: readError } = await supabase.from("reactions").select("id").eq("post_id", postId).eq("user_id", user.id).eq("emoji", emoji).maybeSingle();
-  if (readError) return { error: readError.message };
+  if (readError) return { error: postgresMessage(readError, "That reaction could not be read.") };
   const { error } = existing
     ? await supabase.from("reactions").delete().eq("id", existing.id)
     : await supabase.from("reactions").insert({ post_id: postId, user_id: user.id, emoji });
-  if (error) return { error: error.message };
-  revalidatePath("/dashboard/community");
-  revalidatePath("/creator/channels");
-  revalidatePath("/creator/community");
+  // 42501 is the policy refusing the insert, which after 20260911010000 almost
+  // always means the emoji is no longer in the community's enabled set.
+  if (error) {
+    const fallback = error.code === "42501" ? "That reaction is not enabled in this community." : "That reaction could not be saved.";
+    return { error: postgresMessage(error, fallback) };
+  }
+  revalidateCommunity();
   return { success: true, reactionAdded: !existing };
 }
 
@@ -38,11 +47,9 @@ export async function createStaffPost(data: FormData): Promise<Result> {
   const { data: channel, error: channelError } = await supabase.from("channels").select("type").eq("id", channelId).maybeSingle();
   if (channelError || !channel) return { error: "You cannot post in this channel." };
   const { error } = await supabase.from("posts").insert({ channel_id: channelId, author_id: user.id, body: body || null, image_url: attachmentPath || null, post_type: channel.type === "announcements" ? "announcement" : "post" });
-  if (error) return { error: error.message };
+  if (error) return { error: postgresMessage(error, "That post could not be published.") };
 
-  revalidatePath("/dashboard/community");
-  revalidatePath("/creator/channels");
-  revalidatePath("/creator/community");
+  revalidateCommunity();
   return { success: true };
 }
 
@@ -51,17 +58,21 @@ export async function editStaffPost(postId: string, body: string): Promise<Resul
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to edit." };
-  
-  const { data: profile, error: profileError } = await supabase.from("profiles").select("platform_role,is_suspended").eq("id", user.id).maybeSingle();
-  if (profileError || !profile || profile.is_suspended || !["moderator", "influencer", "super_admin"].includes(profile.platform_role)) {
-    return { error: "Moderator or influencer access is required." };
-  }
 
-  const { error } = await supabase.from("posts").update({ body: body.trim(), updated_at: new Date().toISOString() }).eq("id", postId);
-  if (error) return { error: error.message };
-  revalidatePath("/dashboard/community");
-  revalidatePath("/creator/channels");
-  revalidatePath("/creator/community");
+  // Content belongs to its author. A moderator may hide a post but never rewrite
+  // one, so the author predicate is on the update itself and again in the
+  // posts_guard_update trigger. Filtering here turns the common case into a
+  // clean zero-row result instead of a raised database exception.
+  const { data: updated, error } = await supabase
+    .from("posts")
+    .update({ body: body.trim(), updated_at: new Date().toISOString() })
+    .eq("id", postId)
+    .eq("author_id", user.id)
+    .select("id")
+    .maybeSingle();
+  if (error) return { error: postgresMessage(error, "That message could not be updated.") };
+  if (!updated) return { error: "Only the author can edit this message." };
+  revalidateCommunity();
   return { success: true };
 }
 
@@ -76,10 +87,8 @@ export async function togglePostHighlight(postId: string): Promise<Result> {
   if (postError || !post) return { error: "Message not found." };
   const highlighted = !post.is_pinned;
   const { error } = await supabase.from("posts").update({ is_pinned: highlighted, pinned_at: highlighted ? new Date().toISOString() : null, updated_at: new Date().toISOString() }).eq("id", postId);
-  if (error) return { error: error.message };
-  revalidatePath("/dashboard/community");
-  revalidatePath("/creator/channels");
-  revalidatePath("/creator/community");
+  if (error) return { error: postgresMessage(error, "That message could not be updated.") };
+  revalidateCommunity();
   return { success: true };
 }
 
@@ -95,11 +104,9 @@ export async function deleteStaffPost(postId: string): Promise<Result> {
   }
 
   const { data: deleted, error } = await supabase.rpc("soft_delete_post", { target_post_id: postId });
-  if (error) return { error: error.message };
+  if (error) return { error: postgresMessage(error, "That message could not be deleted.") };
   if (!deleted) return { error: "Message not found or it has already been deleted." };
-  revalidatePath("/dashboard/community");
-  revalidatePath("/creator/channels");
-  revalidatePath("/creator/community");
+  revalidateCommunity();
   refresh();
   return { success: true };
 }

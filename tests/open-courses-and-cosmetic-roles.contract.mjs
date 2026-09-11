@@ -37,11 +37,13 @@ test("creator course controls keep achievements but remove access tiers and prer
 });
 
 test("cosmetic roles are creator-managed, member-readable, and display-only", async () => {
-  const [migration, page, actions, surface] = await Promise.all([
+  // Badge rendering moved from CommunitySurface into MessageStream when the
+  // community surface was split; the invariant is unchanged.
+  const [migration, page, actions, stream] = await Promise.all([
     read("supabase/migrations/20260802000000_open_courses_and_cosmetic_roles.sql"),
     read("src/app/creator/members/page.tsx"),
     read("src/app/creator/members/actions.ts"),
-    read("src/components/community/CommunitySurface.tsx"),
+    read("src/components/community/MessageStream.tsx"),
   ]);
   assert.match(migration, /create table public\.cosmetic_roles/);
   assert.match(migration, /permission_config jsonb not null default '\{\}'::jsonb/);
@@ -49,6 +51,6 @@ test("cosmetic roles are creator-managed, member-readable, and display-only", as
   assert.match(migration, /public\.is_influencer\(\) and assigned_by = \(select auth\.uid\(\)\)/);
   assert.match(page, /requireInfluencerWorkspace\("\/creator\/members"\)/);
   assert.match(actions, /requireInfluencer\(\)/);
-  assert.match(surface, /post\.authorRoles\?\.map/);
+  assert.match(stream, /post\.authorRoles\?\.map/);
   assert.doesNotMatch(migration, /permission_config.*allowed_roles|permission_config.*min_tier/);
 });

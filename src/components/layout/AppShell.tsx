@@ -203,6 +203,11 @@ export function AppShell({ active, title, memberName = "Practitioner", platformR
   }
 
   const settingsHref = withRouteBase(routeBase, "/settings");
+  // In the creator workspace this resolves to /creator/settings, which is the
+  // community configuration page, not an account page. requireActiveMembership
+  // redirects influencers to /creator, so /dashboard/settings is unreachable for
+  // them and must not be linked here. Label what the link actually opens.
+  const settingsLabel = routeBase === "/creator" ? "Open community settings" : "Open account settings";
   const notificationsHref = withRouteBase(routeBase, "/notifications");
 
   const sidebar = (
@@ -214,7 +219,7 @@ export function AppShell({ active, title, memberName = "Practitioner", platformR
         {navItems.map((item) => { const Icon = item.icon; const selected = pathname === item.href || active === item.label; return <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)} className={`focus-ring flex min-h-11 items-center justify-between rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wider transition ${selected ? "bg-sidebar-accent text-sidebar-primary" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-primary"}`}><span className="flex items-center gap-3"><Icon size={16}/>{item.label}</span>{item.label === "Notifications" && unreadCount > 0 && <span className="grid min-w-5 size-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}</Link>; })}
       </nav>
       <div className="border-t border-sidebar-border bg-sidebar/80 p-4">
-        <div className="flex items-center justify-between gap-3 px-2"><div className="flex min-w-0 items-center gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-full border border-sidebar-border bg-sidebar-accent font-bold text-sidebar-primary">{memberName[0]?.toUpperCase() || "P"}</div><div className="min-w-0"><p className="truncate text-xs font-bold text-white">{memberName}</p><p className="truncate text-[10px] text-fog-muted">{roleName(platformRole)}</p><p className="mt-1 text-[9px] font-semibold text-primary-container">Member profile</p></div></div><Link href={settingsHref} aria-label="Open account settings" className="focus-ring group grid size-9 shrink-0 place-items-center rounded-full text-sidebar-foreground transition hover:bg-sidebar-accent hover:text-white"><Settings size={16} className="transition-transform duration-500 group-hover:rotate-90"/></Link></div>
+        <div className="flex items-center justify-between gap-3 px-2"><div className="flex min-w-0 items-center gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-full border border-sidebar-border bg-sidebar-accent font-bold text-sidebar-primary">{memberName[0]?.toUpperCase() || "P"}</div><div className="min-w-0"><p className="truncate text-xs font-bold text-white">{memberName}</p><p className="truncate text-[10px] text-fog-muted">{roleName(platformRole)}</p><p className="mt-1 text-[9px] font-semibold text-primary-container">Member profile</p></div></div><Link href={settingsHref} aria-label={settingsLabel} className="focus-ring group grid size-9 shrink-0 place-items-center rounded-full text-sidebar-foreground transition hover:bg-sidebar-accent hover:text-white"><Settings size={16} className="transition-transform duration-500 group-hover:rotate-90"/></Link></div>
       </div>
     </>
   );
