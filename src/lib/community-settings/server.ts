@@ -5,13 +5,16 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   DEFAULT_COMMUNITY_COMPOSER,
   DEFAULT_COMMUNITY_IDENTITY,
+  DEFAULT_COMMUNITY_MODERATION,
   type CommunityComposer,
   type CommunityIdentity,
+  type CommunityModeration,
 } from "@/lib/community-settings/model";
 
 export type IdentityLoad = {
   identity: CommunityIdentity;
   composer: CommunityComposer;
+  moderation: CommunityModeration;
   logoUrl: string | null;
   /** Human-readable notes about what could not be read. Empty when everything loaded. */
   degraded: string[];
@@ -35,7 +38,7 @@ export async function loadCommunityIdentity(supabase: SupabaseClient): Promise<I
       // the type level, and a concatenated expression degrades every column to
       // GenericStringError.
       .select(
-        "tagline,logo_path,accent_color,welcome_message,rules,show_welcome,reaction_emojis,max_body_length,allow_links,allow_attachments,max_attachment_bytes,allowed_attachment_types",
+        "tagline,logo_path,accent_color,welcome_message,rules,show_welcome,reaction_emojis,max_body_length,allow_links,allow_attachments,max_attachment_bytes,allowed_attachment_types,slow_mode_seconds,edit_window_minutes,delete_requires_reason,blocked_word_mode,blocked_word_match",
       )
       .maybeSingle(),
     supabase.from("platform_settings").select("community_name").maybeSingle(),
@@ -78,5 +81,15 @@ export async function loadCommunityIdentity(supabase: SupabaseClient): Promise<I
     allowedAttachmentTypes: row?.allowed_attachment_types ?? DEFAULT_COMMUNITY_COMPOSER.allowedAttachmentTypes,
   };
 
-  return { identity, composer, logoUrl, degraded };
+  const moderation: CommunityModeration = {
+    slowModeSeconds: row?.slow_mode_seconds ?? DEFAULT_COMMUNITY_MODERATION.slowModeSeconds,
+    editWindowMinutes: row?.edit_window_minutes ?? DEFAULT_COMMUNITY_MODERATION.editWindowMinutes,
+    deleteRequiresReason: row?.delete_requires_reason ?? DEFAULT_COMMUNITY_MODERATION.deleteRequiresReason,
+    blockedWordMode: (row?.blocked_word_mode as CommunityModeration["blockedWordMode"]) ??
+      DEFAULT_COMMUNITY_MODERATION.blockedWordMode,
+    blockedWordMatch: (row?.blocked_word_match as CommunityModeration["blockedWordMatch"]) ??
+      DEFAULT_COMMUNITY_MODERATION.blockedWordMatch,
+  };
+
+  return { identity, composer, moderation, logoUrl, degraded };
 }

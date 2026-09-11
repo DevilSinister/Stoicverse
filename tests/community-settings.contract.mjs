@@ -131,3 +131,81 @@ test("identity writes hard-fail and name the outstanding migration", async () =>
   assert.match(actions, /postgresMessage/);
   assert.doesNotMatch(actions, /\.error\.message/);
 });
+
+test("permission grants are a union, never a deny list", async () => {
+  const migration = await read("supabase/migrations/20260911020000_community_role_permissions.sql");
+
+  // A union is monotone, so "why can this person do X" always has a one-hop
+  // answer. Denies turn it into an ordering problem with no good answer.
+  assert.match(migration, /create or replace function public\.community_grant\(grant_key text\)/);
+  assert.doesNotMatch(migration, /deny|revoke_grant|permission_denies/i);
+
+  // @all and manage_channels must not be in the moderator baseline.
+  const baseline = migration.match(/grant_key in \(([^)]*)\)/);
+  assert.ok(baseline, "the moderator baseline is not recognisable");
+  assert.doesNotMatch(baseline[1], /mention_all/);
+  assert.doesNotMatch(baseline[1], /manage_channels/);
+
+  // Every function here pins its search_path. The security advisor flagged both
+  // immutable ones for a mutable path on apply, and one of them backs a CHECK
+  // constraint. Count the pins against the function definitions.
+  const definitions = migration.match(/create or replace function/g) ?? [];
+  const pinned = migration.match(/set search_path to 'public', 'pg_temp'/g) ?? [];
+  assert.equal(pinned.length, definitions.length);
+});
+
+test("the enforcing mention regex has exactly one definition", async () => {
+  const migration = await read("supabase/migrations/20260911020000_community_role_permissions.sql");
+
+  // Two copies in the database and you get posts accepted that notify nobody,
+  // or refused that would have notified everybody. Both the notifier and the
+  // write-time gate must call the shared function.
+  assert.match(migration, /create or replace function public\.community_mention_kind/);
+  assert.match(migration, /kind text := public\.community_mention_kind\(body_text\)/);
+  assert.match(migration, /mention := public\.community_mention_kind\(new\.body\)/);
+
+  // The @all literal appears once: inside community_mention_kind itself. The
+  // notifier keeps a per-tier match because it interpolates each member's tier,
+  // but it must not carry a second @all pattern.
+  const atAll = migration.match(/@all\(\[\^\[:alnum:\]_\]\|\$\)/g) ?? [];
+  assert.equal(atAll.length, 1);
+});
+
+test("blocked words are literal phrases, never user-supplied regex", async () => {
+  const migration = await read("supabase/migrations/20260911030000_community_moderation_engine.sql");
+
+  // A user regex evaluated on every insert is a denial-of-service aimed at
+  // your own database, so the phrase is escaped before it reaches a match.
+  assert.match(migration, /regexp_replace\(btrim\(phrase\)/);
+  assert.match(migration, /char_length\(btrim\(phrase\)\) between 2 and 60/);
+  // Staff-only read: the definer trigger still checks posts against rows the
+  // member cannot see, which is the point.
+  assert.match(migration, /create policy community_blocked_words_staff_read/);
+  assert.match(migration, /using \(public\.is_staff\(\)\)/);
+});
+
+test("slow mode takes an advisory lock, or two concurrent posts both pass", async () => {
+  const migration = await read("supabase/migrations/20260911030000_community_moderation_engine.sql");
+
+  // Without the lock both inserts read the same max(created_at) and both clear
+  // the check.
+  assert.match(migration, /pg_advisory_xact_lock/);
+  assert.match(migration, /tg_op = 'INSERT'/);
+  // The edit window is an UPDATE-only rule.
+  assert.match(migration, /tg_op = 'UPDATE'/);
+  assert.match(migration, /slow_mode_seconds between 0 and 21600/);
+});
+
+test("the blocked-word matcher agrees with the SQL on both modes", async () => {
+  const [migration, model] = await Promise.all([
+    read("supabase/migrations/20260911030000_community_moderation_engine.sql"),
+    read("src/lib/community-settings/model.ts"),
+  ]);
+
+  // Word mode uses [^[:alnum:]_] boundaries in SQL and the same class in JS —
+  //  would treat accented letters differently and the "test a sentence" box
+  // would disagree with what actually happens on save.
+  assert.match(migration, /\[\^\[:alnum:\]_\]/);
+  assert.match(model, /\[\^a-zA-Z0-9_\]/);
+  assert.doesNotMatch(model, /\\b\$\{phrase/);
+});

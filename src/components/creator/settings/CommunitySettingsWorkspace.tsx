@@ -2,16 +2,26 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Hash, MessageSquare, Sparkles } from "lucide-react";
+import { Hash, MessageSquare, ScrollText, ShieldCheck, Sparkles, Users } from "lucide-react";
 
 import { StructureEditor } from "@/components/community/structure/StructureEditor";
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
+import { AuditLogSection } from "@/components/creator/settings/AuditLogSection";
 import { ComposerSection } from "@/components/creator/settings/ComposerSection";
 import { IdentitySection } from "@/components/creator/settings/IdentitySection";
+import { ModerationSection } from "@/components/creator/settings/ModerationSection";
+import { RolesSection } from "@/components/creator/settings/RolesSection";
 import { AppShell } from "@/components/layout/AppShell";
-import type { CommunityComposer, CommunityIdentity } from "@/lib/community-settings/model";
+import type { AuditEvent, RoleWithPermissions } from "@/lib/community-settings/governance";
+import type { CommunityComposer, CommunityIdentity, CommunityModeration } from "@/lib/community-settings/model";
 
-export type CommunitySettingsSection = "identity" | "channels" | "composer";
+export type CommunitySettingsSection =
+  | "identity"
+  | "channels"
+  | "roles"
+  | "composer"
+  | "moderation"
+  | "audit";
 
 /** Sections with a server action and a database policy behind them. */
 const SECTIONS = [
@@ -28,22 +38,29 @@ const SECTIONS = [
     icon: Hash,
   },
   {
+    id: "roles" as const,
+    label: "Roles & permissions",
+    blurb: "What each role may do. Grants compose with channel access, never bypass it.",
+    icon: Users,
+  },
+  {
     id: "composer" as const,
     label: "Composer & reactions",
     blurb: "What a message may contain, and how members can respond to one.",
     icon: MessageSquare,
   },
-];
-
-/**
- * Sections the plan builds in later phases. Listed, not rendered as controls:
- * a toggle with no service behind it is worse than an absent one, because it
- * tells the creator a rule is in force when nothing enforces it.
- */
-const PLANNED = [
-  { label: "Roles & permissions", blurb: "What each role may do — post, pin, delete, mention." },
-  { label: "Moderation", blurb: "Slow mode, blocked words, edit window, and delete reasons." },
-  { label: "Audit log", blurb: "Every edit, delete, pin, and unpin, with the previous message." },
+  {
+    id: "moderation" as const,
+    label: "Moderation",
+    blurb: "Pace, blocked phrases, edit windows, and deletion reasons.",
+    icon: ShieldCheck,
+  },
+  {
+    id: "audit" as const,
+    label: "Audit log",
+    blurb: "Every edit, deletion, pin and flag, with the message as it was.",
+    icon: ScrollText,
+  },
 ];
 
 export function CommunitySettingsWorkspace({
@@ -52,6 +69,11 @@ export function CommunitySettingsWorkspace({
   channels,
   identity,
   composer,
+  moderation,
+  roles,
+  blockedPhrases,
+  auditEvents,
+  auditDegraded,
   logoUrl,
   degraded,
 }: {
@@ -60,6 +82,11 @@ export function CommunitySettingsWorkspace({
   channels: CommunityChannel[];
   identity: CommunityIdentity;
   composer: CommunityComposer;
+  moderation: CommunityModeration;
+  roles: RoleWithPermissions[];
+  blockedPhrases: { id: string; phrase: string }[];
+  auditEvents: AuditEvent[];
+  auditDegraded: string[];
   logoUrl: string | null;
   /** What could not be read. Reads degrade; the matching writes are disabled. */
   degraded: string[];
@@ -120,20 +147,6 @@ export function CommunitySettingsWorkspace({
             })}
           </ul>
 
-          <div className="mt-6 border-t border-surgical-steel pt-4">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-fog-muted">Not built yet</h2>
-            <ul className="mt-2 space-y-2">
-              {PLANNED.map((entry) => (
-                <li key={entry.label} className="text-sm text-fog-muted">
-                  <span className="block font-medium text-on-surface-variant/70">{entry.label}</span>
-                  <span className="block text-xs leading-5">{entry.blurb}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-3 text-xs leading-5 text-fog-muted">
-              Each ships with the database rule that enforces it, so nothing here is a setting the server ignores.
-            </p>
-          </div>
         </nav>
 
         <section aria-label={active.label} className="min-w-0">
@@ -161,6 +174,15 @@ export function CommunitySettingsWorkspace({
               <StructureEditor variant="inline" categories={categories} channels={channels} onNotice={showNotice} />
             </div>
           )}
+          {section === "roles" && <RolesSection roles={roles} canSave={degraded.length === 0} />}
+          {section === "moderation" && (
+            <ModerationSection
+              moderation={moderation}
+              phrases={blockedPhrases}
+              canSave={degraded.length === 0}
+            />
+          )}
+          {section === "audit" && <AuditLogSection events={auditEvents} degraded={auditDegraded} />}
         </section>
       </div>
 

@@ -119,6 +119,164 @@ export const DEFAULT_COMMUNITY_COMPOSER: CommunityComposer = {
   allowedAttachmentTypes: ATTACHMENT_TYPE_CHOICES.map((choice) => choice.value),
 };
 
+/** Mirrors the key list in `is_valid_permission_config`. A key here that is not there is silently never granted. */
+export const PERMISSION_KEYS = [
+  "post",
+  "pin",
+  "delete_others",
+  "manage_channels",
+  "mention_all",
+  "mention_tier",
+  "bypass_slow_mode",
+] as const;
+
+export type PermissionKey = (typeof PERMISSION_KEYS)[number];
+export type PermissionConfig = Partial<Record<PermissionKey, boolean>>;
+
+/**
+ * What a moderator can do without any cosmetic role.
+ *
+ * `mention_all` and `manage_channels` are deliberately absent: @all reaches
+ * every active member at once and channel management reshapes what everyone
+ * sees. Both need an explicit grant.
+ */
+export const MODERATOR_BASELINE: PermissionKey[] = ["post", "pin", "delete_others", "mention_tier"];
+
+export const PERMISSION_LABELS: Record<PermissionKey, { label: string; detail: string; escalating: boolean }> = {
+  post: { label: "Post", detail: "Write messages in channels they can already open.", escalating: false },
+  pin: { label: "Pin", detail: "Pin and unpin any message in those channels.", escalating: false },
+  delete_others: {
+    label: "Delete others' messages",
+    detail: "Hide anyone's message. The original text is kept in the audit log.",
+    escalating: true,
+  },
+  manage_channels: {
+    label: "Manage channels",
+    detail: "Create, rename, gate, archive and reorder every channel.",
+    escalating: true,
+  },
+  mention_all: { label: "Mention @all", detail: "Notify every active member at once.", escalating: true },
+  mention_tier: { label: "Mention @tier-N", detail: "Notify one tier at a time.", escalating: false },
+  bypass_slow_mode: {
+    label: "Bypass slow mode",
+    detail: "Post without waiting out the channel's pace limit.",
+    escalating: false,
+  },
+};
+
+/** Drop unknown keys and non-booleans, exactly as the database CHECK does. */
+export function parsePermissionConfig(input: unknown): PermissionConfig {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return {};
+  const known = new Set<string>(PERMISSION_KEYS);
+  const result: PermissionConfig = {};
+  for (const [key, value] of Object.entries(input as Record<string, unknown>)) {
+    if (known.has(key) && typeof value === "boolean") result[key as PermissionKey] = value;
+  }
+  return result;
+}
+
+export type CommunityModeration = {
+  slowModeSeconds: number;
+  editWindowMinutes: number;
+  deleteRequiresReason: boolean;
+  blockedWordMode: "block" | "flag";
+  blockedWordMatch: "word" | "substring";
+};
+
+/** Mirrors community_settings_moderation_bounds. */
+export const MODERATION_LIMITS = {
+  slowModeSeconds: { min: 0, max: 21600 },
+  editWindowMinutes: { min: 0, max: 10080 },
+  phrase: { min: 2, max: 60 },
+  maxPhrases: 200,
+} as const;
+
+export const DEFAULT_COMMUNITY_MODERATION: CommunityModeration = {
+  slowModeSeconds: 0,
+  editWindowMinutes: 0,
+  deleteRequiresReason: false,
+  blockedWordMode: "block",
+  blockedWordMatch: "word",
+};
+
+const REGEX_SPECIALS = /[.*+?^${}()|[\]\\]/g;
+
+/**
+ * The same match the database trigger performs, so the interface's "test a
+ * sentence" box cannot disagree with what actually happens on save.
+ *
+ * Returns the phrase that matched, or null. This is a speed bump and not a
+ * filter: homoglyphs, zero-width joiners and `b-a-d` all pass straight through.
+ */
+export function matchesBlockedWord(
+  body: string,
+  phrases: string[],
+  mode: CommunityModeration["blockedWordMatch"],
+): string | null {
+  const haystack = body ?? "";
+  for (const raw of phrases) {
+    const phrase = raw.trim();
+    if (!phrase) continue;
+    if (mode === "substring") {
+      if (haystack.toLowerCase().includes(phrase.toLowerCase())) return phrase;
+      continue;
+    }
+    // Word mode mirrors the SQL's [^[:alnum:]_] boundaries rather than \b,
+    // which treats accented letters differently.
+    const pattern = new RegExp(`(^|[^a-zA-Z0-9_])${phrase.replace(REGEX_SPECIALS, "\\$&")}([^a-zA-Z0-9_]|$)`, "i");
+    if (pattern.test(haystack)) return phrase;
+  }
+  return null;
+}
+
+export function parseModeration(input: Record<string, unknown>): CommunityModeration {
+  const slowModeSeconds = Number.parseInt(String(input.slowModeSeconds ?? ""), 10);
+  if (
+    !Number.isInteger(slowModeSeconds) ||
+    slowModeSeconds < MODERATION_LIMITS.slowModeSeconds.min ||
+    slowModeSeconds > MODERATION_LIMITS.slowModeSeconds.max
+  ) {
+    throw new Error("Slow mode must be between 0 seconds (off) and 6 hours.");
+  }
+
+  const editWindowMinutes = Number.parseInt(String(input.editWindowMinutes ?? ""), 10);
+  if (
+    !Number.isInteger(editWindowMinutes) ||
+    editWindowMinutes < MODERATION_LIMITS.editWindowMinutes.min ||
+    editWindowMinutes > MODERATION_LIMITS.editWindowMinutes.max
+  ) {
+    throw new Error("The edit window must be between 0 minutes (never expires) and 7 days.");
+  }
+
+  const blockedWordMode = String(input.blockedWordMode ?? "");
+  const blockedWordMatch = String(input.blockedWordMatch ?? "");
+  if (blockedWordMode !== "block" && blockedWordMode !== "flag") {
+    throw new Error("Blocked words must either block the message or flag it.");
+  }
+  if (blockedWordMatch !== "word" && blockedWordMatch !== "substring") {
+    throw new Error("Blocked words must match whole words or any substring.");
+  }
+
+  return {
+    slowModeSeconds,
+    editWindowMinutes,
+    deleteRequiresReason: input.deleteRequiresReason === true || input.deleteRequiresReason === "on",
+    blockedWordMode,
+    blockedWordMatch,
+  };
+}
+
+/** 2–60 characters, lowercased and trimmed, matching the table's CHECK and unique index. */
+export function parseBlockedPhrase(raw: string): string {
+  const phrase = raw.trim().toLowerCase();
+  if (phrase.length < MODERATION_LIMITS.phrase.min || phrase.length > MODERATION_LIMITS.phrase.max) {
+    throw new Error(
+      `Each phrase must be between ${MODERATION_LIMITS.phrase.min} and ${MODERATION_LIMITS.phrase.max} characters.`,
+    );
+  }
+  return phrase;
+}
+
 const HEX_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 
 export function isHexColor(value: string): boolean {
