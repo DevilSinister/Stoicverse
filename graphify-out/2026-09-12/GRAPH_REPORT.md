@@ -1,22 +1,22 @@
 # Graph Report - StoicWealthSociety  (2026-09-12)
 
 ## Corpus Check
-- 433 files · ~396,317 words
+- 439 files · ~402,803 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2185 nodes · 4459 edges · 196 communities (155 shown, 41 thin omitted)
+- 2201 nodes · 4543 edges · 186 communities (146 shown, 40 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 62 edges (avg confidence: 0.78)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `28f324c3`
+- Built from commit: `c42dba2b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- access.ts
-- SettingsPageShell.tsx
+- AskStoicScreens.tsx
+- sections.ts
 - community-settings/model.ts
 - requireInfluencer
 - AuthForm.tsx
@@ -34,7 +34,7 @@
 - constants.ts
 - EmojiPicker.tsx
 - Influencer Implementation Plan
-- CourseVideoPlayer.tsx
+- VideoPage.tsx
 - automod.ts
 - Graphify Workflow
 - Product Requirements Document
@@ -51,8 +51,8 @@
 - Client Screen Inventory
 - graphify reference: query, path, explain
 - CRITICAL BROWSER STORAGE RESTRICTION
-- community/actions.ts
-- alert-dialog.tsx
+- useToast
+- sheet.tsx
 - rls.integration.mjs
 - UI/UX Standards
 - Row Level Security
@@ -81,11 +81,11 @@
 - CLAUDE.md
 - .claude/CLAUDE.md
 - extraction-spec.md
-- revenue/model.ts
+- CreatorRevenueView.tsx
 - Cairn Design System Reference
 - eslint.config.mjs
-- MessageMenu.tsx
-- sections.ts
+- createClient
+- Composer.tsx
 - cn
 - tokenize.ts
 - postcss.config.mjs
@@ -113,71 +113,61 @@
 - Stoicverse project and branch status
 - ChannelView.tsx
 - search/route.ts
-- members/actions.ts
+- creator/settings/actions.ts
 - role-model.ts
 - proxy.ts
 - NotificationCenter.tsx
-- IdentitySection.tsx
-- postgresMessage
+- EmojiSection.tsx
+- member-actions.ts
 - Migrations — how this project actually deploys
 - utils.ts
 - member-operations/server.ts
-- message-actions.ts
+- MessageMenu.tsx
 - messages.ts
 - next
 - LandingScreen.tsx
 - field.tsx
 - workspace.ts
-- AppShell.tsx
+- withRouteBase
 - ChannelsShell.tsx
 - login/route.ts
-- CreatorRevenueView.tsx
-- StructureEditor.tsx
-- AuditLogSection.tsx
-- CourseCatalogPage.tsx
-- @base-ui/react
+- @supabase/ssr
+- RolesSection.tsx
 - VoicePlayer.tsx
 - channels/actions.ts
 - @dnd-kit/utilities
-- ChannelView
+- CommunityProvider.tsx
 - react-dom
 - @supabase/supabase-js
 - community-migrations.contract.mjs
 - requireInfluencerWorkspace
 - community-settings/permissions.ts
-- createAdminClient
+- webhook/route.ts
 - search-query.ts
-- app/mentorship/page.tsx
-- createClient
-- CommunitySurface.tsx
-- [channelId]/page.tsx
+- AppShell.tsx
+- isRateLimited
+- channel-meta.ts
+- access.ts
 - CommunityWorkspace.tsx
-- TurnoverWorkspace.tsx
-- isUuid
+- revalidateCommunity
 - tabs.tsx
 - @dnd-kit/core
 - channels.contract.mjs
 - MemberList.tsx
-- MemberRegistry.tsx
 - presence.ts
 - @dnd-kit/sortable
-- dropdown-menu.tsx
 - toggle-group.tsx
-- VideoPage.tsx
-- stream/route.ts
 - dialog.tsx
 - lucide-react
-- MemberProfileDialog.tsx
 - checkout/page.tsx
-- tooltip.tsx
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 149 edges
-2. `createClient()` - 69 edges
-3. `postgresMessage()` - 55 edges
-4. `revalidateCommunity()` - 37 edges
-5. `isUuid()` - 36 edges
-6. `createClient()` - 36 edges
+2. `createClient()` - 73 edges
+3. `postgresMessage()` - 59 edges
+4. `revalidateCommunity()` - 41 edges
+5. `isUuid()` - 40 edges
+6. `createClient()` - 38 edges
 7. `requireInfluencerWorkspace()` - 33 edges
 8. `AppShell()` - 29 edges
 9. `requireInfluencer()` - 29 edges
@@ -186,14 +176,14 @@
 ## Surprising Connections (you probably didn't know these)
 - `Cairn Design System Reference` --semantically_similar_to--> `Cairn Pricing Page Reference`  [INFERRED] [semantically similar]
   cover.webp → preview-desktop.png
+- `parseEmojiName()` --references--> `name`  [EXTRACTED]
+  src/lib/community/emojis.ts → package.json
 - `ChannelView()` --indirect_call--> `message()`  [INFERRED]
   src/components/channels/ChannelView.tsx → tests/channels-message-actions.test.mjs
-- `buildAnalytics()` --indirect_call--> `row()`  [INFERRED]
-  src/lib/analytics/model.ts → tests/community-settings-order.test.mjs
-- `parse()` --calls--> `parseSearchQuery()`  [EXTRACTED]
-  tests/channels-search-query.test.mjs → src/lib/channels/search-query.ts
-- `press()` --calls--> `resolveShortcut()`  [EXTRACTED]
-  tests/channels-shortcuts.test.mjs → src/lib/channels/shortcuts.ts
+- `buildRevenue()` --indirect_call--> `row()`  [INFERRED]
+  src/lib/revenue/model.ts → tests/community-settings-order.test.mjs
+- `safeNextPath()` --calls--> `safeNextPath()`  [EXTRACTED]
+  proxy.ts → src/lib/security/safe-path.ts
 
 ## Import Cycles
 - 2-file cycle: `src/components/dashboard/DashboardView.tsx -> src/components/dashboard/TerminalDashboard.tsx -> src/components/dashboard/DashboardView.tsx`
@@ -206,27 +196,27 @@
 - **Dashboard Screen Variants** — stitch_screens_ask_stoic___dashboard_desktop_dashboard_desktop_screen, stitch_screens_ask_stoic___dashboard_desktop__discord_sidebar_dashboard_discord_sidebar_screen, stitch_screens_ask_stoic___dashboard_mobile_dashboard_mobile_screen [INFERRED 0.85]
 - **Trading Education Learning Flow** — stitch_screens_ask_stoic___trading_education_platform_trading_education_platform, stitch_screens_ask_stoic___trading_education_platform_learning_roadmap, stitch_screens_ask_stoic___trading_education_platform_progression_model [EXTRACTED 1.00]
 
-## Communities (196 total, 41 thin omitted)
+## Communities (186 total, 40 thin omitted)
 
-### Community 0 - "access.ts"
+### Community 0 - "AskStoicScreens.tsx"
+Cohesion: 0.12
+Nodes (13): CreatorMasterPage(), MasterPage(), MasterPageOptions, renderMasterPage(), ButtonLink(), CommunityChannel, CommunityPost, cx() (+5 more)
+
+### Community 1 - "sections.ts"
 Cohesion: 0.09
-Nodes (22): AdminPage(), CreatorMasterPage(), NotificationsPage(), MasterPage(), MasterPageOptions, renderMasterPage(), CommitmentPage(), SubscriptionPage() (+14 more)
-
-### Community 1 - "SettingsPageShell.tsx"
-Cohesion: 0.20
-Nodes (13): CreatorSettingsPage(), NoticeContext, NoticeContextValue, SettingsNoticeProvider(), useSettingsNotice(), SettingsOverlayShell(), SettingsPageShell(), SettingsRail() (+5 more)
+Nodes (33): CreatorSettingsPage(), ACTION_COPY, ACTIONS, AuditLogSection(), SECTION_ICONS, NoticeContext, NoticeContextValue, SettingsNoticeProvider() (+25 more)
 
 ### Community 2 - "community-settings/model.ts"
-Cohesion: 0.11
-Nodes (22): SafetySection(), when(), bounded(), CASE_KIND_LABELS, CASE_KINDS, CommunityIdentity, CommunitySafety, DEFAULT_COMMUNITY_IDENTITY (+14 more)
+Cohesion: 0.09
+Nodes (37): AccentField(), IdentityPreview(), IdentitySection(), RoleColorField(), ACCENT_SWATCHES, bounded(), CASE_KIND_LABELS, CASE_KINDS (+29 more)
 
 ### Community 3 - "requireInfluencer"
-Cohesion: 0.13
-Nodes (33): ActionResult, addCourseVideo(), addLesson(), createCourse(), deleteCourse(), deleteCourseVideo(), driveId(), enrollInCourse() (+25 more)
+Cohesion: 0.09
+Nodes (40): GET(), runtime, ActionResult, addCourseVideo(), addLesson(), createCourse(), deleteCourse(), deleteCourseVideo() (+32 more)
 
 ### Community 4 - "AuthForm.tsx"
-Cohesion: 0.13
-Nodes (11): appOrigin(), AuthActionState, clientKey(), loginAction(), signupAction(), ARRIVAL_NOTICES, AuthForm(), AuthState (+3 more)
+Cohesion: 0.10
+Nodes (18): appOrigin(), AuthActionState, clientKey(), loginAction(), signupAction(), GET(), SettingsPage(), validSections (+10 more)
 
 ### Community 5 - "CreatorEventsView.tsx"
 Cohesion: 0.09
@@ -249,8 +239,8 @@ Cohesion: 0.07
 Nodes (26): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+18 more)
 
 ### Community 10 - "CreatorOverviewView.tsx"
-Cohesion: 0.13
-Nodes (13): CreatorOverviewView(), currency, delta(), eventTime(), FilterOption, isSameDay(), number, OverviewData (+5 more)
+Cohesion: 0.11
+Nodes (14): CreatorDashboardPage(), CreatorOverviewView(), currency, delta(), eventTime(), FilterOption, isSameDay(), number (+6 more)
 
 ### Community 11 - "components.json"
 Cohesion: 0.09
@@ -266,7 +256,7 @@ Nodes (12): DashboardPage(), DashboardPageOptions, renderDashboardPage(), Dashbo
 
 ### Community 14 - "dependencies"
 Cohesion: 0.12
-Nodes (17): class-variance-authority, clsx, emojibase-data, dependencies, class-variance-authority, clsx, emojibase-data, recharts (+9 more)
+Nodes (17): @base-ui/react, class-variance-authority, clsx, emojibase-data, dependencies, @base-ui/react, class-variance-authority, clsx (+9 more)
 
 ### Community 15 - "devDependencies"
 Cohesion: 0.12
@@ -274,7 +264,7 @@ Nodes (17): eslint, eslint-config-next, devDependencies, eslint, eslint-config-n
 
 ### Community 16 - "constants.ts"
 Cohesion: 0.12
-Nodes (28): sendChannelMessage(), sendMessage(), Composer(), PendingAttachment, MENTIONS, MentionTrigger, mentionTriggerAt(), MessageComposer() (+20 more)
+Nodes (24): MENTIONS, MentionTrigger, mentionTriggerAt(), MessageComposer(), ATTACHMENT_MAX_BYTES, ATTACHMENT_MIME_TYPES, ATTACHMENTS_PER_MESSAGE, CHANNEL_NOTIFICATION_LEVELS (+16 more)
 
 ### Community 17 - "EmojiPicker.tsx"
 Cohesion: 0.06
@@ -284,13 +274,13 @@ Nodes (59): generate(), OUTPUT, require, root, applySkinTone(), buildIndex(), Co
 Cohesion: 0.12
 Nodes (15): 1. Permission model — two independent axes, 2.1 Home / Analytics, 2.2 Members, 2.3 Learning (Tiers), 2.4 Events, 2. Influencer Dashboard — surfaces, 3. Gifting membership — rules, 4. Membership lapse behavior (+7 more)
 
-### Community 20 - "CourseVideoPlayer.tsx"
-Cohesion: 0.31
-Nodes (7): formatDuration(), LegacyCourseVideoPlayer(), PlaylistVideo, formatDuration(), LessonWorkspacePlayer(), PlaylistVideo, QueueItem()
+### Community 20 - "VideoPage.tsx"
+Cohesion: 0.21
+Nodes (10): VideoPage(), renderVideoPage(), DashboardVideoPage(), formatDuration(), LegacyCourseVideoPlayer(), PlaylistVideo, formatDuration(), LessonWorkspacePlayer() (+2 more)
 
 ### Community 21 - "automod.ts"
-Cohesion: 0.14
-Nodes (27): RuleDraft, RuleEditor(), AutomodSection(), draftFor(), AUTOMOD_KIND_LABELS, AUTOMOD_KINDS, AUTOMOD_LIMITS, AUTOMOD_MATCH_MODES (+19 more)
+Cohesion: 0.11
+Nodes (32): RuleDraft, RuleEditor(), AutomodSection(), draftFor(), AUTOMOD_KIND_LABELS, AUTOMOD_KINDS, AUTOMOD_LIMITS, AUTOMOD_MATCH_MODES (+24 more)
 
 ### Community 22 - "Graphify Workflow"
 Cohesion: 0.14
@@ -314,7 +304,7 @@ Nodes (10): Access and data safety, Community and curriculum, Documentation main
 
 ### Community 28 - "CreatorAnalyticsView.tsx"
 Cohesion: 0.07
-Nodes (43): GET(), CreatorAnalyticsPage(), Cell, Courses(), CreatorAnalyticsView(), date(), delta(), Events() (+35 more)
+Nodes (44): GET(), CreatorAnalyticsPage(), Cell, Courses(), CreatorAnalyticsView(), date(), delta(), Events() (+36 more)
 
 ### Community 29 - "package.json"
 Cohesion: 0.20
@@ -352,13 +342,13 @@ Nodes (5): For /graphify explain, For /graphify path, graphify reference: query,
 Cohesion: 0.40
 Nodes (5): CRITICAL BROWSER STORAGE RESTRICTION, Step 0 — Does the request need a visual at all?, Step 1 — Is a connected MCP tool a fit?, Step 2 — Did the person ask for a file?, Step 3 — Visualizer (default inline visual)
 
-### Community 38 - "community/actions.ts"
-Cohesion: 0.10
-Nodes (21): acceptRules(), forwardMessage(), ForwardOutcome, markChannelRead(), Result, inter, jetbrainsMono, metadata (+13 more)
+### Community 38 - "useToast"
+Cohesion: 0.11
+Nodes (16): ForwardOutcome, inter, jetbrainsMono, metadata, InlineEditor(), ForwardDialog(), Stage, RulesGateNotice() (+8 more)
 
-### Community 39 - "alert-dialog.tsx"
-Cohesion: 0.08
-Nodes (17): AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription(), AlertDialogFooter(), AlertDialogHeader(), AlertDialogMedia(), AlertDialogOverlay() (+9 more)
+### Community 39 - "sheet.tsx"
+Cohesion: 0.18
+Nodes (6): SheetContent(), SheetDescription(), SheetFooter(), SheetHeader(), SheetOverlay(), SheetTitle()
 
 ### Community 41 - "UI/UX Standards"
 Cohesion: 0.40
@@ -436,21 +426,21 @@ Nodes (3): Learning Roadmap, Learn Apply Master Progression, Trading Education P
 Cohesion: 0.67
 Nodes (3): AskStoic Design System, Institutional Stoic Methodical Brand, Terminal Dark Design
 
-### Community 68 - "revenue/model.ts"
-Cohesion: 0.13
-Nodes (25): GET(), headers, CreatorRevenuePage(), CreatorRevenueView(), buildRevenue(), defaultRevenueFilters(), parseRevenueFilters(), RevenueAggregate (+17 more)
+### Community 68 - "CreatorRevenueView.tsx"
+Cohesion: 0.09
+Nodes (36): GET(), headers, CreatorRevenuePage(), change(), CreatorRevenueView(), date(), decimal(), MemberCredits() (+28 more)
 
-### Community 71 - "MessageMenu.tsx"
-Cohesion: 0.20
-Nodes (12): createThread(), Dialog, MenuItemType, MenuSeparatorType, MessageMenu(), ContextMenuContent(), ContextMenuItem(), ContextMenuSeparator() (+4 more)
+### Community 71 - "createClient"
+Cohesion: 0.16
+Nodes (25): POST(), dynamic, GET(), PERIODS, GET(), acceptRules(), createThread(), deleteMessage() (+17 more)
 
-### Community 72 - "sections.ts"
-Cohesion: 0.18
-Nodes (15): SECTION_ICONS, DEFAULT_SETTINGS_SECTION, first(), isSettingsSection(), LEGACY_SECTION_ALIASES, parseSettingsQuery(), SECTION_IDS, SETTINGS_GROUPS (+7 more)
+### Community 72 - "Composer.tsx"
+Cohesion: 0.19
+Nodes (14): Pinned, PinsPopover(), Thread, ThreadListPopover(), useLazyRows(), PendingAttachment, useUnread(), Popover() (+6 more)
 
 ### Community 73 - "cn"
-Cohesion: 0.11
-Nodes (30): Avatar(), AvatarBadge(), AvatarFallback(), AvatarGroup(), AvatarGroupCount(), AvatarImage(), PopoverContent(), PopoverDescription() (+22 more)
+Cohesion: 0.08
+Nodes (37): AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription(), AlertDialogFooter(), AlertDialogHeader(), AlertDialogMedia(), AlertDialogOverlay() (+29 more)
 
 ### Community 74 - "tokenize.ts"
 Cohesion: 0.18
@@ -466,63 +456,63 @@ Nodes (19): Analytics implementation, Confirmed product rules, Courses, /creator
 
 ### Community 125 - "combobox.tsx"
 Cohesion: 0.09
-Nodes (23): ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxContent(), ComboboxEmpty(), ComboboxGroup(), ComboboxInput() (+15 more)
+Nodes (25): Button(), buttonVariants, ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear(), ComboboxContent(), ComboboxEmpty() (+17 more)
 
 ### Community 126 - "Stoicverse project and branch status"
 Cohesion: 0.15
 Nodes (12): Branch inventory, Concrete unfinished work and risks, Documentation and maintenance, Executive assessment, Feature gaps, Implemented in committed history, Integration history, Recommended next steps (+4 more)
 
 ### Community 127 - "ChannelView.tsx"
-Cohesion: 0.11
-Nodes (28): setThreadState(), Pinned, PinsPopover(), Thread, ThreadListPopover(), useLazyRows(), MessageRow(), timeOf() (+20 more)
+Cohesion: 0.13
+Nodes (24): ChannelPage(), dynamic, ChannelView(), dayOf(), MessageRow(), Reactions(), timeOf(), mergeMessage() (+16 more)
 
 ### Community 128 - "search/route.ts"
 Cohesion: 0.21
 Nodes (12): CourseRow, CourseVideoRow, DirectoryRow, Embedded, firstOf(), GET(), MemberRow, roleName() (+4 more)
 
-### Community 130 - "members/actions.ts"
-Cohesion: 0.15
-Nodes (20): currentIsoWeekStart(), deleteCosmeticRole(), giftMemberSubscription(), moderateMember(), refreshMemberOperations(), saveCosmeticRole(), saveWeeklyTurnover(), setCosmeticRoleAssignment() (+12 more)
+### Community 130 - "creator/settings/actions.ts"
+Cohesion: 0.38
+Nodes (8): clearLockdown(), Result, saveCommunityIdentity(), saveCommunitySafety(), saveRole(), value(), SafetySection(), when()
 
 ### Community 131 - "role-model.ts"
-Cohesion: 0.07
-Nodes (38): Candidate, MemberRow, MembersTab(), RoleEditor(), RoleForm(), Tab, TABS, RoleIconField() (+30 more)
+Cohesion: 0.13
+Nodes (15): normalizePermissions(), isSystemRoleKey(), parseRoleInput(), RoleInput, SYSTEM_ROLE_KEYS, SystemRoleKey, text(), TIER_ROLE_KEYS (+7 more)
 
 ### Community 132 - "proxy.ts"
-Cohesion: 0.13
-Nodes (21): adminRoutes, authRoutes, communityRoutes, config, copyResponseState(), creatorRoutes, isRouteMatch(), memberRoutes (+13 more)
+Cohesion: 0.22
+Nodes (13): adminRoutes, authRoutes, communityRoutes, config, copyResponseState(), creatorRoutes, isRouteMatch(), memberRoutes (+5 more)
 
 ### Community 134 - "NotificationCenter.tsx"
-Cohesion: 0.31
-Nodes (8): FeedResponse, groupLabel(), iconFor(), NotificationCenter(), relativeTime, timeAgo(), views, safeNotificationHref()
+Cohesion: 0.24
+Nodes (13): GET(), FeedResponse, groupLabel(), iconFor(), NotificationCenter(), relativeTime, timeAgo(), views (+5 more)
 
-### Community 135 - "IdentitySection.tsx"
-Cohesion: 0.20
-Nodes (15): AccentField(), IdentityPreview(), IdentitySection(), RoleColorField(), ACCENT_SWATCHES, channelLuminance(), contrastRatio(), formatContrast() (+7 more)
+### Community 135 - "EmojiSection.tsx"
+Cohesion: 0.42
+Nodes (6): EmojiSection(), CUSTOM_EMOJI_LIMITS, CustomEmoji, emojiToken(), isAllowedEmojiType(), parseEmojiName()
 
-### Community 136 - "postgresMessage"
-Cohesion: 0.17
-Nodes (26): RFC-4122, RestrictionScope, restrictMember(), Result, SCOPES, unrestrictMember(), clearLockdown(), deleteRole() (+18 more)
+### Community 136 - "member-actions.ts"
+Cohesion: 0.15
+Nodes (12): RFC-4122, createEmoji(), deleteEmoji(), renameEmoji(), Result, RestrictionScope, restrictMember(), Result (+4 more)
 
 ### Community 137 - "Migrations — how this project actually deploys"
 Cohesion: 0.40
 Nodes (4): Known ledger facts (2026-09-10), Migrations — how this project actually deploys, The workflow, Why
 
 ### Community 142 - "utils.ts"
-Cohesion: 0.12
-Nodes (10): Badge(), badgeVariants, Checkbox(), Kbd(), KbdGroup(), RadioGroup(), RadioGroupItem(), Skeleton() (+2 more)
+Cohesion: 0.11
+Nodes (9): Badge(), badgeVariants, Checkbox(), ScrollArea(), ScrollBar(), Skeleton(), Slider(), Switch() (+1 more)
 
 ### Community 143 - "member-operations/server.ts"
-Cohesion: 0.13
-Nodes (23): GET(), GET(), platformRoles, statuses, CreatorMembersPage(), decodeMemberCursor(), encodeMemberCursor(), MemberCursor (+15 more)
+Cohesion: 0.05
+Nodes (59): GET(), GET(), platformRoles, statuses, currentIsoWeekStart(), deleteCosmeticRole(), giftMemberSubscription(), moderateMember() (+51 more)
 
-### Community 144 - "message-actions.ts"
-Cohesion: 0.26
-Nodes (10): deriveMessageActions(), JUMP_PAGE_BUDGET, MessageAbilities, MessageActions, messagePermalink(), MessageSubject, NOTHING, abilities() (+2 more)
+### Community 144 - "MessageMenu.tsx"
+Cohesion: 0.17
+Nodes (14): Dialog, MenuItemType, MenuSeparatorType, deriveMessageActions(), JUMP_PAGE_BUDGET, MessageAbilities, MessageActions, messagePermalink() (+6 more)
 
 ### Community 145 - "messages.ts"
 Cohesion: 0.13
-Nodes (15): ChannelsLayout(), ForwardedOrigin, toForwardedOrigin(), toClientMessage(), ChannelThread, DirectoryMember, loadMemberDirectory(), loadViewerState() (+7 more)
+Nodes (16): ChannelsLayout(), ChannelRow, ForwardedOrigin, toForwardedOrigin(), toClientMessage(), ChannelThread, loadCustomEmojis(), loadMemberDirectory() (+8 more)
 
 ### Community 147 - "LandingScreen.tsx"
 Cohesion: 0.19
@@ -533,132 +523,96 @@ Cohesion: 0.15
 Nodes (13): Field(), FieldContent(), FieldDescription(), FieldError(), FieldGroup(), FieldLabel(), FieldLegend(), FieldSeparator() (+5 more)
 
 ### Community 149 - "workspace.ts"
-Cohesion: 0.12
-Nodes (25): AUDIT_PAGE_SIZE, AUTOMOD_ALERT_PAGE_SIZE, AutomodAlertRow, AutomodRuleRow, loadAuditPage(), loadAutomodAlerts(), loadAutomodPresets(), loadAutomodRules() (+17 more)
-
-### Community 150 - "AppShell.tsx"
 Cohesion: 0.10
-Nodes (25): renderCourseDetailPage(), DashboardCoursePage(), CourseCard, CourseFilter, CourseRow(), duration(), filters, LearningPathCatalog() (+17 more)
+Nodes (29): StructureEditorProps, CommunityCategory, CommunityChannel, STAFF_ROLES, loadAutomodAlerts(), loadAutomodPresets(), loadAutomodRules(), CaseKind (+21 more)
+
+### Community 150 - "withRouteBase"
+Cohesion: 0.13
+Nodes (17): CourseEnrollment, CoursesPage(), CourseVideo, renderCoursesPage(), DashboardCoursesPage(), CourseCard, CourseFilter, CourseRow() (+9 more)
 
 ### Community 151 - "ChannelsShell.tsx"
-Cohesion: 0.15
-Nodes (16): setChannelNotificationLevel(), CHANNEL_ICONS, ChannelLink(), ChannelNav(), ChannelsShell(), LEVEL_LABEL, ShellSkeleton(), useCommunity() (+8 more)
+Cohesion: 0.10
+Nodes (23): CHANNEL_ICONS, ChannelLink(), ChannelNav(), ChannelsShell(), LEVEL_LABEL, ShellSkeleton(), useCommunity(), ACCOUNT_LABEL (+15 more)
 
 ### Community 152 - "login/route.ts"
-Cohesion: 0.19
-Nodes (14): adoptOwner(), isLocalRequest(), LOCAL_HOSTS, POST(), secretMatches(), seedPersona(), DevLoginPanel(), DEV_PERSONA_EMAIL (+6 more)
+Cohesion: 0.15
+Nodes (19): GET(), POST(), runtime, adoptOwner(), isLocalRequest(), LOCAL_HOSTS, POST(), secretMatches() (+11 more)
 
-### Community 153 - "CreatorRevenueView.tsx"
-Cohesion: 0.22
-Nodes (12): change(), date(), decimal(), MemberCredits(), money(), productName(), RevenueOverview(), RevenueTrend() (+4 more)
-
-### Community 154 - "StructureEditor.tsx"
-Cohesion: 0.18
-Nodes (16): useRoleOrder(), StructureEditorProps, StructurePanes(), StructureList(), StructureSelection, OrderState, useStructureOrder(), CommunityCategory (+8 more)
-
-### Community 155 - "AuditLogSection.tsx"
-Cohesion: 0.40
-Nodes (4): ACTION_COPY, ACTIONS, AuditLogSection(), AuditEvent
-
-### Community 156 - "CourseCatalogPage.tsx"
-Cohesion: 0.33
-Nodes (5): CourseEnrollment, CoursesPage(), CourseVideo, renderCoursesPage(), DashboardCoursesPage()
+### Community 154 - "RolesSection.tsx"
+Cohesion: 0.13
+Nodes (18): RoleEditor(), CreateRoleButton(), DeleteRoleCard(), RolesSection(), useRoleOrder(), StructurePanes(), StructureList(), StructureSelection (+10 more)
 
 ### Community 158 - "VoicePlayer.tsx"
 Cohesion: 0.17
 Nodes (20): clock(), decodeQueue, measure(), measureOnce(), peakCache, SPEEDS, VoicePlayer(), clock() (+12 more)
 
 ### Community 159 - "channels/actions.ts"
-Cohesion: 0.11
-Nodes (30): access(), creatorSupabase(), deleteChannelOverride(), deleteCommunityStructure(), reorderCommunityStructure(), Result, Role, roles() (+22 more)
+Cohesion: 0.17
+Nodes (22): access(), creatorSupabase(), deleteChannelOverride(), deleteCommunityStructure(), reorderCommunityStructure(), Result, Role, roles() (+14 more)
 
-### Community 161 - "ChannelView"
+### Community 161 - "CommunityProvider.tsx"
 Cohesion: 0.11
-Nodes (19): ChannelView(), dayOf(), continuesGroup(), firstUnreadIndex(), GROUP_WINDOW_MS, GroupableMessage, startsNewDay(), activeMentionQuery() (+11 more)
+Nodes (20): CommunityContext, CommunityProvider(), CommunityValue, MobilePane, Composer(), GROUP_WINDOW_MS, activeMentionQuery(), decodeMentions() (+12 more)
 
 ### Community 167 - "requireInfluencerWorkspace"
-Cohesion: 0.13
-Nodes (12): LessonPage(), LessonPageOptions, renderLessonPage(), CreatorCourseManagerPageV2(), CreatorLessonPage(), CreatorDashboardPage(), CreatorEventsPage(), CreatorNotificationsPage() (+4 more)
+Cohesion: 0.18
+Nodes (12): LessonPage(), LessonPageOptions, renderLessonPage(), CreatorLessonPage(), CreatorEventsPage(), CreatorMentorshipPage(), MentorshipPage(), MentorshipPageOptions (+4 more)
 
 ### Community 168 - "community-settings/permissions.ts"
-Cohesion: 0.13
-Nodes (21): ALL_KEY_SET, canGrant(), canManageRole(), CHANNEL_KEY_SET, CHANNEL_PERMISSION_KEYS, diffPermissions(), ESCALATING_PERMISSIONS, isChannelPermissionKey() (+13 more)
+Cohesion: 0.07
+Nodes (39): Candidate, MemberRow, MembersTab(), RoleForm(), Tab, TABS, RoleIconField(), RolePermissionGrid() (+31 more)
 
-### Community 169 - "createAdminClient"
-Cohesion: 0.22
-Nodes (10): GET(), POST(), runtime, POST(), runtime, StripeEvent, verifiedEvent(), Email (+2 more)
+### Community 169 - "webhook/route.ts"
+Cohesion: 0.36
+Nodes (6): POST(), runtime, StripeEvent, verifiedEvent(), Email, sendTransactionalEmail()
 
 ### Community 170 - "search-query.ts"
 Cohesion: 0.16
 Nodes (16): applyFilter(), dayLabel(), describeFilters(), HAS_LABEL, HAS_VALUES, HasFilter, KEYS, matchName() (+8 more)
 
-### Community 171 - "app/mentorship/page.tsx"
-Cohesion: 0.27
-Nodes (7): CreatorMentorshipPage(), MentorshipPage(), MentorshipPageOptions, renderMentorshipPage(), Notification, MentorshipView(), MentorshipViewProps
-
-### Community 172 - "createClient"
-Cohesion: 0.16
-Nodes (21): POST(), products, runtime, POST(), GET(), POST(), dynamic, GET() (+13 more)
-
-### Community 173 - "CommunitySurface.tsx"
+### Community 171 - "AppShell.tsx"
 Cohesion: 0.13
-Nodes (21): deleteMessage(), editMessage(), togglePostHighlight(), toggleReaction(), Reactions(), channelHref(), channelMeta(), ChannelTypeMeta (+13 more)
+Nodes (15): CreatorNotificationsPage(), AppShell(), AppShellProps, EMPTY_NOTIFICATIONS, eventDate(), Notification, NotificationResponse, roleName() (+7 more)
 
-### Community 174 - "[channelId]/page.tsx"
+### Community 172 - "isRateLimited"
+Cohesion: 0.27
+Nodes (10): POST(), products, runtime, POST(), GET(), PATCH(), hasTrustedOrigin(), isRateLimited() (+2 more)
+
+### Community 173 - "channel-meta.ts"
 Cohesion: 0.19
-Nodes (11): BlockedPage(), dynamic, ChannelPage(), dynamic, ChannelsIndexPage(), dynamic, ATTACHMENT_URL_TTL_SECONDS, attachmentPathsOf() (+3 more)
+Nodes (13): channelHref(), channelMeta(), ChannelTypeMeta, META, tierName(), ChannelRow(), ChannelSidebar(), Props (+5 more)
+
+### Community 174 - "access.ts"
+Cohesion: 0.14
+Nodes (14): AdminPage(), BlockedPage(), dynamic, ChannelsIndexPage(), dynamic, NotificationsPage(), CommitmentPage(), SubscriptionPage() (+6 more)
 
 ### Community 175 - "CommunityWorkspace.tsx"
-Cohesion: 0.23
-Nodes (9): CreatorChannelsPage(), CreatorCommunityPage(), DashboardCommunityPage(), CommunitySurface(), capabilities, CommunityWorkspace, CommunityWorkspaceOptions, renderCommunityWorkspace() (+1 more)
+Cohesion: 0.22
+Nodes (10): CreatorChannelsPage(), CreatorCommunityPage(), DashboardCommunityPage(), CommunitySurface(), capabilities, CommunityWorkspace, CommunityWorkspaceOptions, renderCommunityWorkspace() (+2 more)
 
-### Community 176 - "TurnoverWorkspace.tsx"
-Cohesion: 0.24
-Nodes (9): CreatorMemberTurnoverPage(), isoWeekRange(), money(), statuses, TurnoverDesktopRow(), TurnoverMobileRow(), TurnoverWorkspace(), MemberDirectoryPage (+1 more)
-
-### Community 177 - "isUuid"
-Cohesion: 0.26
-Nodes (17): giftMembership(), banMember(), bulkDeleteMessages(), reportMessage(), resolveReport(), Result, timeoutMember(), unbanMember() (+9 more)
+### Community 177 - "revalidateCommunity"
+Cohesion: 0.22
+Nodes (26): giftMembership(), banMember(), bulkDeleteMessages(), resolveReport(), Result, timeoutMember(), unbanMember(), untimeoutMember() (+18 more)
 
 ### Community 178 - "tabs.tsx"
 Cohesion: 0.40
 Nodes (5): Tabs(), TabsContent(), TabsList(), tabsListVariants, TabsTrigger()
 
 ### Community 181 - "MemberList.tsx"
-Cohesion: 0.14
-Nodes (11): CONTEXT_PARTS, DROPDOWN_PARTS, Pending, ContextMenu(), ContextMenuCheckboxItem(), ContextMenuLabel(), ContextMenuRadioItem(), ContextMenuShortcut() (+3 more)
-
-### Community 184 - "MemberRegistry.tsx"
-Cohesion: 0.20
-Nodes (7): date(), DesktopTable(), EMPTY_FILTERS, Filters, MemberRegistry(), MobileRows(), statusOptions
+Cohesion: 0.07
+Nodes (30): CONTEXT_PARTS, DROPDOWN_PARTS, Pending, GIFT_OPTIONS, GiftOption, MemberMenuContext, memberMenuItems(), MenuParts (+22 more)
 
 ### Community 185 - "presence.ts"
 Cohesion: 0.26
 Nodes (10): TypingPayload, useCommunityLive(), activeTypists(), groupMembers(), MemberLike, MemberSection, onlineIdsFrom(), TYPING_TTL_MS (+2 more)
 
-### Community 187 - "dropdown-menu.tsx"
-Cohesion: 0.18
-Nodes (7): DropdownMenuCheckboxItem(), DropdownMenuLabel(), DropdownMenuRadioItem(), DropdownMenuShortcut(), DropdownMenuSub(), DropdownMenuSubContent(), DropdownMenuSubTrigger()
-
 ### Community 188 - "toggle-group.tsx"
 Cohesion: 0.27
 Nodes (8): react, react, useComboboxAnchor(), ToggleGroup(), ToggleGroupContext, ToggleGroupItem(), Toggle(), toggleVariants
 
-### Community 189 - "VideoPage.tsx"
-Cohesion: 0.60
-Nodes (3): VideoPage(), renderVideoPage(), DashboardVideoPage()
-
-### Community 190 - "stream/route.ts"
-Cohesion: 0.60
-Nodes (3): GET(), runtime, getGoogleDriveDownloadUrl()
-
 ### Community 191 - "dialog.tsx"
 Cohesion: 0.18
 Nodes (6): DialogContent(), DialogDescription(), DialogFooter(), DialogHeader(), DialogOverlay(), DialogTitle()
-
-### Community 193 - "MemberProfileDialog.tsx"
-Cohesion: 0.15
-Nodes (13): GIFT_OPTIONS, GiftOption, MemberMenuContext, memberMenuItems(), MenuParts, ACCOUNT_LABEL, Detail, Pending (+5 more)
 
 ### Community 194 - "checkout/page.tsx"
 Cohesion: 0.33
@@ -667,22 +621,22 @@ Nodes (4): CheckoutPage(), CheckoutScreen(), OFFERS, Product
 ## Knowledge Gaps
 - **643 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+638 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **41 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **40 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `createClient()` connect `createClient` to `search/route.ts`, `access.ts`, `requireInfluencer`, `AuthForm.tsx`, `CreatorEventsView.tsx`, `AccountSettingsWorkspace.tsx`, `proxy.ts`, `postgresMessage`, `member-operations/server.ts`, `constants.ts`, `LandingScreen.tsx`, `ChannelsShell.tsx`, `community/actions.ts`, `requireInfluencerWorkspace`, `createAdminClient`, `CommunitySurface.tsx`, `[channelId]/page.tsx`, `isUuid`, `stream/route.ts`, `checkout/page.tsx`, `MessageMenu.tsx`, `ChannelView.tsx`?**
-  _High betweenness centrality (0.118) - this node is a cross-community bridge._
-- **Why does `cn()` connect `cn` to `MemberProfileDialog.tsx`, `tooltip.tsx`, `MessageMenu.tsx`, `alert-dialog.tsx`, `utils.ts`, `tabs.tsx`, `field.tsx`, `MemberList.tsx`, `dropdown-menu.tsx`, `toggle-group.tsx`, `combobox.tsx`, `dialog.tsx`?**
-  _High betweenness centrality (0.099) - this node is a cross-community bridge._
-- **Why does `createClient()` connect `ChannelView.tsx` to `ChannelView`, `MemberProfileDialog.tsx`, `role-model.ts`, `proxy.ts`, `NotificationCenter.tsx`, `IdentitySection.tsx`, `CommunitySurface.tsx`, `constants.ts`, `isUuid`, `AppShell.tsx`, `ChannelsShell.tsx`, `presence.ts`?**
+- **Why does `createClient()` connect `createClient` to `search/route.ts`, `checkout/page.tsx`, `requireInfluencer`, `AuthForm.tsx`, `CreatorEventsView.tsx`, `NotificationCenter.tsx`, `AccountSettingsWorkspace.tsx`, `member-actions.ts`, `requireInfluencerWorkspace`, `isRateLimited`, `access.ts`, `member-operations/server.ts`, `revalidateCommunity`, `LandingScreen.tsx`, `login/route.ts`?**
+  _High betweenness centrality (0.110) - this node is a cross-community bridge._
+- **Why does `cn()` connect `cn` to `sheet.tsx`, `Composer.tsx`, `utils.ts`, `tabs.tsx`, `field.tsx`, `MemberList.tsx`, `ChannelsShell.tsx`, `toggle-group.tsx`, `combobox.tsx`, `dialog.tsx`?**
+  _High betweenness centrality (0.100) - this node is a cross-community bridge._
+- **Why does `createClient()` connect `Composer.tsx` to `CommunityProvider.tsx`, `community-settings/model.ts`, `NotificationCenter.tsx`, `createClient`, `EmojiSection.tsx`, `community-settings/permissions.ts`, `AppShell.tsx`, `constants.ts`, `revalidateCommunity`, `ChannelsShell.tsx`, `login/route.ts`, `presence.ts`, `ChannelView.tsx`?**
   _High betweenness centrality (0.070) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `rsc` to the rest of the system?**
   _643 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `access.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.09041835357624832 - nodes in this community are weakly interconnected._
+- **Should `AskStoicScreens.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.11666666666666667 - nodes in this community are weakly interconnected._
+- **Should `sections.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.08970099667774087 - nodes in this community are weakly interconnected._
 - **Should `community-settings/model.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.11264367816091954 - nodes in this community are weakly interconnected._
-- **Should `requireInfluencer` be split into smaller, more focused modules?**
-  _Cohesion score 0.12624584717607973 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08571428571428572 - nodes in this community are weakly interconnected._

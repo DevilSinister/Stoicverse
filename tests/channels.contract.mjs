@@ -137,7 +137,7 @@ test("every colour token the channel UI uses is actually defined", async () => {
     "src/components/channels/MessageMenu.tsx",
     "src/components/channels/ThreadPanel.tsx",
     "src/components/channels/ChannelHeaderPopovers.tsx",
-    "src/components/channels/SearchBar.tsx",
+    "src/components/channels/SearchOverlay.tsx",
     "src/components/channels/MemberList.tsx",
   ];
 
@@ -301,7 +301,9 @@ test("the old search signature is dropped, not left as an overload", async () =>
 });
 
 test("an unresolved filter stops the search instead of running it", async () => {
-  const bar = await readCode("src/components/channels/SearchBar.tsx");
+  // Search moved out of the sidebar and into the channel header in the same
+  // change that widened it past messages; the guarantees below did not move.
+  const bar = await readCode("src/components/channels/SearchOverlay.tsx");
   // A search that silently drops `from:someone` returns everybody's messages
   // and looks like it worked.
   assert.match(bar, /if \(!parsed\.runnable\)/);
@@ -581,4 +583,15 @@ test("attachment URLs are signed, because the bucket is private", async () => {
   assert.match(thread, /signAttachmentUrls\(supabase, paths\)/);
   // And a thread shows an image rather than naming the file it is in.
   assert.match(thread, /attachment\.mimeType\.startsWith\("image\/"\)/);
+});
+
+test("only messages leave the browser when somebody searches", async () => {
+  const overlay = await readCode("src/components/channels/SearchOverlay.tsx");
+  // Channels, categories and members are already in the provider. A search
+  // that asked the server for them would be a round trip to re-learn what the
+  // sidebar is currently drawn from, and results that arrive after the
+  // keystroke instead of on it.
+  assert.match(overlay, /localCandidates\(channels, members\)/);
+  const rpcCalls = [...overlay.matchAll(/supabase\.rpc\("([a-z_]+)"/g)].map((match) => match[1]);
+  assert.deepEqual(rpcCalls, ["community_search_messages"], "one RPC, and it is the message one");
 });

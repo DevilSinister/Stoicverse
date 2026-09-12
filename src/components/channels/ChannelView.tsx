@@ -12,6 +12,7 @@ import {
   Menu,
   MessagesSquare,
   Pin,
+  Search,
   Users,
   WifiOff,
 } from "lucide-react";
@@ -24,6 +25,7 @@ import { MemberList } from "@/components/channels/MemberList";
 import { MessageMenu } from "@/components/channels/MessageMenu";
 import { MobilePaneDrawer } from "@/components/channels/MobilePane";
 import { RulesGateNotice } from "@/components/channels/RulesGateNotice";
+import { SearchOverlay } from "@/components/channels/SearchOverlay";
 import { VoicePlayer } from "@/components/channels/VoicePlayer";
 import { ThreadPanel } from "@/components/channels/ThreadPanel";
 import { useToast } from "@/components/ui/toast";
@@ -502,6 +504,7 @@ export function ChannelView({
   const [openThreadName, setOpenThreadName] = useState<string | null>(null);
 
   const notify = useToast();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // The RPC returns newest first; the list reads oldest at the top.
   const [messages, setMessages] = useState<ChannelMessage[]>(() => [...initialMessages].reverse());
@@ -755,6 +758,19 @@ export function ChannelView({
                 Reconnecting
               </span>
             )}
+            {/*
+              Search belongs to the conversation, not to the list of rooms:
+              it was in the sidebar, which is the one part of the page a phone
+              never shows and the one place its results had nowhere to go.
+            */}
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search the community"
+              className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+            >
+              <Search size={16} aria-hidden="true" />
+            </button>
             <ThreadListPopover channelId={channel.id} onOpenThread={openThread} />
             <PinsPopover
               channelId={channel.id}
@@ -906,6 +922,8 @@ export function ChannelView({
           />
         </MobilePaneDrawer>
       ) : null}
+
+      {searchOpen ? <SearchOverlay onClose={() => setSearchOpen(false)} /> : null}
 
       {openThreadId ? (
         <ThreadPanel

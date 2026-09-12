@@ -11,7 +11,6 @@ import { useCommunity, type ChannelRow } from "@/components/channels/CommunityPr
 import { MemberProfileDialog } from "@/components/channels/MemberProfileDialog";
 import { MobilePaneDrawer } from "@/components/channels/MobilePane";
 import { QuickSwitcher } from "@/components/channels/QuickSwitcher";
-import { SearchBar } from "@/components/channels/SearchBar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -160,10 +159,6 @@ function ChannelNav({ onNavigate }: { onNavigate?: () => void }) {
             <Settings size={16} aria-hidden="true" />
           </Link>
         ) : null}
-      </div>
-
-      <div className="border-b border-surgical-steel px-2 py-2">
-        <SearchBar />
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">

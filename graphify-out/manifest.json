@@ -2065,13 +2065,13 @@
     "semantic_hash": ""
   },
   "src/components/channels/ChannelView.tsx": {
-    "mtime": 1789218104.4524763,
-    "ast_hash": "25d6ec40d4b2ea84f4cfe5c0e63d19eb",
+    "mtime": 1789221922.3738093,
+    "ast_hash": "571e6665c972e2330a54d095c15035af",
     "semantic_hash": ""
   },
   "src/components/channels/ChannelsShell.tsx": {
-    "mtime": 1789204497.2091424,
-    "ast_hash": "67a5d5f2c58b517beb82865fe6fa2d47",
+    "mtime": 1789221889.7098112,
+    "ast_hash": "794d02efbb86419289e5e98b6fff96a3",
     "semantic_hash": ""
   },
   "src/components/channels/CommunityProvider.tsx": {
@@ -2120,8 +2120,8 @@
     "semantic_hash": ""
   },
   "tests/channels.contract.mjs": {
-    "mtime": 1789206222.272327,
-    "ast_hash": "6b714c3b68497cf66876e5ecf57cfa1e",
+    "mtime": 1789222067.6223123,
+    "ast_hash": "6259c9358dfbe615e2f3cd9bbac04272",
     "semantic_hash": ""
   },
   "src/components/channels/ChannelHeaderPopovers.tsx": {
@@ -2162,11 +2162,6 @@
   "tests/channels-message-actions.test.mjs": {
     "mtime": 1789204604.7936594,
     "ast_hash": "3b48103e92e72b2311c958364fd7c08d",
-    "semantic_hash": ""
-  },
-  "src/components/channels/SearchBar.tsx": {
-    "mtime": 1789195809.4544542,
-    "ast_hash": "1bd7d89d420799a55c652621596bd0e1",
     "semantic_hash": ""
   },
   "src/components/channels/useUnread.ts": {
@@ -2422,6 +2417,21 @@
   "tests/community-emoji.contract.mjs": {
     "mtime": 1789221088.7941391,
     "ast_hash": "d218cc6b0f5cc2dd26be3838bf35684d",
+    "semantic_hash": ""
+  },
+  "src/components/channels/SearchOverlay.tsx": {
+    "mtime": 1789222413.1224036,
+    "ast_hash": "a45076d71dd713478ac3e7199f67e097",
+    "semantic_hash": ""
+  },
+  "src/lib/channels/search-index.ts": {
+    "mtime": 1789221782.8900497,
+    "ast_hash": "b1212c2c15d54f2e8af99991f5ac322d",
+    "semantic_hash": ""
+  },
+  "tests/channels-search-index.test.mjs": {
+    "mtime": 1789221977.800897,
+    "ast_hash": "09adfe8dcc6367c4b9f2175559c4b68a",
     "semantic_hash": ""
   }
 }
