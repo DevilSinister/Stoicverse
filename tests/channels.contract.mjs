@@ -409,15 +409,22 @@ test("a sanction from the member list asks for its reason", async () => {
   const list = await readCode("src/components/channels/MemberList.tsx");
   // `parseModerationReason` refuses an empty reason for every sanction that is
   // not an undo, so a dialog that skipped it would only produce a failure.
-  assert.match(list, /timeoutMember\(pending\.member\.id, pending\.seconds \?\? 600, reason\)/);
+  // Asserted on the reason reaching each call, not on the exact argument list:
+  // pinning the literal arguments broke this test the first time the pending
+  // shape was tightened, while the guarantee had not changed at all.
+  assert.match(list, /timeoutMember\(pending\.member\.id, [^)]*reason\)/);
   assert.match(list, /banMember\(pending\.member\.id, reason\)/);
+  assert.match(list, /restrictMember\(pending\.member\.id, pending\.scope, pending\.scopeId, reason\)/);
   // Removing a timeout is the undo, and takes no reason.
   assert.match(list, /untimeoutMember\(member\.id\)/);
   // Only what the viewer actually holds.
   assert.match(list, /const canTimeout = can\("moderate_members"\)/);
   assert.match(list, /const canBan = can\("ban_members"\)/);
-  // And never on yourself: the database refuses it.
-  assert.match(list, /member\.id !== viewer\?\.userId/);
+
+  // And never on yourself: the database refuses it. The rule moved into the
+  // shared item list when right-click was added, so it is asserted there.
+  const items = await readCode("src/components/channels/MemberMenuItems.tsx");
+  assert.match(items, /const moderating = !isSelf && \(canTimeout \|\| canBan\)/);
 });
 
 test("the typing line sits above the composer, not inside it", async () => {

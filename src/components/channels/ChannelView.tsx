@@ -229,16 +229,8 @@ function MessageRow({
     );
   }
 
-  return (
-    <li
-      ref={(node) => registerNode(message.id, node)}
-      // The id on the element, not only in a ref: a jump, a test and P5's
-      // keyboard navigation all need to find a row from outside this component.
-      data-message-id={message.id}
-      className={`group relative px-4 transition-colors duration-700 ${grouped ? "py-0.5" : "pb-0.5 pt-3"} ${
-        flashed ? "bg-primary-container/20" : "hover:bg-surface-container-lowest/60"
-      }`}
-    >
+  const body = (
+    <>
       {message.replyToPostId ? (
         <button
           type="button"
@@ -315,7 +307,27 @@ function MessageRow({
         </div>
       </div>
 
-      {editing ? null : (
+    </>
+  );
+
+  return (
+    <li
+      ref={(node) => registerNode(message.id, node)}
+      // The id on the element, not only in a ref: a jump, a test and P5's
+      // keyboard navigation all need to find a row from outside this component.
+      data-message-id={message.id}
+      className={`group relative px-4 transition-colors duration-700 ${grouped ? "py-0.5" : "pb-0.5 pt-3"} ${
+        flashed ? "bg-primary-container/20" : "hover:bg-surface-container-lowest/60"
+      }`}
+    >
+      {/*
+        While editing there is no menu and no right-click: the row has become
+        a form, and offering to delete the message somebody is halfway through
+        rewriting is not an offer worth making.
+      */}
+      {editing ? (
+        body
+      ) : (
         <MessageMenu
           message={message}
           viewerId={viewer?.userId ?? null}
@@ -331,7 +343,9 @@ function MessageRow({
           onEdit={() => onStartEdit(message.id)}
           onOpenThread={onOpenThread}
           onChanged={onChanged}
-        />
+        >
+          {body}
+        </MessageMenu>
       )}
     </li>
   );

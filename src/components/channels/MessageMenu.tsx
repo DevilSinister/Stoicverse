@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type ComponentType, type ReactNode } from "react";
 import { CornerUpLeft, Loader2, MessagesSquare, MoreHorizontal, Pin, PinOff, SmilePlus } from "lucide-react";
 
 import { createThread, deleteMessage, togglePostHighlight, toggleReaction } from "@/app/community/actions";
 import { reportMessage } from "@/app/community/moderation-actions";
 import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +40,13 @@ import type { ChannelMessage } from "@/lib/community/messages";
 
 type Dialog = null | "delete" | "report" | "thread";
 
+/* eslint-disable @typescript-eslint/no-explicit-any -- the dropdown and
+   context item types are structurally identical and nominally distinct;
+   this only passes children through. */
+type MenuItemType = ComponentType<any>;
+type MenuSeparatorType = ComponentType<any>;
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 export function MessageMenu({
   message,
   viewerId,
@@ -42,6 +56,7 @@ export function MessageMenu({
   onEdit,
   onOpenThread,
   onChanged,
+  children,
 }: {
   message: ChannelMessage;
   viewerId: string | null;
@@ -51,6 +66,8 @@ export function MessageMenu({
   onEdit: () => void;
   onOpenThread: (threadId: string, name?: string | null) => void;
   onChanged: () => void;
+  /** The message row itself. Wrapped so a right-click anywhere on it opens the menu. */
+  children: ReactNode;
 }) {
   const actions = deriveMessageActions({
     message: {
@@ -114,8 +131,87 @@ export function MessageMenu({
     }
   };
 
-  return (
+  /**
+   * The items, written once and rendered into both menus.
+   *
+   * base-ui's dropdown and context menus are different component trees, so
+   * the same list has to be buildable from either set of pieces. Duplicating
+   * it would guarantee the right-click menu drifts from the left-click one.
+   */
+  const items = (Item: MenuItemType, Separator: MenuSeparatorType) => (
     <>
+        {actions.startThread ? (
+          <Item
+            onClick={() => {
+              setThreadName("");
+              setDialog("thread");
+            }}
+          >
+            Start a thread
+          </Item>
+        ) : null}
+        {actions.openThread ? (
+          <Item onClick={() => message.threadId && onOpenThread(message.threadId, message.threadName)}>
+            Open thread
+          </Item>
+        ) : null}
+        {actions.pin ? (
+          <Item onClick={() => void run(() => togglePostHighlight(message.id))} disabled={busy}>
+            <span className="flex items-center gap-2">
+              {message.isPinned ? <PinOff size={14} aria-hidden="true" /> : <Pin size={14} aria-hidden="true" />}
+              {message.isPinned ? "Unpin message" : "Pin message"}
+            </span>
+          </Item>
+        ) : null}
+        {actions.edit ? <Item onClick={onEdit}>Edit message</Item> : null}
+
+        {actions.copyText || actions.copyLink ? <Separator /> : null}
+        {actions.copyText ? (
+          <Item onClick={() => void copy(message.body ?? "", "text")}>Copy text</Item>
+        ) : null}
+        {actions.copyLink ? (
+          <Item
+            onClick={() => void copy(messagePermalink(window.location.origin, channelId, message.id), "link")}
+          >
+            Copy link
+          </Item>
+        ) : null}
+
+        {actions.report || actions.remove ? <Separator /> : null}
+        {actions.report ? (
+          <Item
+            onClick={() => {
+              setReportKind(REPORT_REASONS[0]);
+              setReason("");
+              setDialog("report");
+            }}
+          >
+            Report message
+          </Item>
+        ) : null}
+        {actions.remove ? (
+          <Item
+            variant="destructive"
+            onClick={() => {
+              setReason("");
+              setDialog("delete");
+            }}
+          >
+            Delete message
+          </Item>
+        ) : null}
+    </>
+  );
+
+  return (
+    <ContextMenu>
+      {/*
+        `contents` so the trigger adds no box of its own: the row keeps its
+        own layout, and a right-click anywhere on it reaches this menu.
+      */}
+      <ContextMenuTrigger className="contents">{children}</ContextMenuTrigger>
+      <ContextMenuContent className="w-52">{items(ContextMenuItem, ContextMenuSeparator)}</ContextMenuContent>
+
       {/*
         `hidden` by default, but forced visible while this row's menu or emoji
         picker is open. Both portal to the body, so opening one takes the mouse
@@ -185,66 +281,7 @@ export function MessageMenu({
             <MoreHorizontal size={14} aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
-            {actions.startThread ? (
-              <DropdownMenuItem
-                onClick={() => {
-                  setThreadName("");
-                  setDialog("thread");
-                }}
-              >
-                Start a thread
-              </DropdownMenuItem>
-            ) : null}
-            {actions.openThread ? (
-              <DropdownMenuItem onClick={() => message.threadId && onOpenThread(message.threadId, message.threadName)}>
-                Open thread
-              </DropdownMenuItem>
-            ) : null}
-            {actions.pin ? (
-              <DropdownMenuItem onClick={() => void run(() => togglePostHighlight(message.id))} disabled={busy}>
-                <span className="flex items-center gap-2">
-                  {message.isPinned ? <PinOff size={14} aria-hidden="true" /> : <Pin size={14} aria-hidden="true" />}
-                  {message.isPinned ? "Unpin message" : "Pin message"}
-                </span>
-              </DropdownMenuItem>
-            ) : null}
-            {actions.edit ? <DropdownMenuItem onClick={onEdit}>Edit message</DropdownMenuItem> : null}
-
-            {actions.copyText || actions.copyLink ? <DropdownMenuSeparator /> : null}
-            {actions.copyText ? (
-              <DropdownMenuItem onClick={() => void copy(message.body ?? "", "text")}>Copy text</DropdownMenuItem>
-            ) : null}
-            {actions.copyLink ? (
-              <DropdownMenuItem
-                onClick={() => void copy(messagePermalink(window.location.origin, channelId, message.id), "link")}
-              >
-                Copy link
-              </DropdownMenuItem>
-            ) : null}
-
-            {actions.report || actions.remove ? <DropdownMenuSeparator /> : null}
-            {actions.report ? (
-              <DropdownMenuItem
-                onClick={() => {
-                  setReportKind(REPORT_REASONS[0]);
-                  setReason("");
-                  setDialog("report");
-                }}
-              >
-                Report message
-              </DropdownMenuItem>
-            ) : null}
-            {actions.remove ? (
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => {
-                  setReason("");
-                  setDialog("delete");
-                }}
-              >
-                Delete message
-              </DropdownMenuItem>
-            ) : null}
+            {items(DropdownMenuItem, DropdownMenuSeparator)}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -351,7 +388,7 @@ export function MessageMenu({
           ) : null}
         </ActionDialog>
       ) : null}
-    </>
+    </ContextMenu>
   );
 }
 
