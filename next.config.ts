@@ -23,6 +23,14 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  // `next build` and `next dev` both own `.next`, and a build run while the dev
+  // server is up leaves production manifests (BUILD_ID, routes-manifest,
+  // prerender-manifest) beside the dev output. The dev server then resolves
+  // routes against them and answers 404 for pages that exist — and a client
+  // that calls .json() on that HTML 404 reports a JSON parse error, which
+  // points nowhere near the cause. Build with NEXT_BUILD_DIR set to keep the
+  // two apart. Unset, this is exactly the default.
+  distDir: process.env.NEXT_BUILD_DIR || ".next",
   experimental: {
     serverActions: {
       bodySizeLimit: "6mb",
