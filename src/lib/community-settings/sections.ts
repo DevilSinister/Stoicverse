@@ -94,7 +94,7 @@ export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
     blurb: "Rules that act on messages the moment they are sent.",
     group: "moderation",
     requires: "manage_community",
-    built: false,
+    built: true,
   },
   {
     id: "safety",

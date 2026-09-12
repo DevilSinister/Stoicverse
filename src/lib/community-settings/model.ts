@@ -72,53 +72,24 @@ export const ACCENT_SWATCHES = [
 export type CommunityModeration = {
   editWindowMinutes: number;
   deleteRequiresReason: boolean;
-  blockedWordMode: "block" | "flag";
-  blockedWordMatch: "word" | "substring";
 };
 
-/** Mirrors community_settings_moderation_bounds. */
+/**
+ * Mirrors community_settings_moderation_bounds.
+ *
+ * Blocked words left this row in 20260912040000: they are AutoMod rules now,
+ * each with its own match mode and its own action, so a pair of community-wide
+ * columns could no longer say what any one of them does. Their bounds live in
+ * `automod.ts` as `AUTOMOD_LIMITS.keyword`.
+ */
 export const MODERATION_LIMITS = {
   editWindowMinutes: { min: 0, max: 10080 },
-  phrase: { min: 2, max: 60 },
-  maxPhrases: 200,
 } as const;
 
 export const DEFAULT_COMMUNITY_MODERATION: CommunityModeration = {
   editWindowMinutes: 0,
   deleteRequiresReason: false,
-  blockedWordMode: "block",
-  blockedWordMatch: "word",
 };
-
-const REGEX_SPECIALS = /[.*+?^${}()|[\]\\]/g;
-
-/**
- * The same match the database trigger performs, so the interface's "test a
- * sentence" box cannot disagree with what actually happens on save.
- *
- * Returns the phrase that matched, or null. This is a speed bump and not a
- * filter: homoglyphs, zero-width joiners and `b-a-d` all pass straight through.
- */
-export function matchesBlockedWord(
-  body: string,
-  phrases: string[],
-  mode: CommunityModeration["blockedWordMatch"],
-): string | null {
-  const haystack = body ?? "";
-  for (const raw of phrases) {
-    const phrase = raw.trim();
-    if (!phrase) continue;
-    if (mode === "substring") {
-      if (haystack.toLowerCase().includes(phrase.toLowerCase())) return phrase;
-      continue;
-    }
-    // Word mode mirrors the SQL's [^[:alnum:]_] boundaries rather than \b,
-    // which treats accented letters differently.
-    const pattern = new RegExp(`(^|[^a-zA-Z0-9_])${phrase.replace(REGEX_SPECIALS, "\\$&")}([^a-zA-Z0-9_]|$)`, "i");
-    if (pattern.test(haystack)) return phrase;
-  }
-  return null;
-}
 
 export function parseModeration(input: Record<string, unknown>): CommunityModeration {
   const editWindowMinutes = Number.parseInt(String(input.editWindowMinutes ?? ""), 10);
@@ -130,32 +101,10 @@ export function parseModeration(input: Record<string, unknown>): CommunityModera
     throw new Error("The edit window must be between 0 minutes (never expires) and 7 days.");
   }
 
-  const blockedWordMode = String(input.blockedWordMode ?? "");
-  const blockedWordMatch = String(input.blockedWordMatch ?? "");
-  if (blockedWordMode !== "block" && blockedWordMode !== "flag") {
-    throw new Error("Blocked words must either block the message or flag it.");
-  }
-  if (blockedWordMatch !== "word" && blockedWordMatch !== "substring") {
-    throw new Error("Blocked words must match whole words or any substring.");
-  }
-
   return {
     editWindowMinutes,
     deleteRequiresReason: input.deleteRequiresReason === true || input.deleteRequiresReason === "on",
-    blockedWordMode,
-    blockedWordMatch,
   };
-}
-
-/** 2–60 characters, lowercased and trimmed, matching the table's CHECK and unique index. */
-export function parseBlockedPhrase(raw: string): string {
-  const phrase = raw.trim().toLowerCase();
-  if (phrase.length < MODERATION_LIMITS.phrase.min || phrase.length > MODERATION_LIMITS.phrase.max) {
-    throw new Error(
-      `Each phrase must be between ${MODERATION_LIMITS.phrase.min} and ${MODERATION_LIMITS.phrase.max} characters.`,
-    );
-  }
-  return phrase;
 }
 
 /**

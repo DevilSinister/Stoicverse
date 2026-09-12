@@ -1,6 +1,6 @@
 "use server";
 
-import { parseBlockedPhrase, parseIdentity, parseModeration } from "@/lib/community-settings/model";
+import { parseIdentity, parseModeration } from "@/lib/community-settings/model";
 import { parseRoleInput } from "@/lib/community-settings/role-model";
 import { isUuid } from "@/lib/security/uuid";
 import { revalidateCommunity } from "@/lib/community-settings/revalidate";
@@ -193,7 +193,7 @@ export async function setRoleMembers(
   return { success: true };
 }
 
-/** Save slow mode, the edit window, delete reasons, and how blocked words match. */
+/** Save the edit window and whether a deletion needs a reason. */
 export async function saveCommunityModeration(data: FormData): Promise<Result> {
   const { supabase } = await requireInfluencer();
 
@@ -202,8 +202,6 @@ export async function saveCommunityModeration(data: FormData): Promise<Result> {
     moderation = parseModeration({
       editWindowMinutes: value(data, "editWindowMinutes"),
       deleteRequiresReason: data.get("deleteRequiresReason") !== null,
-      blockedWordMode: value(data, "blockedWordMode"),
-      blockedWordMatch: value(data, "blockedWordMatch"),
     });
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Those settings could not be saved." };
@@ -214,8 +212,6 @@ export async function saveCommunityModeration(data: FormData): Promise<Result> {
     .update({
       edit_window_minutes: moderation.editWindowMinutes,
       delete_requires_reason: moderation.deleteRequiresReason,
-      blocked_word_mode: moderation.blockedWordMode,
-      blocked_word_match: moderation.blockedWordMatch,
     })
     .eq("id", true);
 
@@ -232,46 +228,3 @@ export async function saveCommunityModeration(data: FormData): Promise<Result> {
   return { success: true };
 }
 
-/**
- * Add phrases to the blocked list.
- *
- * Accepts a bulk paste. Literal phrases only, never a pattern: a user-supplied
- * regex evaluated on every insert is a denial-of-service aimed at your own
- * database.
- */
-export async function addBlockedWords(data: FormData): Promise<Result> {
-  const { supabase } = await requireInfluencer();
-
-  const raw = value(data, "phrases");
-  const candidates = [...new Set(raw.split(/[\n,]/).map((entry) => entry.trim()).filter(Boolean))];
-  if (!candidates.length) return { error: "Enter at least one phrase." };
-
-  let phrases: string[];
-  try {
-    phrases = candidates.map(parseBlockedPhrase);
-  } catch (error) {
-    return { error: error instanceof Error ? error.message : "Those phrases could not be saved." };
-  }
-
-  // The unique index is on lower(btrim(phrase)); ignoring duplicates keeps a
-  // bulk paste from failing wholesale because one entry was already listed.
-  const { error } = await supabase
-    .from("community_blocked_words")
-    .upsert(phrases.map((phrase) => ({ phrase })), { onConflict: "phrase", ignoreDuplicates: true });
-
-  if (error) return { error: postgresMessage(error, "Those phrases could not be saved.") };
-
-  revalidateCommunity();
-  return { success: true };
-}
-
-export async function removeBlockedWord(id: string): Promise<Result> {
-  const { supabase } = await requireInfluencer();
-  if (!isUuid(id)) return { error: "That phrase could not be found." };
-
-  const { error } = await supabase.from("community_blocked_words").delete().eq("id", id);
-  if (error) return { error: postgresMessage(error, "That phrase could not be removed.") };
-
-  revalidateCommunity();
-  return { success: true };
-}

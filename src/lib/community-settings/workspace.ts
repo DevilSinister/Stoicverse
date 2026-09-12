@@ -4,7 +4,16 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
-import { loadAuditPage, loadBlockedWords, type AuditEvent } from "@/lib/community-settings/governance";
+import {
+  loadAuditPage,
+  loadAutomodAlerts,
+  loadAutomodPresets,
+  loadAutomodRules,
+  type AuditEvent,
+  type AutomodAlertRow,
+  type AutomodRuleRow,
+} from "@/lib/community-settings/governance";
+import type { AutomodPreset } from "@/lib/community-settings/automod";
 import { isPermissionKey, type PermissionKey } from "@/lib/community-settings/permissions";
 import { loadActiveBans, loadReportsQueue, type BanRow, type ReportRow } from "@/lib/community-settings/moderation";
 import { loadCommunityRoles, type RolesLoad } from "@/lib/community-settings/roles";
@@ -44,7 +53,14 @@ export type SettingsWorkspaceData = {
     overrides: ChannelOverride[];
   };
   roles?: RolesLoad;
-  blockedPhrases?: { id: string; phrase: string }[];
+  automod?: {
+    rules: AutomodRuleRow[];
+    presets: AutomodPreset[];
+    alerts: AutomodAlertRow[];
+    /** Exemptions are chosen from these, so the editor needs them alongside the rules. */
+    roles: CommunityRole[];
+    channels: CommunityChannel[];
+  };
   audit?: { events: AuditEvent[]; nextCursor: string | null; degraded: string[] };
   reports?: { rows: ReportRow[]; nextCursor: string | null; status: "open" | "resolved" };
   bans?: BanRow[];
@@ -130,11 +146,28 @@ export async function loadSettingsWorkspace(
       degraded.push(...roles.degraded);
       break;
     }
+    case "automod": {
+      const [rules, presets, alerts, roles, structure] = await Promise.all([
+        loadAutomodRules(supabase),
+        loadAutomodPresets(supabase),
+        loadAutomodAlerts(supabase),
+        loadCommunityRoles(supabase, userId),
+        loadCommunityStructure(supabase),
+      ]);
+      data.automod = {
+        rules: rules.rules,
+        presets: presets.presets,
+        alerts: alerts.alerts,
+        roles: roles.roles,
+        channels: structure.channels,
+      };
+      degraded.push(...rules.degraded, ...presets.degraded, ...alerts.degraded, ...roles.degraded);
+      break;
+    }
     case "safety": {
-      const [identity, blocked] = await Promise.all([loadCommunityIdentity(supabase), loadBlockedWords(supabase)]);
+      const identity = await loadCommunityIdentity(supabase);
       data.identity = identity;
-      data.blockedPhrases = blocked.phrases;
-      degraded.push(...identity.degraded, ...blocked.degraded);
+      degraded.push(...identity.degraded);
       break;
     }
     case "reports": {

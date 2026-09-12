@@ -233,16 +233,20 @@ test("slow mode takes an advisory lock, or two concurrent posts both pass", asyn
   assert.match(migration, /slow_mode_seconds between 0 and 21600/);
 });
 
-test("the blocked-word matcher agrees with the SQL on both modes", async () => {
-  const [migration, model] = await Promise.all([
-    read("supabase/migrations/20260911030000_community_moderation_engine.sql"),
-    read("src/lib/community-settings/model.ts"),
+test("the keyword matcher agrees with the SQL on both modes", async () => {
+  // Blocked words became AutoMod rules in 20260912040000, so the mirror this
+  // asserts moved from model.ts to automod.ts along with them. The invariant
+  // did not change: both sides use the same word-boundary class.
+  const [migration, automod] = await Promise.all([
+    read("supabase/migrations/20260912040000_community_automod.sql"),
+    read("src/lib/community-settings/automod.ts"),
   ]);
 
-  // Word mode uses [^[:alnum:]_] boundaries in SQL and the same class in JS —
-  //  would treat accented letters differently and the "test a sentence" box
-  // would disagree with what actually happens on save.
+  // Word mode uses [^[:alnum:]_] boundaries in SQL, and the JS mirror rewrites
+  // the POSIX class rather than reaching for , which would treat accented
+  // letters differently and make the "test a sentence" box disagree with what
+  // happens on save.
   assert.match(migration, /\[\^\[:alnum:\]_\]/);
-  assert.match(model, /\[\^a-zA-Z0-9_\]/);
-  assert.doesNotMatch(model, /\\b\$\{phrase/);
+  assert.match(automod, /\[\^\[:alnum:\]_\]/);
+  assert.match(automod, /replaceAll\("\[:alnum:\]", "0-9A-Za-z"\)/);
 });

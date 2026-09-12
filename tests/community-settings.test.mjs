@@ -9,9 +9,7 @@ import {
   IDENTITY_LIMITS,
   isHexColor,
   MIN_ACCENT_CONTRAST,
-  matchesBlockedWord,
   MODERATION_LIMITS,
-  parseBlockedPhrase,
   parseIdentity,
   parseModeration,
   relativeLuminance,
@@ -100,11 +98,8 @@ test("the limits the interface shows are the limits the validator enforces", () 
 });
 
 const moderation = (overrides = {}) => ({
-  slowModeSeconds: 0,
   editWindowMinutes: 0,
   deleteRequiresReason: false,
-  blockedWordMode: "block",
-  blockedWordMatch: "word",
   ...overrides,
 });
 
@@ -113,44 +108,25 @@ const moderation = (overrides = {}) => ({
 // units in community-permissions.test.mjs and the SQL-to-TypeScript equality
 // assertion in community-roles.contract.mjs.
 
-test("word mode matches a whole word and ignores it inside a longer one", () => {
-  assert.equal(matchesBlockedWord("a badword here", ["badword"], "word"), "badword");
-  assert.equal(matchesBlockedWord("badwording is fine", ["badword"], "word"), null);
-  assert.equal(matchesBlockedWord("BADWORD shouting", ["badword"], "word"), "badword");
-});
-
-test("substring mode over-matches, which is the whole reason the test box exists", () => {
-  // "classic" contains "ass". The interface has to let a creator discover this
-  // before members do.
-  assert.equal(matchesBlockedWord("a classic mistake", ["ass"], "substring"), "ass");
-  assert.equal(matchesBlockedWord("a classic mistake", ["ass"], "word"), null);
-});
-
-test("a phrase with regex metacharacters is matched literally, not compiled", () => {
-  // Otherwise a listed phrase could blow up or silently match everything.
-  assert.equal(matchesBlockedWord("buy c++ now", ["c++"], "word"), "c++");
-  assert.equal(matchesBlockedWord("anything at all", [".*"], "word"), null);
-});
-
-test("the matcher is honest about being a speed bump", () => {
-  // Separator characters defeat it. The UI says so; this pins the behaviour so
-  // nobody later mistakes it for a filter.
-  assert.equal(matchesBlockedWord("b-a-d-w-o-r-d", ["badword"], "substring"), null);
-});
+// Blocked-word matching left this module in phase 5. The four tests that
+// covered `matchesBlockedWord` are now the keyword-compiler and match tests in
+// community-automod.test.mjs, which additionally assert parity with the SQL
+// that actually runs on insert — something these never did.
 
 test("moderation bounds mirror the database constraint", () => {
   // Slow mode left this function in phase 3: it is a property of a channel now,
   // and its bounds are asserted by `parseSlowMode` in
   // community-channel-permissions.contract.mjs.
   assert.throws(() => parseModeration(moderation({ editWindowMinutes: 10081 })), /0 minutes/);
-  assert.throws(() => parseModeration(moderation({ blockedWordMode: "delete" })), /block the message or flag/);
-  assert.throws(() => parseModeration(moderation({ blockedWordMatch: "regex" })), /whole words or any substring/);
   assert.equal(parseModeration(moderation({ editWindowMinutes: 10080 })).editWindowMinutes, 10080);
+  assert.equal(MODERATION_LIMITS.editWindowMinutes.max, 10080);
 });
 
-test("blocked phrases are lowercased, trimmed and bounded", () => {
-  assert.equal(parseBlockedPhrase("  BadWord  "), "badword");
-  assert.throws(() => parseBlockedPhrase("a"), /between 2 and 60/);
-  assert.throws(() => parseBlockedPhrase("x".repeat(61)), /between 2 and 60/);
-  assert.equal(MODERATION_LIMITS.phrase.max, 60);
+test("moderation carries no blocked-word settings after phase 5", () => {
+  // The two community-wide columns were dropped by 20260912040000. If a later
+  // change reintroduces them here without a column behind them, this fails
+  // rather than shipping a control that saves nothing.
+  const parsed = parseModeration(moderation());
+  assert.deepEqual(Object.keys(parsed).sort(), ["deleteRequiresReason", "editWindowMinutes"]);
+  assert.equal("phrase" in MODERATION_LIMITS, false);
 });
