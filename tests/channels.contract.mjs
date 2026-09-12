@@ -365,6 +365,18 @@ test("a message shows the thread hanging off it", async () => {
   assert.match(down, /left join public\.threads thread_row on thread_row\.id = post\.thread_id/);
 });
 
+test("the hover bar keeps its box while its own menu is open", async () => {
+  // The menu and the emoji picker both portal to the body. Once the pointer
+  // moves off the row and onto the menu, `group-hover` and `group-focus-within`
+  // both go false; if the bar is `display: none` at that moment the trigger has
+  // no bounding box, and the positioner re-measures a 0x0 anchor and drops the
+  // menu in the top-left corner of the screen.
+  const menu = await readCode("src/components/channels/MessageMenu.tsx");
+  assert.match(menu, /menuOpen \|\| emojiOpen \? "flex" : "hidden group-focus-within:flex group-hover:flex"/);
+  // The open state has to be controlled, or the bar cannot know to stay.
+  assert.match(menu, /<DropdownMenu open=\{menuOpen\} onOpenChange=\{setMenuOpen\}>/);
+});
+
 test("the legacy community surface is still intact", async () => {
   // P1 builds the new page alongside the old one. The browser gate cannot run
   // until the dev-login service-role key is supplied, and deleting the only
