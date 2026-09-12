@@ -5,6 +5,7 @@ import { Check, Forward, Hash, Loader2, Search } from "lucide-react";
 
 import { forwardMessage, type ForwardOutcome } from "@/app/community/actions";
 import { useCommunity } from "@/components/channels/CommunityProvider";
+import { useToast } from "@/components/ui/toast";
 import { FORWARD_CHANNEL_LIMIT, MESSAGE_MAX_CHARS } from "@/lib/community/constants";
 import type { ChannelMessage } from "@/lib/community/messages";
 
@@ -38,11 +39,11 @@ export function ForwardDialog({
   onSent: () => void;
 }) {
   const { channels, affordances } = useCommunity();
+  const notify = useToast();
   const [selected, setSelected] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [note, setNote] = useState("");
   const [stage, setStage] = useState<Stage>({ kind: "picking" });
-  const [error, setError] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -70,7 +71,6 @@ export function ForwardDialog({
   const atLimit = selected.length >= FORWARD_CHANNEL_LIMIT;
 
   const toggle = (channelId: string) => {
-    setError(null);
     setSelected((current) => {
       if (current.includes(channelId)) return current.filter((id) => id !== channelId);
       if (current.length >= FORWARD_CHANNEL_LIMIT) return current;
@@ -81,12 +81,11 @@ export function ForwardDialog({
   const send = async () => {
     if (selected.length === 0) return;
     setStage({ kind: "sending" });
-    setError(null);
 
     const result = await forwardMessage(message.id, selected, note);
     if (result.error || !result.outcomes) {
       setStage({ kind: "picking" });
-      setError(result.error ?? "That message could not be forwarded.");
+      notify(result.error ?? "That message could not be forwarded.");
       return;
     }
 
@@ -232,12 +231,6 @@ export function ForwardDialog({
             </div>
           </>
         )}
-
-        {error ? (
-          <p role="alert" className="px-4 pb-1 text-xs text-error">
-            {error}
-          </p>
-        ) : null}
 
         <div className="flex items-center justify-between gap-3 border-t border-surgical-steel px-4 py-3">
           <p className="text-[11px] text-fog-muted">

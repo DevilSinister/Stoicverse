@@ -1840,8 +1840,8 @@
     "semantic_hash": ""
   },
   "src/lib/community/constants.ts": {
-    "mtime": 1789208089.1466148,
-    "ast_hash": "e93783715c8eab2f93c2447aee366db2",
+    "mtime": 1789212883.8145783,
+    "ast_hash": "8efe4b83d85df21bad888c3bcfa740e5",
     "semantic_hash": ""
   },
   "supabase/migrations/20260912000000_community_global_composer_constants.sql": {
@@ -2085,8 +2085,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/Composer.tsx": {
-    "mtime": 1789211395.3926651,
-    "ast_hash": "0e831d1b6229acd0a7b5a38122aabb75",
+    "mtime": 1789213033.7797961,
+    "ast_hash": "534e6c3a72c5c39b914b16e8d43c4445",
     "semantic_hash": ""
   },
   "src/lib/channels/grouping.ts": {
@@ -2330,8 +2330,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/VoiceRecorder.tsx": {
-    "mtime": 1789211131.892589,
-    "ast_hash": "b49d6a098d89b20e6d74e82a6caa6dd5",
+    "mtime": 1789213927.635747,
+    "ast_hash": "d09b4c3182c2f811cfa8cc4df9fb9c27",
     "semantic_hash": ""
   },
   "supabase/migrations/20260912150000_voice_notes.sql": {
@@ -2350,8 +2350,23 @@
     "semantic_hash": ""
   },
   "src/components/channels/VoicePlayer.tsx": {
-    "mtime": 1789210642.9295254,
-    "ast_hash": "9a203814fd4ac80b86c4348f843e498a",
+    "mtime": 1789213700.7175117,
+    "ast_hash": "9d4266ac0b2a708e16bee0ec4113d524",
+    "semantic_hash": ""
+  },
+  "src/components/channels/Waveform.tsx": {
+    "mtime": 1789212829.2410605,
+    "ast_hash": "2312e2d9a3fd9fde345606f4de823a0b",
+    "semantic_hash": ""
+  },
+  "src/lib/channels/waveform.ts": {
+    "mtime": 1789212822.5271714,
+    "ast_hash": "ed9c636fc6fe0f867ebe195cc68f910a",
+    "semantic_hash": ""
+  },
+  "tests/waveform.test.mjs": {
+    "mtime": 1789213106.7913113,
+    "ast_hash": "ddebe3754104a5b811c34d78a31a6574",
     "semantic_hash": ""
   }
 }

@@ -25,6 +25,7 @@ import { MessageMenu } from "@/components/channels/MessageMenu";
 import { MobilePaneDrawer } from "@/components/channels/MobilePane";
 import { VoicePlayer } from "@/components/channels/VoicePlayer";
 import { ThreadPanel } from "@/components/channels/ThreadPanel";
+import { useToast } from "@/components/ui/toast";
 import { attachmentPathsOf, signAttachmentUrls } from "@/lib/channels/attachment-urls";
 import { continuesGroup, firstUnreadIndex, startsNewDay } from "@/lib/channels/grouping";
 import { JUMP_PAGE_BUDGET } from "@/lib/channels/message-actions";
@@ -160,16 +161,19 @@ function InlineEditor({
   onCancel: () => void;
   onSaved: (body: string) => Promise<string | null>;
 }) {
+  const notify = useToast();
   const [body, setBody] = useState(initial);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const save = async () => {
     if (body.trim() === "") return;
     setBusy(true);
     const failure = await onSaved(body);
     setBusy(false);
-    if (failure) setError(failure);
+    // Toasted rather than rendered under the box: this editor sits inside the
+    // message list, so a line appearing beneath it pushed every message below
+    // it down while somebody was reading them.
+    if (failure) notify(failure);
   };
 
   return (
@@ -205,11 +209,6 @@ function InlineEditor({
         </button>
         <span>Enter to save, Escape to cancel</span>
       </p>
-      {error ? (
-        <p role="alert" className="mt-1 text-xs text-red-300">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -501,6 +500,8 @@ export function ChannelView({
   // first reply supplies it thereafter.
   const [openThreadName, setOpenThreadName] = useState<string | null>(null);
 
+  const notify = useToast();
+
   // The RPC returns newest first; the list reads oldest at the top.
   const [messages, setMessages] = useState<ChannelMessage[]>(() => [...initialMessages].reverse());
   const [cursor, setCursor] = useState(initialCursor);
@@ -509,7 +510,6 @@ export function ChannelView({
   const [mentionSeed, setMentionSeed] = useState<{ name: string; at: number } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const [urls, setUrls] = useState(() => new Map(Object.entries(initialUrls)));
   const paneRef = useRef<HTMLOListElement | null>(null);
   const atBottomRef = useRef(true);
@@ -665,7 +665,6 @@ export function ChannelView({
    */
   const jumpTo = useCallback(
     async (messageId: string) => {
-      setNotice(null);
       for (let page = 0; page <= JUMP_PAGE_BUDGET; page += 1) {
         const node = nodesRef.current.get(messageId);
         if (node) {
@@ -679,9 +678,9 @@ export function ChannelView({
         const rows = await loadOlder();
         if (rows.length === 0) break;
       }
-      setNotice("That message is further back than this view reaches.");
+      notify("That message is further back than this view reaches.");
     },
-    [loadOlder],
+    [loadOlder, notify],
   );
 
   // A `?jump=` from a copied link or a pin, honoured once per target so a
@@ -775,15 +774,6 @@ export function ChannelView({
             </button>
           </div>
         </header>
-
-        {notice ? (
-          <p
-            role="status"
-            className="border-b border-surgical-steel bg-surface-container-low px-4 py-2 text-xs text-fog-muted"
-          >
-            {notice}
-          </p>
-        ) : null}
 
         <ol
           ref={paneRef}

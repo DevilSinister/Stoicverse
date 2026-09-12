@@ -16,6 +16,7 @@ import { createThread, deleteMessage, togglePostHighlight, toggleReaction } from
 import { reportMessage } from "@/app/community/moderation-actions";
 import { ForwardDialog } from "@/components/channels/ForwardDialog";
 import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
+import { useToast } from "@/components/ui/toast";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -92,11 +93,11 @@ export function MessageMenu({
     abilities,
   });
 
+  const notify = useToast();
   const [dialog, setDialog] = useState<Dialog>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [reportKind, setReportKind] = useState<string>(REPORT_REASONS[0]);
   const [threadName, setThreadName] = useState("");
@@ -118,11 +119,13 @@ export function MessageMenu({
 
   const run = async (work: () => Promise<{ error?: string } | void>) => {
     setBusy(true);
-    setError(null);
     const result = await work();
     setBusy(false);
     if (result && "error" in result && result.error) {
-      setError(result.error);
+      // The dialog stays open on a refusal so the reason somebody typed is
+      // still there to correct; the refusal itself is a toast, because a line
+      // of red inside the dialog resized it under the cursor.
+      notify(result.error);
       return;
     }
     setDialog(null);
@@ -138,7 +141,7 @@ export function MessageMenu({
       setCopied(label);
       window.setTimeout(() => setCopied(null), 1500);
     } catch {
-      setError("Your browser would not let the page copy that.");
+      notify("Your browser would not let the page copy that.");
     }
   };
 
@@ -344,13 +347,9 @@ export function MessageMenu({
                 : "Start a thread"
           }
           busy={busy}
-          error={error}
           confirmLabel={dialog === "delete" ? "Delete" : dialog === "report" ? "Send report" : "Start"}
           destructive={dialog === "delete"}
-          onCancel={() => {
-            setDialog(null);
-            setError(null);
-          }}
+          onCancel={() => setDialog(null)}
           onConfirm={() => {
             if (dialog === "delete") {
               void run(() => deleteMessage(message.id, actions.removeNeedsReason ? reason : undefined));
@@ -442,7 +441,6 @@ function ActionDialog({
   title,
   children,
   busy,
-  error,
   confirmLabel,
   destructive,
   onCancel,
@@ -451,7 +449,6 @@ function ActionDialog({
   title: string;
   children: ReactNode;
   busy: boolean;
-  error: string | null;
   confirmLabel: string;
   destructive?: boolean;
   onCancel: () => void;
@@ -470,11 +467,6 @@ function ActionDialog({
       <div className="w-full max-w-sm rounded-xl border border-surgical-steel bg-surface-container-low p-4">
         <h2 className="text-sm font-semibold text-on-surface">{title}</h2>
         <div className="mt-3 space-y-3">{children}</div>
-        {error ? (
-          <p role="alert" className="mt-2 text-xs text-red-300">
-            {error}
-          </p>
-        ) : null}
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"

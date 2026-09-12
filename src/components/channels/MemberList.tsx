@@ -7,6 +7,7 @@ import { giftMembership, restrictMember, unrestrictMember } from "@/app/communit
 import { banMember, timeoutMember, untimeoutMember } from "@/app/community/moderation-actions";
 import { useCommunity } from "@/components/channels/CommunityProvider";
 import { memberMenuItems, type MemberMenuContext } from "@/components/channels/MemberMenuItems";
+import { useToast } from "@/components/ui/toast";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -89,36 +90,32 @@ export function MemberList({
   const isOwner = Boolean(viewer?.isInfluencer);
   const canSeeDetail = isOwner || canTimeout;
 
+  const notify = useToast();
+
   const [pending, setPending] = useState<Pending>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const sections = useMemo(() => groupMembers(members, onlineIds), [members, onlineIds]);
 
   // Plain functions, deliberately. None of these is passed to a memoised
   // child, so a useCallback bought nothing here and cost the React compiler
   // its ability to optimise the component at all.
-  const say = (message: string) => {
-    setNotice(message);
-    window.setTimeout(() => setNotice((current) => (current === message ? null : current)), 4000);
-  };
-
   const gift = async (member: DirectoryMember, days: number) => {
-    setError(null);
     const result = await giftMembership(member.id, days);
     if (result.error) {
-      say(result.error);
+      notify(result.error);
       return;
     }
     const until = result.expiresAt ? new Date(result.expiresAt).toLocaleDateString() : null;
-    say(until ? `${member.fullName} now has access until ${until}.` : `${member.fullName} was gifted access.`);
+    notify(
+      until ? `${member.fullName} now has access until ${until}.` : `${member.fullName} was gifted access.`,
+      "success",
+    );
   };
 
   const run = async () => {
     if (!pending) return;
     setBusy(true);
-    setError(null);
 
     const result =
       pending.kind === "timeout"
@@ -129,15 +126,18 @@ export function MemberList({
 
     setBusy(false);
     if (result.error) {
-      setError(result.error);
+      // The dialog stays open with the typed reason intact; the refusal goes
+      // to a toast rather than resizing the dialog under the cursor.
+      notify(result.error);
       return;
     }
-    say(
+    notify(
       pending.kind === "restrict"
         ? `${pending.member.fullName} was removed from ${pending.scopeLabel}.`
         : pending.kind === "ban"
           ? `${pending.member.fullName} was banned.`
           : `${pending.member.fullName} was timed out.`,
+      "success",
     );
     setPending(null);
     setReason("");
@@ -157,18 +157,18 @@ export function MemberList({
     onGift: (days) => void gift(member, days),
     onTimeout: (seconds) => {
       setReason("");
-      setError(null);
       setPending({ kind: "timeout", member, seconds });
     },
     onRemoveTimeout: () => {
       void untimeoutMember(member.id).then((result) =>
-        say(result.error ?? `${member.fullName}'s timeout was removed.`),
+        result.error
+          ? notify(result.error)
+          : notify(`${member.fullName}'s timeout was removed.`, "success"),
       );
     },
     onRestrict: (scope) => {
       if (!channel) return;
       setReason("");
-      setError(null);
       setPending({
         kind: "restrict",
         member,
@@ -181,12 +181,13 @@ export function MemberList({
       if (!channel) return;
       const scopeId = scope === "channel" ? channel.id : channel.categoryId;
       void unrestrictMember(member.id, scope, scopeId).then((result) =>
-        say(result.error ?? `${member.fullName}'s restriction was lifted.`),
+        result.error
+          ? notify(result.error)
+          : notify(`${member.fullName}'s restriction was lifted.`, "success"),
       );
     },
     onBan: () => {
       setReason("");
-      setError(null);
       setPending({ kind: "ban", member });
     },
   });
@@ -200,12 +201,6 @@ export function MemberList({
           : "hidden min-h-0 w-56 shrink-0 flex-col border-l border-surgical-steel bg-surface-container-lowest xl:flex"
       }
     >
-      {notice ? (
-        <p role="status" className="border-b border-surgical-steel px-3 py-2 text-[11px] text-on-surface-variant">
-          {notice}
-        </p>
-      ) : null}
-
       <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
         {sections.length === 0 ? <p className="px-2 text-xs text-fog-muted">Nobody here yet.</p> : null}
 
@@ -309,13 +304,9 @@ export function MemberList({
                 : `Time out ${pending.member.fullName}`
           }
           busy={busy}
-          error={error}
           confirmLabel={pending.kind === "ban" ? "Ban" : pending.kind === "restrict" ? "Remove" : "Time out"}
           destructive={pending.kind !== "timeout"}
-          onCancel={() => {
-            setPending(null);
-            setError(null);
-          }}
+          onCancel={() => setPending(null)}
           onConfirm={() => void run()}
         >
           <label className="block text-xs text-on-surface-variant">
@@ -368,7 +359,6 @@ function ReasonDialog({
   title,
   children,
   busy,
-  error,
   confirmLabel,
   destructive,
   onCancel,
@@ -377,7 +367,6 @@ function ReasonDialog({
   title: string;
   children: ReactNode;
   busy: boolean;
-  error: string | null;
   confirmLabel: string;
   destructive?: boolean;
   onCancel: () => void;
@@ -396,11 +385,6 @@ function ReasonDialog({
       <div className="w-full max-w-sm rounded-xl border border-surgical-steel bg-surface-container-low p-4">
         <h2 className="text-sm font-semibold text-on-surface">{title}</h2>
         <div className="mt-3">{children}</div>
-        {error ? (
-          <p role="alert" className="mt-2 text-xs text-red-300">
-            {error}
-          </p>
-        ) : null}
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"

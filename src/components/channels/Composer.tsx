@@ -8,6 +8,7 @@ import { useCommunity, type ChannelRow } from "@/components/channels/CommunityPr
 import { VoiceRecorder, type Recording } from "@/components/channels/VoiceRecorder";
 import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useToast } from "@/components/ui/toast";
 import { encodeMentions } from "@/lib/channels/mentions";
 import { signAttachmentUrls } from "@/lib/channels/attachment-urls";
 import { resolveShortcut } from "@/lib/channels/shortcuts";
@@ -82,6 +83,10 @@ export function Composer({
   const { viewer, dictionary, affordances, announceTyping } = useCommunity();
   const permissions = affordances(channel.id);
   const label = placeholder ?? `Message #${channel.name}`;
+  // Every failure here is a toast. Rendered under the box, a refused upload
+  // grew the composer and shoved the conversation up by a line — a message
+  // about a problem should not create a second one.
+  const notify = useToast();
 
   const [body, setBody] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);
@@ -89,7 +94,6 @@ export function Composer({
   const [recorderActive, setRecorderActive] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -112,10 +116,9 @@ export function Composer({
 
   const attach = async (files: FileList | null) => {
     if (!files || files.length === 0 || !viewer) return;
-    setError(null);
 
     if (attachments.length + files.length > ATTACHMENTS_PER_MESSAGE) {
-      setError(`A message can carry at most ${ATTACHMENTS_PER_MESSAGE} attachments.`);
+      notify(`A message can carry at most ${ATTACHMENTS_PER_MESSAGE} attachments.`);
       return;
     }
 
@@ -126,11 +129,11 @@ export function Composer({
       // Checked here rather than through `accept=`, because drag-and-drop and
       // paste both bypass `accept` entirely.
       if (!isAllowedAttachmentType(file.type)) {
-        setError(`${file.name} is not a file type this community allows.`);
+        notify(`${file.name} is not a file type this community allows.`);
         continue;
       }
       if (file.size > ATTACHMENT_MAX_BYTES) {
-        setError(`${file.name} is larger than 25 MB.`);
+        notify(`${file.name} is larger than 25 MB.`);
         continue;
       }
 
@@ -140,7 +143,7 @@ export function Composer({
       const path = `${viewer.userId}/${channel.id}/${crypto.randomUUID()}-${safeName}`;
       const { error: uploadError } = await supabase.storage.from("community-posts").upload(path, file);
       if (uploadError) {
-        setError(`${file.name} could not be uploaded.`);
+        notify(`${file.name} could not be uploaded.`);
         continue;
       }
 
@@ -169,7 +172,6 @@ export function Composer({
   const uploadRecording = async (recording: Recording) => {
     if (!viewer) return;
     setUploading(true);
-    setError(null);
 
     const extension = recording.mimeType.includes("mp4") ? "m4a" : recording.mimeType.includes("ogg") ? "ogg" : "webm";
     const path = `${viewer.userId}/${channel.id}/${crypto.randomUUID()}-voice.${extension}`;
@@ -180,7 +182,7 @@ export function Composer({
 
     if (uploadError) {
       setUploading(false);
-      setError("That recording could not be uploaded.");
+      notify("That recording could not be uploaded.");
       return;
     }
 
@@ -245,7 +247,6 @@ export function Composer({
     const ready = (body.trim() !== "" || outgoing.length > 0) && !tooLong && !sending;
     if (!ready || !viewer || (uploading && extraAttachments.length === 0)) return;
 
-    setError(null);
     setSending(true);
 
     const clientNonce = crypto.randomUUID();
@@ -310,9 +311,9 @@ export function Composer({
       // is worse than the failure itself.
       setBody(encoded);
       setAttachments(sentAttachments);
-      setError(result.error);
+      notify(result.error);
     } else if (result.blocked) {
-      setError(result.blocked);
+      notify(result.blocked);
     }
 
     onSettled();
@@ -492,18 +493,16 @@ export function Composer({
         ) : null}
       </div>
 
-      <div className="mt-1 flex items-center gap-3">
-        {body.length >= MESSAGE_COUNTER_FROM ? (
-          <span className={`text-[11px] ${tooLong ? "text-red-300" : "text-fog-muted"}`}>
-            {`${body.length.toLocaleString("en-US")} / ${MESSAGE_MAX_CHARS.toLocaleString("en-US")}`}
-          </span>
-        ) : null}
-        {error ? (
-          <p role="alert" className="text-xs text-red-300">
-            {error}
-          </p>
-        ) : null}
-      </div>
+      {/*
+        The counter stays: it describes what is in the box, it belongs beside
+        the box, and it appears well before the limit rather than at the
+        moment of failure. Failures themselves are toasts.
+      */}
+      {body.length >= MESSAGE_COUNTER_FROM ? (
+        <span className={`mt-1 block text-[11px] ${tooLong ? "text-error" : "text-fog-muted"}`}>
+          {`${body.length.toLocaleString("en-US")} / ${MESSAGE_MAX_CHARS.toLocaleString("en-US")}`}
+        </span>
+      ) : null}
     </div>
   );
 }

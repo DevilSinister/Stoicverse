@@ -7,6 +7,7 @@ import { giftMembership } from "@/app/community/member-actions";
 import { banMember, timeoutMember, untimeoutMember } from "@/app/community/moderation-actions";
 import { useCommunity } from "@/components/channels/CommunityProvider";
 import { GIFT_OPTIONS } from "@/components/channels/MemberMenuItems";
+import { useToast } from "@/components/ui/toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -77,8 +78,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
   const [pending, setPending] = useState<Pending>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const notify = useToast();
 
   // Loads once, on mount. The shell keys this component on the person it is
   // showing, so opening a second card while the first is open remounts rather
@@ -105,11 +105,6 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
     };
   }, [userId, canSeeDetail]);
 
-  const say = (message: string) => {
-    setNotice(message);
-    window.setTimeout(() => setNotice((current) => (current === message ? null : current)), 4000);
-  };
-
   const name = profile?.full_name ?? members.find((member) => member.id === userId)?.fullName ?? "Member";
   const online = onlineIds.has(userId);
   const topColor = profile?.roles?.find((role) => role.color)?.color ?? null;
@@ -125,11 +120,11 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
   const gift = async (days: number) => {
     const result = await giftMembership(userId, days);
     if (result.error) {
-      say(result.error);
+      notify(result.error);
       return;
     }
     const until = result.expiresAt ? new Date(result.expiresAt).toLocaleDateString() : null;
-    say(until ? `${name} now has access until ${until}.` : `${name} was gifted access.`);
+    notify(until ? `${name} now has access until ${until}.` : `${name} was gifted access.`, "success");
     // The card is showing what just changed, so it re-reads rather than lying.
     const supabase = createClient();
     const { data } = await supabase.rpc("community_member_detail", { target: userId });
@@ -139,17 +134,17 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
   const run = async () => {
     if (!pending) return;
     setBusy(true);
-    setError(null);
     const result =
       pending.kind === "timeout"
         ? await timeoutMember(userId, pending.seconds, reason)
         : await banMember(userId, reason);
     setBusy(false);
     if (result.error) {
-      setError(result.error);
+      // The confirmation stays open with the reason still typed in it.
+      notify(result.error);
       return;
     }
-    say(pending.kind === "ban" ? `${name} was banned.` : `${name} was timed out.`);
+    notify(pending.kind === "ban" ? `${name} was banned.` : `${name} was timed out.`, "success");
     setPending(null);
     setReason("");
   };
@@ -285,7 +280,6 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                               key={preset.seconds}
                               onClick={() => {
                                 setReason("");
-                                setError(null);
                                 setPending({ kind: "timeout", seconds: preset.seconds });
                               }}
                             >
@@ -299,7 +293,9 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                         type="button"
                         onClick={() =>
                           void untimeoutMember(userId).then((result) =>
-                            say(result.error ?? `${name}'s timeout was removed.`),
+                            result.error
+                              ? notify(result.error)
+                              : notify(`${name}'s timeout was removed.`, "success"),
                           )
                         }
                         className="focus-ring flex items-center gap-1.5 rounded-lg border border-surgical-steel px-2 py-1 text-[11px] text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface"
@@ -315,7 +311,6 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                       type="button"
                       onClick={() => {
                         setReason("");
-                        setError(null);
                         setPending({ kind: "ban" });
                       }}
                       className="focus-ring flex items-center gap-1.5 rounded-lg border border-error/50 px-2 py-1 text-[11px] text-error hover:bg-error/10"
@@ -357,12 +352,6 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
           </div>
         )}
 
-        {notice ? (
-          <p role="status" className="border-t border-surgical-steel px-4 py-2 text-[11px] text-on-surface-variant">
-            {notice}
-          </p>
-        ) : null}
-
         <div className="flex justify-end border-t border-surgical-steel px-4 py-3">
           <button
             type="button"
@@ -401,18 +390,10 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                 className="mt-1 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-2 text-sm text-on-surface outline-none"
               />
             </label>
-            {error ? (
-              <p role="alert" className="mt-2 text-xs text-error">
-                {error}
-              </p>
-            ) : null}
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  setPending(null);
-                  setError(null);
-                }}
+                onClick={() => setPending(null)}
                 disabled={busy}
                 className="focus-ring rounded-lg border border-surgical-steel px-3 py-1.5 text-xs text-on-surface-variant disabled:opacity-50"
               >

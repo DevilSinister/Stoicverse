@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Mic, Pause, Play, SendHorizontal, Trash2 } from "lucide-react";
 
 import { WaveformBars } from "@/components/channels/Waveform";
+import { useToast } from "@/components/ui/toast";
 import { audioContextClass, FLAT_WAVEFORM, levelFromTimeDomain, pushLevel } from "@/lib/channels/waveform";
 import { VOICE_NOTE_MAX_SECONDS, VOICE_NOTE_MIN_SECONDS } from "@/lib/community/constants";
 
@@ -58,9 +59,13 @@ export function VoiceRecorder({
    */
   onActiveChange?: (active: boolean) => void;
 }) {
+  // Failures are toasted, never rendered here: this component *is* the
+  // composer row while it runs, and a line of red text inside it pushed the
+  // send button sideways at the exact moment somebody was reaching for it.
+  const notify = useToast();
+
   const [state, setState] = useState<"idle" | "recording" | "paused">("idle");
   const [elapsed, setElapsed] = useState(0);
-  const [error, setError] = useState<string | null>(null);
   const [levels, setLevels] = useState<readonly number[]>(FLAT_WAVEFORM);
 
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -203,10 +208,9 @@ export function VoiceRecorder({
   };
 
   const start = async () => {
-    setError(null);
     const mimeType = pickMimeType();
     if (!mimeType) {
-      setError("This browser cannot record audio.");
+      notify("This browser cannot record audio.");
       return;
     }
 
@@ -220,7 +224,7 @@ export function VoiceRecorder({
       // clicks — and, before that, a `Permissions-Policy` header that had
       // disabled the microphone for the whole origin.
       const name = failure instanceof DOMException ? failure.name : "";
-      setError(
+      notify(
         name === "NotAllowedError"
           ? "Microphone access is blocked. Allow it for this site in your browser, then try again."
           : name === "NotFoundError" || name === "OverconstrainedError"
@@ -235,7 +239,7 @@ export function VoiceRecorder({
       recorder = new MediaRecorder(stream, { mimeType });
     } catch {
       stream.getTracks().forEach((track) => track.stop());
-      setError("The microphone could not be started.");
+      notify("The microphone could not be started.");
       return;
     }
     chunksRef.current = [];
@@ -262,7 +266,7 @@ export function VoiceRecorder({
       // find out costs more than the number is worth.
       const durationSeconds = bankedRef.current;
       if (durationSeconds < VOICE_NOTE_MIN_SECONDS) {
-        setError("That recording was too short to send.");
+        notify("That recording was too short to send.");
         return;
       }
       onRecorded({ blob, mimeType, durationSeconds });
@@ -285,7 +289,7 @@ export function VoiceRecorder({
       stream.getTracks().forEach((track) => track.stop());
       releaseMeter();
       recorderRef.current = null;
-      setError("The microphone stopped before recording could start.");
+      notify("The microphone stopped before recording could start.");
       return;
     }
 
@@ -351,26 +355,19 @@ export function VoiceRecorder({
   }
 
   return (
-    <>
-      {/*
-        Filled in the accent rather than drawn as another grey glyph: with the
-        box empty this is the send button's position and its job, and it should
-        read as the thing you press.
-      */}
-      <button
-        type="button"
-        onClick={() => void start()}
-        disabled={disabled}
-        aria-label="Record a voice note"
-        className="focus-ring flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface disabled:opacity-40"
-      >
-        <Mic size={16} aria-hidden="true" />
-      </button>
-      {error ? (
-        <span role="alert" className="text-[11px] text-error">
-          {error}
-        </span>
-      ) : null}
-    </>
+    /*
+      Filled in the accent rather than drawn as another grey glyph: with the
+      box empty this is the send button's position and its job, and it should
+      read as the thing you press.
+    */
+    <button
+      type="button"
+      onClick={() => void start()}
+      disabled={disabled}
+      aria-label="Record a voice note"
+      className="focus-ring flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface disabled:opacity-40"
+    >
+      <Mic size={16} aria-hidden="true" />
+    </button>
   );
 }
