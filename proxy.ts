@@ -7,6 +7,9 @@ import { getSupabaseConfig } from "@/lib/supabase/env";
 const authRoutes = ["/login", "/signup"];
 const creatorRoute = "/creator";
 const memberRoutes = ["/dashboard"];
+// The community is the one surface every signed-in role shares: the creator
+// reads the same channels their members do. Gated on access, never on role.
+const communityRoutes = ["/channels"];
 const creatorRoutes = ["/creator"];
 const adminRoutes = ["/admin"];
 const deletionPendingRoute = "/account/deletion-pending";
@@ -102,11 +105,12 @@ export async function proxy(request: NextRequest) {
   const isCreatorRoute = isRouteMatch(path, creatorRoutes);
   const isAdminRoute = isRouteMatch(path, adminRoutes);
   const requiresMembership = isRouteMatch(path, memberRoutes);
+  const isCommunityRoute = isRouteMatch(path, communityRoutes);
   const isAuthRoute = authRoutes.includes(path);
   const isDeletionPendingRoute = path === deletionPendingRoute;
   const currentPath = `${path}${request.nextUrl.search}`;
 
-  if ((isCheckoutRoute || requiresMembership || isCreatorRoute || isAdminRoute || isDeletionPendingRoute) && !user) {
+  if ((isCheckoutRoute || requiresMembership || isCommunityRoute || isCreatorRoute || isAdminRoute || isDeletionPendingRoute) && !user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", currentPath);
     return redirectWithState(response, loginUrl);
@@ -116,7 +120,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  const needsSubscriptionCheck = isCheckoutRoute || requiresMembership || isAuthRoute || isCreatorRoute || isAdminRoute || isDeletionPendingRoute;
+  const needsSubscriptionCheck = isCheckoutRoute || requiresMembership || isCommunityRoute || isAuthRoute || isCreatorRoute || isAdminRoute || isDeletionPendingRoute;
   if (!needsSubscriptionCheck) {
     return response;
   }
@@ -144,6 +148,16 @@ export async function proxy(request: NextRequest) {
 
   if (isDeletionPendingRoute && !deletionRequest) {
     return redirectWithState(response, new URL(isAdmin ? "/admin" : isInfluencer ? creatorRoute : hasMemberWorkspaceAccess ? "/dashboard" : "/checkout", request.url));
+  }
+
+  // Every role that can reach the community reaches it here, before the
+  // role-based redirects below — otherwise an influencer opening /channels
+  // would be sent to /creator and could never see their own community.
+  if (isCommunityRoute) {
+    if (!hasMemberWorkspaceAccess && !isInfluencer && !isAdmin) {
+      return redirectWithState(response, new URL("/checkout", request.url));
+    }
+    return response;
   }
 
   if (isAdminRoute && !isAdmin) {

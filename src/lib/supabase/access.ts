@@ -184,3 +184,53 @@ export async function requireCommunityPermission(permission: string, channelId?:
 
   return { supabase, user };
 }
+
+/**
+ * Access to the community itself, for `/channels`.
+ *
+ * Deliberately not `requireActiveMembership`, which redirects an influencer to
+ * `/creator` and a super_admin to `/admin`. The community is the one surface
+ * every signed-in role shares: the creator reads the same channels their
+ * members do, and sending them somewhere else would mean they could never see
+ * their own community.
+ *
+ * A sanction is not handled here. `community_viewer_state` reports the gate
+ * and the page renders the reason, because "you are timed out until 4pm" is a
+ * different thing from "you do not have an account".
+ */
+export async function requireCommunityAccess(nextPath: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+  }
+
+  const [{ data: membership }, { data: profile }, { data: deletionRequest }] = await Promise.all([
+    supabase.from("memberships").select("id, expires_at").eq("user_id", user.id).eq("status", "active").maybeSingle(),
+    supabase.from("profiles").select("is_suspended, platform_role").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("account_deletion_requests")
+      .select("id")
+      .eq("user_id", user.id)
+      .in("status", ["pending", "processing", "failed"])
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  if (deletionRequest) redirect("/account/deletion-pending");
+  if (profile?.is_suspended) redirect("/checkout");
+
+  const isStaff =
+    profile?.platform_role === "moderator" ||
+    profile?.platform_role === "influencer" ||
+    profile?.platform_role === "super_admin";
+  const hasActiveMembership =
+    Boolean(membership) && (!membership?.expires_at || new Date(membership.expires_at) > new Date());
+
+  if (!hasActiveMembership && !isStaff) redirect("/checkout");
+
+  return { supabase, user, isStaff };
+}

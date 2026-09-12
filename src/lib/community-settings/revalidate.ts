@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
  * structure after the other edits it.
  */
 const COMMUNITY_PATHS = [
+  "/channels",
   "/creator/settings",
   "/creator/channels",
   "/creator/community",
@@ -19,4 +20,8 @@ const COMMUNITY_PATHS = [
 
 export function revalidateCommunity() {
   for (const path of COMMUNITY_PATHS) revalidatePath(path);
+  // The dynamic segment needs its own call with the `type` argument: a bare
+  // revalidatePath("/channels/[channelId]") is a no-op in Next 16 and the
+  // failure is silent — every channel keeps serving the page it had.
+  revalidatePath("/channels/[channelId]", "page");
 }
