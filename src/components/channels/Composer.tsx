@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Loader2, Paperclip, Smile, X } from "lucide-react";
+import { Loader2, Paperclip, SendHorizontal, Smile, X } from "lucide-react";
 
 import { sendChannelMessage } from "@/app/community/actions";
 import { useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
@@ -85,6 +85,8 @@ export function Composer({
 
   const [body, setBody] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);
+  // True while the recorder owns the composer row.
+  const [recorderActive, setRecorderActive] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -222,6 +224,10 @@ export function Composer({
     });
   };
 
+  // What the trailing button is for: with nothing drafted it stays a
+  // microphone, and the moment there is a word or a file it becomes Send.
+  const hasDraft = body.trim() !== "" || attachments.length > 0;
+
   const send = async () => {
     if (!canSend || !viewer) return;
     setError(null);
@@ -334,7 +340,34 @@ export function Composer({
         </ul>
       ) : null}
 
-      <div className="flex items-end gap-2 rounded-xl border border-surgical-steel bg-surface-container-lowest px-3 py-2">
+      <div
+        className={
+          recorderActive
+            ? "flex items-center gap-2"
+            : "flex items-end gap-2 rounded-xl border border-surgical-steel bg-surface-container-lowest px-3 py-2"
+        }
+      >
+        {/*
+          While a recording is running, paused or being reviewed it is the
+          whole row. Everything else is hidden rather than disabled: a text box
+          beside a running recording is a box nobody is typing in.
+        */}
+        {/*
+          Hidden the moment there is something to send — the microphone and
+          Send share this position, and only one of them is ever the useful
+          action. `recorderActive` keeps it mounted through a recording, which
+          is the one time a draft could appear beneath it.
+        */}
+        {permissions.canAttach && (recorderActive || !hasDraft) ? (
+          <VoiceRecorder
+            disabled={uploading || sending}
+            onRecorded={(recording) => void uploadRecording(recording)}
+            onActiveChange={setRecorderActive}
+          />
+        ) : null}
+
+        {recorderActive ? null : (
+        <>
         {permissions.canAttach ? (
           <>
             <input ref={fileRef} type="file" multiple hidden onChange={(event) => void attach(event.target.files)} />
@@ -352,17 +385,6 @@ export function Composer({
               )}
             </button>
           </>
-        ) : null}
-
-        {/*
-          Recording is gated on `attach_files` like every other attachment,
-          because that is exactly what a voice note is.
-        */}
-        {permissions.canAttach ? (
-          <VoiceRecorder
-            disabled={uploading || sending}
-            onRecorded={(recording) => void uploadRecording(recording)}
-          />
         ) : null}
 
         {/*
@@ -431,14 +453,30 @@ export function Composer({
           className="max-h-40 min-h-6 flex-1 resize-none bg-transparent text-sm leading-6 text-on-surface outline-none placeholder:text-fog-muted"
         />
 
-        <button
-          type="button"
-          onClick={() => void send()}
-          disabled={!canSend}
-          className="focus-ring shrink-0 rounded-lg bg-primary-container px-3 py-1.5 text-xs font-semibold text-monolith-surface disabled:opacity-40"
-        >
-          {sending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : "Send"}
-        </button>
+        {/*
+          Send replaces the microphone once there is something to send, which
+          is the swap every messaging app makes: with an empty box the useful
+          action is to speak, and with a drafted message it is to send it. The
+          microphone itself lives above, before this branch, because it has to
+          survive the row being handed over to a recording.
+        */}
+        {hasDraft || !permissions.canAttach ? (
+          <button
+            type="button"
+            onClick={() => void send()}
+            disabled={!canSend}
+            aria-label="Send"
+            className="focus-ring flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface disabled:opacity-40"
+          >
+            {sending ? (
+              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+            ) : (
+              <SendHorizontal size={16} aria-hidden="true" />
+            )}
+          </button>
+        ) : null}
+        </>
+        )}
       </div>
 
       <div className="mt-1 flex items-center gap-3">

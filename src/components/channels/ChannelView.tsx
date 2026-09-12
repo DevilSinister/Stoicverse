@@ -11,7 +11,6 @@ import {
   Loader2,
   Menu,
   MessagesSquare,
-  Mic,
   Pin,
   Users,
   WifiOff,
@@ -24,6 +23,7 @@ import { mergeMessage, useChannelLive, useCommunity, type ChannelRow } from "@/c
 import { MemberList } from "@/components/channels/MemberList";
 import { MessageMenu } from "@/components/channels/MessageMenu";
 import { MobilePaneDrawer } from "@/components/channels/MobilePane";
+import { VoicePlayer } from "@/components/channels/VoicePlayer";
 import { ThreadPanel } from "@/components/channels/ThreadPanel";
 import { attachmentPathsOf, signAttachmentUrls } from "@/lib/channels/attachment-urls";
 import { continuesGroup, firstUnreadIndex, startsNewDay } from "@/lib/channels/grouping";
@@ -55,12 +55,6 @@ function timeOf(iso: string) {
   return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
-/** `m:ss`, the way every player shows a short clip. */
-function formatDuration(seconds: number): string {
-  const whole = Math.round(seconds);
-  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
-}
-
 function dayOf(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
 }
@@ -81,15 +75,7 @@ function Attachments({ attachments, urls }: { attachments: ChannelMessage["attac
         if (isAudio && href) {
           return (
             <li key={attachment.id} className="w-full">
-              <div className="flex max-w-md items-center gap-2 rounded-lg border border-surgical-steel bg-surface-container-lowest px-2 py-1.5">
-                <Mic size={14} aria-hidden="true" className="shrink-0 text-fog-muted" />
-                <audio src={href} controls preload="none" className="h-8 min-w-0 flex-1" />
-                {attachment.durationSeconds ? (
-                  <span className="shrink-0 text-[11px] tabular-nums text-fog-muted">
-                    {formatDuration(attachment.durationSeconds)}
-                  </span>
-                ) : null}
-              </div>
+              <VoicePlayer src={href} durationSeconds={attachment.durationSeconds} />
             </li>
           );
         }

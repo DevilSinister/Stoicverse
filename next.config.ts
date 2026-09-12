@@ -52,7 +52,12 @@ const nextConfig: NextConfig = {
         { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         { key: "X-Content-Type-Options", value: "nosniff" },
         { key: "X-Frame-Options", value: "DENY" },
-        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        // `microphone=(self)`, not `microphone=()`. An empty allow-list disables
+        // the microphone for the whole origin, so `getUserMedia({ audio: true })`
+        // rejects before any permission prompt is ever shown — which reads as a
+        // broken recorder rather than as a policy. Camera and location stay off:
+        // nothing in the product asks for either.
+        { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=()" },
         { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
       ],
     }];

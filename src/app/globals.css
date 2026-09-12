@@ -328,3 +328,37 @@
     filter: none;
   }
 }
+
+/*
+ * The voice note scrubber.
+ *
+ * `appearance: none` on a range input removes the track *and* the thumb, and
+ * Tailwind cannot reach `::-webkit-slider-thumb` — without these rules the
+ * slider is a coloured line you can drag but never see the handle of. The
+ * track itself is painted by an inline gradient, because it has to follow
+ * playback position.
+ */
+.voice-scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: var(--color-primary-container);
+  cursor: pointer;
+}
+
+.voice-scrubber::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: none;
+  border-radius: 9999px;
+  background: var(--color-primary-container);
+  cursor: pointer;
+}
+
+.voice-scrubber:disabled::-webkit-slider-thumb,
+.voice-scrubber:disabled::-moz-range-thumb {
+  background: var(--color-surgical-steel);
+  cursor: default;
+}
