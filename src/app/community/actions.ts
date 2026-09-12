@@ -2,7 +2,13 @@
 
 import { refresh } from "next/cache";
 
-import { isValidReactionToken, MESSAGE_MAX_CHARS } from "@/lib/community/constants";
+import {
+  CHANNEL_NOTIFICATION_LEVELS,
+  isValidReactionToken,
+  MESSAGE_MAX_CHARS,
+  THREAD_NAME_LIMITS,
+  type ChannelNotificationLevel,
+} from "@/lib/community/constants";
 import { revalidateCommunity } from "@/lib/community-settings/revalidate";
 import { isUuid as uuid } from "@/lib/security/uuid";
 import { postgresMessage } from "@/lib/supabase/errors";
@@ -79,7 +85,7 @@ export async function editMessage(postId: string, body: string): Promise<Result>
   // clean zero-row result instead of a raised database exception.
   const { data: updated, error } = await supabase
     .from("posts")
-    .update({ body: body.trim(), updated_at: new Date().toISOString() })
+    .update({ body: body.trim(), edited_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq("id", postId)
     .eq("author_id", user.id)
     .select("id")
@@ -121,5 +127,130 @@ export async function deleteMessage(postId: string): Promise<Result> {
   if (!deleted) return { error: "Message not found or it has already been deleted." };
   revalidateCommunity();
   refresh();
+  return { success: true };
+}
+
+// --------------------------------------------------------------- messaging
+// The write half of the model added in 20260912070000.
+//
+// `sendMessage` above is deliberately untouched. It inserts directly and
+// writes `posts.image_url`, which is what the legacy `MessageStream` reads;
+// routing it through the RPC would stop images rendering in the only working
+// community UI. Phase P1 deletes that composer and this becomes the only path.
+
+/**
+ * Send through `community_send_message`.
+ *
+ * The RPC evaluates AutoMod *before* it inserts, which is why a blocked
+ * message can come back as a reason instead of an exception: the alert and any
+ * timeout have already been recorded by the time this returns.
+ */
+export async function sendChannelMessage(input: {
+  channelId: string;
+  body?: string;
+  replyToPostId?: string;
+  threadId?: string;
+  attachments?: { path: string; mimeType: string; byteSize: number; width?: number; height?: number }[];
+  clientNonce?: string;
+}): Promise<Result & { postId?: string; blocked?: string }> {
+  if (!uuid(input.channelId)) return { error: "Invalid channel." };
+  if (input.replyToPostId && !uuid(input.replyToPostId)) return { error: "Invalid message." };
+  if (input.threadId && !uuid(input.threadId)) return { error: "Invalid thread." };
+  if ((input.body ?? "").length > MESSAGE_MAX_CHARS) {
+    return { error: `Messages are limited to ${MESSAGE_MAX_CHARS.toLocaleString("en-US")} characters.` };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("community_send_message", {
+    channel: input.channelId,
+    body: input.body ?? null,
+    reply_to: input.replyToPostId ?? null,
+    thread: input.threadId ?? null,
+    attachments: input.attachments ?? [],
+    client_nonce: input.clientNonce ?? null,
+  });
+  if (error) return { error: postgresMessage(error, "That message could not be sent.") };
+
+  const row = (data as { post_id: string | null; blocked_reason: string | null }[] | null)?.[0];
+  // A block is not an error: the member's message was read, judged and
+  // refused, and the interface says so rather than showing a failure.
+  if (row?.blocked_reason) return { success: true, blocked: row.blocked_reason };
+
+  revalidateCommunity();
+  return { success: true, postId: row?.post_id ?? undefined };
+}
+
+export async function createThread(postId: string, name: string): Promise<Result & { threadId?: string }> {
+  if (!uuid(postId)) return { error: "Invalid message." };
+  const trimmed = name.trim();
+  if (trimmed.length < THREAD_NAME_LIMITS.min || trimmed.length > THREAD_NAME_LIMITS.max) {
+    return { error: `A thread name must be between ${THREAD_NAME_LIMITS.min} and ${THREAD_NAME_LIMITS.max} characters.` };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("community_thread_create", { root_post: postId, thread_name: trimmed });
+  if (error) return { error: postgresMessage(error, "That thread could not be started.") };
+
+  revalidateCommunity();
+  return { success: true, threadId: data as string };
+}
+
+export async function setThreadState(
+  threadId: string,
+  state: { archived?: boolean; locked?: boolean },
+): Promise<Result> {
+  if (!uuid(threadId)) return { error: "Invalid thread." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("community_thread_set", {
+    thread: threadId,
+    archived: state.archived ?? null,
+    is_locked: state.locked ?? null,
+  });
+  if (error) return { error: postgresMessage(error, "That thread could not be updated.") };
+
+  revalidateCommunity();
+  return { success: true };
+}
+
+/**
+ * Mark a channel read.
+ *
+ * Deliberately does not revalidate: phase P3 calls this from the browser on a
+ * debounce as the member scrolls, and revalidating the route on every scroll
+ * stop would re-render the whole page against the server.
+ */
+export async function markChannelRead(channelId: string, lastPostId?: string): Promise<Result> {
+  if (!uuid(channelId)) return { error: "Invalid channel." };
+  if (lastPostId && !uuid(lastPostId)) return { error: "Invalid message." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("community_mark_read", {
+    channel: channelId,
+    last_post: lastPostId ?? null,
+  });
+  if (error) return { error: postgresMessage(error, "That channel could not be marked read.") };
+  return { success: true };
+}
+
+export async function setChannelNotificationLevel(
+  channelId: string,
+  level: ChannelNotificationLevel,
+  mutedUntil?: string,
+): Promise<Result> {
+  if (!uuid(channelId)) return { error: "Invalid channel." };
+  if (!(CHANNEL_NOTIFICATION_LEVELS as readonly string[]).includes(level)) {
+    return { error: "That is not a notification level." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("community_set_channel_notification", {
+    channel: channelId,
+    notification_level: level,
+    mute_until: mutedUntil ?? null,
+  });
+  if (error) return { error: postgresMessage(error, "That preference could not be saved.") };
+
+  revalidateCommunity();
   return { success: true };
 }

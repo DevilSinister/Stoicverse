@@ -63,3 +63,40 @@ export function formatBytes(bytes: number): string {
   if (bytes >= 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${bytes} B`;
 }
+
+// ---------------------------------------------------------------- messaging
+// Mirrors migration 20260912070000. The page reads these; the database
+// enforces them.
+
+/** One page of a channel or thread. `community_channel_messages` clamps to 100. */
+export const MESSAGE_PAGE_SIZE = 50;
+
+/** Mirrors the bounds inside `community_search_messages`. */
+export const SEARCH_QUERY_LIMITS = { min: 2, max: 100, pageSize: 25 } as const;
+
+/** Mirrors `threads_name_check`. */
+export const THREAD_NAME_LIMITS = { min: 1, max: 100 } as const;
+
+/**
+ * How a mention is written in a body. Every form carries an id, so renaming a
+ * person, role or channel never breaks an old message.
+ *
+ * `@all` and `@tier-N` are the legacy forms. They are still rendered as inert
+ * chips in messages written before 20260912070000, but nothing extracts them
+ * any more: a tier is a role now, and a role mention carries its uuid.
+ */
+export const MENTION_TOKENS = {
+  user: /<@([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})>/g,
+  role: /<@&([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})>/g,
+  channel: /<#([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})>/g,
+  everyone: /(^|[^0-9A-Za-z_])@(everyone|here)([^0-9A-Za-z_]|$)/,
+} as const;
+
+/** The legacy forms, kept so the renderer can grey them out rather than drop them. */
+export const LEGACY_MENTION_TOKENS = {
+  all: /(^|[^0-9A-Za-z_])@all([^0-9A-Za-z_]|$)/,
+  tier: /(^|[^0-9A-Za-z_])@tier-([1-5])([^0-9A-Za-z_]|$)/,
+} as const;
+
+export const CHANNEL_NOTIFICATION_LEVELS = ["all", "mentions", "none"] as const;
+export type ChannelNotificationLevel = (typeof CHANNEL_NOTIFICATION_LEVELS)[number];
