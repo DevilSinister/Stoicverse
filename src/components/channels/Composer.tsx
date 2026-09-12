@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Loader2, Paperclip, X } from "lucide-react";
+import { Loader2, Paperclip, Smile, X } from "lucide-react";
 
 import { sendChannelMessage } from "@/app/community/actions";
 import { useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
+import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { encodeMentions } from "@/lib/channels/mentions";
 import { signAttachmentUrls } from "@/lib/channels/attachment-urls";
 import { resolveShortcut } from "@/lib/channels/shortcuts";
@@ -74,6 +76,8 @@ export function Composer({
   const label = placeholder ?? `Message #${channel.name}`;
 
   const [body, setBody] = useState("");
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const textRef = useRef<HTMLTextAreaElement>(null);
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -140,6 +144,32 @@ export function Composer({
 
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
+  };
+
+  /**
+   * Drop an emoji where the caret is, not at the end.
+   *
+   * Somebody who has clicked back into the middle of a sentence to add a
+   * smiley means it to land there. The caret is then put after what was
+   * inserted, so typing continues from the right place rather than jumping to
+   * the end of the line.
+   */
+  const insertAtCaret = (text: string) => {
+    const field = textRef.current;
+    if (!field) {
+      setBody((current) => current + text);
+      return;
+    }
+    const start = field.selectionStart ?? body.length;
+    const end = field.selectionEnd ?? start;
+    setBody(body.slice(0, start) + text + body.slice(end));
+    // After React has written the new value; setting it now would be undone by
+    // the re-render that follows.
+    requestAnimationFrame(() => {
+      field.focus();
+      const caret = start + text.length;
+      field.setSelectionRange(caret, caret);
+    });
   };
 
   const send = async () => {
@@ -268,7 +298,33 @@ export function Composer({
           </>
         ) : null}
 
+        {/*
+          The emoji button sits with the attachment button rather than inside
+          the box: it is a thing you do to the message, like attaching a file,
+          and putting it in the text area would move the caret target as the
+          box grows.
+        */}
+        <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+          <PopoverTrigger
+            aria-label="Insert an emoji"
+            className="focus-ring shrink-0 rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+          >
+            <Smile size={16} aria-hidden="true" />
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-auto p-0">
+            <EmojiPicker
+              mode="insert"
+              onSelect={(selection) => {
+                setEmojiOpen(false);
+                if (selection.kind === "unicode") insertAtCaret(selection.glyph);
+              }}
+              onClose={() => setEmojiOpen(false)}
+            />
+          </PopoverContent>
+        </Popover>
+
         <textarea
+          ref={textRef}
           value={body}
           onChange={(event) => {
             setBody(event.target.value);

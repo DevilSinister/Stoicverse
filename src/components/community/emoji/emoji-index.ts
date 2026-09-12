@@ -125,7 +125,17 @@ export function buildIndex(data: readonly CompactEmojiInput[], shortcodes: Short
   }
 
   entries.sort((a, b) => a.group - b.group || a.order - b.order);
+  return indexEntries(entries);
+}
 
+/**
+ * The lookup maps over an already-sorted entry list.
+ *
+ * Shared by `buildIndex` (build time, from emojibase) and `fromPayload`
+ * (runtime, from the shipped file), so the two can never disagree about what
+ * an index is.
+ */
+function indexEntries(entries: EmojiEntry[]): EmojiIndex {
   const byGroup = new Map<number, EmojiEntry[]>();
   const byUnicode = new Map<string, EmojiEntry>();
   const byShortcode = new Map<string, EmojiEntry>();
@@ -140,6 +150,79 @@ export function buildIndex(data: readonly CompactEmojiInput[], shortcodes: Short
     for (const code of entry.shortcodes) byShortcode.set(code, entry);
   }
   return { entries, byGroup, byUnicode, byShortcode };
+}
+
+/**
+ * The index as it is shipped to the browser.
+ *
+ * The picker used to `import()` emojibase's own files: 645 KB of `compact.json`
+ * plus 185 KB of shortcodes, as JavaScript chunks, merged and filtered on every
+ * first open. Measured at 500 ms from click to grid, and all of it paid again
+ * on a cold cache in every new tab.
+ *
+ * This is the same index after the filtering, sorting and merging have already
+ * happened, generated once by `scripts/build-emoji-index.mjs`. Grouped, because
+ * the group and the sort order are then carried by the shape rather than by a
+ * field on all 1,900 rows; tuples rather than objects, because the key names
+ * were a third of the bytes; `unicode` omitted because it is derived from the
+ * hexcode; `order` omitted because position in the array is the order.
+ *
+ * `v` is a format version, and the filename carries it too — a stale payload
+ * cached by a browser must never be read as a newer one.
+ */
+export type EmojiPayloadEntry = [
+  hexcode: string,
+  label: string,
+  tags: string,
+  shortcodes: string[],
+  skins: string[] | 0,
+];
+
+export type EmojiPayload = {
+  v: 1;
+  g: Record<string, EmojiPayloadEntry[]>;
+};
+
+export const EMOJI_PAYLOAD_VERSION = 1;
+export const EMOJI_PAYLOAD_URL = "/emoji/index.v1.json";
+
+/** Build time only: the shipped payload, from a full emojibase index. */
+export function toPayload(index: EmojiIndex): EmojiPayload {
+  const g: Record<string, EmojiPayloadEntry[]> = {};
+  for (const group of EMOJI_GROUPS) {
+    g[String(group.id)] = (index.byGroup.get(group.id) ?? []).map((entry) => [
+      entry.hexcode,
+      entry.label,
+      entry.tags.join(" "),
+      entry.shortcodes,
+      entry.skins ? entry.skins.map((skin) => skin ?? "") : 0,
+    ]);
+  }
+  return { v: EMOJI_PAYLOAD_VERSION, g };
+}
+
+/** Runtime: the payload back into the index the picker searches. */
+export function fromPayload(payload: EmojiPayload): EmojiIndex {
+  const entries: EmojiEntry[] = [];
+  for (const group of EMOJI_GROUPS) {
+    const rows = payload.g[String(group.id)] ?? [];
+    rows.forEach(([hexcode, label, tags, shortcodes, skins], order) => {
+      const entry: EmojiEntry = {
+        hexcode,
+        unicode: glyphFromHexcode(hexcode),
+        label,
+        group: group.id,
+        order,
+        tags: tags === "" ? [] : tags.split(" "),
+        shortcodes,
+      };
+      // Index 0 is unused so tone 1..5 lines up with the array; the generator
+      // writes an empty string there and `applySkinTone` never reads it.
+      if (skins !== 0) entry.skins = skins;
+      entries.push(entry);
+    });
+  }
+  return indexEntries(entries);
 }
 
 export function normalizeQuery(query: string): string {

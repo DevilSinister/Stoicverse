@@ -19,7 +19,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   applySkinTone,
-  buildIndex,
+  EMOJI_PAYLOAD_URL,
+  EMOJI_PAYLOAD_VERSION,
+  fromPayload,
+  type EmojiPayload,
   EMOJI_GROUPS,
   frequentlyUsed,
   isSkinTone,
@@ -81,15 +84,32 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
 let cachedIndex: EmojiIndex | null = null;
 let pendingIndex: Promise<EmojiIndex> | null = null;
 
+/**
+ * Fetched, not imported.
+ *
+ * This used to `import()` emojibase's `compact.json` and its shortcodes — 830
+ * KB of JSON as JavaScript chunks, filtered and merged on every first open,
+ * measured at 500 ms from click to grid. `scripts/build-emoji-index.mjs` does
+ * that work once and commits the result; what arrives here is 179 KB of
+ * already-sorted, already-merged index that the browser caches like any other
+ * static file and never has to parse as code.
+ *
+ * Same-origin, which `connect-src 'self'` allows. Still module-scoped, so the
+ * second picker on a page pays nothing.
+ */
 async function loadIndex(): Promise<EmojiIndex> {
   if (cachedIndex) return cachedIndex;
   if (!pendingIndex) {
-    pendingIndex = Promise.all([
-      import("emojibase-data/en/compact.json"),
-      import("emojibase-data/en/shortcodes/emojibase.json"),
-    ])
-      .then(([data, shortcodes]) => {
-        cachedIndex = buildIndex(data.default, shortcodes.default);
+    pendingIndex = fetch(EMOJI_PAYLOAD_URL, { cache: "force-cache" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`emoji index ${response.status}`);
+        const payload = (await response.json()) as EmojiPayload;
+        if (payload.v !== EMOJI_PAYLOAD_VERSION) {
+          // The filename carries the version too, so this only fires if the
+          // two disagree — a stale file served under a fresh name.
+          throw new Error(`emoji index version ${String(payload.v)}`);
+        }
+        cachedIndex = fromPayload(payload);
         return cachedIndex;
       })
       .catch((error: unknown) => {
@@ -142,6 +162,8 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
   const [preview, setPreview] = useState<Preview | null>(null);
   const [activeGroup, setActiveGroup] = useState<number>(EMOJI_GROUPS[0].id);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  // Which groups have been built. Only ever grows.
+  const [expanded, setExpanded] = useState<ReadonlySet<number>>(() => new Set<number>());
   const searchRef = useRef<HTMLInputElement>(null);
   const groupRefs = useRef(new Map<number, HTMLElement>());
 
@@ -163,6 +185,7 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
   useEffect(() => {
     if (autoFocus) searchRef.current?.focus();
   }, [autoFocus]);
+
 
   const results = useMemo(() => (index && query.trim() ? searchEmoji(index, query) : null), [index, query]);
 
@@ -191,6 +214,33 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
     setToneOpen(false);
   };
 
+  /**
+   * Build every group within a screen-and-a-bit of the viewport.
+   *
+   * Read from the scroller's own offsets, which are exact because an unbuilt
+   * group already occupies the height it will have. Called on scroll, after a
+   * jump, and once the index arrives — the three moments the answer can change.
+   */
+  const expandVisible = () => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const top = scroller.scrollTop - EXPAND_MARGIN_PX;
+    const bottom = scroller.scrollTop + scroller.clientHeight + EXPAND_MARGIN_PX;
+    const reached: number[] = [];
+    for (const [group, node] of groupRefs.current) {
+      if (group < 0) continue;
+      const start = node.offsetTop - scroller.offsetTop;
+      if (start + node.offsetHeight >= top && start <= bottom) reached.push(group);
+    }
+    if (reached.length === 0) return;
+    setExpanded((current) => {
+      if (reached.every((group) => current.has(group))) return current;
+      const next = new Set(current);
+      for (const group of reached) next.add(group);
+      return next;
+    });
+  };
+
   const jumpTo = (group: number) => {
     setQuery("");
     setActiveGroup(group);
@@ -198,13 +248,38 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
       const node = groupRefs.current.get(group);
       const scroller = scrollerRef.current;
       if (node && scroller) scroller.scrollTo({ top: node.offsetTop - scroller.offsetTop, behavior: "auto" });
+      // After the scroll, or the jump lands on a group that is still a
+      // placeholder and stays one until something else moves.
+      expandVisible();
     });
   };
+
+  // Kept current in an effect rather than assigned during render, the same
+  // way `useChannelLive` carries its handlers. `expandVisible` is a plain
+  // function — memoising it bought nothing and cost the React compiler the
+  // ability to optimise this component at all.
+  const expandRef = useRef(expandVisible);
+  useEffect(() => {
+    expandRef.current = expandVisible;
+  });
+
+  /**
+   * The first groups, once there is something to measure.
+   *
+   * Runs after the placeholders have laid out, so their offsets are real. It
+   * only ever adds, and `expandVisible` returns the same Set when nothing
+   * changed, so this settles in one pass rather than re-rendering forever.
+   */
+  useEffect(() => {
+    if (!index || results) return;
+    expandRef.current();
+  }, [index, results]);
 
   // Scroll spy: the rail highlights the group whose heading last crossed the top.
   const onScroll = () => {
     const scroller = scrollerRef.current;
     if (!scroller || results) return;
+    expandVisible();
     const top = scroller.scrollTop + scroller.offsetTop + 8;
     let current = activeGroup;
     for (const [group, node] of groupRefs.current) {
@@ -431,21 +506,23 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
                   <div className="grid grid-cols-9 gap-0.5">{customEmojis.map(renderCustomButton)}</div>
                 </section>
               )}
-              {EMOJI_GROUPS.map((group) => (
-                <section
-                  key={group.id}
-                  ref={(node) => {
-                    if (node) groupRefs.current.set(group.id, node);
-                  }}
-                  aria-labelledby={`emoji-group-${group.key}`}
-                  style={{ contentVisibility: "auto", containIntrinsicSize: "0 320px" }}
-                >
-                  {heading(`emoji-group-${group.key}`, group.label)}
-                  <div className="grid grid-cols-9 gap-0.5">
-                    {(index.byGroup.get(group.id) ?? []).map(renderGlyphButton)}
-                  </div>
-                </section>
-              ))}
+              {EMOJI_GROUPS.map((group) => {
+                const rows = index.byGroup.get(group.id) ?? [];
+                return (
+                  <LazyGroup
+                    key={group.id}
+                    shown={expanded.has(group.id)}
+                    count={rows.length}
+                    sectionRef={(node) => {
+                      if (node) groupRefs.current.set(group.id, node);
+                    }}
+                    labelledBy={`emoji-group-${group.key}`}
+                  >
+                    {heading(`emoji-group-${group.key}`, group.label)}
+                    <div className="grid grid-cols-9 gap-0.5">{rows.map(renderGlyphButton)}</div>
+                  </LazyGroup>
+                );
+              })}
             </>
           )}
         </div>
@@ -465,5 +542,58 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
         )}
       </div>
     </div>
+  );
+}
+
+/** One button: 36 px tall on a 2 px gap. */
+const GLYPH_ROW_PX = 38;
+const HEADING_PX = 28;
+/** How far beyond the viewport a group is built. */
+const EXPAND_MARGIN_PX = 600;
+
+/** The height a group will occupy once it is built, so the scrollbar is right before it is. */
+function groupHeight(count: number): number {
+  return Math.ceil(count / COLUMNS) * GLYPH_ROW_PX + HEADING_PX;
+}
+
+/**
+ * A group that holds its place until it is worth building.
+ *
+ * Rendering all nine is 2,008 buttons and, measured, 298 ms of it — paid every
+ * time the picker opens, long after the data is cached. `content-visibility`
+ * already skipped painting them; it does not skip creating them, and creating
+ * them was the cost.
+ *
+ * Which groups are built is decided by the scroller, not by an
+ * IntersectionObserver: an observer rooted on this scroller never fired here,
+ * not even for a section sitting on screen, and the picker already tracks
+ * scroll position for its group rail. One mechanism, already working, rather
+ * than a second one that has to be trusted.
+ *
+ * A built group is never taken down again — scrolling back up must not rebuild
+ * what was just built.
+ */
+function LazyGroup({
+  shown,
+  count,
+  sectionRef,
+  labelledBy,
+  children,
+}: {
+  shown: boolean;
+  count: number;
+  sectionRef: (node: HTMLElement | null) => void;
+  labelledBy: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      ref={sectionRef}
+      aria-labelledby={shown ? labelledBy : undefined}
+      aria-busy={shown ? undefined : true}
+      style={shown ? undefined : { height: groupHeight(count) }}
+    >
+      {shown ? children : null}
+    </section>
   );
 }
