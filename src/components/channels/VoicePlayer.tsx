@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Mic, Pause, Play } from "lucide-react";
+import { Pause, Play } from "lucide-react";
+
+import { WaveformBars } from "@/components/channels/Waveform";
+import { audioContextClass, FLAT_WAVEFORM, peaksFromSamples, WAVEFORM_BARS } from "@/lib/channels/waveform";
 
 /**
  * Listening to a voice note: play, pause, scrub, and change the speed.
@@ -18,6 +21,60 @@ import { Mic, Pause, Play } from "lucide-react";
  */
 
 const SPEEDS = [1, 1.5, 2] as const;
+
+/** A clip larger than this is left as a flat line rather than decoded whole. */
+const MAX_DECODE_BYTES = 8 * 1024 * 1024;
+
+/**
+ * Measured clips, and the one-at-a-time queue that measures them.
+ *
+ * A waveform has to be drawn before it is played — a row of identical dashes
+ * is exactly the picture of a broken attachment — so every note in view is
+ * decoded on mount. Two things keep that affordable: the peaks are cached
+ * across re-renders and pagination, and the decodes run in single file, so
+ * opening a channel full of voice notes does not start ten decoders at once.
+ *
+ * The cache is keyed on the path rather than the URL: these are signed, and
+ * the same clip re-signs to a different query string an hour later.
+ */
+const peakCache = new Map<string, number[]>();
+let decodeQueue: Promise<unknown> = Promise.resolve();
+
+function measureOnce(src: string): Promise<number[] | null> {
+  const key = src.split("?")[0] ?? src;
+  const cached = peakCache.get(key);
+  if (cached) return Promise.resolve(cached);
+
+  const run = decodeQueue.then(() => measure(src));
+  decodeQueue = run.catch(() => null);
+  return run.then((peaks) => {
+    if (peaks) peakCache.set(key, peaks);
+    return peaks;
+  });
+}
+
+async function measure(src: string): Promise<number[] | null> {
+  const Context = audioContextClass();
+  if (!Context) return null;
+  try {
+    const response = await fetch(src);
+    if (!response.ok) return null;
+    const bytes = await response.arrayBuffer();
+    if (bytes.byteLength > MAX_DECODE_BYTES) return null;
+
+    const context = new Context();
+    try {
+      const decoded = await context.decodeAudioData(bytes);
+      return peaksFromSamples(decoded.getChannelData(0), WAVEFORM_BARS);
+    } finally {
+      void context.close();
+    }
+  } catch {
+    // The picture is decoration; the audio element is doing the playing and
+    // does not need any of this to have worked.
+    return null;
+  }
+}
 
 function clock(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
@@ -40,6 +97,7 @@ export function VoicePlayer({
   const [elapsed, setElapsed] = useState(0);
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]>(1);
   const [fileDuration, setFileDuration] = useState<number | null>(null);
+  const [peaks, setPeaks] = useState<readonly number[] | null>(null);
 
   // `Infinity` is what a headerless webm reports, and it is not a duration.
   const total = fileDuration ?? (durationSeconds && durationSeconds > 0 ? durationSeconds : null);
@@ -76,6 +134,16 @@ export function VoicePlayer({
     };
   }, []);
 
+  useEffect(() => {
+    let live = true;
+    void measureOnce(src).then((measured) => {
+      if (live && measured) setPeaks(measured);
+    });
+    return () => {
+      live = false;
+    };
+  }, [src]);
+
   const toggle = () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -96,14 +164,16 @@ export function VoicePlayer({
     setElapsed(audio.currentTime);
   };
 
-  const progress = total ? Math.min(100, (elapsed / total) * 100) : 0;
+  const progress = total ? Math.min(1, elapsed / total) : 0;
 
   return (
     <div className="flex max-w-md items-center gap-2 rounded-lg border border-surgical-steel bg-surface-container-lowest px-2 py-1.5">
-      {/* `preload="none"`: a channel of voice notes should not fetch every one of them on open. */}
+      {/*
+        `preload="none"`: the element itself fetches nothing until somebody
+        presses play. The one request a note costs on open is the measurement
+        above, and the two share a URL, so playing it reads from the cache.
+      */}
       <audio ref={audioRef} src={src} preload="none" className="hidden" />
-
-      <Mic size={14} aria-hidden="true" className="shrink-0 text-fog-muted" />
 
       <button
         type="button"
@@ -115,26 +185,28 @@ export function VoicePlayer({
       </button>
 
       {/*
-        A range input rather than a styled div: dragging, arrow keys and a
-        screen reader's value announcement all come free, and a voice note is
-        exactly the kind of thing somebody wants to skip back through.
+        The bars are the picture; the range input laid over them is the
+        control. Invisible rather than absent, because dragging, arrow keys and
+        a screen reader's value announcement all come free from a real range —
+        and a voice note is exactly the kind of thing somebody wants to skip
+        back through.
       */}
-      <label className="min-w-0 flex-1">
-        <span className="sr-only">{`Seek within ${label}`}</span>
-        <input
-          type="range"
-          min={0}
-          max={total ?? 0}
-          step={0.1}
-          value={Math.min(elapsed, total ?? 0)}
-          disabled={!total}
-          onChange={(event) => seek(Number(event.target.value))}
-          style={{
-            background: `linear-gradient(to right, var(--color-primary-container) ${progress}%, var(--color-surgical-steel) ${progress}%)`,
-          }}
-          className="voice-scrubber h-1 w-full cursor-pointer appearance-none rounded-full disabled:cursor-default"
-        />
-      </label>
+      <div className="relative min-w-0 flex-1">
+        <WaveformBars levels={peaks ?? FLAT_WAVEFORM} progress={progress} />
+        <label className="absolute inset-0">
+          <span className="sr-only">{`Seek within ${label}`}</span>
+          <input
+            type="range"
+            min={0}
+            max={total ?? 0}
+            step={0.1}
+            value={Math.min(elapsed, total ?? 0)}
+            disabled={!total}
+            onChange={(event) => seek(Number(event.target.value))}
+            className="size-full cursor-pointer appearance-none bg-transparent opacity-0 disabled:cursor-default"
+          />
+        </label>
+      </div>
 
       <span className="shrink-0 text-[11px] tabular-nums text-fog-muted">
         {total ? `${clock(elapsed)} / ${clock(total)}` : clock(elapsed)}

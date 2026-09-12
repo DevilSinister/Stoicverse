@@ -36,6 +36,15 @@ export const ATTACHMENT_MIME_TYPES = [
 /** How long one voice note may run. The 25 MB cap is nowhere near this. */
 export const VOICE_NOTE_MAX_SECONDS = 300;
 
+/**
+ * Shorter than this and the recording is thrown away rather than sent.
+ *
+ * A finished recording sends itself, so a mis-tap on the microphone followed
+ * by a mis-tap on send would otherwise post a quarter-second of room tone to
+ * the channel with no chance to take it back.
+ */
+export const VOICE_NOTE_MIN_SECONDS = 1;
+
 export const MAX_DISTINCT_REACTIONS_PER_MESSAGE = 20;
 /** Longest Unicode reaction, in code points, matching the SQL `{1,16}` (PostgreSQL counts characters, not UTF-16 units). */
 export const REACTION_MAX_CHARS = 16;

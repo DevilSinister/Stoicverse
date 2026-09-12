@@ -157,12 +157,14 @@ export function Composer({
   };
 
   /**
-   * Put a finished recording into the draft as an attachment.
+   * Upload a finished recording and send it, in one movement.
    *
    * Deliberately the same path as a picked file — same bucket, same
    * `{uid}/{channel}/` prefix the upload policy reads, same signing — because
    * a voice note is an attachment and nothing downstream should have to know
-   * where it came from.
+   * where it came from. What differs is the ending: it goes straight out
+   * rather than landing in the draft, because finishing a recording *is* the
+   * decision to send it, and the bin in the recorder is the other answer.
    */
   const uploadRecording = async (recording: Recording) => {
     if (!viewer) return;
@@ -182,20 +184,24 @@ export function Composer({
       return;
     }
 
-    setAttachments((current) => [
-      ...current,
-      {
-        path,
-        mimeType: recording.mimeType,
-        byteSize: recording.blob.size,
-        name: `Voice note (${Math.round(recording.durationSeconds)}s)`,
-        durationSeconds: Number(recording.durationSeconds.toFixed(1)),
-      },
-    ]);
+    const attachment: PendingAttachment = {
+      path,
+      mimeType: recording.mimeType,
+      byteSize: recording.blob.size,
+      name: `Voice note (${Math.round(recording.durationSeconds)}s)`,
+      durationSeconds: Number(recording.durationSeconds.toFixed(1)),
+    };
+
+    // Signed before the send rather than after it, so the bubble that appears
+    // can be played straight away instead of waiting for the next refresh.
     const signed = await signAttachmentUrls(supabase, [path]);
     const href = signed.get(path);
     if (href) onAttachmentUrl(path, href);
+
     setUploading(false);
+    // A refused send puts it back into the draft as an ordinary attachment,
+    // which is exactly where retrying it belongs.
+    await send([attachment]);
   };
 
   /**
@@ -228,14 +234,23 @@ export function Composer({
   // microphone, and the moment there is a word or a file it becomes Send.
   const hasDraft = body.trim() !== "" || attachments.length > 0;
 
-  const send = async () => {
-    if (!canSend || !viewer) return;
+  /**
+   * @param extraAttachments Uploaded outside the draft — today, a finished
+   *   recording. It arrives with its upload already done, which is why this
+   *   re-derives its own readiness instead of trusting `canSend`: that one is
+   *   computed for the button, from a render where `uploading` was still true.
+   */
+  const send = async (extraAttachments: PendingAttachment[] = []) => {
+    const outgoing = [...attachments, ...extraAttachments];
+    const ready = (body.trim() !== "" || outgoing.length > 0) && !tooLong && !sending;
+    if (!ready || !viewer || (uploading && extraAttachments.length === 0)) return;
+
     setError(null);
     setSending(true);
 
     const clientNonce = crypto.randomUUID();
     const encoded = encodeMentions(body.trim(), dictionary);
-    const sentAttachments = attachments;
+    const sentAttachments = outgoing;
 
     onOptimistic({
       id: `optimistic-${clientNonce}`,
