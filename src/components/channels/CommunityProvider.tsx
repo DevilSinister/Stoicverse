@@ -6,6 +6,7 @@ import type { MentionDictionary } from "@/lib/channels/mentions";
 import { deriveAffordances, type Affordances } from "@/lib/channels/permissions";
 import type { ChannelMessage, DirectoryMember, ViewerState } from "@/lib/community/messages";
 import type { MentionResolvers } from "@/lib/markdown/render";
+import { useCommunityLive } from "@/components/channels/useCommunityLive";
 import { useUnread } from "@/components/channels/useUnread";
 import { createClient } from "@/lib/supabase/client";
 
@@ -47,6 +48,12 @@ type CommunityValue = {
   setActiveChannel: (channelId: string | null) => void;
   /** Re-reads unread and mention counts now, rather than waiting for the debounce. */
   refreshUnread: () => void;
+  /** Who is present in the community right now. Ephemeral: never stored. */
+  onlineIds: ReadonlySet<string>;
+  /** Broadcasts that this person is typing in a channel, throttled. */
+  announceTyping: (channelId: string) => void;
+  /** The names of everyone typing in one channel, excluding the viewer. */
+  typistsIn: (channelId: string) => string[];
   degraded: string[];
 };
 
@@ -74,6 +81,9 @@ export function CommunityProvider({
   // Unread lives here rather than in the sidebar because the open channel has
   // to be able to say "I am being read" — the two halves are one question.
   const { channels, setActiveChannel, refreshUnread } = useUnread(initialChannels);
+  const { onlineIds, announceTyping, typistsIn } = useCommunityLive(
+    viewer ? { userId: viewer.userId, name: viewer.profile?.fullName ?? "Member" } : null,
+  );
 
   const value = useMemo<CommunityValue>(() => {
     const channelById = new Map(channels.map((channel) => [channel.id, channel]));
@@ -109,9 +119,22 @@ export function CommunityProvider({
       },
       setActiveChannel,
       refreshUnread,
+      onlineIds,
+      announceTyping,
+      typistsIn,
       degraded,
     };
-  }, [viewer, channels, members, degraded, setActiveChannel, refreshUnread]);
+  }, [
+    viewer,
+    channels,
+    members,
+    degraded,
+    setActiveChannel,
+    refreshUnread,
+    onlineIds,
+    announceTyping,
+    typistsIn,
+  ]);
 
   return <CommunityContext.Provider value={value}>{children}</CommunityContext.Provider>;
 }

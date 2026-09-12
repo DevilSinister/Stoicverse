@@ -38,6 +38,7 @@ export function Composer({
   replyTo,
   threadId = null,
   placeholder,
+  mentionSeed,
   onClearReply,
   onOptimistic,
   onSettled,
@@ -48,12 +49,18 @@ export function Composer({
   /** Set when this composer sits in a thread panel rather than under the channel. */
   threadId?: string | null;
   placeholder?: string;
+  /**
+   * A name to drop in from the member list. Carries an `at` stamp because
+   * mentioning the same person twice in a row is a real thing to do, and a
+   * bare name would look unchanged the second time.
+   */
+  mentionSeed?: { name: string; at: number } | null;
   onClearReply: () => void;
   onOptimistic: (message: ChannelMessage) => void;
   onSettled: () => void;
   onAttachmentUrl: (path: string, url: string) => void;
 }) {
-  const { viewer, dictionary, affordances } = useCommunity();
+  const { viewer, dictionary, affordances, announceTyping } = useCommunity();
   const permissions = affordances(channel.id);
   const label = placeholder ?? `Message #${channel.name}`;
 
@@ -63,6 +70,19 @@ export function Composer({
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
+
+  // Adjusting state during render on a changed prop, which is React's own
+  // documented shape for exactly this — and the only one that satisfies both
+  // rules here: a ref may not be read or written during render, and setState
+  // may not be called synchronously from an effect.
+  //
+  // Appended rather than replacing: clicking a member halfway through a
+  // sentence means "and also mention them", not "start again".
+  const [seenSeed, setSeenSeed] = useState(0);
+  if (mentionSeed && mentionSeed.at !== seenSeed) {
+    setSeenSeed(mentionSeed.at);
+    setBody((current) => (current === "" ? `@${mentionSeed.name} ` : `${current.trimEnd()} @${mentionSeed.name} `));
+  }
 
   const tooLong = body.length > MESSAGE_MAX_CHARS;
   const canSend = (body.trim() !== "" || attachments.length > 0) && !tooLong && !sending && !uploading;
@@ -234,7 +254,13 @@ export function Composer({
 
         <textarea
           value={body}
-          onChange={(event) => setBody(event.target.value)}
+          onChange={(event) => {
+            setBody(event.target.value);
+            // Only while there is something to see. Announcing on the
+            // keystroke that empties the box tells everyone somebody is
+            // typing when they have just given up.
+            if (event.target.value.trim() !== "") announceTyping(channel.id);
+          }}
           onKeyDown={(event) => {
             // Enter sends, Shift+Enter is a newline — the convention every chat
             // client shares, and the one people's hands already know.

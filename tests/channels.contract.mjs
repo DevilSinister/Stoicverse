@@ -138,6 +138,7 @@ test("every colour token the channel UI uses is actually defined", async () => {
     "src/components/channels/ThreadPanel.tsx",
     "src/components/channels/ChannelHeaderPopovers.tsx",
     "src/components/channels/SearchBar.tsx",
+    "src/components/channels/MemberList.tsx",
   ];
 
   // Utilities that share a prefix with a colour but never take one.
@@ -384,6 +385,47 @@ test("the hover bar keeps its box while its own menu is open", async () => {
   assert.match(menu, /menuOpen \|\| emojiOpen \? "flex" : "hidden group-focus-within:flex group-hover:flex"/);
   // The open state has to be controlled, or the bar cannot know to stay.
   assert.match(menu, /<DropdownMenu open=\{menuOpen\} onOpenChange=\{setMenuOpen\}>/);
+});
+
+// --------------------------------------------------------------- phase P4
+
+test("presence and typing never touch the database", async () => {
+  const live = await readCode("src/components/channels/useCommunityLive.ts");
+  // A write per keystroke per member, for a value that expires in six
+  // seconds, is not something a table should ever see.
+  assert.equal(/\.from\(|\.rpc\(/.test(live), false, "presence and typing must stay in the realtime channel");
+  assert.match(live, /event: "typing"/);
+  assert.match(live, /type: "broadcast"/);
+  // Keyed by user, so two tabs are one person in the member list.
+  assert.match(live, /presence: \{ key: viewerId \}/);
+  // Your own keystrokes are not news to you.
+  assert.match(live, /broadcast: \{ self: false \}/);
+  // Nothing announces that somebody stopped, so entries have to expire.
+  assert.match(live, /TYPING_TTL_MS/);
+  assert.match(live, /THROTTLE_MS/);
+});
+
+test("a sanction from the member list asks for its reason", async () => {
+  const list = await readCode("src/components/channels/MemberList.tsx");
+  // `parseModerationReason` refuses an empty reason for every sanction that is
+  // not an undo, so a dialog that skipped it would only produce a failure.
+  assert.match(list, /timeoutMember\(pending\.member\.id, pending\.seconds \?\? 600, reason\)/);
+  assert.match(list, /banMember\(pending\.member\.id, reason\)/);
+  // Removing a timeout is the undo, and takes no reason.
+  assert.match(list, /untimeoutMember\(member\.id\)/);
+  // Only what the viewer actually holds.
+  assert.match(list, /const canTimeout = can\("moderate_members"\)/);
+  assert.match(list, /const canBan = can\("ban_members"\)/);
+  // And never on yourself: the database refuses it.
+  assert.match(list, /member\.id !== viewer\?\.userId/);
+});
+
+test("the typing line sits above the composer, not inside it", async () => {
+  const view = await readCode("src/components/channels/ChannelView.tsx");
+  // A line appearing and disappearing inside the box moves the very thing
+  // somebody is aiming at, and it reserves its height either way.
+  assert.match(view, /aria-live="polite" className="h-4 px-4/);
+  assert.match(view, /typingSentence\(typistsIn\(channel\.id\)\)/);
 });
 
 test("the legacy community surface is still intact", async () => {

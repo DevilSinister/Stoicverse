@@ -8,11 +8,13 @@ import { editMessage, markChannelRead, toggleReaction } from "@/app/community/ac
 import { PinsPopover, ThreadListPopover } from "@/components/channels/ChannelHeaderPopovers";
 import { Composer } from "@/components/channels/Composer";
 import { mergeMessage, useChannelLive, useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
+import { MemberList } from "@/components/channels/MemberList";
 import { MessageMenu } from "@/components/channels/MessageMenu";
 import { ThreadPanel } from "@/components/channels/ThreadPanel";
 import { continuesGroup, firstUnreadIndex, startsNewDay } from "@/lib/channels/grouping";
 import { JUMP_PAGE_BUDGET } from "@/lib/channels/message-actions";
 import { COMPOSER_NOTICE } from "@/lib/channels/permissions";
+import { typingSentence } from "@/lib/channels/presence";
 import { toClientMessage } from "@/lib/channels/rows";
 import { MESSAGE_PAGE_SIZE } from "@/lib/community/constants";
 import type { ChannelMessage } from "@/lib/community/messages";
@@ -346,7 +348,7 @@ export function ChannelView({
   initialCursor: { createdAt: string; id: string } | null;
   initialUrls: Record<string, string>;
 }) {
-  const { affordances, viewer, setActiveChannel, refreshUnread } = useCommunity();
+  const { affordances, viewer, setActiveChannel, refreshUnread, typistsIn } = useCommunity();
   const permissions = affordances(channel.id);
   const router = useRouter();
   const pathname = usePathname();
@@ -368,6 +370,7 @@ export function ChannelView({
   const [cursor, setCursor] = useState(initialCursor);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [replyTo, setReplyTo] = useState<ChannelMessage | null>(null);
+  const [mentionSeed, setMentionSeed] = useState<{ name: string; at: number } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -663,10 +666,20 @@ export function ChannelView({
           ))}
         </ol>
 
+        {/*
+          Above the composer, not inside it: the box is where somebody types,
+          and a line that appears and disappears inside it moves the very thing
+          they are aiming at.
+        */}
+        <p aria-live="polite" className="h-4 px-4 text-[11px] text-fog-muted">
+          {typingSentence(typistsIn(channel.id)) ?? ""}
+        </p>
+
         {permissions.composer === "ready" ? (
           <Composer
             channel={channel}
             replyTo={replyTo}
+            mentionSeed={mentionSeed}
             onClearReply={() => setReplyTo(null)}
             onOptimistic={(optimistic) => {
               setMessages((current) => mergeMessage(current, optimistic));
@@ -681,6 +694,8 @@ export function ChannelView({
           </p>
         )}
       </div>
+
+      <MemberList channelId={channel.id} onMention={(name) => setMentionSeed({ name, at: Date.now() })} />
 
       {openThreadId ? (
         <ThreadPanel
