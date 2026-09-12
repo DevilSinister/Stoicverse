@@ -352,20 +352,6 @@ export function Composer({
           whole row. Everything else is hidden rather than disabled: a text box
           beside a running recording is a box nobody is typing in.
         */}
-        {/*
-          Hidden the moment there is something to send — the microphone and
-          Send share this position, and only one of them is ever the useful
-          action. `recorderActive` keeps it mounted through a recording, which
-          is the one time a draft could appear beneath it.
-        */}
-        {permissions.canAttach && (recorderActive || !hasDraft) ? (
-          <VoiceRecorder
-            disabled={uploading || sending}
-            onRecorded={(recording) => void uploadRecording(recording)}
-            onActiveChange={setRecorderActive}
-          />
-        ) : null}
-
         {recorderActive ? null : (
         <>
         {permissions.canAttach ? (
@@ -453,13 +439,27 @@ export function Composer({
           className="max-h-40 min-h-6 flex-1 resize-none bg-transparent text-sm leading-6 text-on-surface outline-none placeholder:text-fog-muted"
         />
 
+        </>
+        )}
+
         {/*
-          Send replaces the microphone once there is something to send, which
-          is the swap every messaging app makes: with an empty box the useful
-          action is to speak, and with a drafted message it is to send it. The
-          microphone itself lives above, before this branch, because it has to
-          survive the row being handed over to a recording.
+          The trailing slot, and the only one either of these ever occupies:
+          with an empty box the useful action is to speak, and with a drafted
+          message it is to send. Both live at the end of the row, so the button
+          under the reader's thumb does not move when it changes what it does.
+
+          The recorder sits outside the branch above because a running
+          recording takes the whole row — unmounting it there would stop the
+          recording the moment it started.
         */}
+        {permissions.canAttach && (recorderActive || !hasDraft) ? (
+          <VoiceRecorder
+            disabled={uploading || sending}
+            onRecorded={(recording) => void uploadRecording(recording)}
+            onActiveChange={setRecorderActive}
+          />
+        ) : null}
+
         {hasDraft || !permissions.canAttach ? (
           <button
             type="button"
@@ -475,8 +475,6 @@ export function Composer({
             )}
           </button>
         ) : null}
-        </>
-        )}
       </div>
 
       <div className="mt-1 flex items-center gap-3">
