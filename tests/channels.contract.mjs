@@ -550,3 +550,35 @@ test("both side columns have a way in on a narrow screen", async () => {
   // just chose from inside it.
   assert.match(shell, /setPane\(null\);\s*\}, \[activeId, setPane\]\)/);
 });
+
+test("attachment URLs are signed, because the bucket is private", async () => {
+  // `community-posts` has `public = false`. The page was built on
+  // `getPublicUrl` under a comment claiming otherwise, so
+  // `/object/public/community-posts/...` answered 400 for every image posted
+  // to a channel, from P1 until it was noticed.
+  for (const path of [
+    "src/app/channels/[channelId]/page.tsx",
+    "src/components/channels/Composer.tsx",
+    "src/components/channels/ChannelView.tsx",
+    "src/components/channels/ThreadPanel.tsx",
+  ]) {
+    const source = await readCode(path);
+    assert.doesNotMatch(
+      source,
+      /getPublicUrl/,
+      `${path}: community-posts is private, so a public URL can never load`,
+    );
+  }
+
+  // Every path the browser can reach has to be signed, not only the first
+  // page the server renders: a refresh, a page of history and a thread all
+  // bring attachments the map has never seen.
+  const view = await readCode("src/components/channels/ChannelView.tsx");
+  assert.match(view, /const addUrls = useCallback/);
+  assert.match(view, /void addUrls\(rows\)/);
+
+  const thread = await readCode("src/components/channels/ThreadPanel.tsx");
+  assert.match(thread, /signAttachmentUrls\(supabase, paths\)/);
+  // And a thread shows an image rather than naming the file it is in.
+  assert.match(thread, /attachment\.mimeType\.startsWith\("image\/"\)/);
+});

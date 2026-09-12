@@ -6,6 +6,7 @@ import { Loader2, Paperclip, X } from "lucide-react";
 import { sendChannelMessage } from "@/app/community/actions";
 import { useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
 import { encodeMentions } from "@/lib/channels/mentions";
+import { signAttachmentUrls } from "@/lib/channels/attachment-urls";
 import { resolveShortcut } from "@/lib/channels/shortcuts";
 import {
   ATTACHMENT_MAX_BYTES,
@@ -130,7 +131,11 @@ export function Composer({
       }
 
       setAttachments((current) => [...current, { path, mimeType: file.type, byteSize: file.size, name: file.name }]);
-      onAttachmentUrl(path, supabase.storage.from("community-posts").getPublicUrl(path).data.publicUrl);
+      // Signed, not public: the bucket is private, and a public URL here gave
+      // the sender a broken preview of the image they had just uploaded.
+      const signed = await signAttachmentUrls(supabase, [path]);
+      const href = signed.get(path);
+      if (href) onAttachmentUrl(path, href);
     }
 
     setUploading(false);

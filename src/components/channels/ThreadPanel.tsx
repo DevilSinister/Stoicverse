@@ -6,6 +6,7 @@ import { Archive, Lock, LockOpen, MessagesSquare, X } from "lucide-react";
 import { setThreadState } from "@/app/community/actions";
 import { Composer } from "@/components/channels/Composer";
 import { mergeMessage, useCommunity, useThreadLive, type ChannelRow } from "@/components/channels/CommunityProvider";
+import { attachmentPathsOf, signAttachmentUrls } from "@/lib/channels/attachment-urls";
 import { toClientMessage } from "@/lib/channels/rows";
 import { MESSAGE_PAGE_SIZE } from "@/lib/community/constants";
 import type { ChannelMessage } from "@/lib/community/messages";
@@ -62,8 +63,21 @@ export function ThreadPanel({
       setMessages([]);
       return;
     }
-    setMessages(((data ?? []) as Record<string, unknown>[]).map(toClientMessage).reverse());
+    const rows = ((data ?? []) as Record<string, unknown>[]).map(toClientMessage);
+    setMessages([...rows].reverse());
     setError(null);
+
+    // Sign what this page of the thread carries. Until now this map was only
+    // ever filled by the composer below, so an attachment on a reply that was
+    // already here rendered as a link with no href at all.
+    const paths = attachmentPathsOf(rows);
+    if (paths.length === 0) return;
+    const signed = await signAttachmentUrls(supabase, paths);
+    setUrls((current) => {
+      const next = new Map(current);
+      for (const [path, href] of signed) next.set(path, href);
+      return next;
+    });
   }, [channel.id, threadId]);
 
   // The rule guards against a synchronous setState cascading a second render.
@@ -172,18 +186,38 @@ export function ThreadPanel({
             </div>
             {message.attachments.length > 0 ? (
               <ul className="mt-1 space-y-1">
-                {message.attachments.map((attachment) => (
-                  <li key={attachment.id}>
-                    <a
-                      href={urls.get(attachment.path)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="focus-ring text-xs text-primary-container underline underline-offset-2"
-                    >
-                      {attachment.path.split("/").pop()}
-                    </a>
-                  </li>
-                ))}
+                {message.attachments.map((attachment) => {
+                  const href = urls.get(attachment.path);
+                  // An image is shown, not named. The channel list has always
+                  // done this; the thread panel listed a filename instead,
+                  // which made a screenshot posted in a thread invisible.
+                  if (href && attachment.mimeType.startsWith("image/")) {
+                    return (
+                      <li key={attachment.id}>
+                        <a href={href} target="_blank" rel="noopener noreferrer" className="focus-ring block">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={href}
+                            alt=""
+                            className="max-h-48 max-w-full rounded-lg border border-surgical-steel object-cover"
+                          />
+                        </a>
+                      </li>
+                    );
+                  }
+                  return (
+                    <li key={attachment.id}>
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="focus-ring text-xs text-primary-container underline underline-offset-2"
+                      >
+                        {attachment.path.split("/").pop()}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             ) : null}
           </li>

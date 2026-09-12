@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { ChannelView } from "@/components/channels/ChannelView";
 import type { ChannelRow } from "@/components/channels/CommunityProvider";
+import { attachmentPathsOf, signAttachmentUrls } from "@/lib/channels/attachment-urls";
 import { loadChannelMessages } from "@/lib/community/messages";
 import { isUuid } from "@/lib/security/uuid";
 import { requireCommunityAccess } from "@/lib/supabase/access";
@@ -53,15 +54,11 @@ export default async function ChannelPage({ params }: { params: Promise<{ channe
   // be done here: a Server Component render may not set a cookie, and Next
   // throws rather than ignoring it, so the whole channel renders as an error.
 
-  // The bucket is public, so this is string construction rather than a signed
-  // URL round trip per attachment. The storage read policy is still what
-  // decides whether the object is served.
-  const urls: Record<string, string> = {};
-  for (const message of page.messages) {
-    for (const attachment of message.attachments) {
-      urls[attachment.path] = supabase.storage.from("community-posts").getPublicUrl(attachment.path).data.publicUrl;
-    }
-  }
+  // Signed, because `community-posts` is a private bucket. This was
+  // `getPublicUrl` under a comment claiming the bucket was public: it is not,
+  // and every image in every channel had been answering 400 since P1. One
+  // request signs the whole page.
+  const urls = Object.fromEntries(await signAttachmentUrls(supabase, attachmentPathsOf(page.messages)));
 
   return (
     <ChannelView

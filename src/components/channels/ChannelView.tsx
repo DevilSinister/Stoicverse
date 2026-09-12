@@ -24,6 +24,7 @@ import { MemberList } from "@/components/channels/MemberList";
 import { MessageMenu } from "@/components/channels/MessageMenu";
 import { MobilePaneDrawer } from "@/components/channels/MobilePane";
 import { ThreadPanel } from "@/components/channels/ThreadPanel";
+import { attachmentPathsOf, signAttachmentUrls } from "@/lib/channels/attachment-urls";
 import { continuesGroup, firstUnreadIndex, startsNewDay } from "@/lib/channels/grouping";
 import { JUMP_PAGE_BUDGET } from "@/lib/channels/message-actions";
 import { COMPOSER_NOTICE } from "@/lib/channels/permissions";
@@ -512,6 +513,26 @@ export function ChannelView({
     else nodesRef.current.delete(id);
   }, []);
 
+  /**
+   * Sign the attachments in a batch of messages and merge them into the map.
+   *
+   * Every path the browser fetches has to pass through here. The server signs
+   * the first page; anything that arrives afterwards — a refresh, a page of
+   * history, a jump — brings attachments the map has never seen, and an
+   * unsigned one renders as an image that cannot load.
+   */
+  const addUrls = useCallback(async (rows: ChannelMessage[]) => {
+    const paths = attachmentPathsOf(rows);
+    if (paths.length === 0) return;
+    const signed = await signAttachmentUrls(createClient(), paths);
+    if (signed.size === 0) return;
+    setUrls((current) => {
+      const next = new Map(current);
+      for (const [path, href] of signed) next.set(path, href);
+      return next;
+    });
+  }, []);
+
   const refresh = useCallback(async () => {
     const supabase = createClient();
     const { data } = await supabase.rpc("community_channel_messages", {
@@ -522,8 +543,10 @@ export function ChannelView({
       thread: null,
     });
     if (!data) return;
-    setMessages((data as Record<string, unknown>[]).map(toClientMessage).reverse());
-  }, [channel.id]);
+    const rows = (data as Record<string, unknown>[]).map(toClientMessage);
+    setMessages([...rows].reverse());
+    void addUrls(rows);
+  }, [channel.id, addUrls]);
 
   // The realtime payload is the raw row: no author name, no reactions, no
   // attachments. Re-reading the page is one round trip and returns the shape
@@ -614,8 +637,9 @@ export function ChannelView({
     setMessages((current) => [...[...rows].reverse(), ...current]);
     setCursor(rows.length === MESSAGE_PAGE_SIZE && oldest ? { createdAt: oldest.createdAt, id: oldest.id } : null);
     setLoadingOlder(false);
+    void addUrls(rows);
     return rows;
-  }, [channel.id, cursor, loadingOlder]);
+  }, [channel.id, cursor, loadingOlder, addUrls]);
 
   /**
    * Scroll to a message and flash it.
