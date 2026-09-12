@@ -6,6 +6,7 @@ import { Loader2, Paperclip, X } from "lucide-react";
 import { sendChannelMessage } from "@/app/community/actions";
 import { useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
 import { encodeMentions } from "@/lib/channels/mentions";
+import { resolveShortcut } from "@/lib/channels/shortcuts";
 import {
   ATTACHMENT_MAX_BYTES,
   ATTACHMENTS_PER_MESSAGE,
@@ -43,6 +44,7 @@ export function Composer({
   onOptimistic,
   onSettled,
   onAttachmentUrl,
+  onEditLast,
 }: {
   channel: ChannelRow;
   replyTo: ChannelMessage | null;
@@ -56,6 +58,12 @@ export function Composer({
    */
   mentionSeed?: { name: string; at: number } | null;
   onClearReply: () => void;
+  /**
+   * Up arrow on an empty box edits your last message. The composer is the
+   * only thing that knows the box is empty, and the list is the only thing
+   * that knows which message was yours, so the two halves meet here.
+   */
+  onEditLast?: () => void;
   onOptimistic: (message: ChannelMessage) => void;
   onSettled: () => void;
   onAttachmentUrl: (path: string, url: string) => void;
@@ -165,6 +173,9 @@ export function Composer({
         height: null,
       })),
       reactions: [],
+      // The composer never forwards. Forwarding goes through the message
+      // menu and its own RPC, and lands as a message the list re-reads.
+      forwarded: null,
     });
 
     setBody("");
@@ -267,6 +278,23 @@ export function Composer({
             if (event.key === "Enter" && !event.shiftKey) {
               event.preventDefault();
               void send();
+            }
+            // Only on an empty box: with anything typed, Up is the caret
+            // moving through what somebody is still writing.
+            if (
+              onEditLast &&
+              body === "" &&
+              resolveShortcut({
+                key: event.key,
+                ctrlKey: event.ctrlKey,
+                metaKey: event.metaKey,
+                altKey: event.altKey,
+                shiftKey: event.shiftKey,
+                typing: true,
+              }) === "editLastMessage"
+            ) {
+              event.preventDefault();
+              onEditLast();
             }
           }}
           rows={1}

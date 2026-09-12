@@ -78,6 +78,15 @@ export const SEARCH_QUERY_LIMITS = { min: 2, max: 100, pageSize: 25 } as const;
 export const THREAD_NAME_LIMITS = { min: 1, max: 100 } as const;
 
 /**
+ * How many channels one message can be forwarded into at once.
+ *
+ * `community_forward_message` enforces the same number and is the gate that
+ * matters; this is here so the picker can stop somebody at the tenth tick
+ * rather than accepting an eleventh and failing the whole call.
+ */
+export const FORWARD_CHANNEL_LIMIT = 10;
+
+/**
  * How a mention is written in a body. Every form carries an id, so renaming a
  * person, role or channel never breaks an old message.
  *

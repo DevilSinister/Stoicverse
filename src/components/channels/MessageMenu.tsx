@@ -1,10 +1,20 @@
 "use client";
 
 import { useState, type ComponentType, type ReactNode } from "react";
-import { CornerUpLeft, Loader2, MessagesSquare, MoreHorizontal, Pin, PinOff, SmilePlus } from "lucide-react";
+import {
+  CornerUpLeft,
+  Forward,
+  Loader2,
+  MessagesSquare,
+  MoreHorizontal,
+  Pin,
+  PinOff,
+  SmilePlus,
+} from "lucide-react";
 
 import { createThread, deleteMessage, togglePostHighlight, toggleReaction } from "@/app/community/actions";
 import { reportMessage } from "@/app/community/moderation-actions";
+import { ForwardDialog } from "@/components/channels/ForwardDialog";
 import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
 import {
   ContextMenu,
@@ -38,7 +48,7 @@ import type { ChannelMessage } from "@/lib/community/messages";
  * that case will carry.
  */
 
-type Dialog = null | "delete" | "report" | "thread";
+type Dialog = null | "delete" | "report" | "thread" | "forward";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- the dropdown and
    context item types are structurally identical and nominally distinct;
@@ -100,6 +110,7 @@ export function MessageMenu({
     actions.pin ||
     actions.startThread ||
     actions.openThread ||
+    actions.forward ||
     actions.report ||
     actions.copyText ||
     actions.copyLink;
@@ -164,6 +175,14 @@ export function MessageMenu({
           </Item>
         ) : null}
         {actions.edit ? <Item onClick={onEdit}>Edit message</Item> : null}
+        {actions.forward ? (
+          <Item onClick={() => setDialog("forward")}>
+            <span className="flex items-center gap-2">
+              <Forward size={14} aria-hidden="true" />
+              Forward
+            </span>
+          </Item>
+        ) : null}
 
         {actions.copyText || actions.copyLink ? <Separator /> : null}
         {actions.copyText ? (
@@ -273,6 +292,17 @@ export function MessageMenu({
           </button>
         ) : null}
 
+        {actions.forward ? (
+          <button
+            type="button"
+            onClick={() => setDialog("forward")}
+            aria-label={`Forward the message from ${message.authorName}`}
+            className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+          >
+            <Forward size={14} aria-hidden="true" />
+          </button>
+        ) : null}
+
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenuTrigger
             aria-label={`More actions for the message from ${message.authorName}`}
@@ -295,7 +325,16 @@ export function MessageMenu({
         </span>
       ) : null}
 
-      {dialog ? (
+      {/*
+        Its own dialog rather than another `ActionDialog` case: this one picks
+        from a list, reports an outcome per channel, and can end in a partial
+        success, none of which the confirm-or-cancel shape can carry.
+      */}
+      {dialog === "forward" ? (
+        <ForwardDialog message={message} onClose={() => setDialog(null)} onSent={onChanged} />
+      ) : null}
+
+      {dialog && dialog !== "forward" ? (
         <ActionDialog
           title={
             dialog === "delete"

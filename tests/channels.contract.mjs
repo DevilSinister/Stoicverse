@@ -443,3 +443,110 @@ test("the legacy community surface is still intact", async () => {
   const surface = await read("src/components/community/CommunitySurface.tsx");
   assert.ok(surface.length > 0);
 });
+
+// --------------------------------------------------------------- phase P5
+
+test("a forward points at the original rather than copying it", async () => {
+  // The decision the feature turns on: deleting a message deletes it
+  // everywhere it was forwarded, in the same act. A snapshot would leave the
+  // deleted words standing in every channel somebody had republished them to.
+  const migration = await read("supabase/migrations/20260912140000_community_message_forwarding.sql");
+  assert.match(migration, /add column if not exists forwarded_from_post_id uuid references public\.posts\(id\)/);
+  assert.match(migration, /left join public\.posts origin on origin\.id = post\.forwarded_from_post_id/);
+  // Read live, and the deleted case answers with nothing rather than the words.
+  assert.match(migration, /case when origin\.is_deleted then null else origin\.body end/);
+
+  // A forward of a forward names the original. Enforced by a trigger, so no
+  // writer can build a chain.
+  assert.match(migration, /create trigger posts_forward_is_flat/);
+  assert.match(migration, /new\.forwarded_from_post_id := origin;/);
+});
+
+test("forwarding asks every question an ordinary send asks", async () => {
+  const migration = await read("supabase/migrations/20260912140000_community_message_forwarding.sql");
+  // You may only republish what you may read — both halves of reading it.
+  assert.match(migration, /community_has\('view_channel', source\.channel_id\)/);
+  assert.match(migration, /community_has\('read_message_history', source\.channel_id\)/);
+  // And only into a channel you may post in.
+  assert.match(migration, /community_has\('send_messages', target\)/);
+  // AutoMod runs against the forwarded body too. The trigger on `posts` only
+  // ever sees the note, so without this forwarding would be the one way to
+  // put a blocked phrase into a channel that blocks it.
+  assert.match(migration, /automod_evaluate\(actor, target, source\.body, null\)/);
+  // The gate the whole community shares.
+  assert.match(migration, /private\.community_gate\(actor\)/);
+});
+
+test("one refused channel does not roll back the others", async () => {
+  // Partial success is the normal case — slow mode here, no permission there.
+  // Without a sub-transaction per target the first refusal would take four
+  // successful sends down with it.
+  const migration = await read("supabase/migrations/20260912140000_community_message_forwarding.sql");
+  assert.match(migration, /returns table \(channel_id uuid, post_id uuid, failure text\)/);
+  assert.match(migration, /exception when others then/);
+
+  const dialog = await readCode("src/components/channels/ForwardDialog.tsx");
+  // The dialog stays open on anything less than every one of them landing.
+  assert.match(dialog, /landed\.length === result\.outcomes\.length/);
+  // Only channels this person can post in are offered.
+  assert.match(dialog, /affordances\(channel\.id\)\.composer !== "ready"/);
+});
+
+test("a message with nothing but attachments can finally be sent", async () => {
+  // `posts_check` could not see `post_attachments`, so from phase 8 onward an
+  // attachments-only message was refused outright. A deferred constraint
+  // trigger is the only shape that can ask the question after the attachments
+  // are written.
+  const migration = await read("supabase/migrations/20260912140001_posts_content_check.sql");
+  assert.match(migration, /create constraint trigger posts_has_content/);
+  assert.match(migration, /deferrable initially deferred/);
+  assert.match(migration, /select 1 from public\.post_attachments where post_id = new\.id/);
+  assert.match(migration, /alter table public\.posts drop constraint if exists posts_check/);
+
+  const down = await read("supabase/rollback/20260912140001_posts_content_check.down.sql");
+  assert.match(down, /add constraint posts_check/);
+});
+
+test("the profile card sends the commercial half to nobody who cannot see it", async () => {
+  // `community_member_profile` is open to any member; `community_member_detail`
+  // is refused without `moderate_members`. Two calls rather than one wider
+  // one, so a member's browser never holds what somebody paid.
+  const card = await readCode("src/components/channels/MemberProfileDialog.tsx");
+  assert.match(card, /canSeeDetail \? supabase\.rpc\("community_member_detail"/);
+  assert.match(card, /supabase\.rpc\("community_member_profile", \{ target: userId \}\)/);
+  assert.match(card, /const canSeeDetail = isOwner \|\| canTimeout;/);
+
+  // Neither yourself nor the creator can be sanctioned from here. The database
+  // refuses both, so the buttons would only produce a refusal to read.
+  assert.match(card, /const moderating = !isSelf && !targetIsOwner && \(canTimeout \|\| canBan\);/);
+});
+
+test("a name and an avatar both open the same card", async () => {
+  const view = await readCode("src/components/channels/ChannelView.tsx");
+  const opens = view.match(/openProfile\(message\.authorId\)/g) ?? [];
+  assert.equal(opens.length, 2, "the avatar and the name each open the profile");
+  // A message whose author is gone has nobody to open.
+  assert.match(view, /disabled=\{message\.authorId === null\}/);
+
+  // One card for the whole page, keyed on the person, so opening a second
+  // while the first is up remounts rather than shows stale roles under a new
+  // name.
+  const shell = await readCode("src/components/channels/ChannelsShell.tsx");
+  assert.match(shell, /<MemberProfileDialog key=\{profileFor\} userId=\{profileFor\}/);
+});
+
+test("both side columns have a way in on a narrow screen", async () => {
+  // Below `md` the channel list is `hidden`, and below `xl` so is the member
+  // list. Until P5 there was no way to reach either on a phone.
+  const view = await readCode("src/components/channels/ChannelView.tsx");
+  assert.match(view, /setPane\("sidebar"\)/);
+  assert.match(view, /setPane\("members"\)/);
+  assert.match(view, /md:hidden/);
+  assert.match(view, /xl:hidden/);
+
+  const shell = await readCode("src/components/channels/ChannelsShell.tsx");
+  assert.match(shell, /pane === "sidebar"/);
+  // A pane left open across a navigation would sit over the channel somebody
+  // just chose from inside it.
+  assert.match(shell, /setPane\(null\);\s*\}, \[activeId, setPane\]\)/);
+});

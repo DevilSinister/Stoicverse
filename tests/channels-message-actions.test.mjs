@@ -22,6 +22,7 @@ const abilities = (over = {}) => ({
   canPin: false,
   canManageMessages: false,
   canCreateThread: false,
+  canForward: true,
   ...over,
 });
 
@@ -124,4 +125,28 @@ test("a permalink points at the channel and names the message", () => {
 test("the jump budget is bounded and small", () => {
   // Unbounded, a reply to something from months ago walks the whole channel.
   assert.ok(JUMP_PAGE_BUDGET >= 1 && JUMP_PAGE_BUDGET <= 10);
+});
+
+test("forwarding is offered on a message with no words in it", () => {
+  // An attachments-only message is exactly the kind worth passing on, and the
+  // channel it is going *to* is where the permission question is answered.
+  const actions = derive({ hasBody: false }, ME, {});
+  assert.equal(actions.forward, true);
+  assert.equal(actions.copyText, false);
+});
+
+test("forwarding disappears when there is nowhere to post", () => {
+  const actions = derive({}, ME, { canForward: false });
+  assert.equal(actions.forward, false);
+});
+
+test("a system message offers its link and nothing else, forwarding included", () => {
+  const actions = derive({ postType: "system" }, ME, {});
+  assert.equal(actions.forward, false);
+  assert.equal(actions.copyLink, true);
+});
+
+test("an optimistic bubble cannot be forwarded, because it has no row yet", () => {
+  const actions = derive({ pending: true }, ME, {});
+  assert.equal(actions.forward, false);
 });

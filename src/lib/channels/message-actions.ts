@@ -30,6 +30,13 @@ export type MessageAbilities = {
   canPin: boolean;
   canManageMessages: boolean;
   canCreateThread: boolean;
+  /**
+   * Whether there is anywhere to forward to — at least one channel this
+   * person may post in. Answered by the caller, which holds the channel list;
+   * offering "Forward" to somebody with no such channel opens a picker with
+   * nothing in it.
+   */
+  canForward: boolean;
 };
 
 export type MessageActions = {
@@ -42,6 +49,8 @@ export type MessageActions = {
   pin: boolean;
   startThread: boolean;
   openThread: boolean;
+  /** Republish this message into other channels. */
+  forward: boolean;
   report: boolean;
   copyText: boolean;
   copyLink: boolean;
@@ -56,6 +65,7 @@ const NOTHING: MessageActions = {
   pin: false,
   startThread: false,
   openThread: false,
+  forward: false,
   report: false,
   copyText: false,
   copyLink: false,
@@ -90,6 +100,11 @@ export function deriveMessageActions(input: {
     pin: abilities.canPin,
     startThread: abilities.canCreateThread && message.threadId === null,
     openThread: message.threadId !== null,
+    // Forwarding is not gated on this channel: the permission that matters is
+    // the one on the channel it is going *to*, and the picker only lists
+    // those. An empty message — one that is only attachments — is still worth
+    // forwarding, so this asks nothing about the body.
+    forward: abilities.canForward,
     // Reporting your own message is noise in the queue, and there is nobody to
     // report when the author's profile is gone.
     report: !own && message.authorId !== null,

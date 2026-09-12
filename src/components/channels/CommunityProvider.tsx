@@ -54,8 +54,31 @@ type CommunityValue = {
   announceTyping: (channelId: string) => void;
   /** The names of everyone typing in one channel, excluding the viewer. */
   typistsIn: (channelId: string) => string[];
+  /**
+   * Open somebody's profile card.
+   *
+   * The state is here and the dialog is rendered once by the shell, rather
+   * than one dialog per message row: a channel page holds fifty messages and
+   * a member list beside them, and every one of those names opens the same
+   * card about the same person.
+   */
+  openProfile: (userId: string) => void;
+  /** Whose card is open, or null. */
+  profileFor: string | null;
+  closeProfile: () => void;
+  /**
+   * Which pane is over the conversation on a narrow screen.
+   *
+   * Below `md` the channel list and the member list have nowhere to sit, so
+   * they become drawers. One at a time, because two overlapping drawers on a
+   * phone leaves nothing of the conversation to return to.
+   */
+  pane: MobilePane;
+  setPane: (pane: MobilePane) => void;
   degraded: string[];
 };
+
+export type MobilePane = "sidebar" | "members" | null;
 
 const CommunityContext = createContext<CommunityValue | null>(null);
 
@@ -84,6 +107,9 @@ export function CommunityProvider({
   const { onlineIds, announceTyping, typistsIn } = useCommunityLive(
     viewer ? { userId: viewer.userId, name: viewer.profile?.fullName ?? "Member" } : null,
   );
+
+  const [profileFor, setProfileFor] = useState<string | null>(null);
+  const [pane, setPane] = useState<MobilePane>(null);
 
   const value = useMemo<CommunityValue>(() => {
     const channelById = new Map(channels.map((channel) => [channel.id, channel]));
@@ -122,6 +148,11 @@ export function CommunityProvider({
       onlineIds,
       announceTyping,
       typistsIn,
+      openProfile: setProfileFor,
+      profileFor,
+      closeProfile: () => setProfileFor(null),
+      pane,
+      setPane,
       degraded,
     };
   }, [
@@ -134,6 +165,8 @@ export function CommunityProvider({
     onlineIds,
     announceTyping,
     typistsIn,
+    profileFor,
+    pane,
   ]);
 
   return <CommunityContext.Provider value={value}>{children}</CommunityContext.Provider>;

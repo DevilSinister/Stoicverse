@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useSelectedLayoutSegment } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSelectedLayoutSegment } from "next/navigation";
 import { BellOff, CalendarDays, Hash, Lock, Megaphone, ScrollText, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { setChannelNotificationLevel } from "@/app/community/actions";
 import { useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
+import { MemberProfileDialog } from "@/components/channels/MemberProfileDialog";
+import { MobilePaneDrawer } from "@/components/channels/MobilePane";
+import { QuickSwitcher } from "@/components/channels/QuickSwitcher";
 import { SearchBar } from "@/components/channels/SearchBar";
 import {
   DropdownMenu,
@@ -15,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { isTypingTarget, resolveShortcut } from "@/lib/channels/shortcuts";
 import { CHANNEL_NOTIFICATION_LEVELS } from "@/lib/community/constants";
 
 /**
@@ -111,10 +115,10 @@ function ChannelLink({ channel, active, muted }: { channel: ChannelRow; active: 
   );
 }
 
-export function ChannelsShell({ children }: { children: ReactNode }) {
+function ChannelNav({ onNavigate }: { onNavigate?: () => void }) {
   const { channels, viewer, degraded } = useCommunity();
   const settings = viewer?.notificationSettings ?? {};
-  // Read once when the shell mounts rather than on every render. `Date.now()`
+  // Read once when the nav mounts rather than on every render. `Date.now()`
   // during render is impure: an expiring mute would flip whenever React
   // happened to re-render, which is neither predictable nor tied to the clock.
   // The cost is that a timed mute expiring while the page is open keeps its
@@ -144,68 +148,156 @@ export function ChannelsShell({ children }: { children: ReactNode }) {
   }
 
   return (
+    <>
+      <div className="flex items-center justify-between gap-2 border-b border-surgical-steel px-3 py-3">
+        <span className="truncate text-sm font-semibold text-on-surface">Community</span>
+        {canManage ? (
+          <Link
+            href="/creator/settings"
+            aria-label="Community settings"
+            className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+          >
+            <Settings size={16} aria-hidden="true" />
+          </Link>
+        ) : null}
+      </div>
+
+      <div className="border-b border-surgical-steel px-2 py-2">
+        <SearchBar />
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
+        {degraded.length > 0 ? (
+          <p
+            role="status"
+            className="mb-3 rounded-lg border border-dashed border-surgical-steel p-2 text-xs text-fog-muted"
+          >
+            {degraded[0]}
+          </p>
+        ) : null}
+
+        {categories.length === 0 ? (
+          <p className="px-2 text-xs text-fog-muted">No channels yet.</p>
+        ) : (
+          categories.map((category) => (
+            <div key={category.id} className="mb-4">
+              <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-fog-muted">
+                {category.name}
+              </p>
+              <ul className="space-y-0.5">
+                {category.channels.map((channel) => (
+                  <li key={channel.id} onClick={onNavigate}>
+                    <ChannelLink channel={channel} active={channel.id === activeId} muted={isMuted(channel.id)} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="border-t border-surgical-steel px-3 py-2">
+        <p className="truncate text-xs text-on-surface-variant">{viewer?.profile?.fullName ?? "Member"}</p>
+      </div>
+    </>
+  );
+}
+
+export function ChannelsShell({ children }: { children: ReactNode }) {
+  const { channels, pane, setPane, profileFor, closeProfile } = useCommunity();
+  const router = useRouter();
+  const activeId = useSelectedLayoutSegment();
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+
+  /**
+   * The page's keyboard shortcuts.
+   *
+   * Bound on the document rather than on a wrapper, because the composer, the
+   * member list and every dialog are all inside this tree and any of them can
+   * hold focus when somebody reaches for Ctrl+K. What each key *means* is
+   * `resolveShortcut`, which is a pure function a test can execute; this only
+   * carries out the answer.
+   */
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const action = resolveShortcut({
+        key: event.key,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+        altKey: event.altKey,
+        shiftKey: event.shiftKey,
+        typing: isTypingTarget(event.target),
+      });
+      if (action === null || action === "editLastMessage") return;
+
+      if (action === "quickSwitcher") {
+        event.preventDefault();
+        setSwitcherOpen(true);
+        return;
+      }
+
+      if (action === "closeTopmost") {
+        // One layer at a time, outermost last. Escape with a pane open closes
+        // the pane, not the page.
+        if (switcherOpen) setSwitcherOpen(false);
+        else if (profileFor) closeProfile();
+        else if (pane) setPane(null);
+        return;
+      }
+
+      // Walking the list skips the locked channels, which are shown but have
+      // nothing behind them for this person.
+      const open = channels.filter((channel) => !channel.isLocked);
+      if (open.length === 0) return;
+      const index = open.findIndex((channel) => channel.id === activeId);
+      const next =
+        action === "nextChannel"
+          ? open[(index + 1 + open.length) % open.length]
+          : open[(index - 1 + open.length) % open.length];
+      if (next && next.id !== activeId) {
+        event.preventDefault();
+        router.push(`/channels/${next.id}`);
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [channels, activeId, router, switcherOpen, pane, setPane, profileFor, closeProfile]);
+
+  // A pane left open across a navigation would sit over the channel somebody
+  // just chose from inside it.
+  useEffect(() => {
+    setPane(null);
+  }, [activeId, setPane]);
+
+  return (
     <div className="grid h-svh grid-cols-1 bg-monolith-surface md:grid-cols-[15rem_1fr]">
       <nav
         aria-label="Channels"
         className="hidden min-h-0 flex-col border-r border-surgical-steel bg-surface-container-lowest md:flex"
       >
-        <div className="flex items-center justify-between gap-2 border-b border-surgical-steel px-3 py-3">
-          <span className="truncate text-sm font-semibold text-on-surface">Community</span>
-          {canManage ? (
-            <Link
-              href="/creator/settings"
-              aria-label="Community settings"
-              className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
-            >
-              <Settings size={16} aria-hidden="true" />
-            </Link>
-          ) : null}
-        </div>
-
-        <div className="border-b border-surgical-steel px-2 py-2">
-          <SearchBar />
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
-          {degraded.length > 0 ? (
-            <p
-              role="status"
-              className="mb-3 rounded-lg border border-dashed border-surgical-steel p-2 text-xs text-fog-muted"
-            >
-              {degraded[0]}
-            </p>
-          ) : null}
-
-          {categories.length === 0 ? (
-            <p className="px-2 text-xs text-fog-muted">No channels yet.</p>
-          ) : (
-            categories.map((category) => (
-              <div key={category.id} className="mb-4">
-                <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-fog-muted">
-                  {category.name}
-                </p>
-                <ul className="space-y-0.5">
-                  {category.channels.map((channel) => (
-                    <li key={channel.id}>
-                      <ChannelLink
-                        channel={channel}
-                        active={channel.id === activeId}
-                        muted={isMuted(channel.id)}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="border-t border-surgical-steel px-3 py-2">
-          <p className="truncate text-xs text-on-surface-variant">{viewer?.profile?.fullName ?? "Member"}</p>
-        </div>
+        <ChannelNav />
       </nav>
 
       <div className="flex min-h-0 min-w-0 flex-col">{children}</div>
+
+      {/* The same list as a pane, for the screens with no column to put it in. */}
+      {pane === "sidebar" ? (
+        <MobilePaneDrawer side="left" label="Channels" onClose={() => setPane(null)}>
+          <div className="flex min-h-0 flex-1 flex-col">
+            <ChannelNav onNavigate={() => setPane(null)} />
+          </div>
+        </MobilePaneDrawer>
+      ) : null}
+
+      {/*
+        One card for the whole page. Every name and every avatar in every
+        message opens this same one, so there is never more than one mounted
+        and never a stale copy behind the open one.
+      */}
+      {profileFor ? <MemberProfileDialog key={profileFor} userId={profileFor} onClose={closeProfile} /> : null}
+
+      {switcherOpen ? <QuickSwitcher onClose={() => setSwitcherOpen(false)} /> : null}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { refresh } from "next/cache";
 
 import {
   CHANNEL_NOTIFICATION_LEVELS,
+  FORWARD_CHANNEL_LIMIT,
   isValidReactionToken,
   MESSAGE_MAX_CHARS,
   THREAD_NAME_LIMITS,
@@ -189,6 +190,54 @@ export async function sendChannelMessage(input: {
 
   revalidateCommunity();
   return { success: true, postId: row?.post_id ?? undefined };
+}
+
+/** One channel's outcome. `postId` is set when it landed, `failure` when it did not. */
+export type ForwardOutcome = { channelId: string; postId: string | null; failure: string | null };
+
+/**
+ * Forward one message into several channels at once.
+ *
+ * Partial success is the normal case rather than the exception — slow mode in
+ * one channel, no `send_messages` in another — so this returns a row per
+ * channel instead of a single error. The RPC runs each target in its own
+ * sub-transaction for the same reason: one refusal must not take the others
+ * down with it.
+ */
+export async function forwardMessage(
+  sourcePostId: string,
+  channelIds: string[],
+  note?: string,
+): Promise<Result & { outcomes?: ForwardOutcome[] }> {
+  if (!uuid(sourcePostId)) return { error: "Invalid message." };
+  const targets = [...new Set(channelIds)];
+  if (targets.length === 0) return { error: "Choose at least one channel." };
+  if (targets.length > FORWARD_CHANNEL_LIMIT) {
+    return { error: `A message can be forwarded to at most ${FORWARD_CHANNEL_LIMIT} channels at once.` };
+  }
+  if (targets.some((id) => !uuid(id))) return { error: "Invalid channel." };
+  if ((note ?? "").length > MESSAGE_MAX_CHARS) {
+    return { error: `Messages are limited to ${MESSAGE_MAX_CHARS.toLocaleString("en-US")} characters.` };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("community_forward_message", {
+    source_post: sourcePostId,
+    targets,
+    note: note?.trim() ? note.trim() : null,
+  });
+  if (error) return { error: postgresMessage(error, "That message could not be forwarded.") };
+
+  const rows = (data as { channel_id: string; post_id: string | null; failure: string | null }[] | null) ?? [];
+  revalidateCommunity();
+  return {
+    success: true,
+    outcomes: rows.map((row) => ({
+      channelId: row.channel_id,
+      postId: row.post_id,
+      failure: row.failure,
+    })),
+  };
 }
 
 export async function createThread(postId: string, name: string): Promise<Result & { threadId?: string }> {

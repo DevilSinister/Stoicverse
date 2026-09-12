@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, MoreVertical } from "lucide-react";
 
 import { giftMembership, restrictMember, unrestrictMember } from "@/app/community/member-actions";
 import { banMember, timeoutMember, untimeoutMember } from "@/app/community/moderation-actions";
@@ -30,7 +30,6 @@ import {
 import { groupMembers } from "@/lib/channels/presence";
 import { SANCTION_LIMITS } from "@/lib/community-settings/model";
 import type { DirectoryMember } from "@/lib/community/messages";
-import { createClient } from "@/lib/supabase/client";
 
 /**
  * Who is in the community, and what can be done about them.
@@ -49,18 +48,6 @@ type Pending =
   | { kind: "restrict"; member: DirectoryMember; scope: "channel" | "category"; scopeId: string; scopeLabel: string }
   | null;
 
-type Detail = {
-  full_name: string;
-  joined_at: string | null;
-  platform_role: string | null;
-  membership_status: string | null;
-  membership_expires_at: string | null;
-  membership_source: string | null;
-  amount_paid: number | null;
-  message_count: number | null;
-  roles: { id: string; name: string; color: string | null }[] | null;
-};
-
 const DROPDOWN_PARTS = {
   Item: DropdownMenuItem,
   Sub: DropdownMenuSub,
@@ -77,8 +64,21 @@ const CONTEXT_PARTS = {
   Separator: ContextMenuSeparator,
 };
 
-export function MemberList({ channelId, onMention }: { channelId: string; onMention: (name: string) => void }) {
-  const { members, viewer, onlineIds, affordances, channels } = useCommunity();
+export function MemberList({
+  channelId,
+  onMention,
+  variant = "column",
+}: {
+  channelId: string;
+  onMention: (name: string) => void;
+  /**
+   * `column` is the permanent right-hand column, which only exists from `xl`
+   * up. `drawer` is the same list inside the mobile pane, where it is already
+   * inside a labelled dialog with its own heading and scroller.
+   */
+  variant?: "column" | "drawer";
+}) {
+  const { members, viewer, onlineIds, affordances, channels, openProfile } = useCommunity();
   const permissions = affordances(channelId);
   const channel = channels.find((entry) => entry.id === channelId);
 
@@ -94,9 +94,6 @@ export function MemberList({ channelId, onMention }: { channelId: string; onMent
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [detailFor, setDetailFor] = useState<DirectoryMember | null>(null);
-  const [detail, setDetail] = useState<Detail | null>(null);
-
   const sections = useMemo(() => groupMembers(members, onlineIds), [members, onlineIds]);
 
   // Plain functions, deliberately. None of these is passed to a memoised
@@ -105,14 +102,6 @@ export function MemberList({ channelId, onMention }: { channelId: string; onMent
   const say = (message: string) => {
     setNotice(message);
     window.setTimeout(() => setNotice((current) => (current === message ? null : current)), 4000);
-  };
-
-  const openDetail = async (member: DirectoryMember) => {
-    setDetailFor(member);
-    setDetail(null);
-    const supabase = createClient();
-    const { data } = await supabase.rpc("community_member_detail", { target: member.id });
-    setDetail((data as Detail[] | null)?.[0] ?? null);
   };
 
   const gift = async (member: DirectoryMember, days: number) => {
@@ -124,8 +113,6 @@ export function MemberList({ channelId, onMention }: { channelId: string; onMent
     }
     const until = result.expiresAt ? new Date(result.expiresAt).toLocaleDateString() : null;
     say(until ? `${member.fullName} now has access until ${until}.` : `${member.fullName} was gifted access.`);
-    // The panel is showing what just changed, so it re-reads rather than lying.
-    if (detailFor?.id === member.id) void openDetail(member);
   };
 
   const run = async () => {
@@ -166,7 +153,7 @@ export function MemberList({ channelId, onMention }: { channelId: string; onMent
     channelName: channel?.name ?? "this channel",
     categoryName: channel?.categoryName ?? "this category",
     onMention: () => onMention(member.fullName),
-    onDetail: () => void openDetail(member),
+    onDetail: () => openProfile(member.id),
     onGift: (days) => void gift(member, days),
     onTimeout: (seconds) => {
       setReason("");
@@ -206,8 +193,12 @@ export function MemberList({ channelId, onMention }: { channelId: string; onMent
 
   return (
     <aside
-      aria-label="Members"
-      className="hidden min-h-0 w-56 shrink-0 flex-col border-l border-surgical-steel bg-surface-container-lowest xl:flex"
+      aria-label={variant === "drawer" ? undefined : "Members"}
+      className={
+        variant === "drawer"
+          ? "flex min-h-0 flex-col"
+          : "hidden min-h-0 w-56 shrink-0 flex-col border-l border-surgical-steel bg-surface-container-lowest xl:flex"
+      }
     >
       {notice ? (
         <p role="status" className="border-b border-surgical-steel px-3 py-2 text-[11px] text-on-surface-variant">
@@ -255,26 +246,45 @@ export function MemberList({ channelId, onMention }: { channelId: string; onMent
                     <span className="sr-only">{online ? "online" : "offline"}</span>
                   </>
                 );
-                const rowClass = `focus-ring flex w-full items-center gap-2 rounded-lg px-2 py-1 text-left text-sm hover:bg-surface-container-low ${
+                const rowClass = `focus-ring flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1 text-left text-sm hover:bg-surface-container-low ${
                   online ? "text-on-surface" : "text-fog-muted opacity-60"
                 }`;
 
                 return (
                   <li key={member.id}>
                     {/*
-                      Right-click and left-click open the same list. The context
-                      menu wraps the row; the dropdown is the row. Two triggers,
-                      one set of actions.
+                      Left-click opens the person, right-click opens what can
+                      be done to them — the split Discord uses, and the one
+                      somebody clicking a name is expecting. The actions are
+                      also on the "..." button, because a right-click is not
+                      available on a touchscreen and `Mention` would otherwise
+                      be unreachable there.
                     */}
                     <ContextMenu>
                       <ContextMenuTrigger className="block">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className={rowClass}>{row}</DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56">
-                            <MemberHeader member={member} />
-                            {memberMenuItems(DROPDOWN_PARTS, context)}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="group/member relative flex items-center">
+                          <button type="button" className={rowClass} onClick={() => openProfile(member.id)}>
+                            {row}
+                          </button>
+
+                          <DropdownMenu>
+                            {/*
+                              `opacity-0`, never `display: none`: the menu
+                              portals to the body, and a trigger with no
+                              layout box puts it in the top-left corner.
+                            */}
+                            <DropdownMenuTrigger
+                              aria-label={`Actions for ${member.fullName}`}
+                              className="focus-ring absolute right-1 rounded p-1 text-fog-muted opacity-0 group-focus-within/member:opacity-100 group-hover/member:opacity-100 data-[popup-open]:opacity-100 hover:text-on-surface"
+                            >
+                              <MoreVertical size={13} aria-hidden="true" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56">
+                              <MemberHeader member={member} />
+                              {memberMenuItems(DROPDOWN_PARTS, context)}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </ContextMenuTrigger>
                       <ContextMenuContent className="w-56">
                         <MemberHeader member={member} />
@@ -288,19 +298,6 @@ export function MemberList({ channelId, onMention }: { channelId: string; onMent
           </div>
         ))}
       </div>
-
-      {detailFor ? (
-        <MemberDetailDialog
-          member={detailFor}
-          detail={detail}
-          canGift={isOwner}
-          onGift={(days) => void gift(detailFor, days)}
-          onClose={() => {
-            setDetailFor(null);
-            setDetail(null);
-          }}
-        />
-      ) : null}
 
       {pending ? (
         <ReasonDialog
@@ -363,120 +360,6 @@ function MemberHeader({ member }: { member: DirectoryMember }) {
       ) : (
         <p className="mt-0.5 text-[11px] text-fog-muted">No roles</p>
       )}
-    </div>
-  );
-}
-
-function MemberDetailDialog({
-  member,
-  detail,
-  canGift,
-  onGift,
-  onClose,
-}: {
-  member: DirectoryMember;
-  detail: Detail | null;
-  canGift: boolean;
-  onGift: (days: number) => void;
-  onClose: () => void;
-}) {
-  const date = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString() : "—");
-  const expiry = detail?.membership_expires_at ?? null;
-  // Read once when the panel opens. `Date.now()` during render is impure, and
-  // a membership does not lapse in the seconds somebody spends reading it.
-  const [openedAt] = useState(() => Date.now());
-  const lapsed = expiry !== null && Date.parse(expiry) < openedAt;
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Details for ${member.fullName}`}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-      onKeyDown={(event) => {
-        if (event.key === "Escape") onClose();
-      }}
-    >
-      <div className="w-full max-w-sm rounded-xl border border-surgical-steel bg-surface-container-low p-4">
-        <h2 className="text-sm font-semibold text-on-surface">{member.fullName}</h2>
-
-        {detail === null ? (
-          <p className="mt-3 text-xs text-fog-muted">Loading…</p>
-        ) : (
-          <dl className="mt-3 space-y-1.5 text-xs">
-            <Row label="Member since" value={date(detail.joined_at)} />
-            <Row label="Account" value={detail.platform_role ?? "member"} />
-            <Row
-              label="Membership"
-              value={
-                detail.membership_status
-                  ? `${detail.membership_status}${lapsed ? " (lapsed)" : ""}`
-                  : "none"
-              }
-            />
-            <Row label="Access until" value={date(expiry)} />
-            <Row
-              label="Paid via"
-              value={
-                detail.membership_source === "gifted"
-                  ? "gifted"
-                  : detail.membership_source === "stripe"
-                    ? `Stripe${detail.amount_paid ? ` — ${detail.amount_paid}` : ""}`
-                    : "—"
-              }
-            />
-            <Row label="Messages" value={String(detail.message_count ?? 0)} />
-          </dl>
-        )}
-
-        {canGift ? (
-          <div className="mt-4 border-t border-surgical-steel pt-3">
-            <p className="text-[11px] text-fog-muted">
-              {/*
-                Says "extends", because that is what it does: a gift starts from
-                whatever they already have, not from today.
-              */}
-              Gift access — extends whatever they already have.
-            </p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {[
-                { days: 7, label: "1 week" },
-                { days: 30, label: "1 month" },
-                { days: 90, label: "3 months" },
-                { days: 365, label: "1 year" },
-              ].map((option) => (
-                <button
-                  key={option.days}
-                  type="button"
-                  onClick={() => onGift(option.days)}
-                  className="focus-ring rounded-lg border border-surgical-steel px-2 py-1 text-[11px] text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface"
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="mt-4 flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="focus-ring rounded-lg border border-surgical-steel px-3 py-1.5 text-xs text-on-surface-variant"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3">
-      <dt className="shrink-0 text-fog-muted">{label}</dt>
-      <dd className="truncate text-on-surface-variant">{value}</dd>
     </div>
   );
 }

@@ -1,8 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { CornerUpLeft, FileText, Hash, Loader2, MessagesSquare, Pin, WifiOff } from "lucide-react";
+import {
+  CornerUpLeft,
+  FileText,
+  Forward,
+  Hash,
+  Loader2,
+  Menu,
+  MessagesSquare,
+  Pin,
+  Users,
+  WifiOff,
+} from "lucide-react";
 
 import { editMessage, markChannelRead, toggleReaction } from "@/app/community/actions";
 import { PinsPopover, ThreadListPopover } from "@/components/channels/ChannelHeaderPopovers";
@@ -10,6 +22,7 @@ import { Composer } from "@/components/channels/Composer";
 import { mergeMessage, useChannelLive, useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
 import { MemberList } from "@/components/channels/MemberList";
 import { MessageMenu } from "@/components/channels/MessageMenu";
+import { MobilePaneDrawer } from "@/components/channels/MobilePane";
 import { ThreadPanel } from "@/components/channels/ThreadPanel";
 import { continuesGroup, firstUnreadIndex, startsNewDay } from "@/lib/channels/grouping";
 import { JUMP_PAGE_BUDGET } from "@/lib/channels/message-actions";
@@ -18,7 +31,7 @@ import { typingSentence } from "@/lib/channels/presence";
 import { toClientMessage } from "@/lib/channels/rows";
 import { MESSAGE_PAGE_SIZE } from "@/lib/community/constants";
 import type { ChannelMessage } from "@/lib/community/messages";
-import { MarkdownBody } from "@/lib/markdown/render";
+import { MarkdownBody, type MentionResolvers } from "@/lib/markdown/render";
 import { isJumboEmoji } from "@/lib/markdown/tokenize";
 import { createClient } from "@/lib/supabase/client";
 
@@ -186,6 +199,62 @@ function InlineEditor({
   );
 }
 
+/**
+ * A forwarded message, as it stands right now.
+ *
+ * The content is read live through `forwarded_from_post_id` rather than
+ * copied, so this is the original — not a snapshot of what it said when it
+ * was forwarded. When the original is deleted the card says so and shows
+ * nothing, which is the whole reason the link is followed rather than copied.
+ *
+ * The jump into the source channel appears only when the viewer can open it.
+ * Somebody can be shown a message forwarded out of a channel they have no
+ * access to — that is what forwarding is — but they are not handed a link into
+ * it.
+ */
+function ForwardedCard({
+  forwarded,
+  resolvers,
+}: {
+  forwarded: NonNullable<ChannelMessage["forwarded"]>;
+  resolvers: MentionResolvers;
+}) {
+  return (
+    <div className="mt-1 border-l-2 border-surgical-steel pl-3">
+      <p className="flex items-center gap-1 text-[11px] text-fog-muted">
+        <Forward size={11} aria-hidden="true" className="shrink-0" />
+        <span>
+          {`Forwarded from ${forwarded.authorName}`}
+          {forwarded.channelName ? ` in #${forwarded.channelName}` : ""}
+        </span>
+      </p>
+
+      {forwarded.deleted ? (
+        <p className="mt-0.5 text-sm italic text-fog-muted">This message was deleted.</p>
+      ) : (
+        <>
+          <div className="mt-0.5 text-sm leading-6 text-on-surface-variant">
+            <MarkdownBody body={forwarded.body} resolvers={resolvers} />
+          </div>
+          {forwarded.attachmentCount > 0 ? (
+            <p className="text-[11px] text-fog-muted">
+              {`${forwarded.attachmentCount} ${forwarded.attachmentCount === 1 ? "attachment" : "attachments"} — open the original to see ${forwarded.attachmentCount === 1 ? "it" : "them"}`}
+            </p>
+          ) : null}
+          {forwarded.channelVisible && forwarded.channelId ? (
+            <Link
+              href={`/channels/${forwarded.channelId}?jump=${forwarded.postId}`}
+              className="focus-ring rounded text-[11px] text-primary-container hover:underline"
+            >
+              Go to the original
+            </Link>
+          ) : null}
+        </>
+      )}
+    </div>
+  );
+}
+
 function MessageRow({
   message,
   grouped,
@@ -201,6 +270,7 @@ function MessageRow({
   onOpenThread,
   onJump,
   onChanged,
+  canForward,
 }: {
   message: ChannelMessage;
   grouped: boolean;
@@ -216,8 +286,10 @@ function MessageRow({
   onOpenThread: (threadId: string, name?: string | null) => void;
   onJump: (messageId: string) => void;
   onChanged: () => void;
+  /** Whether this person can post anywhere at all — see `ChannelView`. */
+  canForward: boolean;
 }) {
-  const { resolvers, viewer, affordances } = useCommunity();
+  const { resolvers, viewer, affordances, openProfile } = useCommunity();
   const permissions = affordances(channelId);
   const jumbo = isJumboEmoji(message.body ?? "");
 
@@ -245,25 +317,41 @@ function MessageRow({
 
       <div className="flex gap-3">
         <div className="w-9 shrink-0">
-          {grouped ? null : message.authorAvatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={message.authorAvatar} alt="" className="size-9 rounded-full object-cover" />
-          ) : (
-            <div className="flex size-9 items-center justify-center rounded-full bg-surface-container-high text-sm font-semibold text-on-surface-variant">
-              {message.authorName.slice(0, 1).toUpperCase()}
-            </div>
+          {grouped ? null : (
+            // The picture and the name both open the same card. Two hit
+            // targets for one person, which is where somebody clicks when
+            // they want to know who just said something.
+            <button
+              type="button"
+              onClick={() => message.authorId && openProfile(message.authorId)}
+              disabled={message.authorId === null}
+              aria-label={`Open the profile for ${message.authorName}`}
+              className="focus-ring rounded-full disabled:cursor-default"
+            >
+              {message.authorAvatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={message.authorAvatar} alt="" className="size-9 rounded-full object-cover" />
+              ) : (
+                <span className="flex size-9 items-center justify-center rounded-full bg-surface-container-high text-sm font-semibold text-on-surface-variant">
+                  {message.authorName.slice(0, 1).toUpperCase()}
+                </span>
+              )}
+            </button>
           )}
         </div>
 
         <div className="min-w-0 flex-1">
           {grouped ? null : (
             <p className="flex items-baseline gap-2">
-              <span
-                className="text-sm font-semibold text-on-surface"
+              <button
+                type="button"
+                onClick={() => message.authorId && openProfile(message.authorId)}
+                disabled={message.authorId === null}
+                className="focus-ring rounded text-sm font-semibold text-on-surface hover:underline disabled:cursor-default disabled:no-underline"
                 style={message.authorColor ? { color: message.authorColor } : undefined}
               >
                 {message.authorName}
-              </span>
+              </button>
               <time dateTime={message.createdAt} className="text-[11px] text-fog-muted">
                 {timeOf(message.createdAt)}
               </time>
@@ -288,6 +376,10 @@ function MessageRow({
               {message.editedAt ? <span className="ml-1 text-[10px] text-fog-muted">(edited)</span> : null}
             </div>
           )}
+
+          {message.forwarded ? (
+            <ForwardedCard forwarded={message.forwarded} resolvers={resolvers} />
+          ) : null}
 
           <Attachments attachments={message.attachments} urls={urls} />
           <Reactions message={message} canReact={permissions.canReact} onChanged={onChanged} />
@@ -338,6 +430,7 @@ function MessageRow({
             canPin: permissions.canPin,
             canManageMessages: permissions.canManageMessages,
             canCreateThread: permissions.canCreateThread,
+            canForward,
           }}
           onReply={() => onReply(message)}
           onEdit={() => onStartEdit(message.id)}
@@ -362,7 +455,21 @@ export function ChannelView({
   initialCursor: { createdAt: string; id: string } | null;
   initialUrls: Record<string, string>;
 }) {
-  const { affordances, viewer, setActiveChannel, refreshUnread, typistsIn } = useCommunity();
+  const { affordances, viewer, setActiveChannel, refreshUnread, typistsIn, channels, pane, setPane } = useCommunity();
+
+  /**
+   * Is there anywhere at all to forward to?
+   *
+   * Computed once for the whole channel rather than per message row: the
+   * answer is the same for all fifty of them, and it walks the channel list.
+   * The picker asks the same question again when it builds its list, and the
+   * database asks it a third time per target — this only decides whether the
+   * menu item is worth drawing.
+   */
+  const canForward = useMemo(
+    () => channels.some((entry) => !entry.isLocked && affordances(entry.id).composer === "ready"),
+    [channels, affordances],
+  );
   const permissions = affordances(channel.id);
   const router = useRouter();
   const pathname = usePathname();
@@ -582,6 +689,19 @@ export function ChannelView({
     <div className="flex min-h-0 flex-1">
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex items-center gap-2 border-b border-surgical-steel px-4 py-3">
+          {/*
+            The way back to the channel list on a phone. Above `md` the list
+            is always on screen, so the button would be a second door to a
+            room the reader is already standing in.
+          */}
+          <button
+            type="button"
+            onClick={() => setPane("sidebar")}
+            aria-label="Show channels"
+            className="focus-ring -ml-1 rounded-lg p-1 text-fog-muted hover:text-on-surface md:hidden"
+          >
+            <Menu size={18} aria-hidden="true" />
+          </button>
           <Hash size={16} aria-hidden="true" className="shrink-0 text-fog-muted" />
           <h1 className="truncate text-sm font-semibold text-on-surface">{channel.name}</h1>
           {channel.description ? (
@@ -603,6 +723,18 @@ export function ChannelView({
               onJump={(id) => void jumpTo(id)}
               onChanged={() => void refresh()}
             />
+            {/*
+              Hidden from `xl` up, where the member list has its own column.
+              Below that it is a drawer, and this is the only way to it.
+            */}
+            <button
+              type="button"
+              onClick={() => setPane("members")}
+              aria-label="Show members"
+              className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface xl:hidden"
+            >
+              <Users size={16} aria-hidden="true" />
+            </button>
           </div>
         </header>
 
@@ -675,6 +807,7 @@ export function ChannelView({
                 onOpenThread={openThread}
                 onJump={(id) => void jumpTo(id)}
                 onChanged={() => void refresh()}
+                canForward={canForward}
               />
             </div>
           ))}
@@ -695,6 +828,20 @@ export function ChannelView({
             replyTo={replyTo}
             mentionSeed={mentionSeed}
             onClearReply={() => setReplyTo(null)}
+            onEditLast={() => {
+              // The last thing this person said in this channel that still has
+              // words in it. A forward or an attachment-only message has
+              // nothing to edit, and an optimistic bubble has no row yet.
+              const mine = [...messages]
+                .reverse()
+                .find(
+                  (candidate) =>
+                    candidate.authorId === viewer?.userId &&
+                    !candidate.id.startsWith("optimistic-") &&
+                    (candidate.body ?? "").trim() !== "",
+                );
+              if (mine) setEditingId(mine.id);
+            }}
             onOptimistic={(optimistic) => {
               setMessages((current) => mergeMessage(current, optimistic));
               atBottomRef.current = true;
@@ -710,6 +857,24 @@ export function ChannelView({
       </div>
 
       <MemberList channelId={channel.id} onMention={(name) => setMentionSeed({ name, at: Date.now() })} />
+
+      {/*
+        The same list, in a pane, for the screens too narrow to carry the
+        column. Mounted only while open — a second copy of a list that is
+        permanently hidden is a second set of subscriptions for nobody.
+      */}
+      {pane === "members" ? (
+        <MobilePaneDrawer side="right" label="Members" onClose={() => setPane(null)}>
+          <MemberList
+            channelId={channel.id}
+            variant="drawer"
+            onMention={(name) => {
+              setMentionSeed({ name, at: Date.now() });
+              setPane(null);
+            }}
+          />
+        </MobilePaneDrawer>
+      ) : null}
 
       {openThreadId ? (
         <ThreadPanel

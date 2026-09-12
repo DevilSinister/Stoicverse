@@ -1,3 +1,4 @@
+import { toForwardedOrigin } from "@/lib/channels/forwarded";
 import type { ChannelMessage } from "@/lib/community/messages";
 
 /**
@@ -33,5 +34,6 @@ export function toClientMessage(row: Record<string, unknown>): ChannelMessage {
     threadMessageCount: (row.thread_message_count as number | null) ?? null,
     attachments: (row.attachments as ChannelMessage["attachments"] | null) ?? [],
     reactions: (row.reactions as ChannelMessage["reactions"] | null) ?? [],
+    forwarded: toForwardedOrigin(row),
   };
 }

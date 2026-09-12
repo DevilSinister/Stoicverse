@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { toForwardedOrigin, type ForwardedOrigin } from "@/lib/channels/forwarded";
 import { MESSAGE_PAGE_SIZE, SEARCH_QUERY_LIMITS } from "@/lib/community/constants";
 
 /**
@@ -52,6 +53,8 @@ export type ChannelMessage = {
   threadMessageCount: number | null;
   attachments: MessageAttachment[];
   reactions: MessageReaction[];
+  /** Set on a forward. The original is read live, so it can have gone. */
+  forwarded: ForwardedOrigin | null;
 };
 
 export type MessagePage = {
@@ -89,6 +92,7 @@ function toMessage(row: Record<string, unknown>): ChannelMessage {
       height: entry.height ?? null,
     })),
     reactions: (row.reactions as MessageReaction[] | null) ?? [],
+    forwarded: toForwardedOrigin(row),
   };
 }
 

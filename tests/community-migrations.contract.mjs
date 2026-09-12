@@ -33,12 +33,16 @@ test("every rebuild migration ships a rollback and never names a tenant", async 
 
 test("every function pins search_path and every definer is revoked from PUBLIC", async () => {
   for (const { name, sql } of await rebuildMigrations()) {
-    const created = sql.match(/create or replace function\s+([a-z_.]+)\s*\(/gi) ?? [];
+    // `create function`, not only `create or replace`. Changing a function's
+    // return type needs a drop and a plain create, and an assertion that only
+    // knew the `or replace` spelling would have waved through an unpinned
+    // definer every time a function's shape changed.
+    const created = sql.match(/create (?:or replace )?function\s+([a-z_.]+)\s*\(/gi) ?? [];
     const pinned = sql.match(/set search_path (to|=) /gi) ?? [];
     assert.equal(pinned.length, created.length, `${name}: ${created.length} functions, ${pinned.length} search_path pins`);
 
     const definers = [
-      ...sql.matchAll(/create or replace function\s+([a-z_.]+)\s*\(([^)]*)\)[\s\S]*?security definer/gi),
+      ...sql.matchAll(/create (?:or replace )?function\s+([a-z_.]+)\s*\(([^)]*)\)[\s\S]*?security definer/gi),
     ];
     for (const [, fn] of definers) {
       assert.match(
