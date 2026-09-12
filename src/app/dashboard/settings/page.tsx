@@ -2,12 +2,27 @@ import { headers } from "next/headers";
 
 import { AccountSettingsWorkspace, type SettingsSection } from "@/components/settings/AccountSettingsWorkspace";
 import { safeNextPath } from "@/lib/security/safe-path";
-import { requireActiveMembership } from "@/lib/supabase/access";
+import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
 
 const validSections = new Set<SettingsSection>(["account", "notifications", "sessions", "deletion"]);
 
-export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ section?: string; returnTo?: string }> }) {
-  const { supabase, user } = await requireActiveMembership("/dashboard/settings");
+type AccountSettingsOptions = {
+  searchParams: Promise<{ section?: string; returnTo?: string }>;
+  /**
+   * The influencer workspace. `requireActiveMembership` redirects an
+   * influencer to /creator and `proxy.ts` bounces them off /dashboard/*, so a
+   * creator could never open this page — which left them with no route to
+   * their own account and, because sign-out lives here, no way to log out at
+   * all. `/creator/account` is the same page behind the other guard.
+   */
+  creatorWorkspace?: boolean;
+};
+
+export async function renderAccountSettings({ searchParams, creatorWorkspace = false }: AccountSettingsOptions) {
+  const base = creatorWorkspace ? "/creator" : "/dashboard";
+  const { supabase, user } = creatorWorkspace
+    ? await requireInfluencerWorkspace("/creator/account")
+    : await requireActiveMembership("/dashboard/settings");
   const [params, headerList, profileResult, membershipResult, preferenceResult, assignmentResult] = await Promise.all([
     searchParams,
     headers(),
@@ -31,13 +46,15 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
   const requestedSection = params.section as SettingsSection | undefined;
   const initialSection = requestedSection && validSections.has(requestedSection) ? requestedSection : "account";
-  const candidateReturn = safeNextPath(params.returnTo, "/dashboard");
-  const returnTo = candidateReturn.startsWith("/dashboard/settings") ? "/dashboard" : candidateReturn;
+  const candidateReturn = safeNextPath(params.returnTo, base);
+  // Returning to the page you are on is not a way back.
+  const settingsPath = creatorWorkspace ? "/creator/account" : "/dashboard/settings";
+  const returnTo = candidateReturn.startsWith(settingsPath) ? base : candidateReturn;
   const userAgent = headerList.get("user-agent") || "Current browser";
   const currentDevice = /mobile|android|iphone|ipad/i.test(userAgent) ? "Mobile browser" : /windows/i.test(userAgent) ? "Windows browser" : /macintosh|mac os/i.test(userAgent) ? "Mac browser" : /linux/i.test(userAgent) ? "Linux browser" : "Current browser";
   const preferences = preferenceResult.data;
 
-  return <AccountSettingsWorkspace initialSection={initialSection} returnTo={returnTo} data={{
+  return <AccountSettingsWorkspace initialSection={initialSection} returnTo={returnTo} basePath={settingsPath} homePath={base} data={{
     fullName: profile?.full_name?.trim() || "Practitioner",
     email: user.email || "No email available",
     avatarUrl,
@@ -54,4 +71,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
     currentDevice,
     canDelete: profile?.platform_role === "member",
   }}/>;
+}
+
+export default async function SettingsPage({ searchParams }: { searchParams: AccountSettingsOptions["searchParams"] }) {
+  return renderAccountSettings({ searchParams });
 }

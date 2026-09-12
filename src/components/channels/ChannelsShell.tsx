@@ -10,6 +10,7 @@ import { setChannelNotificationLevel } from "@/app/community/actions";
 import { useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
 import { MemberProfileDialog } from "@/components/channels/MemberProfileDialog";
 import { MobilePaneDrawer } from "@/components/channels/MobilePane";
+import { AppRail } from "@/components/layout/AppRail";
 import { QuickSwitcher } from "@/components/channels/QuickSwitcher";
 import {
   DropdownMenu,
@@ -198,8 +199,8 @@ function ChannelNav({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export function ChannelsShell({ children }: { children: ReactNode }) {
-  const { channels, pane, setPane, profileFor, closeProfile } = useCommunity();
+export function ChannelsShell({ children, isMaster = false }: { children: ReactNode; isMaster?: boolean }) {
+  const { channels, viewer, pane, setPane, profileFor, closeProfile } = useCommunity();
   const router = useRouter();
   const activeId = useSelectedLayoutSegment();
   const [switcherOpen, setSwitcherOpen] = useState(false);
@@ -265,8 +266,29 @@ export function ChannelsShell({ children }: { children: ReactNode }) {
     setPane(null);
   }, [activeId, setPane]);
 
+  /*
+    The same rail the workspace renders. Mounting it here is the whole point of
+    the component: crossing between /channels and /creator used to swap the
+    entire frame and take the navigation with it.
+
+    `routeBase` comes from the viewer rather than the URL, because /channels is
+    one route for everybody — the resolver decides what each person may do once
+    they are here — while the rail's other destinations are per-role.
+  */
+  const rail = (
+    <AppRail
+      routeBase={viewer?.isInfluencer ? "/creator" : "/dashboard"}
+      isMaster={isMaster}
+      memberName={viewer?.profile?.fullName ?? "Member"}
+      avatarUrl={viewer?.profile?.avatarUrl ?? null}
+      onNavigate={() => setPane(null)}
+    />
+  );
+
   return (
-    <div className="grid h-svh grid-cols-1 bg-monolith-surface md:grid-cols-[15rem_1fr]">
+    <div className="grid h-svh grid-cols-1 bg-monolith-surface md:grid-cols-[4.5rem_15rem_1fr]">
+      <div className="hidden min-h-0 md:block">{rail}</div>
+
       <nav
         aria-label="Channels"
         className="hidden min-h-0 flex-col border-r border-surgical-steel bg-surface-container-lowest md:flex"
@@ -279,8 +301,16 @@ export function ChannelsShell({ children }: { children: ReactNode }) {
       {/* The same list as a pane, for the screens with no column to put it in. */}
       {pane === "sidebar" ? (
         <MobilePaneDrawer side="left" label="Channels" onClose={() => setPane(null)}>
-          <div className="flex min-h-0 flex-1 flex-col">
-            <ChannelNav onNavigate={() => setPane(null)} />
+          {/*
+            Both columns from one gesture. A permanent 4.5rem rail is too much
+            of a phone, and a second drawer to reach the rest of the product
+            would be a gesture nobody discovers.
+          */}
+          <div className="flex min-h-0 flex-1">
+            {rail}
+            <div className="flex min-h-0 flex-1 flex-col">
+              <ChannelNav onNavigate={() => setPane(null)} />
+            </div>
           </div>
         </MobilePaneDrawer>
       ) : null}

@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { AlertCircle, Bell, ChevronRight, LoaderCircle, Menu, RefreshCw, Search, Settings, X } from "lucide-react";
+import { AlertCircle, Bell, ChevronRight, LoaderCircle, Menu, RefreshCw, Search, X } from "lucide-react";
 
-import { buildAppNav } from "@/lib/navigation/app-nav";
+import { AppRail } from "@/components/layout/AppRail";
 import { withRouteBase } from "@/lib/navigation/paths";
 import { safeNotificationHref, type NotificationItem } from "@/lib/notifications/model";
 import { createClient } from "@/lib/supabase/client";
@@ -27,6 +26,11 @@ const SEARCH_GROUPS: { kind: SearchKind; label: string }[] = [
 ];
 
 export interface AppShellProps {
+  /**
+   * Legacy. It named the nav item to highlight; the rail derives that from the
+   * pathname instead, so nothing reads this. Kept because ~19 components pass
+   * it and none of them should have to change for a chrome edit.
+   */
   active: string;
   title: string;
   terminalHeader?: boolean;
@@ -40,13 +44,10 @@ export interface AppShellProps {
 }
 
 const EMPTY_NOTIFICATIONS: Notification[] = [];
-const roleName = (role: string) => role.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 
-export function AppShell({ active, title, memberName = "Practitioner", platformRole = "member", notifications: initialNotifications = EMPTY_NOTIFICATIONS, routeBase = "", children }: AppShellProps) {
-  const pathname = usePathname();
+export function AppShell({ title, isMaster = false, memberName = "Practitioner", platformRole = "member", notifications: initialNotifications = EMPTY_NOTIFICATIONS, routeBase = "", children }: AppShellProps) {
   const supabase = useMemo(() => createClient(), []);
-  const navItems = useMemo(() => buildAppNav({ routeBase }), [routeBase]);
   const searchInput = useRef<HTMLInputElement>(null);
   const notificationPanel = useRef<HTMLDivElement>(null);
   const notificationTrigger = useRef<HTMLButtonElement | null>(null);
@@ -202,26 +203,24 @@ export function AppShell({ active, title, memberName = "Practitioner", platformR
     if (restoreFocus) window.setTimeout(() => mobileMenuTrigger.current?.focus(), 0);
   }
 
-  const settingsHref = withRouteBase(routeBase, "/settings");
-  // In the creator workspace this resolves to /creator/settings, which is the
-  // community configuration page, not an account page. requireActiveMembership
-  // redirects influencers to /creator, so /dashboard/settings is unreachable for
-  // them and must not be linked here. Label what the link actually opens.
-  const settingsLabel = routeBase === "/creator" ? "Open community settings" : "Open account settings";
   const notificationsHref = withRouteBase(routeBase, "/notifications");
 
-  const sidebar = (
-    <>
-      <div className="flex items-center justify-between border-b border-sidebar-border p-4">
-        <Link href="/" className="block focus-ring rounded-lg"><div className="text-lg font-extrabold tracking-tight text-white">Stoicverse</div><div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-fog-muted">Community Hub</div></Link>
-      </div>
-      <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4" aria-label="Workspace navigation">
-        {navItems.map((item) => { const Icon = item.icon; const selected = pathname === item.href || active === item.label; return <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)} className={`focus-ring flex min-h-11 items-center justify-between rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wider transition ${selected ? "bg-sidebar-accent text-sidebar-primary" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-primary"}`}><span className="flex items-center gap-3"><Icon size={16}/>{item.label}</span>{item.label === "Notifications" && unreadCount > 0 && <span className="grid min-w-5 size-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}</Link>; })}
-      </nav>
-      <div className="border-t border-sidebar-border bg-sidebar/80 p-4">
-        <div className="flex items-center justify-between gap-3 px-2"><div className="flex min-w-0 items-center gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-full border border-sidebar-border bg-sidebar-accent font-bold text-sidebar-primary">{memberName[0]?.toUpperCase() || "P"}</div><div className="min-w-0"><p className="truncate text-xs font-bold text-white">{memberName}</p><p className="truncate text-[10px] text-fog-muted">{roleName(platformRole)}</p><p className="mt-1 text-[9px] font-semibold text-primary-container">Member profile</p></div></div><Link href={settingsHref} aria-label={settingsLabel} className="focus-ring group grid size-9 shrink-0 place-items-center rounded-full text-sidebar-foreground transition hover:bg-sidebar-accent hover:text-white"><Settings size={16} className="transition-transform duration-500 group-hover:rotate-90"/></Link></div>
-      </div>
-    </>
+  /*
+    The rail replaced this shell's nav list, its brand block and its user
+    footer — all three are things the rail now carries, and carries in
+    `/channels` too, which is the point. What is left of the sidebar concept is
+    the mobile drawer, where the rail sits inside rather than beside, because
+    4.5rem of permanent chrome is too much of a phone.
+  */
+  const rail = (
+    <AppRail
+      routeBase={routeBase}
+      platformRole={platformRole}
+      isMaster={isMaster}
+      memberName={memberName}
+      unreadCount={unreadCount}
+      onNavigate={() => setMobileMenuOpen(false)}
+    />
   );
 
   return (
@@ -232,8 +231,8 @@ export function AppShell({ active, title, memberName = "Practitioner", platformR
       </header>
 
       {mobileMenuOpen && <button type="button" aria-label="Close menu" className="fixed inset-0 z-40 bg-black/80 md:hidden" onClick={() => closeMobileMenu()}/>}
-      {mobileMenuOpen && <aside ref={mobileDrawer} id="mobile-workspace-navigation" className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar md:hidden">{sidebar}</aside>}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">{sidebar}</aside>
+      {mobileMenuOpen && <aside ref={mobileDrawer} id="mobile-workspace-navigation" className="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-sidebar-border bg-sidebar md:hidden">{rail}</aside>}
+      <aside className="sticky top-0 hidden h-screen shrink-0 flex-col md:flex">{rail}</aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="hidden h-16 items-center justify-between border-b border-surgical-steel bg-surface-container-low px-6 md:flex lg:px-8">

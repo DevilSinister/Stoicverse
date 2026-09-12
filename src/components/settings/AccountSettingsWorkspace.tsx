@@ -43,7 +43,26 @@ const inputClass = "focus-ring mt-2 min-h-11 w-full rounded-lg border border-sur
 const primaryButton = "focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary-container px-5 text-sm font-semibold text-on-primary-fixed transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50";
 const secondaryButton = "focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-surgical-steel px-5 text-sm font-semibold text-on-surface transition hover:border-primary-container hover:text-primary-container disabled:cursor-not-allowed disabled:opacity-50";
 
-export function AccountSettingsWorkspace({ data, initialSection, returnTo }: { data: SettingsWorkspaceData; initialSection: SettingsSection; returnTo: string }) {
+export function AccountSettingsWorkspace({
+  data,
+  initialSection,
+  returnTo,
+  /**
+   * Where this workspace lives. The creator reaches the same page at
+   * `/creator/account`, and hardcoding `/dashboard/settings` here would send
+   * them somewhere `proxy.ts` immediately bounces them out of — changing a
+   * section would have thrown them back to /creator.
+   */
+  basePath = "/dashboard/settings",
+  /** Where "back" goes when `returnTo` is the default. */
+  homePath = "/dashboard",
+}: {
+  data: SettingsWorkspaceData;
+  initialSection: SettingsSection;
+  returnTo: string;
+  basePath?: string;
+  homePath?: string;
+}) {
   const router = useRouter();
   const [section, setSection] = useState(initialSection);
   const [mobileDetail, setMobileDetail] = useState(initialSection !== "account");
@@ -62,8 +81,8 @@ export function AccountSettingsWorkspace({ data, initialSection, returnTo }: { d
     setSection(next);
     setMobileDetail(true);
     const params = new URLSearchParams({ section: next });
-    if (returnTo !== "/dashboard") params.set("returnTo", returnTo);
-    router.replace(`/dashboard/settings?${params.toString()}`, { scroll: false });
+    if (returnTo !== homePath) params.set("returnTo", returnTo);
+    router.replace(`${basePath}?${params.toString()}`, { scroll: false });
   }
 
   function showCategories() {

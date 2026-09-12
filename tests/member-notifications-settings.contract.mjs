@@ -6,11 +6,14 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("member messages are retired without changing creator navigation", async () => {
   const [nav, retiredPage] = await Promise.all([
-    read("src/lib/navigation/app-nav.ts"),
+    read("src/lib/navigation/rail.ts"),
     read("src/app/dashboard/messages/page.tsx"),
   ]);
   assert.doesNotMatch(nav, /Messages|\/dashboard\/messages/);
-  assert.match(nav, /href: "\/channels", label: "Channels"/);
+  // One label for /channels now: it is the same route for everyone, so calling
+  // it "Channels" for a creator and "Communities" for a member described a
+  // split that does not exist.
+  assert.match(nav, /href: "\/channels", label: "Community"/);
   assert.match(nav, /href: "\/creator\/members", label: "Members"/);
   assert.match(retiredPage, /permanentRedirect\("\/channels"\)/);
 });

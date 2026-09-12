@@ -12,18 +12,23 @@ import { requireCommunityAccess } from "@/lib/supabase/access";
  * sends an influencer to /creator and a super_admin to /admin, which would
  * mean the creator could never open their own community.
  *
- * The three reads run together. They are independent, and the layout cannot
- * paint until all three are in, so awaiting them in sequence would be three
- * round trips of blank screen instead of one.
+ * The reads run together. They are independent, and the layout cannot paint
+ * until all of them are in, so awaiting them in sequence would be a round trip
+ * of blank screen each instead of one.
  */
 export default async function ChannelsLayout({ children }: { children: ReactNode }) {
-  const { supabase } = await requireCommunityAccess("/channels");
+  const { supabase, user } = await requireCommunityAccess("/channels");
 
-  const [viewerLoad, directory, memberLoad, emojiLoad] = await Promise.all([
+  const [viewerLoad, directory, memberLoad, emojiLoad, tier] = await Promise.all([
     loadViewerState(supabase),
     supabase.rpc("community_channel_directory"),
     loadMemberDirectory(supabase),
     loadCustomEmojis(supabase),
+    // Only so the rail can offer Master Zone here as well as in the workspace.
+    // An icon that exists on one side of a navigation and not the other reads
+    // as the product losing it. A point-read on an indexed key, in parallel
+    // with four larger loads, so it costs no wall-clock.
+    supabase.from("member_tiers").select("is_master").eq("user_id", user.id).maybeSingle(),
   ]);
 
   const degraded = [...viewerLoad.degraded, ...memberLoad.degraded, ...emojiLoad.degraded];
@@ -55,7 +60,7 @@ export default async function ChannelsLayout({ children }: { children: ReactNode
       emojis={emojiLoad.emojis}
       degraded={degraded}
     >
-      <ChannelsShell>{children}</ChannelsShell>
+      <ChannelsShell isMaster={Boolean(tier.data?.is_master)}>{children}</ChannelsShell>
     </CommunityProvider>
   );
 }

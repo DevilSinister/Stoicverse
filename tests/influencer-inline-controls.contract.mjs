@@ -34,7 +34,7 @@ test("canonical creator pages use creator-only routes and workspace access", () 
 });
 
 test("member screens are clean while creator screens own the management controls", () => {
-  const nav = read("src/lib/navigation/app-nav.ts");
+  const nav = read("src/lib/navigation/rail.ts");
   const shell = read("src/components/layout/AppShell.tsx");
   const dashboard = read("src/components/dashboard/DashboardView.tsx");
   const memberLearning = read("src/components/courses/CourseCatalog.tsx");
@@ -56,7 +56,7 @@ test("member screens are clean while creator screens own the management controls
 });
 
 test("member and creator route trees expose separate navigation and guards", () => {
-  const nav = read("src/lib/navigation/app-nav.ts");
+  const nav = read("src/lib/navigation/rail.ts");
   const memberAccess = read("src/lib/supabase/access.ts");
   const memberCommunity = read("src/app/community/page.tsx");
 
@@ -68,9 +68,11 @@ test("member and creator route trees expose separate navigation and guards", () 
     assert.match(read(`src/app/creator/${path}/page.tsx`), /requireInfluencerWorkspace/);
   }
   assert.match(read("src/app/creator/channels/page.tsx"), /permanentRedirect\("\/creator\/settings\?section=channels"\)/);
-  assert.match(nav, /label: "Overview"/);
+  // The rail carries these, and "Overview" is now "Dashboard" — one label for
+  // the home slot rather than a different word per role.
+  assert.match(nav, /label: "Dashboard"/);
   assert.match(nav, /label: "Revenue"/);
-  assert.match(nav, /label: "Community settings"/);
+  assert.match(nav, /"Community settings"/);
   assert.doesNotMatch(nav, /label: "Messages"/);
   // Phase 9: one community surface. The member and the creator both land on
   // /channels, and the directory RPC — not a per-workspace branch — is what
