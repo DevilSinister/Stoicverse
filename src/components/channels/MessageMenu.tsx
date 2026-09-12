@@ -67,6 +67,7 @@ export function MessageMenu({
 
   const [dialog, setDialog] = useState<Dialog>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
@@ -115,7 +116,19 @@ export function MessageMenu({
 
   return (
     <>
-      <div className="absolute right-4 top-1 hidden items-center gap-0.5 rounded-lg border border-surgical-steel bg-surface-container-low p-0.5 group-focus-within:flex group-hover:flex">
+      {/*
+        `hidden` by default, but forced visible while this row's menu or emoji
+        picker is open. Both portal to the body, so opening one takes the mouse
+        and the focus out of this <li> — `group-hover` and `group-focus-within`
+        both go false, the bar collapses to `display: none`, and the trigger
+        loses its bounding box. The positioner then has nothing to anchor to
+        and puts the menu in the top-left corner of the screen.
+      */}
+      <div
+        className={`absolute right-4 top-1 items-center gap-0.5 rounded-lg border border-surgical-steel bg-surface-container-low p-0.5 ${
+          menuOpen || emojiOpen ? "flex" : "hidden group-focus-within:flex group-hover:flex"
+        }`}
+      >
         {actions.react ? (
           <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
             <PopoverTrigger
@@ -164,7 +177,7 @@ export function MessageMenu({
           </button>
         ) : null}
 
-        <DropdownMenu>
+        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenuTrigger
             aria-label={`More actions for the message from ${message.authorName}`}
             className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
