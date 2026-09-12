@@ -114,15 +114,26 @@ export async function togglePostHighlight(postId: string): Promise<Result> {
   return { success: true };
 }
 
-export async function deleteMessage(postId: string): Promise<Result> {
+export async function deleteMessage(postId: string, reason?: string): Promise<Result> {
   if (!uuid(postId)) return { error: "Invalid post identifier." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to delete." };
 
+  // A reason is what turns a deletion into a moderation case: `soft_delete_post`
+  // puts it in `app.moderation_reason`, which the logging trigger reads. Passing
+  // nothing is how an author deleting their own message stays out of the case log.
+  const clean = typeof reason === "string" ? reason.trim() : "";
+  if (clean !== "" && (clean.length < 3 || clean.length > 500)) {
+    return { error: "A deletion reason must be between 3 and 500 characters." };
+  }
+
   // `soft_delete_post` re-checks author-or-manage_messages itself and raises a
   // P0001 the client can read, so there is nothing useful to pre-check here.
-  const { data: deleted, error } = await supabase.rpc("soft_delete_post", { target_post_id: postId });
+  const { data: deleted, error } = await supabase.rpc("soft_delete_post", {
+    target_post_id: postId,
+    delete_reason: clean === "" ? null : clean,
+  });
   if (error) return { error: postgresMessage(error, "That message could not be deleted.") };
   if (!deleted) return { error: "Message not found or it has already been deleted." };
   revalidateCommunity();

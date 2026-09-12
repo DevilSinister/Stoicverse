@@ -158,6 +158,49 @@ export async function loadChannelPins(
   };
 }
 
+export type ChannelThread = {
+  id: string;
+  rootPostId: string;
+  name: string;
+  messageCount: number;
+  lastMessageAt: string | null;
+  createdAt: string;
+  archived: boolean;
+  locked: boolean;
+};
+
+/**
+ * Every thread in one channel, live first and archived below.
+ *
+ * Through `community_channel_threads` rather than `from("threads")`: the table
+ * does carry a `view_channel` policy that would make a direct read safe today,
+ * but the member path reads functions and never base tables, and one policy
+ * clause away from a staff gate is exactly where that rule earns its keep.
+ */
+export async function loadChannelThreads(
+  supabase: SupabaseClient,
+  channelId: string,
+): Promise<{ threads: ChannelThread[]; degraded: string[] }> {
+  const { data, error } = await supabase.rpc("community_channel_threads", { channel: channelId });
+  if (error) {
+    console.error("[community-messages]", { code: error.code ?? null });
+    return { threads: [], degraded: ["Threads could not be read. They need migration 20260912090000."] };
+  }
+  return {
+    threads: ((data ?? []) as Record<string, unknown>[]).map((row) => ({
+      id: row.id as string,
+      rootPostId: row.root_post_id as string,
+      name: (row.name as string) ?? "Thread",
+      messageCount: (row.message_count as number) ?? 0,
+      lastMessageAt: (row.last_message_at as string | null) ?? null,
+      createdAt: row.created_at as string,
+      archived: Boolean(row.archived),
+      locked: Boolean(row.locked),
+    })),
+    degraded: [],
+  };
+}
+
 export type SearchHit = {
   id: string;
   channelId: string;

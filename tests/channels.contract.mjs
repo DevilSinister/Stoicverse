@@ -134,6 +134,9 @@ test("every colour token the channel UI uses is actually defined", async () => {
     "src/components/channels/ChannelsShell.tsx",
     "src/components/channels/ChannelView.tsx",
     "src/components/channels/Composer.tsx",
+    "src/components/channels/MessageMenu.tsx",
+    "src/components/channels/ThreadPanel.tsx",
+    "src/components/channels/ChannelHeaderPopovers.tsx",
   ];
 
   // Utilities that share a prefix with a colour but never take one.
@@ -161,6 +164,99 @@ test("a link in a message is legible, not the shadcn surface accent", async () =
   const render = await readCode("src/lib/markdown/render.tsx");
   assert.equal(/text-accent|bg-accent/.test(render), false);
   assert.match(render, /text-primary-container underline/);
+});
+
+// --------------------------------------------------------------- phase P2
+
+test("the thread list goes through an RPC, never the threads table", async () => {
+  // `public.threads` has a view_channel policy that would make a direct read
+  // safe today. The member path still reads functions, because a table whose
+  // policy is one clause away from a staff gate is the bug class that layer
+  // exists to prevent.
+  const loader = await readCode("src/lib/community/messages.ts");
+  assert.equal(/\.from\("threads"\)/.test(loader), false);
+  assert.match(loader, /rpc\("community_channel_threads"/);
+
+  const migration = await read("supabase/migrations/20260912090000_community_channel_threads.sql");
+  // Security invoker: threads_read already answers who may see a thread, and a
+  // definer here would be a second copy of that rule free to drift from it.
+  assert.match(migration, /security invoker/);
+  // A function is executable by PUBLIC unless that is revoked.
+  assert.match(migration, /revoke execute on function public\.community_channel_threads\(uuid\) from public, anon/);
+  assert.match(migration, /set search_path to 'public', 'pg_temp'/);
+});
+
+test("the thread migration has a rollback that says what it breaks", async () => {
+  const down = await read("supabase/rollback/20260912090000_community_channel_threads.down.sql");
+  assert.match(down, /drop function if exists public\.community_channel_threads/);
+  assert.match(down, /thread list popover/i);
+});
+
+test("a deletion carries the reason the case log will record", async () => {
+  const actions = await readCode("src/app/community/actions.ts");
+  assert.match(actions, /export async function deleteMessage\(postId: string, reason\?: string\)/);
+  assert.match(actions, /delete_reason: clean === "" \? null : clean/);
+
+  // The menu asks only when the reason is going into somebody else's case.
+  const menu = await readCode("src/components/channels/MessageMenu.tsx");
+  assert.match(menu, /deleteMessage\(message\.id, actions\.removeNeedsReason \? reason : undefined\)/);
+});
+
+test("the thread panel subscribes on the thread, not on the channel", async () => {
+  const provider = await read("src/components/channels/CommunityProvider.tsx");
+  // A busy channel would otherwise wake every open thread panel for every
+  // message posted outside it, each one refetching to learn nothing changed.
+  assert.match(provider, /export function useThreadLive/);
+  assert.match(provider, /table: "posts", filter: `thread_id=eq\.\$\{threadId\}`/);
+});
+
+test("a thread is client state in the URL, not a parallel route", async () => {
+  const view = await readCode("src/components/channels/ChannelView.tsx");
+  // A parallel route re-runs the channel's server render — a full page of
+  // messages refetched — every time somebody opens or closes the side panel.
+  assert.match(view, /router\.replace\(query \? `\$\{pathname\}\?\$\{query\}` : pathname, \{ scroll: false \}\)/);
+  assert.equal(/@thread/.test(view), false);
+
+  // The URL is a mirror of the state, not its source. Reading the param on
+  // every render lost the panel whenever a server action revalidated: the
+  // router update landed after router.replace and reset the query. Seeded
+  // once, so a shared link still opens the thread.
+  assert.match(view, /useState<string \| null>\(\(\) => params\.get\("thread"\)\)/);
+  const afterSeed = view.slice(view.indexOf("const openThread = useCallback"));
+  assert.equal(/params\.get\("thread"\)/.test(afterSeed), false, "the open thread must not be re-read from the URL");
+});
+
+test("a jump walks back a bounded number of pages, then says so", async () => {
+  const view = await readCode("src/components/channels/ChannelView.tsx");
+  assert.match(view, /JUMP_PAGE_BUDGET/);
+  // Silence would be indistinguishable from a broken link.
+  assert.match(view, /further back than this view reaches/);
+});
+
+test("a thread reply needs its own permission, not the channel's", async () => {
+  const permissions = await readCode("src/lib/channels/permissions.ts");
+  assert.match(permissions, /canSendInThread: !blocked && has\(permissions, "send_messages_in_threads"\)/);
+
+  const panel = await readCode("src/components/channels/ThreadPanel.tsx");
+  // An announcement channel is read-only at the top level and still takes
+  // replies in its threads, which is most of why a thread there is useful.
+  assert.match(panel, /permissions\.canSendInThread/);
+  assert.match(panel, /threadId=\{threadId\}/);
+});
+
+test("the header panels load when opened, not with the page", async () => {
+  const popovers = await readCode("src/components/channels/ChannelHeaderPopovers.tsx");
+  // Two extra round trips on every channel open, for panels most visits never
+  // touch, is a cost the header should not impose. Asserted on the trigger
+  // rather than on the exact statement: the first version of this checked the
+  // literal line, so refactoring the effect into an open handler broke a test
+  // of behaviour that had not changed.
+  assert.match(popovers, /onOpenChange = \(next: boolean\)/);
+  assert.match(popovers, /if \(!next \|\| loadedRef\.current\) return;/);
+  // And nothing loads it on mount.
+  assert.equal(/useEffect/.test(popovers), false);
+  assert.match(popovers, /rpc\("community_channel_pins"/);
+  assert.match(popovers, /rpc\("community_channel_threads"/);
 });
 
 test("the legacy community surface is still intact", async () => {

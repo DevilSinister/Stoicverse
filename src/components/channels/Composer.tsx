@@ -36,6 +36,8 @@ type PendingAttachment = { path: string; mimeType: string; byteSize: number; nam
 export function Composer({
   channel,
   replyTo,
+  threadId = null,
+  placeholder,
   onClearReply,
   onOptimistic,
   onSettled,
@@ -43,6 +45,9 @@ export function Composer({
 }: {
   channel: ChannelRow;
   replyTo: ChannelMessage | null;
+  /** Set when this composer sits in a thread panel rather than under the channel. */
+  threadId?: string | null;
+  placeholder?: string;
   onClearReply: () => void;
   onOptimistic: (message: ChannelMessage) => void;
   onSettled: () => void;
@@ -50,6 +55,7 @@ export function Composer({
 }) {
   const { viewer, dictionary, affordances } = useCommunity();
   const permissions = affordances(channel.id);
+  const label = placeholder ?? `Message #${channel.name}`;
 
   const [body, setBody] = useState("");
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
@@ -127,7 +133,7 @@ export function Composer({
       replyToPostId: replyTo?.id ?? null,
       replyAuthorName: replyTo?.authorName ?? null,
       replyExcerpt: replyTo?.body?.slice(0, 140) ?? null,
-      threadId: null,
+      threadId,
       threadName: null,
       threadMessageCount: null,
       attachments: sentAttachments.map((attachment, index) => ({
@@ -148,6 +154,7 @@ export function Composer({
     const result = await sendChannelMessage({
       channelId: channel.id,
       body: encoded,
+      threadId: threadId ?? undefined,
       replyToPostId: replyTo?.id,
       attachments: sentAttachments.map(({ path, mimeType, byteSize }) => ({ path, mimeType, byteSize })),
       clientNonce,
@@ -237,8 +244,8 @@ export function Composer({
             }
           }}
           rows={1}
-          placeholder={`Message #${channel.name}`}
-          aria-label={`Message ${channel.name}`}
+          placeholder={label}
+          aria-label={label}
           className="max-h-40 min-h-6 flex-1 resize-none bg-transparent text-sm leading-6 text-on-surface outline-none placeholder:text-fog-muted"
         />
 

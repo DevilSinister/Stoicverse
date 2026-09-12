@@ -24,6 +24,8 @@ export type Affordances = {
   canAttach: boolean;
   canEmbedLinks: boolean;
   canCreateThread: boolean;
+  canSendInThread: boolean;
+  canManageThreads: boolean;
   canPin: boolean;
   canManageMessages: boolean;
   canMentionEveryone: boolean;
@@ -70,6 +72,11 @@ export function deriveAffordances(input: AffordanceInput): Affordances {
     canAttach: !blocked && has(permissions, "attach_files"),
     canEmbedLinks: !blocked && has(permissions, "embed_links"),
     canCreateThread: !blocked && has(permissions, "create_threads"),
+    // A channel can be read-only at the top level and still take replies in
+    // its threads, which is why this is its own permission rather than an
+    // inference from `send_messages`.
+    canSendInThread: !blocked && has(permissions, "send_messages_in_threads"),
+    canManageThreads: has(permissions, "manage_threads"),
     canPin: has(permissions, "pin_messages"),
     canManageMessages: has(permissions, "manage_messages"),
     canMentionEveryone: !blocked && has(permissions, "mention_everyone"),

@@ -160,6 +160,42 @@ export function useChannelLive(
 }
 
 /**
+ * Live messages inside one thread.
+ *
+ * Filtered on `thread_id`, not on the channel: a busy channel would otherwise
+ * wake an open thread panel for every message posted outside it, and the panel
+ * would refetch each time to discover nothing had changed. A realtime filter
+ * takes one column, so this is the column worth spending it on.
+ */
+export function useThreadLive(threadId: string | null, onChange: () => void) {
+  const changeRef = useRef(onChange);
+  useEffect(() => {
+    changeRef.current = onChange;
+  });
+
+  const [connected, setConnected] = useState(true);
+
+  useEffect(() => {
+    if (!threadId) return;
+    const supabase = createClient();
+    const subscription = supabase
+      .channel(`thread:${threadId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "posts", filter: `thread_id=eq.${threadId}` },
+        () => changeRef.current(),
+      )
+      .subscribe((status) => setConnected(status === "SUBSCRIBED"));
+
+    return () => {
+      void supabase.removeChannel(subscription);
+    };
+  }, [threadId]);
+
+  return { connected };
+}
+
+/**
  * Merge one message into a list.
  *
  * An optimistic bubble the composer already rendered carries the same

@@ -1,13 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CornerUpLeft, FileText, Hash, Loader2, WifiOff } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { CornerUpLeft, FileText, Hash, Loader2, MessagesSquare, Pin, WifiOff } from "lucide-react";
 
-import { toggleReaction } from "@/app/community/actions";
+import { editMessage, toggleReaction } from "@/app/community/actions";
+import { PinsPopover, ThreadListPopover } from "@/components/channels/ChannelHeaderPopovers";
 import { Composer } from "@/components/channels/Composer";
 import { mergeMessage, useChannelLive, useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
+import { MessageMenu } from "@/components/channels/MessageMenu";
+import { ThreadPanel } from "@/components/channels/ThreadPanel";
 import { continuesGroup, startsNewDay } from "@/lib/channels/grouping";
+import { JUMP_PAGE_BUDGET } from "@/lib/channels/message-actions";
 import { COMPOSER_NOTICE } from "@/lib/channels/permissions";
+import { toClientMessage } from "@/lib/channels/rows";
 import { MESSAGE_PAGE_SIZE } from "@/lib/community/constants";
 import type { ChannelMessage } from "@/lib/community/messages";
 import { MarkdownBody } from "@/lib/markdown/render";
@@ -15,38 +21,18 @@ import { isJumboEmoji } from "@/lib/markdown/tokenize";
 import { createClient } from "@/lib/supabase/client";
 
 /**
- * One channel: its header, its messages, and the composer.
+ * One channel: its header, its messages, the composer, and the thread panel.
  *
  * The server renders the first page; everything after that is fetched from the
  * browser. Paging is a `supabase.rpc` call rather than a server action because
  * Next 16 dispatches actions sequentially per client — scrolling up twice
  * quickly would queue the second read behind the first.
+ *
+ * `?thread=` and `?jump=` are client state the URL carries, not routes. They
+ * are written with `router.replace` and `scroll: false`, so opening a thread
+ * neither re-runs the server render nor adds a history entry somebody then has
+ * to press Back through.
  */
-
-/** The RPC's snake_case row as the shape the list renders. */
-export function toClientMessage(row: Record<string, unknown>): ChannelMessage {
-  return {
-    id: row.id as string,
-    authorId: (row.author_id as string | null) ?? null,
-    authorName: (row.author_name as string) ?? "Former member",
-    authorAvatar: (row.author_avatar as string | null) ?? null,
-    authorColor: (row.author_color as string | null) ?? null,
-    body: (row.body as string | null) ?? null,
-    postType: (row.post_type as string) ?? "post",
-    isPinned: Boolean(row.is_pinned),
-    createdAt: row.created_at as string,
-    editedAt: (row.edited_at as string | null) ?? null,
-    clientNonce: (row.client_nonce as string | null) ?? null,
-    replyToPostId: (row.reply_to_post_id as string | null) ?? null,
-    replyAuthorName: (row.reply_author_name as string | null) ?? null,
-    replyExcerpt: (row.reply_excerpt as string | null) ?? null,
-    threadId: (row.thread_id as string | null) ?? null,
-    threadName: (row.thread_name as string | null) ?? null,
-    threadMessageCount: (row.thread_message_count as number | null) ?? null,
-    attachments: (row.attachments as ChannelMessage["attachments"] | null) ?? [],
-    reactions: (row.reactions as ChannelMessage["reactions"] | null) ?? [],
-  };
-}
 
 function timeOf(iso: string) {
   return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
@@ -134,42 +120,130 @@ function Reactions({
   );
 }
 
+/** Editing happens where the message is, so the surrounding conversation stays readable. */
+function InlineEditor({
+  initial,
+  onCancel,
+  onSaved,
+}: {
+  initial: string;
+  onCancel: () => void;
+  onSaved: (body: string) => Promise<string | null>;
+}) {
+  const [body, setBody] = useState(initial);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const save = async () => {
+    if (body.trim() === "") return;
+    setBusy(true);
+    const failure = await onSaved(body);
+    setBusy(false);
+    if (failure) setError(failure);
+  };
+
+  return (
+    <div className="mt-1">
+      <textarea
+        value={body}
+        onChange={(event) => setBody(event.target.value)}
+        onKeyDown={(event) => {
+          // Enter saves and Escape abandons — the same two keys the composer
+          // uses, so editing does not need a different set of reflexes.
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            void save();
+          }
+          if (event.key === "Escape") onCancel();
+        }}
+        rows={2}
+        autoFocus
+        aria-label="Edit your message"
+        className="w-full resize-none rounded-lg border border-surgical-steel bg-surface-container-lowest p-2 text-sm text-on-surface outline-none"
+      />
+      <p className="mt-1 flex items-center gap-3 text-[11px] text-fog-muted">
+        <button
+          type="button"
+          onClick={() => void save()}
+          disabled={busy}
+          className="focus-ring rounded text-primary-container disabled:opacity-50"
+        >
+          {busy ? "Saving…" : "Save"}
+        </button>
+        <button type="button" onClick={onCancel} className="focus-ring rounded hover:text-on-surface">
+          Cancel
+        </button>
+        <span>Enter to save, Escape to cancel</span>
+      </p>
+      {error ? (
+        <p role="alert" className="mt-1 text-xs text-red-300">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function MessageRow({
   message,
   grouped,
   urls,
-  canReact,
-  canReply,
+  channelId,
+  editing,
+  flashed,
+  registerNode,
   onReply,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onOpenThread,
+  onJump,
   onChanged,
 }: {
   message: ChannelMessage;
   grouped: boolean;
   urls: Map<string, string>;
-  canReact: boolean;
-  canReply: boolean;
+  channelId: string;
+  editing: boolean;
+  flashed: boolean;
+  registerNode: (id: string, node: HTMLLIElement | null) => void;
   onReply: (message: ChannelMessage) => void;
+  onStartEdit: (id: string) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: (id: string, body: string) => Promise<string | null>;
+  onOpenThread: (threadId: string, name?: string | null) => void;
+  onJump: (messageId: string) => void;
   onChanged: () => void;
 }) {
-  const { resolvers } = useCommunity();
+  const { resolvers, viewer, affordances } = useCommunity();
+  const permissions = affordances(channelId);
   const jumbo = isJumboEmoji(message.body ?? "");
 
   if (message.postType === "system") {
     return (
-      <li className="px-4 py-1 text-xs italic text-fog-muted">
+      <li ref={(node) => registerNode(message.id, node)} className="px-4 py-1 text-xs italic text-fog-muted">
         <MarkdownBody body={message.body} resolvers={resolvers} />
       </li>
     );
   }
 
   return (
-    <li className={`group relative px-4 hover:bg-surface-container-lowest/60 ${grouped ? "py-0.5" : "pb-0.5 pt-3"}`}>
+    <li
+      ref={(node) => registerNode(message.id, node)}
+      className={`group relative px-4 transition-colors duration-700 ${grouped ? "py-0.5" : "pb-0.5 pt-3"} ${
+        flashed ? "bg-primary-container/20" : "hover:bg-surface-container-lowest/60"
+      }`}
+    >
       {message.replyToPostId ? (
-        <p className="mb-0.5 flex items-center gap-1 pl-12 text-xs text-fog-muted">
-          <CornerUpLeft size={12} aria-hidden="true" />
+        <button
+          type="button"
+          onClick={() => message.replyToPostId && onJump(message.replyToPostId)}
+          className="focus-ring mb-0.5 flex w-full items-center gap-1 rounded pl-12 text-left text-xs text-fog-muted hover:text-on-surface-variant"
+        >
+          <CornerUpLeft size={12} aria-hidden="true" className="shrink-0" />
           <span className="font-medium">{message.replyAuthorName ?? "someone"}</span>
           <span className="truncate">{message.replyExcerpt}</span>
-        </p>
+        </button>
       ) : null}
 
       <div className="flex gap-3">
@@ -196,35 +270,64 @@ function MessageRow({
               <time dateTime={message.createdAt} className="text-[11px] text-fog-muted">
                 {timeOf(message.createdAt)}
               </time>
+              {message.isPinned ? (
+                <span className="flex items-center gap-0.5 text-[10px] text-fog-muted">
+                  <Pin size={10} aria-hidden="true" />
+                  Pinned
+                </span>
+              ) : null}
             </p>
           )}
 
-          <div className="text-sm leading-6 text-on-surface-variant">
-            <MarkdownBody body={message.body} resolvers={resolvers} jumbo={jumbo} />
-            {message.editedAt ? <span className="ml-1 text-[10px] text-fog-muted">(edited)</span> : null}
-          </div>
+          {editing ? (
+            <InlineEditor
+              initial={message.body ?? ""}
+              onCancel={onCancelEdit}
+              onSaved={(body) => onSaveEdit(message.id, body)}
+            />
+          ) : (
+            <div className="text-sm leading-6 text-on-surface-variant">
+              <MarkdownBody body={message.body} resolvers={resolvers} jumbo={jumbo} />
+              {message.editedAt ? <span className="ml-1 text-[10px] text-fog-muted">(edited)</span> : null}
+            </div>
+          )}
 
           <Attachments attachments={message.attachments} urls={urls} />
-          <Reactions message={message} canReact={canReact} onChanged={onChanged} />
+          <Reactions message={message} canReact={permissions.canReact} onChanged={onChanged} />
 
           {message.threadId ? (
-            <p className="mt-1 text-xs text-primary-container">
-              {`${message.threadName ?? "Thread"} — ${message.threadMessageCount ?? 0} replies`}
-            </p>
+            <button
+              type="button"
+              onClick={() => message.threadId && onOpenThread(message.threadId, message.threadName)}
+              className="focus-ring mt-1 flex items-center gap-1 rounded text-xs text-primary-container hover:underline"
+            >
+              <MessagesSquare size={12} aria-hidden="true" />
+              {`${message.threadName ?? "Thread"} — ${message.threadMessageCount ?? 0} ${
+                (message.threadMessageCount ?? 0) === 1 ? "reply" : "replies"
+              }`}
+            </button>
           ) : null}
         </div>
-
-        {canReply ? (
-          <button
-            type="button"
-            onClick={() => onReply(message)}
-            aria-label={`Reply to ${message.authorName}`}
-            className="focus-ring absolute right-4 top-1 hidden rounded-lg border border-surgical-steel bg-surface-container-low p-1.5 text-fog-muted hover:text-on-surface group-hover:block"
-          >
-            <CornerUpLeft size={14} aria-hidden="true" />
-          </button>
-        ) : null}
       </div>
+
+      {editing ? null : (
+        <MessageMenu
+          message={message}
+          viewerId={viewer?.userId ?? null}
+          channelId={channelId}
+          abilities={{
+            canReply: permissions.canReply,
+            canReact: permissions.canReact,
+            canPin: permissions.canPin,
+            canManageMessages: permissions.canManageMessages,
+            canCreateThread: permissions.canCreateThread,
+          }}
+          onReply={() => onReply(message)}
+          onEdit={() => onStartEdit(message.id)}
+          onOpenThread={onOpenThread}
+          onChanged={onChanged}
+        />
+      )}
     </li>
   );
 }
@@ -242,15 +345,39 @@ export function ChannelView({
 }) {
   const { affordances } = useCommunity();
   const permissions = affordances(channel.id);
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const jumpTarget = params.get("jump");
+  // The open thread is React state, seeded from the URL so a shared link still
+  // opens the panel. It is not *read* from the URL on every render, because a
+  // server action that calls `revalidateCommunity` triggers a router update
+  // that lands after `router.replace` and resets the query — which silently
+  // swallowed the panel every time somebody created a thread. The URL is a
+  // mirror of this state, never its source.
+  const [openThreadId, setOpenThreadId] = useState<string | null>(() => params.get("thread"));
+  // Only a hint for the panel header: a deep link has no name to seed, and the
+  // first reply supplies it thereafter.
+  const [openThreadName, setOpenThreadName] = useState<string | null>(null);
 
   // The RPC returns newest first; the list reads oldest at the top.
   const [messages, setMessages] = useState<ChannelMessage[]>(() => [...initialMessages].reverse());
   const [cursor, setCursor] = useState(initialCursor);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [replyTo, setReplyTo] = useState<ChannelMessage | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [flashId, setFlashId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [urls, setUrls] = useState(() => new Map(Object.entries(initialUrls)));
   const paneRef = useRef<HTMLOListElement | null>(null);
   const atBottomRef = useRef(true);
+  const nodesRef = useRef(new Map<string, HTMLLIElement>());
+  const jumpedRef = useRef<string | null>(null);
+
+  const registerNode = useCallback((id: string, node: HTMLLIElement | null) => {
+    if (node) nodesRef.current.set(id, node);
+    else nodesRef.current.delete(id);
+  }, []);
 
   const refresh = useCallback(async () => {
     const supabase = createClient();
@@ -281,8 +408,28 @@ export function ChannelView({
     if (pane && atBottomRef.current) pane.scrollTop = pane.scrollHeight;
   }, [messages]);
 
-  const loadOlder = useCallback(async () => {
-    if (!cursor || loadingOlder) return;
+  const setParam = useCallback(
+    (key: string, value: string | null) => {
+      const next = new URLSearchParams(params.toString());
+      if (value === null) next.delete(key);
+      else next.set(key, value);
+      const query = next.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [params, pathname, router],
+  );
+
+  const openThread = useCallback(
+    (id: string | null, name?: string | null) => {
+      setOpenThreadId(id);
+      setOpenThreadName(name ?? null);
+      setParam("thread", id);
+    },
+    [setParam],
+  );
+
+  const loadOlder = useCallback(async (): Promise<ChannelMessage[]> => {
+    if (!cursor || loadingOlder) return [];
     setLoadingOlder(true);
     const supabase = createClient();
     const { data } = await supabase.rpc("community_channel_messages", {
@@ -297,7 +444,56 @@ export function ChannelView({
     setMessages((current) => [...[...rows].reverse(), ...current]);
     setCursor(rows.length === MESSAGE_PAGE_SIZE && oldest ? { createdAt: oldest.createdAt, id: oldest.id } : null);
     setLoadingOlder(false);
+    return rows;
   }, [channel.id, cursor, loadingOlder]);
+
+  /**
+   * Scroll to a message and flash it.
+   *
+   * If it is not loaded, walk back a bounded number of pages looking for it. A
+   * reply to something from six months ago would otherwise either fetch the
+   * whole channel or silently do nothing; a budget and a sentence are honest
+   * about which of the two happened.
+   */
+  const jumpTo = useCallback(
+    async (messageId: string) => {
+      setNotice(null);
+      for (let page = 0; page <= JUMP_PAGE_BUDGET; page += 1) {
+        const node = nodesRef.current.get(messageId);
+        if (node) {
+          atBottomRef.current = false;
+          node.scrollIntoView({ block: "center", behavior: "smooth" });
+          setFlashId(messageId);
+          window.setTimeout(() => setFlashId((current) => (current === messageId ? null : current)), 1600);
+          return;
+        }
+        if (page === JUMP_PAGE_BUDGET) break;
+        const rows = await loadOlder();
+        if (rows.length === 0) break;
+      }
+      setNotice("That message is further back than this view reaches.");
+    },
+    [loadOlder],
+  );
+
+  // A `?jump=` from a copied link or a pin, honoured once per target so a
+  // re-render does not keep dragging the reader back to it.
+  useEffect(() => {
+    if (!jumpTarget || jumpedRef.current === jumpTarget) return;
+    jumpedRef.current = jumpTarget;
+    void jumpTo(jumpTarget);
+  }, [jumpTarget, jumpTo]);
+
+  const saveEdit = useCallback(
+    async (id: string, body: string): Promise<string | null> => {
+      const result = await editMessage(id, body);
+      if (result.error) return result.error;
+      setEditingId(null);
+      await refresh();
+      return null;
+    },
+    [refresh],
+  );
 
   const rendered = useMemo(() => {
     const nodes: { message: ChannelMessage; grouped: boolean; day: string | null }[] = [];
@@ -315,91 +511,124 @@ export function ChannelView({
   }, [messages]);
 
   return (
-    <>
-      <header className="flex items-center gap-2 border-b border-surgical-steel px-4 py-3">
-        <Hash size={16} aria-hidden="true" className="shrink-0 text-fog-muted" />
-        <h1 className="truncate text-sm font-semibold text-on-surface">{channel.name}</h1>
-        {channel.description ? (
-          <p className="hidden truncate border-l border-surgical-steel pl-2 text-xs text-fog-muted sm:block">
-            {channel.description}
+    <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex items-center gap-2 border-b border-surgical-steel px-4 py-3">
+          <Hash size={16} aria-hidden="true" className="shrink-0 text-fog-muted" />
+          <h1 className="truncate text-sm font-semibold text-on-surface">{channel.name}</h1>
+          {channel.description ? (
+            <p className="hidden truncate border-l border-surgical-steel pl-2 text-xs text-fog-muted sm:block">
+              {channel.description}
+            </p>
+          ) : null}
+
+          <div className="ml-auto flex shrink-0 items-center gap-1">
+            {connected ? null : (
+              <span className="flex items-center gap-1 text-xs text-amber-300" role="status">
+                <WifiOff size={12} aria-hidden="true" />
+                Reconnecting
+              </span>
+            )}
+            <ThreadListPopover channelId={channel.id} onOpenThread={openThread} />
+            <PinsPopover channelId={channel.id} onJump={(id) => void jumpTo(id)} />
+          </div>
+        </header>
+
+        {notice ? (
+          <p
+            role="status"
+            className="border-b border-surgical-steel bg-surface-container-low px-4 py-2 text-xs text-fog-muted"
+          >
+            {notice}
           </p>
         ) : null}
-        {connected ? null : (
-          <span className="ml-auto flex items-center gap-1 text-xs text-amber-300" role="status">
-            <WifiOff size={12} aria-hidden="true" />
-            Reconnecting
-          </span>
-        )}
-      </header>
 
-      <ol
-        ref={paneRef}
-        onScroll={(event) => {
-          const pane = event.currentTarget;
-          atBottomRef.current = pane.scrollHeight - pane.scrollTop - pane.clientHeight < 80;
-          if (pane.scrollTop < 120) void loadOlder();
-        }}
-        className="min-h-0 flex-1 overflow-y-auto py-2"
-      >
-        {cursor ? (
-          <li className="flex justify-center py-2">
-            <button
-              type="button"
-              onClick={() => void loadOlder()}
-              disabled={loadingOlder}
-              className="focus-ring inline-flex items-center gap-2 rounded-lg border border-surgical-steel px-3 py-1 text-xs text-fog-muted"
-            >
-              {loadingOlder ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : null}
-              Load earlier messages
-            </button>
-          </li>
-        ) : null}
-
-        {rendered.length === 0 ? (
-          <li className="px-4 py-12 text-center text-sm text-fog-muted">
-            {`Nothing in #${channel.name} yet. Say the first thing.`}
-          </li>
-        ) : null}
-
-        {rendered.map(({ message, grouped, day }) => (
-          <div key={message.id}>
-            {day ? (
-              <li className="flex items-center gap-3 px-4 py-3">
-                <span className="h-px flex-1 bg-surgical-steel" />
-                <span className="text-[11px] font-medium uppercase tracking-wide text-fog-muted">{day}</span>
-                <span className="h-px flex-1 bg-surgical-steel" />
-              </li>
-            ) : null}
-            <MessageRow
-              message={message}
-              grouped={grouped}
-              urls={urls}
-              canReact={permissions.canReact}
-              canReply={permissions.canReply}
-              onReply={setReplyTo}
-              onChanged={() => void refresh()}
-            />
-          </div>
-        ))}
-      </ol>
-
-      {permissions.composer === "ready" ? (
-        <Composer
-          channel={channel}
-          replyTo={replyTo}
-          onClearReply={() => setReplyTo(null)}
-          onOptimistic={(optimistic) => {
-            setMessages((current) => mergeMessage(current, optimistic));
-            atBottomRef.current = true;
+        <ol
+          ref={paneRef}
+          onScroll={(event) => {
+            const pane = event.currentTarget;
+            atBottomRef.current = pane.scrollHeight - pane.scrollTop - pane.clientHeight < 80;
+            if (pane.scrollTop < 120) void loadOlder();
           }}
-          onSettled={() => void refresh()}
-          onAttachmentUrl={(path, url) => setUrls((current) => new Map(current).set(path, url))}
+          className="min-h-0 flex-1 overflow-y-auto py-2"
+        >
+          {cursor ? (
+            <li className="flex justify-center py-2">
+              <button
+                type="button"
+                onClick={() => void loadOlder()}
+                disabled={loadingOlder}
+                className="focus-ring inline-flex items-center gap-2 rounded-lg border border-surgical-steel px-3 py-1 text-xs text-fog-muted"
+              >
+                {loadingOlder ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : null}
+                Load earlier messages
+              </button>
+            </li>
+          ) : null}
+
+          {rendered.length === 0 ? (
+            <li className="px-4 py-12 text-center text-sm text-fog-muted">
+              {`Nothing in #${channel.name} yet. Say the first thing.`}
+            </li>
+          ) : null}
+
+          {rendered.map(({ message, grouped, day }) => (
+            <div key={message.id}>
+              {day ? (
+                <li className="flex items-center gap-3 px-4 py-3">
+                  <span className="h-px flex-1 bg-surgical-steel" />
+                  <span className="text-[11px] font-medium uppercase tracking-wide text-fog-muted">{day}</span>
+                  <span className="h-px flex-1 bg-surgical-steel" />
+                </li>
+              ) : null}
+              <MessageRow
+                message={message}
+                grouped={grouped}
+                urls={urls}
+                channelId={channel.id}
+                editing={editingId === message.id}
+                flashed={flashId === message.id}
+                registerNode={registerNode}
+                onReply={setReplyTo}
+                onStartEdit={setEditingId}
+                onCancelEdit={() => setEditingId(null)}
+                onSaveEdit={saveEdit}
+                onOpenThread={openThread}
+                onJump={(id) => void jumpTo(id)}
+                onChanged={() => void refresh()}
+              />
+            </div>
+          ))}
+        </ol>
+
+        {permissions.composer === "ready" ? (
+          <Composer
+            channel={channel}
+            replyTo={replyTo}
+            onClearReply={() => setReplyTo(null)}
+            onOptimistic={(optimistic) => {
+              setMessages((current) => mergeMessage(current, optimistic));
+              atBottomRef.current = true;
+            }}
+            onSettled={() => void refresh()}
+            onAttachmentUrl={(path, url) => setUrls((current) => new Map(current).set(path, url))}
+          />
+        ) : (
+          <p role="status" className="border-t border-surgical-steel px-4 py-4 text-center text-sm text-fog-muted">
+            {COMPOSER_NOTICE[permissions.composer]}
+          </p>
+        )}
+      </div>
+
+      {openThreadId ? (
+        <ThreadPanel
+          key={openThreadId}
+          channel={channel}
+          threadId={openThreadId}
+          name={openThreadName}
+          onClose={() => openThread(null)}
         />
-      ) : (
-        <p role="status" className="border-t border-surgical-steel px-4 py-4 text-center text-sm text-fog-muted">
-          {COMPOSER_NOTICE[permissions.composer]}
-        </p>
-      )}
-    </>
+      ) : null}
+    </div>
   );
 }
