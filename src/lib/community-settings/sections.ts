@@ -62,7 +62,7 @@ export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
     blurb: "Custom emoji for messages and reactions.",
     group: "community",
     requires: "manage_emojis",
-    built: false,
+    built: true,
   },
   {
     id: "channels",

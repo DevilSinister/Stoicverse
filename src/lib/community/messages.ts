@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { toForwardedOrigin, type ForwardedOrigin } from "@/lib/channels/forwarded";
 import { MESSAGE_PAGE_SIZE, SEARCH_QUERY_LIMITS } from "@/lib/community/constants";
+import type { CustomEmoji } from "@/lib/community/emojis";
 
 /**
  * Reads for the messaging model added in 20260912070000.
@@ -336,6 +337,51 @@ export async function loadMemberDirectory(
       topRoleColor: (row.top_role_color as string | null) ?? null,
       hoisted: Boolean(row.hoisted),
       roles: (row.roles as { id: string; name: string; color: string | null }[] | null) ?? [],
+    })),
+    degraded: [],
+  };
+}
+
+/**
+ * Every custom emoji, with a public URL and the roles that may use it.
+ *
+ * `getPublicUrl` rather than a signed one, and this time the claim is checked:
+ * `select public from storage.buckets where id = 'community-emojis'` is true,
+ * set by the same migration that created it. The last time a comment asserted
+ * a bucket was public without checking, every image in the community answered
+ * 400 for five phases.
+ *
+ * Two reads rather than a join, because supabase-js would return the roles
+ * nested and the picker wants them flat.
+ */
+export async function loadCustomEmojis(
+  supabase: SupabaseClient,
+): Promise<{ emojis: CustomEmoji[]; degraded: string[] }> {
+  const [emojiResult, roleResult] = await Promise.all([
+    supabase.from("community_emojis").select("id,name,image_path,animated").order("name"),
+    supabase.from("community_emoji_roles").select("emoji_id,role_id"),
+  ]);
+
+  if (emojiResult.error) {
+    console.error("[community-messages]", { code: emojiResult.error.code ?? null });
+    return { emojis: [], degraded: ["Custom emoji could not be read. They need migration 20260912170000."] };
+  }
+
+  const rolesByEmoji = new Map<string, string[]>();
+  for (const row of (roleResult.data ?? []) as { emoji_id: string; role_id: string }[]) {
+    const existing = rolesByEmoji.get(row.emoji_id);
+    if (existing) existing.push(row.role_id);
+    else rolesByEmoji.set(row.emoji_id, [row.role_id]);
+  }
+
+  const rows = (emojiResult.data ?? []) as { id: string; name: string; image_path: string; animated: boolean }[];
+  return {
+    emojis: rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      animated: row.animated,
+      roleIds: rolesByEmoji.get(row.id) ?? [],
+      url: supabase.storage.from("community-emojis").getPublicUrl(row.image_path).data.publicUrl,
     })),
     degraded: [],
   };

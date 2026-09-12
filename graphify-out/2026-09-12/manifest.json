@@ -800,8 +800,8 @@
     "semantic_hash": ""
   },
   "src/app/community/actions.ts": {
-    "mtime": 1789208236.0777817,
-    "ast_hash": "1ab2fea18eba77303d3d21bc864f7183",
+    "mtime": 1789217856.9724717,
+    "ast_hash": "53fac031824bb57714c654b3d569e8a7",
     "semantic_hash": ""
   },
   "src/app/courses/CourseCatalogPage.tsx": {
@@ -1505,18 +1505,18 @@
     "semantic_hash": ""
   },
   "src/app/creator/settings/actions.ts": {
-    "mtime": 1789171023.0679538,
-    "ast_hash": "8957021ba6315b608127c8f3eb738cd7",
+    "mtime": 1789217837.2336543,
+    "ast_hash": "0ee1f86cce2488617b5d398bf6206c3c",
     "semantic_hash": ""
   },
   "src/lib/community-settings/model.ts": {
-    "mtime": 1789170972.419091,
-    "ast_hash": "5defe34aee139e20aa5d2448765e0db9",
+    "mtime": 1789217784.019162,
+    "ast_hash": "e8e13086b685418cfe10252a86672004",
     "semantic_hash": ""
   },
   "src/lib/community-settings/server.ts": {
-    "mtime": 1789170956.5386083,
-    "ast_hash": "1b2a711eb664fcf7dd0ac43ecdef8fa6",
+    "mtime": 1789217810.30233,
+    "ast_hash": "b598faf05ee6f34660ab66b38bec731d",
     "semantic_hash": ""
   },
   "supabase/migrations/20260911000000_community_settings_identity.sql": {
@@ -1535,8 +1535,8 @@
     "semantic_hash": ""
   },
   "tests/community-settings.test.mjs": {
-    "mtime": 1789171434.3430893,
-    "ast_hash": "5a66837e8b4d7de29d77ad7d18a34b79",
+    "mtime": 1789218292.1526918,
+    "ast_hash": "bf92170a72a6c3308dea0613afe89549",
     "semantic_hash": ""
   },
   "supabase/migrations/20260911010000_community_composer_rules.sql": {
@@ -1604,11 +1604,6 @@
     "ast_hash": "6a9b7742dd35f209d047e5956325819e",
     "semantic_hash": ""
   },
-  "src/components/community/settings/ModerationSection.tsx": {
-    "mtime": 1789171106.1040163,
-    "ast_hash": "b1bff2c48cd08cfd996c31457b3e1629",
-    "semantic_hash": ""
-  },
   "src/components/community/settings/RolesSection.tsx": {
     "mtime": 1789103782.6636963,
     "ast_hash": "ffccea1e9637c7a21057423ce7993784",
@@ -1635,8 +1630,8 @@
     "semantic_hash": ""
   },
   "src/components/community/settings/SettingsSectionBody.tsx": {
-    "mtime": 1789171364.4633715,
-    "ast_hash": "eed0eef5ec02344044a393126e75b6f2",
+    "mtime": 1789217985.7317646,
+    "ast_hash": "8c58160bf47d432a163ddb48ebb9d73b",
     "semantic_hash": ""
   },
   "src/components/community/settings/section-icons.ts": {
@@ -1800,8 +1795,8 @@
     "semantic_hash": ""
   },
   "src/lib/community-settings/workspace.ts": {
-    "mtime": 1789171066.5698686,
-    "ast_hash": "a502a977deb778df645a9e873d8c066f",
+    "mtime": 1789217985.5588202,
+    "ast_hash": "7ddf0e444de29f032e7304318284f039",
     "semantic_hash": ""
   },
   "src/lib/dev/login-bypass.ts": {
@@ -1860,8 +1855,8 @@
     "semantic_hash": ""
   },
   "tests/community-migrations.contract.mjs": {
-    "mtime": 1789204564.5067673,
-    "ast_hash": "d0d3321a4c78259287e47ce4a5edac7b",
+    "mtime": 1789218325.8166082,
+    "ast_hash": "2e20f97473d7ad76331303472609b5d1",
     "semantic_hash": ""
   },
   "tests/emoji-index.test.mjs": {
@@ -2070,8 +2065,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/ChannelView.tsx": {
-    "mtime": 1789216276.7746034,
-    "ast_hash": "0d85b242cf6e454b629331f9be09d76e",
+    "mtime": 1789218104.4524763,
+    "ast_hash": "25d6ec40d4b2ea84f4cfe5c0e63d19eb",
     "semantic_hash": ""
   },
   "src/components/channels/ChannelsShell.tsx": {
@@ -2100,8 +2095,8 @@
     "semantic_hash": ""
   },
   "src/lib/channels/permissions.ts": {
-    "mtime": 1789193013.2054708,
-    "ast_hash": "37c8985f18ffe0b2844b528f29b3de4c",
+    "mtime": 1789218052.4611866,
+    "ast_hash": "20f7812f4b24f4b0a4ae5f8930f0e8df",
     "semantic_hash": ""
   },
   "src/lib/markdown/render.tsx": {
@@ -2115,8 +2110,8 @@
     "semantic_hash": ""
   },
   "tests/channels-helpers.test.mjs": {
-    "mtime": 1789196448.5419712,
-    "ast_hash": "16aa11adad5ff6af11810eae0804d770",
+    "mtime": 1789218203.524096,
+    "ast_hash": "5abdcabccc39d1823f603f060f592b61",
     "semantic_hash": ""
   },
   "tests/channels-markdown.test.mjs": {
@@ -2372,6 +2367,31 @@
   "src/components/ui/toast.tsx": {
     "mtime": 1789216095.6325784,
     "ast_hash": "c48ccddab2c52fe34a6ce2ec68b7bc42",
+    "semantic_hash": ""
+  },
+  "src/components/channels/RulesGateNotice.tsx": {
+    "mtime": 1789218092.2677174,
+    "ast_hash": "08dbf8d1b9ab9e68786dfbb1e86b7b12",
+    "semantic_hash": ""
+  },
+  "src/components/community/settings/SafetySection.tsx": {
+    "mtime": 1789217956.2410064,
+    "ast_hash": "9a7c38258fba58fd32ba83467ad18869",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260912160000_community_safety_gates.sql": {
+    "mtime": 1789218272.8945825,
+    "ast_hash": "d28a4e73cdad4baea4c939583462aba5",
+    "semantic_hash": ""
+  },
+  "supabase/rollback/20260912160000_community_safety_gates.down.sql": {
+    "mtime": 1789217370.9490228,
+    "ast_hash": "8805d97560084ea4af968908eb73050c",
+    "semantic_hash": ""
+  },
+  "tests/community-safety.contract.mjs": {
+    "mtime": 1789218259.5658545,
+    "ast_hash": "a5822823133f5b4d43a219fb3490d3c7",
     "semantic_hash": ""
   }
 }

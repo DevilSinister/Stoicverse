@@ -6,6 +6,7 @@ import type { MentionDictionary } from "@/lib/channels/mentions";
 import { deriveAffordances, type Affordances } from "@/lib/channels/permissions";
 import type { ChannelMessage, DirectoryMember, ViewerState } from "@/lib/community/messages";
 import type { MentionResolvers } from "@/lib/markdown/render";
+import type { CustomEmoji } from "@/lib/community/emojis";
 import { useCommunityLive } from "@/components/channels/useCommunityLive";
 import { useUnread } from "@/components/channels/useUnread";
 import { createClient } from "@/lib/supabase/client";
@@ -38,6 +39,8 @@ type CommunityValue = {
   viewer: ViewerState | null;
   channels: ChannelRow[];
   members: DirectoryMember[];
+  /** The community's custom emoji, for both pickers and the body renderer. */
+  emojis: CustomEmoji[];
   /** What the viewer may do in one channel. */
   affordances: (channelId: string) => Affordances;
   /** Names for the mention autocomplete and for encoding on send. */
@@ -92,12 +95,14 @@ export function CommunityProvider({
   viewer,
   channels: initialChannels,
   members,
+  emojis,
   degraded,
   children,
 }: {
   viewer: ViewerState | null;
   channels: ChannelRow[];
   members: DirectoryMember[];
+  emojis: CustomEmoji[];
   degraded: string[];
   children: ReactNode;
 }) {
@@ -113,6 +118,7 @@ export function CommunityProvider({
 
   const value = useMemo<CommunityValue>(() => {
     const channelById = new Map(channels.map((channel) => [channel.id, channel]));
+    const emojiById = new Map(emojis.map((emoji) => [emoji.id, emoji]));
     const memberById = new Map(members.map((member) => [member.id, member.fullName]));
     const roleById = new Map((viewer?.roles ?? []).map((role) => [role.id, { name: role.name, color: role.color }]));
     // A role the viewer does not hold still has to render inside somebody
@@ -127,6 +133,7 @@ export function CommunityProvider({
       viewer,
       channels,
       members,
+      emojis,
       affordances: (channelId: string) =>
         deriveAffordances({
           permissions: viewer?.channelPermissions?.[channelId] ?? [],
@@ -142,6 +149,9 @@ export function CommunityProvider({
         user: (id) => memberById.get(id),
         role: (id) => roleById.get(id),
         channel: (id) => channelById.get(id)?.name,
+        // A deleted emoji resolves to nothing and the renderer falls back to
+        // `:name:`. Old messages keep what their author wrote.
+        emoji: (id) => emojiById.get(id)?.url,
       },
       setActiveChannel,
       refreshUnread,
@@ -159,6 +169,7 @@ export function CommunityProvider({
     viewer,
     channels,
     members,
+    emojis,
     degraded,
     setActiveChannel,
     refreshUnread,

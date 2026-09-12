@@ -108,7 +108,10 @@ test("the section registry is the only section list and filters by permission", 
 
   const influencer = visibleSections({ isInfluencer: true, permissions: new Set() }).map((section) => section.id);
   assert.ok(influencer.includes("overview") && influencer.includes("audit"));
-  assert.ok(!influencer.includes("emoji"), "unbuilt sections never render, even for the owner");
+  // Emoji became a built section in phase 6; `members` is still the one that
+  // is not, and it is what now carries the property this line is for.
+  assert.ok(influencer.includes("emoji"), "emoji is built as of phase 6");
+  assert.ok(!influencer.includes("members"), "unbuilt sections never render, even for the owner");
 
   const auditor = visibleSections({
     isInfluencer: false,

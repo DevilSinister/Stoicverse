@@ -136,9 +136,15 @@ export function VoicePlayer({
 
   useEffect(() => {
     let live = true;
-    void measureOnce(src).then((measured) => {
-      if (live && measured) setPeaks(measured);
-    });
+    void measureOnce(src)
+      .then((measured) => {
+        if (live && measured) setPeaks(measured);
+      })
+      // `measure` swallows its own failures, so this can only fire if the
+      // queue itself breaks. A `void`-invoked promise with no catch reports a
+      // dead network as an uncaught TypeError in the console, and a waveform
+      // is not worth one.
+      .catch(() => undefined);
     return () => {
       live = false;
     };

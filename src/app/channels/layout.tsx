@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { ChannelsShell } from "@/components/channels/ChannelsShell";
 import { CommunityProvider, type ChannelRow } from "@/components/channels/CommunityProvider";
-import { loadMemberDirectory, loadViewerState } from "@/lib/community/messages";
+import { loadCustomEmojis, loadMemberDirectory, loadViewerState } from "@/lib/community/messages";
 import { requireCommunityAccess } from "@/lib/supabase/access";
 
 /**
@@ -19,13 +19,14 @@ import { requireCommunityAccess } from "@/lib/supabase/access";
 export default async function ChannelsLayout({ children }: { children: ReactNode }) {
   const { supabase } = await requireCommunityAccess("/channels");
 
-  const [viewerLoad, directory, memberLoad] = await Promise.all([
+  const [viewerLoad, directory, memberLoad, emojiLoad] = await Promise.all([
     loadViewerState(supabase),
     supabase.rpc("community_channel_directory"),
     loadMemberDirectory(supabase),
+    loadCustomEmojis(supabase),
   ]);
 
-  const degraded = [...viewerLoad.degraded, ...memberLoad.degraded];
+  const degraded = [...viewerLoad.degraded, ...memberLoad.degraded, ...emojiLoad.degraded];
   if (directory.error) {
     console.error("[channels]", { code: directory.error.code ?? null });
     degraded.push("The channel list could not be read.");
@@ -51,6 +52,7 @@ export default async function ChannelsLayout({ children }: { children: ReactNode
       viewer={viewerLoad.viewer}
       channels={channels}
       members={memberLoad.members}
+      emojis={emojiLoad.emojis}
       degraded={degraded}
     >
       <ChannelsShell>{children}</ChannelsShell>

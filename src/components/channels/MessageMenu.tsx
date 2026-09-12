@@ -16,6 +16,8 @@ import { createThread, deleteMessage, togglePostHighlight, toggleReaction } from
 import { reportMessage } from "@/app/community/moderation-actions";
 import { ForwardDialog } from "@/components/channels/ForwardDialog";
 import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
+import { emojiToken } from "@/lib/community/emojis";
+import { useCommunity } from "@/components/channels/CommunityProvider";
 import { useToast } from "@/components/ui/toast";
 import {
   ContextMenu,
@@ -94,6 +96,7 @@ export function MessageMenu({
   });
 
   const notify = useToast();
+  const { emojis } = useCommunity();
   const [dialog, setDialog] = useState<Dialog>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -258,13 +261,16 @@ export function MessageMenu({
             <PopoverContent className="w-auto p-0">
               <EmojiPicker
                 mode="react"
+                customEmojis={emojis}
                 onSelect={(selection) => {
                   setEmojiOpen(false);
-                  // Custom emoji arrive in phase 6; until then a reaction is a
-                  // unicode glyph, which is what `reactions.emoji` stores.
-                  if (selection.kind !== "unicode") return;
                   void run(async () => {
-                    await toggleReaction(message.id, selection.glyph);
+                    await toggleReaction(
+                      message.id,
+                      selection.kind === "unicode"
+                        ? selection.glyph
+                        : emojiToken({ id: selection.id, name: selection.name }),
+                    );
                   });
                 }}
                 onClose={() => setEmojiOpen(false)}

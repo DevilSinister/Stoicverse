@@ -10,6 +10,7 @@ import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/components/ui/toast";
 import { encodeMentions } from "@/lib/channels/mentions";
+import { emojiToken } from "@/lib/community/emojis";
 import { signAttachmentUrls } from "@/lib/channels/attachment-urls";
 import { resolveShortcut } from "@/lib/channels/shortcuts";
 import {
@@ -80,7 +81,7 @@ export function Composer({
   onSettled: () => void;
   onAttachmentUrl: (path: string, url: string) => void;
 }) {
-  const { viewer, dictionary, affordances, announceTyping } = useCommunity();
+  const { viewer, dictionary, affordances, announceTyping, emojis } = useCommunity();
   const permissions = affordances(channel.id);
   const label = placeholder ?? `Message #${channel.name}`;
   // Every failure here is a toast. Rendered under the box, a refused upload
@@ -405,9 +406,17 @@ export function Composer({
           <PopoverContent align="start" className="w-auto p-0">
             <EmojiPicker
               mode="insert"
+              customEmojis={emojis}
               onSelect={(selection) => {
                 setEmojiOpen(false);
-                if (selection.kind === "unicode") insertAtCaret(selection.glyph);
+                // A custom emoji goes into the body as its token. The id
+                // travels with the name, so renaming it later never rewrites
+                // this message and deleting it leaves a readable `:name:`.
+                insertAtCaret(
+                  selection.kind === "unicode"
+                    ? selection.glyph
+                    : emojiToken({ id: selection.id, name: selection.name }),
+                );
               }}
               onClose={() => setEmojiOpen(false)}
             />

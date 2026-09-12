@@ -4,6 +4,7 @@ import { StructureEditor } from "@/components/community/structure/StructureEdito
 import { AuditLogSection } from "@/components/community/settings/AuditLogSection";
 import { AutomodSection } from "@/components/community/settings/AutomodSection";
 import { IdentitySection } from "@/components/community/settings/IdentitySection";
+import { EmojiSection } from "@/components/community/settings/EmojiSection";
 import { SafetySection } from "@/components/community/settings/SafetySection";
 import { BansSection, ReportsSection } from "@/components/community/settings/ModerationQueueSections";
 import { RolesSection } from "@/components/community/settings/RolesSection";
@@ -53,6 +54,10 @@ export function SettingsSectionBody({ workspace }: { workspace: SettingsWorkspac
           canSave={canSave}
           onNotice={notice}
         />
+      ) : null;
+    case "emoji":
+      return data.emoji ? (
+        <EmojiSection emojis={data.emoji.emojis} roles={data.emoji.roles} canManage={canSave} />
       ) : null;
     case "safety":
       return data.safety ? (

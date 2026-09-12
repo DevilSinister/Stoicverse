@@ -25,6 +25,8 @@ import {
   type SettingsSection,
 } from "@/lib/community-settings/sections";
 import { loadCommunityIdentity, type IdentityLoad } from "@/lib/community-settings/server";
+import { loadCustomEmojis } from "@/lib/community/messages";
+import type { CustomEmoji } from "@/lib/community/emojis";
 import { loadChannelOverrides, loadCommunityStructure, type ChannelOverride } from "@/lib/community-settings/structure";
 
 /**
@@ -67,6 +69,7 @@ export type SettingsWorkspaceData = {
     rulesChannels: { id: string; name: string }[];
     acceptedCount: number;
   };
+  emoji?: { emojis: CustomEmoji[]; roles: CommunityRole[] };
   audit?: { events: AuditEvent[]; nextCursor: string | null; degraded: string[] };
   reports?: { rows: ReportRow[]; nextCursor: string | null; status: "open" | "resolved" };
   bans?: BanRow[];
@@ -188,6 +191,15 @@ export async function loadSettingsWorkspace(
       };
       degraded.push(...identity.degraded);
       if (accepted.error) degraded.push("The rules acceptance count could not be read.");
+      break;
+    }
+    case "emoji": {
+      const [emojiLoad, roleLoad] = await Promise.all([
+        loadCustomEmojis(supabase),
+        loadCommunityRoles(supabase, userId),
+      ]);
+      data.emoji = { emojis: emojiLoad.emojis, roles: roleLoad.roles };
+      degraded.push(...emojiLoad.degraded, ...roleLoad.degraded);
       break;
     }
     case "reports": {

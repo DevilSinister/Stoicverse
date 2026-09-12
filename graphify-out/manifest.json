@@ -1630,8 +1630,8 @@
     "semantic_hash": ""
   },
   "src/components/community/settings/SettingsSectionBody.tsx": {
-    "mtime": 1789217985.7317646,
-    "ast_hash": "8c58160bf47d432a163ddb48ebb9d73b",
+    "mtime": 1789220915.853699,
+    "ast_hash": "a6d9b7ce2e2c5f41a65052fba25cd08f",
     "semantic_hash": ""
   },
   "src/components/community/settings/section-icons.ts": {
@@ -1790,13 +1790,13 @@
     "semantic_hash": ""
   },
   "src/lib/community-settings/sections.ts": {
-    "mtime": 1789171644.257986,
-    "ast_hash": "362caea7e7cd2920ad6494fc56924197",
+    "mtime": 1789220915.8515317,
+    "ast_hash": "14b8849c9f61bca40924cd59795965e9",
     "semantic_hash": ""
   },
   "src/lib/community-settings/workspace.ts": {
-    "mtime": 1789217985.5588202,
-    "ast_hash": "7ddf0e444de29f032e7304318284f039",
+    "mtime": 1789220915.8515317,
+    "ast_hash": "fe844dff8fffbcfa75e072f49ce95c30",
     "semantic_hash": ""
   },
   "src/lib/dev/login-bypass.ts": {
@@ -1805,8 +1805,8 @@
     "semantic_hash": ""
   },
   "tests/community-permissions.test.mjs": {
-    "mtime": 1789110579.0642633,
-    "ast_hash": "17034793df5e9130bd6e1b96b96c062c",
+    "mtime": 1789221088.7922535,
+    "ast_hash": "53ea2a90aa79086ba1d082a4e55f3e69",
     "semantic_hash": ""
   },
   "tests/community-settings-ui.contract.mjs": {
@@ -2000,8 +2000,8 @@
     "semantic_hash": ""
   },
   "src/lib/community/messages.ts": {
-    "mtime": 1789208089.1466148,
-    "ast_hash": "b413dfde2742d780b35b4b29e0fa82cb",
+    "mtime": 1789220635.8732226,
+    "ast_hash": "ae90a993e6c286b377d7cf8b4cb1b16b",
     "semantic_hash": ""
   },
   "supabase/migrations/20260912070000_community_messages.sql": {
@@ -2045,8 +2045,8 @@
     "semantic_hash": ""
   },
   "src/app/channels/layout.tsx": {
-    "mtime": 1789175931.7426412,
-    "ast_hash": "94ccd8cd04e1ae27e34c392bfefc3628",
+    "mtime": 1789220661.4129257,
+    "ast_hash": "61de799c094826e5a19852d06fdb02ff",
     "semantic_hash": ""
   },
   "src/app/channels/loading.tsx": {
@@ -2075,13 +2075,13 @@
     "semantic_hash": ""
   },
   "src/components/channels/CommunityProvider.tsx": {
-    "mtime": 1789203784.7841372,
-    "ast_hash": "e7cb50d8c2850b0158adc60b6a9e3145",
+    "mtime": 1789220691.5220654,
+    "ast_hash": "91f020dd163e1538335a3639469a066e",
     "semantic_hash": ""
   },
   "src/components/channels/Composer.tsx": {
-    "mtime": 1789216220.9202278,
-    "ast_hash": "81ebdd46fd1c28c6f55cd97b702c51ab",
+    "mtime": 1789220742.7204535,
+    "ast_hash": "ecc4d01d8d7763b51923b2648b35e2a8",
     "semantic_hash": ""
   },
   "src/lib/channels/grouping.ts": {
@@ -2130,8 +2130,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/MessageMenu.tsx": {
-    "mtime": 1789216331.6208677,
-    "ast_hash": "adfd66b8daeafe2c46b5b87534fb980b",
+    "mtime": 1789220755.3182354,
+    "ast_hash": "2b54a15aac0b429ebb97f64a4f73dc48",
     "semantic_hash": ""
   },
   "src/components/channels/ThreadPanel.tsx": {
@@ -2345,8 +2345,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/VoicePlayer.tsx": {
-    "mtime": 1789213700.7175117,
-    "ast_hash": "9d4266ac0b2a708e16bee0ec4113d524",
+    "mtime": 1789221381.044374,
+    "ast_hash": "39ee6e7a0c4bb3d805b9452deefdb99c",
     "semantic_hash": ""
   },
   "src/components/channels/Waveform.tsx": {
@@ -2392,6 +2392,36 @@
   "tests/community-safety.contract.mjs": {
     "mtime": 1789218259.5658545,
     "ast_hash": "a5822823133f5b4d43a219fb3490d3c7",
+    "semantic_hash": ""
+  },
+  "src/app/community/emoji-actions.ts": {
+    "mtime": 1789220816.9399824,
+    "ast_hash": "e16f3f8dffe257ddd028438477c3261c",
+    "semantic_hash": ""
+  },
+  "src/components/community/settings/EmojiSection.tsx": {
+    "mtime": 1789220898.7700608,
+    "ast_hash": "ca115e4edfef056053c748c1c7cfd5d3",
+    "semantic_hash": ""
+  },
+  "src/lib/community/emojis.ts": {
+    "mtime": 1789220614.2260869,
+    "ast_hash": "04149b790a0d2a1fe71c5987af947b58",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260912170000_community_custom_emojis.sql": {
+    "mtime": 1789220488.3483496,
+    "ast_hash": "655f66c47bd9372f80ee41095f8f3e0d",
+    "semantic_hash": ""
+  },
+  "supabase/rollback/20260912170000_community_custom_emojis.down.sql": {
+    "mtime": 1789220488.3781292,
+    "ast_hash": "948efca762f9e5b25b3397015ed5d5f6",
+    "semantic_hash": ""
+  },
+  "tests/community-emoji.contract.mjs": {
+    "mtime": 1789221088.7941391,
+    "ast_hash": "d218cc6b0f5cc2dd26be3838bf35684d",
     "semantic_hash": ""
   }
 }
