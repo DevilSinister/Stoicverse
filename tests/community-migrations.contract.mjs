@@ -41,10 +41,17 @@ test("every function pins search_path and every definer is revoked from PUBLIC",
     const pinned = sql.match(/set search_path (to|=) /gi) ?? [];
     assert.equal(pinned.length, created.length, `${name}: ${created.length} functions, ${pinned.length} search_path pins`);
 
-    const definers = [
-      ...sql.matchAll(/create (?:or replace )?function\s+([a-z_.]+)\s*\(([^)]*)\)[\s\S]*?security definer/gi),
-    ];
-    for (const [, fn] of definers) {
+    // Split at each `create function` and judge every definition inside its
+    // own chunk. Scanning the whole file for "a create, then eventually
+    // `security definer`" runs the lazy match out of one function and into the
+    // next: a non-definer sitting above a definer was reported as a definer,
+    // and — because matchAll resumes past the match it just made — the real
+    // definer below it was never examined at all.
+    const definers = sql
+      .split(/(?=create (?:or replace )?function\s)/i)
+      .filter((chunk) => /^create (?:or replace )?function\s/i.test(chunk) && /security definer/i.test(chunk))
+      .map((chunk) => chunk.match(/^create (?:or replace )?function\s+([a-z_.]+)\s*\(/i)[1]);
+    for (const fn of definers) {
       assert.match(
         sql,
         // `from public` may be followed by more roles. anon and authenticated

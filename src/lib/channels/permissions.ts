@@ -13,6 +13,11 @@ export type ComposerState =
   | "timedOut"
   | "banned"
   | "suspended"
+  // The three soft gates from phase 7. None of them is a sanction: each lifts
+  // itself, or is lifted by the member doing one thing.
+  | "rulesNotAccepted"
+  | "notVerified"
+  | "lockedDown"
   | "readOnly"
   | "announcementOnly"
   | "rulesChannel";
@@ -57,6 +62,9 @@ export function deriveAffordances(input: AffordanceInput): Affordances {
   if (gate === "suspended") composer = "suspended";
   else if (gate === "banned") composer = "banned";
   else if (gate === "timeout") composer = "timedOut";
+  else if (gate === "lockdown") composer = "lockedDown";
+  else if (gate === "rules") composer = "rulesNotAccepted";
+  else if (gate === "verification") composer = "notVerified";
   else if (channelType === "rules") composer = "rulesChannel";
   else if (!has(permissions, "send_messages")) {
     composer = channelType === "announcements" ? "announcementOnly" : "readOnly";
@@ -88,6 +96,10 @@ export const COMPOSER_NOTICE: Record<Exclude<ComposerState, "ready">, string> = 
   suspended: "Your account is suspended.",
   banned: "You are banned from this community.",
   timedOut: "You are timed out and cannot post right now.",
+  // Each of these names the thing that lifts it, because all three do lift.
+  rulesNotAccepted: "Read and accept the community rules before posting.",
+  notVerified: "New members read for a while before they can post. This lifts itself.",
+  lockedDown: "The community is locked down after a burst of sign-ups. This lifts itself.",
   readOnly: "You do not have permission to post in this channel.",
   announcementOnly: "Only the creator posts in announcement channels.",
   rulesChannel: "This channel is the rules. Nobody replies here.",

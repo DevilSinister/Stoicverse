@@ -69,40 +69,127 @@ export const ACCENT_SWATCHES = [
 // seven-key grants-only `permission_config` they replaced is gone from the
 // database, so a copy of it here would be a list nothing reads.
 
-export type CommunityModeration = {
-  editWindowMinutes: number;
-  deleteRequiresReason: boolean;
-};
+/**
+ * The three answers to "may this member post yet", in increasing order of
+ * friction. Each carries the sentence the section shows, because a radio
+ * labelled `member_age` is a column name, not a choice.
+ */
+export const VERIFICATION_LEVELS = [
+  {
+    value: "none",
+    label: "Open",
+    blurb: "Anyone who can see a channel can post in it.",
+  },
+  {
+    value: "member_age",
+    label: "After a wait",
+    blurb: "A new membership reads first, and posts once it is old enough.",
+  },
+  {
+    value: "accepted_rules",
+    label: "After accepting the rules",
+    blurb: "Members read the rules and accept them. Editing the rules asks everyone again.",
+  },
+] as const;
+
+export type VerificationLevel = (typeof VERIFICATION_LEVELS)[number]["value"];
 
 /**
- * Mirrors community_settings_moderation_bounds.
+ * Who may post, how soon, and what happens when many people join at once.
+ *
+ * One shape rather than two, because the edit window and the verification
+ * level are answers to the same question — how much rope a member gets — and
+ * as two forms in one section they only argued about which Save to press.
+ *
+ * `raidLockdownUntil`, `rulesVersion` and `rulesUpdatedAt` are in here but are
+ * never submitted: the database writes them, from the join-rate trigger and
+ * from the settings trigger, and the section only shows them.
+ */
+export type CommunitySafety = {
+  verificationLevel: VerificationLevel;
+  verificationMinutes: number;
+  joinRateLimit: number;
+  joinRateWindowMinutes: number;
+  lockdownMinutes: number;
+  rulesChannelId: string | null;
+  editWindowMinutes: number;
+  deleteRequiresReason: boolean;
+  /** Read-only. Set by private.enforce_join_rate, cleared by community_clear_lockdown. */
+  raidLockdownUntil: string | null;
+  /** Read-only. Bumped by touch_community_settings when the rules text changes. */
+  rulesVersion: number;
+  rulesUpdatedAt: string | null;
+};
+
+const VERIFICATION_VALUES = new Set<string>(VERIFICATION_LEVELS.map((level) => level.value));
+
+/**
+ * Mirrors community_settings_safety_bounds and _moderation_bounds.
  *
  * Blocked words left this row in 20260912040000: they are AutoMod rules now,
  * each with its own match mode and its own action, so a pair of community-wide
  * columns could no longer say what any one of them does. Their bounds live in
  * `automod.ts` as `AUTOMOD_LIMITS.keyword`.
  */
-export const MODERATION_LIMITS = {
+export const SAFETY_LIMITS = {
   editWindowMinutes: { min: 0, max: 10080 },
+  verificationMinutes: { min: 0, max: 10080 },
+  joinRateLimit: { min: 0, max: 500 },
+  joinRateWindowMinutes: { min: 1, max: 60 },
+  lockdownMinutes: { min: 5, max: 1440 },
 } as const;
 
-export const DEFAULT_COMMUNITY_MODERATION: CommunityModeration = {
+export const DEFAULT_COMMUNITY_SAFETY: CommunitySafety = {
+  verificationLevel: "none",
+  verificationMinutes: 0,
+  joinRateLimit: 0,
+  joinRateWindowMinutes: 10,
+  lockdownMinutes: 30,
+  rulesChannelId: null,
   editWindowMinutes: 0,
   deleteRequiresReason: false,
+  raidLockdownUntil: null,
+  rulesVersion: 1,
+  rulesUpdatedAt: null,
 };
 
-export function parseModeration(input: Record<string, unknown>): CommunityModeration {
-  const editWindowMinutes = Number.parseInt(String(input.editWindowMinutes ?? ""), 10);
-  if (
-    !Number.isInteger(editWindowMinutes) ||
-    editWindowMinutes < MODERATION_LIMITS.editWindowMinutes.min ||
-    editWindowMinutes > MODERATION_LIMITS.editWindowMinutes.max
-  ) {
-    throw new Error("The edit window must be between 0 minutes (never expires) and 7 days.");
+function bounded(input: Record<string, unknown>, key: keyof typeof SAFETY_LIMITS, sentence: string): number {
+  const value = Number.parseInt(String(input[key] ?? ""), 10);
+  const limit = SAFETY_LIMITS[key];
+  if (!Number.isInteger(value) || value < limit.min || value > limit.max) throw new Error(sentence);
+  return value;
+}
+
+export function parseSafety(
+  input: Record<string, unknown>,
+): Omit<CommunitySafety, "raidLockdownUntil" | "rulesVersion" | "rulesUpdatedAt"> {
+  const verificationLevel = String(input.verificationLevel ?? "");
+  if (!VERIFICATION_VALUES.has(verificationLevel)) {
+    throw new Error("Choose one of the three ways a member earns the right to post.");
   }
 
+  const verificationMinutes = bounded(input, "verificationMinutes", "The wait must be between 0 minutes and 7 days.");
+  // A wait of zero is the same as no wait at all, and saving it would leave a
+  // level switched on that does nothing — the shape of a setting somebody
+  // later reports as broken.
+  if (verificationLevel === "member_age" && verificationMinutes === 0) {
+    throw new Error("A wait of zero minutes is the same as leaving the community open.");
+  }
+
+  const rulesChannelId = String(input.rulesChannelId ?? "").trim();
+
   return {
-    editWindowMinutes,
+    verificationLevel: verificationLevel as VerificationLevel,
+    verificationMinutes,
+    joinRateLimit: bounded(input, "joinRateLimit", "The join limit must be between 0 (off) and 500."),
+    joinRateWindowMinutes: bounded(input, "joinRateWindowMinutes", "The window must be between 1 and 60 minutes."),
+    lockdownMinutes: bounded(input, "lockdownMinutes", "A lockdown must last between 5 minutes and 24 hours."),
+    rulesChannelId: rulesChannelId === "" ? null : rulesChannelId,
+    editWindowMinutes: bounded(
+      input,
+      "editWindowMinutes",
+      "The edit window must be between 0 minutes (never expires) and 7 days.",
+    ),
     deleteRequiresReason: input.deleteRequiresReason === true || input.deleteRequiresReason === "on",
   };
 }

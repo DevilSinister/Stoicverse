@@ -61,6 +61,12 @@ export type SettingsWorkspaceData = {
     roles: CommunityRole[];
     channels: CommunityChannel[];
   };
+  safety?: {
+    identity: IdentityLoad;
+    /** Only `rules` channels: the database trigger refuses any other as the rules channel. */
+    rulesChannels: { id: string; name: string }[];
+    acceptedCount: number;
+  };
   audit?: { events: AuditEvent[]; nextCursor: string | null; degraded: string[] };
   reports?: { rows: ReportRow[]; nextCursor: string | null; status: "open" | "resolved" };
   bans?: BanRow[];
@@ -165,9 +171,23 @@ export async function loadSettingsWorkspace(
       break;
     }
     case "safety": {
-      const identity = await loadCommunityIdentity(supabase);
-      data.identity = identity;
+      // The acceptance count is a definer RPC rather than a count on the
+      // table: the acceptances policy is own-rows, so a moderator reading it
+      // directly would always count one, and be told nobody had accepted.
+      const [identity, structure, accepted] = await Promise.all([
+        loadCommunityIdentity(supabase),
+        loadCommunityStructure(supabase),
+        supabase.rpc("community_rules_acceptance_count"),
+      ]);
+      data.safety = {
+        identity,
+        rulesChannels: structure.channels
+          .filter((channel) => channel.type === "rules")
+          .map((channel) => ({ id: channel.id, name: channel.name })),
+        acceptedCount: typeof accepted.data === "number" ? accepted.data : 0,
+      };
       degraded.push(...identity.degraded);
+      if (accepted.error) degraded.push("The rules acceptance count could not be read.");
       break;
     }
     case "reports": {

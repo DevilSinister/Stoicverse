@@ -23,6 +23,7 @@ import { mergeMessage, useChannelLive, useCommunity, type ChannelRow } from "@/c
 import { MemberList } from "@/components/channels/MemberList";
 import { MessageMenu } from "@/components/channels/MessageMenu";
 import { MobilePaneDrawer } from "@/components/channels/MobilePane";
+import { RulesGateNotice } from "@/components/channels/RulesGateNotice";
 import { VoicePlayer } from "@/components/channels/VoicePlayer";
 import { ThreadPanel } from "@/components/channels/ThreadPanel";
 import { useToast } from "@/components/ui/toast";
@@ -877,6 +878,8 @@ export function ChannelView({
             onSettled={() => void refresh()}
             onAttachmentUrl={(path, url) => setUrls((current) => new Map(current).set(path, url))}
           />
+        ) : permissions.composer === "rulesNotAccepted" ? (
+          <RulesGateNotice />
         ) : (
           <p role="status" className="border-t border-surgical-steel px-4 py-4 text-center text-sm text-fog-muted">
             {COMPOSER_NOTICE[permissions.composer]}

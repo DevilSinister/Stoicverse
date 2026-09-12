@@ -4,7 +4,7 @@ import { StructureEditor } from "@/components/community/structure/StructureEdito
 import { AuditLogSection } from "@/components/community/settings/AuditLogSection";
 import { AutomodSection } from "@/components/community/settings/AutomodSection";
 import { IdentitySection } from "@/components/community/settings/IdentitySection";
-import { ModerationSection } from "@/components/community/settings/ModerationSection";
+import { SafetySection } from "@/components/community/settings/SafetySection";
 import { BansSection, ReportsSection } from "@/components/community/settings/ModerationQueueSections";
 import { RolesSection } from "@/components/community/settings/RolesSection";
 import { useSettingsNotice } from "@/components/community/settings/SettingsNoticeProvider";
@@ -55,7 +55,14 @@ export function SettingsSectionBody({ workspace }: { workspace: SettingsWorkspac
         />
       ) : null;
     case "safety":
-      return data.identity ? <ModerationSection moderation={data.identity.moderation} canSave={canSave} /> : null;
+      return data.safety ? (
+        <SafetySection
+          safety={data.safety.identity.safety}
+          rulesChannels={data.safety.rulesChannels}
+          acceptedCount={data.safety.acceptedCount}
+          canSave={canSave}
+        />
+      ) : null;
     case "reports":
       return data.reports ? (
         <ReportsSection

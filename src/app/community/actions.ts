@@ -322,3 +322,22 @@ export async function setChannelNotificationLevel(
   revalidateCommunity();
   return { success: true };
 }
+
+
+/**
+ * Accept the rules as they currently stand.
+ *
+ * The version is decided by the database, not sent from here: a client that
+ * chose its own could accept a version that has since been replaced, and the
+ * whole point of versioning the rules is that editing them asks again.
+ *
+ * `refresh` rather than `revalidateCommunity`: accepting changes what *this*
+ * member may do, and nothing about what anybody else sees.
+ */
+export async function acceptRules(): Promise<Result & { version?: number }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("community_accept_rules");
+  if (error) return { error: postgresMessage(error, "The rules could not be accepted.") };
+  refresh();
+  return { success: true, version: typeof data === "number" ? data : undefined };
+}

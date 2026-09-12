@@ -9,9 +9,9 @@ import {
   IDENTITY_LIMITS,
   isHexColor,
   MIN_ACCENT_CONTRAST,
-  MODERATION_LIMITS,
+  SAFETY_LIMITS,
   parseIdentity,
-  parseModeration,
+  parseSafety,
   relativeLuminance,
   SURFACE_COLOR,
 } from "../src/lib/community-settings/model.ts";
@@ -97,7 +97,16 @@ test("the limits the interface shows are the limits the validator enforces", () 
   assert.equal(formatContrast(4.567), "4.6:1");
 });
 
-const moderation = (overrides = {}) => ({
+// Phase 7 folded the two moderation columns into the Safety section, so the
+// same two fields are now submitted alongside verification and raid
+// protection. The bounds these tests guard did not move.
+const safety = (overrides = {}) => ({
+  verificationLevel: "none",
+  verificationMinutes: 0,
+  joinRateLimit: 0,
+  joinRateWindowMinutes: 10,
+  lockdownMinutes: 30,
+  rulesChannelId: "",
   editWindowMinutes: 0,
   deleteRequiresReason: false,
   ...overrides,
@@ -113,20 +122,29 @@ const moderation = (overrides = {}) => ({
 // community-automod.test.mjs, which additionally assert parity with the SQL
 // that actually runs on insert — something these never did.
 
-test("moderation bounds mirror the database constraint", () => {
+test("the edit window bounds mirror the database constraint", () => {
   // Slow mode left this function in phase 3: it is a property of a channel now,
   // and its bounds are asserted by `parseSlowMode` in
   // community-channel-permissions.contract.mjs.
-  assert.throws(() => parseModeration(moderation({ editWindowMinutes: 10081 })), /0 minutes/);
-  assert.equal(parseModeration(moderation({ editWindowMinutes: 10080 })).editWindowMinutes, 10080);
-  assert.equal(MODERATION_LIMITS.editWindowMinutes.max, 10080);
+  assert.throws(() => parseSafety(safety({ editWindowMinutes: 10081 })), /0 minutes/);
+  assert.equal(parseSafety(safety({ editWindowMinutes: 10080 })).editWindowMinutes, 10080);
+  assert.equal(SAFETY_LIMITS.editWindowMinutes.max, 10080);
 });
 
-test("moderation carries no blocked-word settings after phase 5", () => {
+test("safety carries no blocked-word settings after phase 5", () => {
   // The two community-wide columns were dropped by 20260912040000. If a later
   // change reintroduces them here without a column behind them, this fails
   // rather than shipping a control that saves nothing.
-  const parsed = parseModeration(moderation());
-  assert.deepEqual(Object.keys(parsed).sort(), ["deleteRequiresReason", "editWindowMinutes"]);
-  assert.equal("phrase" in MODERATION_LIMITS, false);
+  const parsed = parseSafety(safety());
+  assert.deepEqual(Object.keys(parsed).sort(), [
+    "deleteRequiresReason",
+    "editWindowMinutes",
+    "joinRateLimit",
+    "joinRateWindowMinutes",
+    "lockdownMinutes",
+    "rulesChannelId",
+    "verificationLevel",
+    "verificationMinutes",
+  ]);
+  assert.equal("phrase" in SAFETY_LIMITS, false);
 });

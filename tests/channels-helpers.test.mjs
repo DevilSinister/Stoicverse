@@ -72,6 +72,24 @@ test("the composer resolves the sanction before the channel", () => {
   assert.equal(deriveAffordances({ ...perms("send_messages"), gate: "banned" }).composer, "banned");
   assert.equal(deriveAffordances({ ...perms("send_messages"), gate: "suspended" }).composer, "suspended");
   assert.equal(deriveAffordances(perms("send_messages")).composer, "ready");
+
+  // The three soft gates from phase 7. None of them is a sanction: each one
+  // names the thing that lifts it, and reading survives all three.
+  for (const [gate, state] of [
+    ["lockdown", "lockedDown"],
+    ["rules", "rulesNotAccepted"],
+    ["verification", "notVerified"],
+  ]) {
+    const held = deriveAffordances({ ...perms("send_messages", "add_reactions"), gate });
+    assert.equal(held.composer, state, gate);
+    assert.equal(held.canReply, false, `${gate} stops replying`);
+    assert.equal(held.canReact, false, `${gate} stops reacting`);
+    assert.match(COMPOSER_NOTICE[state], /\S/, `${gate} has something to say`);
+  }
+
+  // A sanction still outranks a soft gate: being banned and unverified reads
+  // as banned, which is the one of the two worth arguing with.
+  assert.equal(deriveAffordances({ ...perms("send_messages"), gate: "banned" }).composer, "banned");
 });
 
 test("a read-only channel and an announcement channel say different things", () => {

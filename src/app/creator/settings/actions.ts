@@ -1,6 +1,6 @@
 "use server";
 
-import { parseIdentity, parseModeration } from "@/lib/community-settings/model";
+import { parseIdentity, parseSafety } from "@/lib/community-settings/model";
 import { parseRoleInput } from "@/lib/community-settings/role-model";
 import { isUuid } from "@/lib/security/uuid";
 import { revalidateCommunity } from "@/lib/community-settings/revalidate";
@@ -193,13 +193,30 @@ export async function setRoleMembers(
   return { success: true };
 }
 
-/** Save the edit window and whether a deletion needs a reason. */
-export async function saveCommunityModeration(data: FormData): Promise<Result> {
-  const { supabase } = await requireInfluencer();
+/**
+ * Save everything in the Safety section, in one write.
+ *
+ * `requireCommunityPermission` rather than `requireInfluencer`: safety is
+ * `manage_community`, which the owner can delegate, and a section that renders
+ * for a role whose save then refuses it is worse than not rendering.
+ *
+ * Note what is *not* here. `rules_version` is bumped by the settings trigger
+ * when the rules text moves, and `raid_lockdown_until` is written by the
+ * join-rate trigger and cleared by `clearLockdown`. Accepting either from a
+ * form would let the page overwrite what the database had just decided.
+ */
+export async function saveCommunitySafety(data: FormData): Promise<Result> {
+  const { supabase } = await requireCommunityPermission("manage_community");
 
-  let moderation;
+  let safety;
   try {
-    moderation = parseModeration({
+    safety = parseSafety({
+      verificationLevel: value(data, "verificationLevel"),
+      verificationMinutes: value(data, "verificationMinutes"),
+      joinRateLimit: value(data, "joinRateLimit"),
+      joinRateWindowMinutes: value(data, "joinRateWindowMinutes"),
+      lockdownMinutes: value(data, "lockdownMinutes"),
+      rulesChannelId: value(data, "rulesChannelId"),
       editWindowMinutes: value(data, "editWindowMinutes"),
       deleteRequiresReason: data.get("deleteRequiresReason") !== null,
     });
@@ -207,11 +224,21 @@ export async function saveCommunityModeration(data: FormData): Promise<Result> {
     return { error: error instanceof Error ? error.message : "Those settings could not be saved." };
   }
 
+  if (safety.rulesChannelId !== null && !isUuid(safety.rulesChannelId)) {
+    return { error: "That is not a channel." };
+  }
+
   const { error } = await supabase
     .from("community_settings")
     .update({
-      edit_window_minutes: moderation.editWindowMinutes,
-      delete_requires_reason: moderation.deleteRequiresReason,
+      verification_level: safety.verificationLevel,
+      verification_minutes: safety.verificationMinutes,
+      join_rate_limit: safety.joinRateLimit,
+      join_rate_window_minutes: safety.joinRateWindowMinutes,
+      lockdown_minutes: safety.lockdownMinutes,
+      rules_channel_id: safety.rulesChannelId,
+      edit_window_minutes: safety.editWindowMinutes,
+      delete_requires_reason: safety.deleteRequiresReason,
     })
     .eq("id", true);
 
@@ -219,11 +246,26 @@ export async function saveCommunityModeration(data: FormData): Promise<Result> {
     return {
       error: postgresMessage(
         error,
-        "Moderation settings could not be saved. If this persists, migration 20260911030000 may not be applied yet.",
+        "Safety settings could not be saved. If this persists, migration 20260912160000 may not be applied yet.",
       ),
     };
   }
 
+  revalidateCommunity();
+  return { success: true };
+}
+
+/**
+ * Lift a raid lockdown by hand.
+ *
+ * Through the RPC rather than an update: the function writes the audit row in
+ * the same statement, and a lockdown lifted with no record of who lifted it is
+ * the one entry in that log somebody will want most.
+ */
+export async function clearLockdown(): Promise<Result> {
+  const { supabase } = await requireCommunityPermission("manage_community");
+  const { error } = await supabase.rpc("community_clear_lockdown");
+  if (error) return { error: postgresMessage(error, "The lockdown could not be lifted.") };
   revalidateCommunity();
   return { success: true };
 }
