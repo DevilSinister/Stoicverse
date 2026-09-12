@@ -25,7 +25,12 @@ test("the constants equal the numbers the database enforces", async () => {
   assert.equal(MESSAGE_MAX_CHARS, 10000);
   assert.match(composerRules, /check \(char_length\(body\) <= 10000\)/, "the fixed CHECK on posts");
   assert.match(migration, new RegExp(`file_size_limit = ${ATTACHMENT_MAX_BYTES}`));
-  for (const type of ATTACHMENT_MIME_TYPES) assert.match(migration, new RegExp(`'${type.replace("/", "\\/")}'`));
+  // The allow-list moved: 20260912000000 set the original seven, and
+  // 20260912150000 widened it for voice notes. Asserting against whichever
+  // migration last touched it keeps this a mirror rather than a snapshot of
+  // the day it was written.
+  const allowList = migration + (await read("supabase/migrations/20260912150000_voice_notes.sql"));
+  for (const type of ATTACHMENT_MIME_TYPES) assert.match(allowList, new RegExp(`'${type.replace("/", "\\/")}'`));
   assert.match(migration, new RegExp(`\\{1,${REACTION_MAX_CHARS}\\}`));
   assert.equal(ATTACHMENTS_PER_MESSAGE, 10);
   assert.equal(MAX_DISTINCT_REACTIONS_PER_MESSAGE, 20);

@@ -24,8 +24,17 @@ export const ATTACHMENT_MIME_TYPES = [
   "image/gif",
   "video/mp4",
   "video/webm",
+  // Chrome and Firefox record `audio/webm`, Safari records `audio/mp4`; the
+  // other two are what a file picked off a disk tends to be.
+  "audio/webm",
+  "audio/mp4",
+  "audio/mpeg",
+  "audio/ogg",
   "application/pdf",
 ] as const;
+
+/** How long one voice note may run. The 25 MB cap is nowhere near this. */
+export const VOICE_NOTE_MAX_SECONDS = 300;
 
 export const MAX_DISTINCT_REACTIONS_PER_MESSAGE = 20;
 /** Longest Unicode reaction, in code points, matching the SQL `{1,16}` (PostgreSQL counts characters, not UTF-16 units). */

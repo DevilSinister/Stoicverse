@@ -12,6 +12,11 @@ const contentSecurityPolicy = [
   `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
+  // Audio and video are served from Supabase Storage over signed URLs, and
+  // `default-src` would otherwise be the rule that applies to them — a voice
+  // note would fail to play with nothing said anywhere but the console.
+  // `blob:` is the recorder's own preview, before anything is uploaded.
+  `media-src 'self' blob: data:${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
   "font-src 'self' data:",
   `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ""}${supabaseSocketOrigin ? ` ${supabaseSocketOrigin}` : ""}`,
   "frame-src https://drive.google.com",

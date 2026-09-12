@@ -162,7 +162,15 @@ export async function sendChannelMessage(input: {
   body?: string;
   replyToPostId?: string;
   threadId?: string;
-  attachments?: { path: string; mimeType: string; byteSize: number; width?: number; height?: number }[];
+  attachments?: {
+    path: string;
+    mimeType: string;
+    byteSize: number;
+    width?: number;
+    height?: number;
+    /** Audio and video only; the recorder's own measurement, carried for the player. */
+    durationSeconds?: number;
+  }[];
   clientNonce?: string;
 }): Promise<Result & { postId?: string; blocked?: string }> {
   if (!uuid(input.channelId)) return { error: "Invalid channel." };

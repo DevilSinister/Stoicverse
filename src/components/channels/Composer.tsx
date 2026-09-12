@@ -5,6 +5,7 @@ import { Loader2, Paperclip, Smile, X } from "lucide-react";
 
 import { sendChannelMessage } from "@/app/community/actions";
 import { useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
+import { VoiceRecorder, type Recording } from "@/components/channels/VoiceRecorder";
 import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { encodeMentions } from "@/lib/channels/mentions";
@@ -35,7 +36,14 @@ import { createClient } from "@/lib/supabase/client";
  *     losing what somebody typed.
  */
 
-type PendingAttachment = { path: string; mimeType: string; byteSize: number; name: string };
+type PendingAttachment = {
+  path: string;
+  mimeType: string;
+  byteSize: number;
+  name: string;
+  /** Set for a voice note, so the bubble can show its length before it loads. */
+  durationSeconds?: number;
+};
 
 export function Composer({
   channel,
@@ -147,6 +155,48 @@ export function Composer({
   };
 
   /**
+   * Put a finished recording into the draft as an attachment.
+   *
+   * Deliberately the same path as a picked file — same bucket, same
+   * `{uid}/{channel}/` prefix the upload policy reads, same signing — because
+   * a voice note is an attachment and nothing downstream should have to know
+   * where it came from.
+   */
+  const uploadRecording = async (recording: Recording) => {
+    if (!viewer) return;
+    setUploading(true);
+    setError(null);
+
+    const extension = recording.mimeType.includes("mp4") ? "m4a" : recording.mimeType.includes("ogg") ? "ogg" : "webm";
+    const path = `${viewer.userId}/${channel.id}/${crypto.randomUUID()}-voice.${extension}`;
+    const supabase = createClient();
+    const { error: uploadError } = await supabase.storage
+      .from("community-posts")
+      .upload(path, recording.blob, { contentType: recording.mimeType });
+
+    if (uploadError) {
+      setUploading(false);
+      setError("That recording could not be uploaded.");
+      return;
+    }
+
+    setAttachments((current) => [
+      ...current,
+      {
+        path,
+        mimeType: recording.mimeType,
+        byteSize: recording.blob.size,
+        name: `Voice note (${Math.round(recording.durationSeconds)}s)`,
+        durationSeconds: Number(recording.durationSeconds.toFixed(1)),
+      },
+    ]);
+    const signed = await signAttachmentUrls(supabase, [path]);
+    const href = signed.get(path);
+    if (href) onAttachmentUrl(path, href);
+    setUploading(false);
+  };
+
+  /**
    * Drop an emoji where the caret is, not at the end.
    *
    * Somebody who has clicked back into the middle of a sentence to add a
@@ -206,6 +256,7 @@ export function Composer({
         byteSize: attachment.byteSize,
         width: null,
         height: null,
+        durationSeconds: attachment.durationSeconds ?? null,
       })),
       reactions: [],
       // The composer never forwards. Forwarding goes through the message
@@ -222,7 +273,12 @@ export function Composer({
       body: encoded,
       threadId: threadId ?? undefined,
       replyToPostId: replyTo?.id,
-      attachments: sentAttachments.map(({ path, mimeType, byteSize }) => ({ path, mimeType, byteSize })),
+      attachments: sentAttachments.map(({ path, mimeType, byteSize, durationSeconds }) => ({
+        path,
+        mimeType,
+        byteSize,
+        durationSeconds,
+      })),
       clientNonce,
     });
 
@@ -296,6 +352,17 @@ export function Composer({
               )}
             </button>
           </>
+        ) : null}
+
+        {/*
+          Recording is gated on `attach_files` like every other attachment,
+          because that is exactly what a voice note is.
+        */}
+        {permissions.canAttach ? (
+          <VoiceRecorder
+            disabled={uploading || sending}
+            onRecorded={(recording) => void uploadRecording(recording)}
+          />
         ) : null}
 
         {/*

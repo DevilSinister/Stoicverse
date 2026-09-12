@@ -26,6 +26,8 @@ export type MessageAttachment = {
   byteSize: number | null;
   width: number | null;
   height: number | null;
+  /** Audio and video only, and only as the recorder measured it. */
+  durationSeconds: number | null;
 };
 
 export type MessageReaction = { emoji: string; count: number; mine: boolean };
@@ -90,6 +92,7 @@ function toMessage(row: Record<string, unknown>): ChannelMessage {
       byteSize: entry.byteSize ?? null,
       width: entry.width ?? null,
       height: entry.height ?? null,
+      durationSeconds: entry.durationSeconds ?? null,
     })),
     reactions: (row.reactions as MessageReaction[] | null) ?? [],
     forwarded: toForwardedOrigin(row),
