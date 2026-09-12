@@ -3,8 +3,6 @@ export type CommunityCategory = {
   name: string;
   description: string | null;
   sortOrder: number;
-  minTier: number;
-  allowedRoles: string[];
   visibilityMode: "locked" | "hidden";
   isArchived: boolean;
 };
@@ -16,8 +14,6 @@ export type CommunityChannel = {
   type: string;
   description: string | null;
   sortOrder: number;
-  minTier: number;
-  allowedRoles: string[];
   visibilityMode: "locked" | "hidden";
   isArchived: boolean;
   isLocked: boolean;

@@ -12,7 +12,12 @@ export default async function CreatorMembersPage() {
     // `priority`. The alias stays here because `search_creator_members`
     // returns the key under the old name too, and one page should not carry
     // two spellings of one field.
-    supabase.from("community_roles").select("id,name,color,priority:position").order("position", { ascending: false }).order("name"),
+    //
+    // `position` MUST be quoted inside the alias. Unquoted, PostgREST parses
+    // `priority:position` as the SQL `position()` function and the request
+    // never returns - a 504 after five seconds, and a page stuck on its
+    // loading skeleton rather than an error anybody can read.
+    supabase.from("community_roles").select('id,name,color,priority:"position"').order("position", { ascending: false }).order("name"),
     queryMemberDirectory(supabase, {}),
   ]);
   if (profileResult.error || rolesResult.error) throw new Error("Unable to load the member registry.");

@@ -8,10 +8,8 @@ import { requireCommunityPermission } from "@/lib/supabase/access";
 import { postgresMessage } from "@/lib/supabase/errors";
 
 type Result = { error?: string; success?: true };
-type Role = "member" | "moderator" | "influencer";
 
 const value = (data: FormData, key: string) => typeof data.get(key) === "string" ? String(data.get(key)).trim() : "";
-const roles = (data: FormData): Role[] => [...new Set(data.getAll("allowedRoles").filter((role): role is Role => role === "member" || role === "moderator" || role === "influencer"))];
 
 async function creatorSupabase() {
   // `manage_channels`, not "is the influencer": the policies on `channels` and
@@ -21,22 +19,27 @@ async function creatorSupabase() {
   return { supabase };
 }
 
+/**
+ * Phase 9 left one field here. `min_tier` and `allowed_roles` were validated
+ * and written by this function long after the overrides took over deciding
+ * access, so a refused form told a creator their tier was invalid and an
+ * accepted one changed nothing. `visibility_mode` is the survivor because it
+ * answers a different question: locked-and-listed, or not listed.
+ */
 function access(data: FormData) {
-  const minTier = Number(value(data, "minTier"));
-  const allowedRoles = roles(data);
   const visibilityMode = value(data, "visibilityMode");
-  if (!Number.isInteger(minTier) || minTier < 1 || minTier > 5 || !allowedRoles.length || !["locked", "hidden"].includes(visibilityMode)) return null;
-  return { min_tier: minTier, allowed_roles: allowedRoles, visibility_mode: visibilityMode };
+  if (!["locked", "hidden"].includes(visibilityMode)) return null;
+  return { visibility_mode: visibilityMode };
 }
 
 export async function saveCategory(data: FormData): Promise<Result> {
   const id = value(data, "categoryId");
   const name = value(data, "name");
   const rule = access(data);
-  if (!name || name.length > 80 || !rule || (id && !uuid(id))) return { error: "Enter a name and valid category access rule." };
+  if (!name || name.length > 80 || !rule || (id && !uuid(id))) return { error: "Enter a name and a valid visibility setting." };
   const { supabase } = await creatorSupabase();
   const { data: nextCategory } = await supabase.from("channel_categories").select("sort_order").order("sort_order", { ascending: false }).limit(1).maybeSingle();
-  const payload = { name, description: value(data, "description") || null, default_min_tier: rule.min_tier, default_allowed_roles: rule.allowed_roles, default_visibility_mode: rule.visibility_mode };
+  const payload = { name, description: value(data, "description") || null, default_visibility_mode: rule.visibility_mode };
   const query = id ? supabase.from("channel_categories").update(payload).eq("id", id) : supabase.from("channel_categories").insert({ ...payload, sort_order: (nextCategory?.sort_order ?? -1) + 1 });
   const { error } = await query;
   if (error) return { error: postgresMessage(error, "That change could not be saved.") };
@@ -49,7 +52,7 @@ export async function saveChannel(data: FormData): Promise<Result> {
   const name = value(data, "name");
   const type = value(data, "type");
   const rule = access(data);
-  if ((id && !uuid(id)) || !uuid(categoryId) || !name || name.length > 80 || !isChannelType(type) || !rule) return { error: "Enter a category, name, type, and valid access rule." };
+  if ((id && !uuid(id)) || !uuid(categoryId) || !name || name.length > 80 || !isChannelType(type) || !rule) return { error: "Enter a category, name, type, and a valid visibility setting." };
   const { supabase } = await creatorSupabase();
   const { data: nextChannel } = await supabase.from("channels").select("sort_order").eq("category_id", categoryId).order("sort_order", { ascending: false }).limit(1).maybeSingle();
   const payload = { category_id: categoryId, name, type, description: value(data, "description") || null, ...rule, is_active: true, is_archived: false };

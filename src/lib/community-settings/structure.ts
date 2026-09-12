@@ -22,11 +22,11 @@ export async function loadCommunityStructure(
   const [categoryResult, channelResult] = await Promise.all([
     supabase
       .from("channel_categories")
-      .select("id,name,description,sort_order,default_min_tier,default_allowed_roles,default_visibility_mode,is_archived")
+      .select("id,name,description,sort_order,default_visibility_mode,is_archived")
       .order("sort_order"),
     supabase
       .from("channels")
-      .select("id,category_id,name,type,description,sort_order,min_tier,allowed_roles,visibility_mode,is_archived,permissions_synced,slow_mode_seconds,legacy_type")
+      .select("id,category_id,name,type,description,sort_order,visibility_mode,is_archived,permissions_synced,slow_mode_seconds,legacy_type")
       .order("sort_order"),
   ]);
 
@@ -48,8 +48,6 @@ export async function loadCommunityStructure(
       name: category.name,
       description: category.description,
       sortOrder: category.sort_order,
-      minTier: category.default_min_tier,
-      allowedRoles: category.default_allowed_roles,
       visibilityMode: category.default_visibility_mode as "locked" | "hidden",
       isArchived: category.is_archived,
     })),
@@ -60,8 +58,6 @@ export async function loadCommunityStructure(
       type: channel.type,
       description: channel.description,
       sortOrder: channel.sort_order,
-      minTier: channel.min_tier,
-      allowedRoles: channel.allowed_roles,
       visibilityMode: channel.visibility_mode as "locked" | "hidden",
       isArchived: channel.is_archived,
       isLocked: false,
