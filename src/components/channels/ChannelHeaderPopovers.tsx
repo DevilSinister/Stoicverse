@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { MessagesSquare, Pin } from "lucide-react";
+import { MessagesSquare, Pin, PinOff } from "lucide-react";
 
+import { togglePostHighlight } from "@/app/community/actions";
+import { useCommunity } from "@/components/channels/CommunityProvider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { createClient } from "@/lib/supabase/client";
 
@@ -27,39 +29,62 @@ type Thread = {
 };
 
 /**
- * Rows fetched the first time the panel is opened.
+ * Rows fetched each time the panel is opened.
  *
  * Driven by the open event rather than an effect: opening a popover is
  * something a person did, not state that needs synchronising, and an effect
  * here would re-run on every `rows` change to decide it had nothing to do.
+ *
+ * Every open, not only the first. The first version cached forever, so pinning
+ * a message and then opening this panel showed the list from before the pin,
+ * with no way to correct it short of reloading the page. One small indexed
+ * query on a deliberate click is worth much less than a panel that lies.
+ *
+ * The previous rows stay on screen while the new ones load, so reopening a
+ * list never flashes empty.
  */
 function useLazyRows<T>(load: () => Promise<T[]>) {
   const [rows, setRows] = useState<T[] | null>(null);
   const [failed, setFailed] = useState(false);
-  const loadedRef = useRef(false);
+  const ticketRef = useRef(0);
 
-  const onOpenChange = (next: boolean) => {
-    if (!next || loadedRef.current) return;
-    loadedRef.current = true;
+  const reload = useCallback(() => {
+    const ticket = ticketRef.current + 1;
+    ticketRef.current = ticket;
     load().then(
       (result) => {
+        if (ticket !== ticketRef.current) return;
         setRows(result);
         setFailed(false);
       },
       () => {
-        // Allow a retry: a failed read should not leave the panel permanently
-        // empty because the first attempt happened to be offline.
-        loadedRef.current = false;
+        if (ticket !== ticketRef.current) return;
         setFailed(true);
       },
     );
+  }, [load]);
+
+  const onOpenChange = (next: boolean) => {
+    if (next) reload();
   };
 
-  return { rows, failed, onOpenChange };
+  return { rows, failed, onOpenChange, reload };
 }
 
-export function PinsPopover({ channelId, onJump }: { channelId: string; onJump: (messageId: string) => void }) {
+export function PinsPopover({
+  channelId,
+  onJump,
+  onChanged,
+}: {
+  channelId: string;
+  onJump: (messageId: string) => void;
+  /** Lets the message list drop its "Pinned" badge when one is unpinned here. */
+  onChanged: () => void;
+}) {
   const [open, setOpen] = useState(false);
+  const [unpinning, setUnpinning] = useState<string | null>(null);
+  const { affordances } = useCommunity();
+  const canPin = affordances(channelId).canPin;
 
   const load = useCallback(async () => {
     const supabase = createClient();
@@ -68,7 +93,18 @@ export function PinsPopover({ channelId, onJump }: { channelId: string; onJump: 
     return (data ?? []) as Pinned[];
   }, [channelId]);
 
-  const { rows, failed, onOpenChange } = useLazyRows<Pinned>(load);
+  const { rows, failed, onOpenChange, reload } = useLazyRows<Pinned>(load);
+
+  // Unpinning belongs in the list that shows the pins. Sending somebody back
+  // into the conversation to find the message, to open its menu, to remove it
+  // from a list they already have open, is not a journey worth making.
+  const unpin = async (postId: string) => {
+    setUnpinning(postId);
+    await togglePostHighlight(postId);
+    setUnpinning(null);
+    reload();
+    onChanged();
+  };
 
   return (
     <Popover
@@ -95,25 +131,40 @@ export function PinsPopover({ channelId, onJump }: { channelId: string; onJump: 
             <p className="px-3 py-4 text-xs text-fog-muted">Nothing is pinned in this channel yet.</p>
           ) : null}
           {(rows ?? []).map((pin) => (
-            <button
+            <div
               key={pin.id}
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onJump(pin.id);
-              }}
-              className="focus-ring block w-full border-b border-surgical-steel/40 px-3 py-2 text-left last:border-0 hover:bg-surface-container-low"
+              className="flex items-start gap-1 border-b border-surgical-steel/40 last:border-0 hover:bg-surface-container-low"
             >
-              <span className="block text-xs font-medium text-on-surface">{pin.author_name ?? "Former member"}</span>
-              {/*
-                Plain text, not markdown: this is a reference to a message, and
-                rendering a spoiler or a jumbo emoji inside a 320px list makes
-                the list harder to scan than the message is to find.
-              */}
-              <span className="mt-0.5 line-clamp-2 block text-xs text-on-surface-variant">
-                {pin.body ?? "(no text)"}
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onJump(pin.id);
+                }}
+                className="focus-ring min-w-0 flex-1 px-3 py-2 text-left"
+              >
+                <span className="block text-xs font-medium text-on-surface">{pin.author_name ?? "Former member"}</span>
+                {/*
+                  Plain text, not markdown: this is a reference to a message, and
+                  rendering a spoiler or a jumbo emoji inside a 320px list makes
+                  the list harder to scan than the message is to find.
+                */}
+                <span className="mt-0.5 line-clamp-2 block text-xs text-on-surface-variant">
+                  {pin.body ?? "(no text)"}
+                </span>
+              </button>
+              {canPin ? (
+                <button
+                  type="button"
+                  onClick={() => void unpin(pin.id)}
+                  disabled={unpinning === pin.id}
+                  aria-label={`Unpin the message from ${pin.author_name ?? "a former member"}`}
+                  className="focus-ring mr-1 mt-2 shrink-0 rounded p-1 text-fog-muted hover:text-on-surface disabled:opacity-50"
+                >
+                  <PinOff size={12} aria-hidden="true" />
+                </button>
+              ) : null}
+            </div>
           ))}
         </div>
       </PopoverContent>

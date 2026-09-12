@@ -581,7 +581,11 @@ export function ChannelView({
               </span>
             )}
             <ThreadListPopover channelId={channel.id} onOpenThread={openThread} />
-            <PinsPopover channelId={channel.id} onJump={(id) => void jumpTo(id)} />
+            <PinsPopover
+              channelId={channel.id}
+              onJump={(id) => void jumpTo(id)}
+              onChanged={() => void refresh()}
+            />
           </div>
         </header>
 

@@ -253,9 +253,18 @@ test("the header panels load when opened, not with the page", async () => {
   // literal line, so refactoring the effect into an open handler broke a test
   // of behaviour that had not changed.
   assert.match(popovers, /onOpenChange = \(next: boolean\)/);
-  assert.match(popovers, /if \(!next \|\| loadedRef\.current\) return;/);
+  assert.match(popovers, /if \(next\) reload\(\);/);
   // And nothing loads it on mount.
   assert.equal(/useEffect/.test(popovers), false);
+
+  // Every open, not only the first. Caching forever meant pinning a message
+  // and then opening this panel showed the list from before the pin, with no
+  // way to correct it short of reloading the page.
+  assert.equal(/loadedRef/.test(popovers), false, "the panel must not cache across opens");
+
+  // And a pin can be removed from the list that shows the pins.
+  assert.match(popovers, /togglePostHighlight\(postId\)/);
+  assert.match(popovers, /aria-label=\{`Unpin the message from/);
   assert.match(popovers, /rpc\("community_channel_pins"/);
   assert.match(popovers, /rpc\("community_channel_threads"/);
 });
