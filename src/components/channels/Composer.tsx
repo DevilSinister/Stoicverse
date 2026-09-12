@@ -246,7 +246,7 @@ export function Composer({
           type="button"
           onClick={() => void send()}
           disabled={!canSend}
-          className="focus-ring shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-monolith-surface disabled:opacity-40"
+          className="focus-ring shrink-0 rounded-lg bg-primary-container px-3 py-1.5 text-xs font-semibold text-monolith-surface disabled:opacity-40"
         >
           {sending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : "Send"}
         </button>

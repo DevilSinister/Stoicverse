@@ -31,8 +31,44 @@ function isLocalRequest(request: NextRequest) {
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
+/**
+ * Mints a sign-in token for the community owner.
+ *
+ * `profiles_one_influencer_idx` allows exactly one influencer, so there is no
+ * such thing as a throwaway creator: seeding one fails on the unique index for
+ * as long as a real owner exists. "Sign in as the creator" can therefore only
+ * mean the account that already is one.
+ *
+ * Nothing about that account is written — not the role, not the name. The
+ * earlier version updated `full_name`, which would have renamed a real
+ * person's profile to "Dev Creator" as a side effect of a QA login.
+ */
+async function adoptOwner(admin: ReturnType<typeof createAdminClient>) {
+  const owner = await admin.from("profiles").select("id").eq("platform_role", "influencer").maybeSingle();
+  if (owner.error) throw new Error(`Could not find the community owner: ${owner.error.message}`);
+  if (!owner.data) return null;
+
+  const user = await admin.auth.admin.getUserById(owner.data.id as string);
+  if (user.error || !user.data.user?.email) {
+    throw new Error(`The community owner has no sign-in address: ${user.error?.message ?? "no email"}`);
+  }
+  const link = await admin.auth.admin.generateLink({ type: "magiclink", email: user.data.user.email });
+  if (link.error || !link.data.properties?.hashed_token) {
+    throw new Error(`Could not mint a sign-in token for the owner: ${link.error?.message ?? "no token"}`);
+  }
+  return { tokenHash: link.data.properties.hashed_token };
+}
+
 async function seedPersona(persona: DevPersona) {
   const admin = createAdminClient();
+
+  if (persona === "creator") {
+    const adopted = await adoptOwner(admin);
+    // No owner yet: fall through and promote the seeded account into the role,
+    // which the unique index permits precisely because it is still vacant.
+    if (adopted) return adopted;
+  }
+
   const email = DEV_PERSONA_EMAIL[persona];
   const fullName = `Dev ${persona[0].toUpperCase()}${persona.slice(1)}`;
 

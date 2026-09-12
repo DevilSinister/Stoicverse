@@ -28,7 +28,7 @@ const EMPTY: MentionResolvers = {
 };
 
 const mentionChip =
-  "rounded px-1 py-0.5 text-[0.95em] font-medium text-accent bg-accent/10 hover:bg-accent/20 transition-colors";
+  "rounded px-1 py-0.5 text-[0.95em] font-medium text-primary-container bg-primary-container/10 hover:bg-primary-container/20 transition-colors";
 
 function Spoiler({ children }: { children: ReactNode }) {
   const [revealed, setRevealed] = useState(false);
@@ -43,7 +43,7 @@ function Spoiler({ children }: { children: ReactNode }) {
       className={
         revealed
           ? "rounded bg-surface-container-high px-1"
-          : "focus-ring cursor-pointer select-none rounded bg-surface-container-highest px-1 text-transparent"
+          : "focus-ring cursor-pointer select-none rounded bg-surface-container-high px-1 text-transparent"
       }
     >
       <span aria-hidden={revealed ? undefined : true}>{children}</span>
@@ -79,7 +79,7 @@ function renderTokens(tokens: Token[], resolvers: MentionResolvers, keyPrefix = 
 
       case "code":
         return (
-          <code key={key} className="rounded bg-surface-container-highest px-1 py-0.5 font-mono text-[0.9em]">
+          <code key={key} className="rounded bg-surface-container-high px-1 py-0.5 font-mono text-[0.9em]">
             {token.value}
           </code>
         );
@@ -186,7 +186,7 @@ function renderTokens(tokens: Token[], resolvers: MentionResolvers, keyPrefix = 
             // noreferrer as well as noopener: a member's link should not leak
             // which channel it was posted in.
             rel="noopener noreferrer nofollow ugc"
-            className="text-accent underline underline-offset-2 hover:text-accent/80"
+            className="text-primary-container underline underline-offset-2 hover:brightness-110"
           >
             {token.label}
           </a>

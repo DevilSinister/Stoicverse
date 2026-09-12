@@ -21,7 +21,9 @@ export const DEV_PERSONAS = ["creator", "moderator", "member"] as const;
 export type DevPersona = (typeof DEV_PERSONAS)[number];
 
 export const DEV_PERSONA_LABELS: Record<DevPersona, { label: string; detail: string }> = {
-  creator: { label: "Creator", detail: "The influencer who owns the community." },
+  // There is exactly one influencer (profiles_one_influencer_idx), so this
+  // signs in as whoever already holds the role rather than seeding a second.
+  creator: { label: "Creator", detail: "The account that already owns the community." },
   moderator: { label: "Moderator", detail: "A member with the Moderator role." },
   member: { label: "Member", detail: "An active tier-1 subscriber." },
 };

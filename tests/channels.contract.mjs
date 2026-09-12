@@ -120,6 +120,49 @@ test("the dynamic channel path is revalidated with its type argument", async () 
   assert.match(revalidate, /"\/channels",/);
 });
 
+test("every colour token the channel UI uses is actually defined", async () => {
+  // A Tailwind class naming a token that does not exist produces no CSS and no
+  // error: `bg-surface-container-highest` rendered a spoiler with transparent
+  // text on a transparent background, so hidden content simply vanished. The
+  // typechecker cannot see inside a string, and the build does not care, so
+  // nothing but a human eye caught it. This is that eye.
+  const css = await read("src/app/globals.css");
+  const defined = new Set([...css.matchAll(/--color-([a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+
+  const files = [
+    "src/lib/markdown/render.tsx",
+    "src/components/channels/ChannelsShell.tsx",
+    "src/components/channels/ChannelView.tsx",
+    "src/components/channels/Composer.tsx",
+  ];
+
+  // Utilities that share a prefix with a colour but never take one.
+  const structural =
+    /^(?:t|r|b|l|x|y|s|e|solid|dashed|dotted|double|hidden|none|current|transparent|inherit|white|black|\[.*\]|(?:t|r|b|l|x|y|s|e)-\d+|\d.*)$/;
+
+  const offenders = [];
+  for (const file of files) {
+    const source = await readCode(file);
+    for (const [, token] of source.matchAll(/(?:text|bg|border|ring|fill|stroke|decoration|outline)-([a-z][a-z0-9-]*)(?:\/\d+)?/g)) {
+      if (structural.test(token)) continue;
+      // Tailwind's own palette is always available.
+      if (/^(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)$/.test(token)) continue;
+      if (!defined.has(token)) offenders.push(`${file}: ${token}`);
+    }
+  }
+
+  assert.deepEqual(offenders, [], `undefined colour tokens: ${offenders.join(", ")}`);
+});
+
+test("a link in a message is legible, not the shadcn surface accent", async () => {
+  // `--color-accent` is redefined further down globals.css as the shadcn dark
+  // surface, so `text-accent` painted links near-black on a near-black page.
+  // The rest of the app uses `text-primary-container` for links; so does this.
+  const render = await readCode("src/lib/markdown/render.tsx");
+  assert.equal(/text-accent|bg-accent/.test(render), false);
+  assert.match(render, /text-primary-container underline/);
+});
+
 test("the legacy community surface is still intact", async () => {
   // P1 builds the new page alongside the old one. The browser gate cannot run
   // until the dev-login service-role key is supplied, and deleting the only

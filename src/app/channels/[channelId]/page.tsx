@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { ChannelView } from "@/components/channels/ChannelView";
@@ -50,15 +49,9 @@ export default async function ChannelPage({ params }: { params: Promise<{ channe
     mentionCount: (row.mention_count as number) ?? 0,
   };
 
-  // Remember where they were, so /channels comes back here next time.
-  const store = await cookies();
-  store.set("sv-last-channel", channelId, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 90,
-  });
+  // Where they were is remembered by `rememberChannel` in proxy.ts. It cannot
+  // be done here: a Server Component render may not set a cookie, and Next
+  // throws rather than ignoring it, so the whole channel renders as an error.
 
   // The bucket is public, so this is string construction rather than a signed
   // URL round trip per attachment. The storage read policy is still what

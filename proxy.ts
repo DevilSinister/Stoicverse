@@ -18,6 +18,32 @@ function isRouteMatch(path: string, routes: string[]) {
   return routes.some((route) => path === route || path.startsWith(`${route}/`));
 }
 
+const CHANNEL_PATH = /^\/channels\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+
+/**
+ * Remembers the open channel, so bare `/channels` returns to it.
+ *
+ * This belongs in middleware rather than in the page: a Server Component
+ * render may not set a cookie, and Next throws rather than ignoring it — the
+ * page rendered as an error boundary, not as a channel. Middleware is the one
+ * place in this request that is allowed to write to the response.
+ *
+ * Only a well-formed channel id is stored, because the value is read back as a
+ * redirect target on the next visit to `/channels`.
+ */
+function rememberChannel(request: NextRequest, response: NextResponse) {
+  const match = CHANNEL_PATH.exec(request.nextUrl.pathname);
+  if (!match) return;
+  if (request.cookies.get("sv-last-channel")?.value === match[1]) return;
+  response.cookies.set("sv-last-channel", match[1], {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 90,
+  });
+}
+
 function safeNextPath(request: NextRequest) {
   const next = request.nextUrl.searchParams.get("next");
   if (next === null) return null;
@@ -157,6 +183,7 @@ export async function proxy(request: NextRequest) {
     if (!hasMemberWorkspaceAccess && !isInfluencer && !isAdmin) {
       return redirectWithState(response, new URL("/checkout", request.url));
     }
+    rememberChannel(request, response);
     return response;
   }
 

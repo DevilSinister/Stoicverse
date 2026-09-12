@@ -121,7 +121,7 @@ function Reactions({
             aria-pressed={reaction.mine}
             className={`focus-ring flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors disabled:opacity-50 ${
               reaction.mine
-                ? "border-accent bg-accent/15 text-on-surface"
+                ? "border-primary-container bg-primary-container/15 text-on-surface"
                 : "border-surgical-steel text-fog-muted hover:bg-surface-container-low"
             }`}
           >
@@ -208,7 +208,7 @@ function MessageRow({
           <Reactions message={message} canReact={canReact} onChanged={onChanged} />
 
           {message.threadId ? (
-            <p className="mt-1 text-xs text-accent">
+            <p className="mt-1 text-xs text-primary-container">
               {`${message.threadName ?? "Thread"} — ${message.threadMessageCount ?? 0} replies`}
             </p>
           ) : null}

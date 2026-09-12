@@ -62,7 +62,7 @@ function ChannelLink({ channel, active }: { channel: ChannelRow; active: boolean
       <span className={`truncate ${channel.hasUnread && !active ? "font-semibold" : ""}`}>{channel.name}</span>
       {channel.mentionCount > 0 ? (
         <span
-          className="ml-auto shrink-0 rounded-full bg-error px-1.5 text-[11px] font-semibold text-on-error"
+          className="ml-auto shrink-0 rounded-full bg-error px-1.5 text-[11px] font-semibold text-monolith-surface"
           aria-label={`${channel.mentionCount} unread mentions`}
         >
           {channel.mentionCount > 99 ? "99+" : channel.mentionCount}
