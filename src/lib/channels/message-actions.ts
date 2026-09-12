@@ -8,7 +8,7 @@
  *
  * The database still decides. Every item here has a server-side check behind
  * it — `soft_delete_post` re-asks author-or-`manage_messages`, and
- * `togglePostHighlight` re-asks `pin_messages`. This only decides what to draw.
+ * `toggleMessagePin` re-asks `pin_messages`. This only decides what to draw.
  *
  * Zero imports, so the unit test loads this directly.
  */

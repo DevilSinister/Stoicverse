@@ -12,8 +12,6 @@ const COMMUNITY_PATHS = [
   "/channels",
   "/creator/settings",
   "/creator/channels",
-  "/creator/community",
-  "/dashboard/community",
   "/creator",
   "/dashboard",
 ] as const;

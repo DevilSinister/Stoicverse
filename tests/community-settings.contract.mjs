@@ -106,8 +106,8 @@ test("composer and reaction rules are platform constants with exactly one defini
     read("src/app/community/actions.ts"),
     read("src/lib/community-settings/model.ts"),
     read("src/lib/community/constants.ts"),
-    read("src/components/community/MessageComposer.tsx"),
-    read("src/components/community/MessageStream.tsx"),
+    read("src/components/channels/Composer.tsx"),
+    read("src/components/channels/MessageMenu.tsx"),
     read("src/components/community/emoji/EmojiPicker.tsx"),
     read("supabase/migrations/20260912000000_community_global_composer_constants.sql"),
   ]);
@@ -130,7 +130,7 @@ test("composer and reaction rules are platform constants with exactly one defini
 
   // The composer reads the constants rather than carrying its own numbers.
   assert.doesNotMatch(composer, /const MAX_BODY = 10_000|20 \* 1024 \* 1024/);
-  assert.match(composer, /isAllowedAttachmentType\(candidate\.type\)/, "type is checked in attach(), not accept=");
+  assert.match(composer, /isAllowedAttachmentType\(file\.type\)/, "type is checked in attach(), not accept=");
 
   // The per-community columns are gone, the dead RPC with them, and the
   // reaction predicate is a format check whose USING clause still ignores it.

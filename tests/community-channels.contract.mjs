@@ -21,16 +21,14 @@ test("channel categories and access rules are enforced by the database", async (
 });
 
 test("creator management and member channel browsing use the shared secure surface", async () => {
-  // The community surface was split into ChannelSidebar / MessageStream /
-  // MessageComposer, and structure editing then moved again into
-  // components/community/structure/. The invariants below are unchanged; only
-  // their homes are.
-  const [actions, surface, sidebar, composer, workspace, reactions, editor, form, list, order] = await Promise.all([
+  // The legacy surface (CommunitySurface / ChannelSidebar / MessageStream /
+  // MessageComposer / CommunityWorkspace) was deleted in phase 9. Structure
+  // editing had already moved to components/community/structure/, and the
+  // conversation itself is /channels. The invariants below are the ones that
+  // outlived that surface; assertions about its own markup went with it.
+  const [actions, body, reactions, editor, form, list, order] = await Promise.all([
     read("src/app/creator/channels/actions.ts"),
-    read("src/components/community/CommunitySurface.tsx"),
-    read("src/components/community/ChannelSidebar.tsx"),
-    read("src/components/community/MessageComposer.tsx"),
-    read("src/components/community/CommunityWorkspace.tsx"),
+    read("src/components/community/settings/SettingsSectionBody.tsx"),
     read("src/app/community/actions.ts"),
     read("src/components/community/structure/StructureEditor.tsx"),
     read("src/components/community/structure/StructureForm.tsx"),
@@ -43,16 +41,13 @@ test("creator management and member channel browsing use the shared secure surfa
   assert.match(actions, /deleteCommunityStructure/);
   assert.match(actions, /reorderCommunityStructure/);
   assert.match(actions, /Channels with posts can only be archived/);
-  assert.match(sidebar, /Reach .* to unlock/);
-  assert.match(sidebar, /Manage structure/);
-  // Structure editing has exactly one implementation. The modal on
-  // /creator/channels and the inline pane on /creator/settings are the same
-  // component with different chrome, so a field added to one cannot go missing
-  // from the other.
-  assert.match(surface, /StructureEditor/);
+  // Structure editing has exactly one implementation. The settings section
+  // renders it inline and the modal variant survives for any caller that wants
+  // it, so a field added to one cannot go missing from the other.
+  assert.match(body, /StructureEditor/);
   assert.match(editor, /variant: "modal"/);
   assert.match(editor, /variant: "inline"/);
-  assert.doesNotMatch(surface, /function StructureForm|function AccessFields/);
+  assert.doesNotMatch(body, /function StructureForm|function AccessFields/);
   // Every structure write still goes through the creator channel actions.
   assert.match(form, /saveCategory/);
   assert.match(form, /saveChannel/);
@@ -64,16 +59,12 @@ test("creator management and member channel browsing use the shared secure surfa
   assert.match(list, /aria-label=\{`Move \$\{label\} up`\}/);
   assert.match(list, /aria-label=\{`Move \$\{label\} down`\}/);
   assert.match(list, /role="group"/);
-  assert.match(composer, /sendMessage/);
-  assert.match(workspace, /community_channel_directory/);
-  assert.match(workspace, /selectedChannelId/);
   assert.match(reactions, /toggleReaction/);
   // Phase 3 replaced the platform-role copy with the permission the database
   // actually asks for. A message action that still said "moderator access is
   // required" would be describing a rule that no longer exists.
   assert.doesNotMatch(reactions, /Moderator or influencer access is required/);
   assert.match(reactions, /community_has/);
-  assert.match(reactions, /You do not have permission to post in this channel\./);
 });
 
 test("post edits are author-only, moderation is audited, and the soft-deleted row still passes RLS", async () => {
@@ -153,25 +144,4 @@ test("community mentions create notifications for all members or an exact tier",
   assert.match(migration, /membership\.status = 'active'/);
   assert.match(migration, /case when tier\.is_master then 5 else tier\.current_tier end/);
   assert.match(migration, /create trigger posts_notify_mentions/);
-});
-
-test("pinned community messages keep chronological placement and can be filtered in-channel", async () => {
-  const [workspace, surface] = await Promise.all([
-    read("src/components/community/CommunityWorkspace.tsx"),
-    read("src/components/community/CommunitySurface.tsx"),
-  ]);
-  assert.doesNotMatch(workspace, /order\("is_pinned"/);
-  // The boolean showPinned became a three-way view after the redesign.
-  assert.match(surface, /const \[view, setView\] = useState<"all" \| "pinned" \| "mentions">\("all"\)/);
-  assert.match(surface, /posts\.filter\(\(post\) => post\.isPinned\)/);
-});
-
-test("community timeline keeps new messages at the bottom and signals unseen arrivals", async () => {
-  const [workspace, surface] = await Promise.all([
-    read("src/components/community/CommunityWorkspace.tsx"),
-    read("src/components/community/CommunitySurface.tsx"),
-  ]);
-  assert.match(workspace, /order\("created_at", \{ ascending: true \}\)/);
-  assert.match(surface, /const \[newCount, setNewCount\] = useState\(0\)/);
-  assert.match(surface, /\{newCount\} new \{newCount === 1 \? "message" : "messages"\}/);
 });

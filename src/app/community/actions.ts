@@ -40,40 +40,6 @@ export async function toggleReaction(postId: string, emoji: string): Promise<Res
   return { success: true, reactionAdded: !existing };
 }
 
-/**
- * Post a message.
- *
- * Renamed from `createStaffPost` because it is no longer a staff action: the
- * `posts_member_insert` policy asks `community_has('send_messages', channel)`,
- * so anyone the community has granted that may post. This checks the same
- * question first only to turn a policy refusal into a sentence.
- */
-export async function sendMessage(data: FormData): Promise<Result> {
-  const channelId = typeof data.get("channelId") === "string" ? String(data.get("channelId")) : "";
-  const body = typeof data.get("body") === "string" ? String(data.get("body")).trim() : "";
-  const attachmentPath = typeof data.get("attachmentPath") === "string" ? String(data.get("attachmentPath")) : "";
-  if (!uuid(channelId) || (!body && !attachmentPath) || body.length > MESSAGE_MAX_CHARS) return { error: `Write a post or attach media (up to ${MESSAGE_MAX_CHARS.toLocaleString("en-US")} characters).` };
-
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Sign in to post." };
-  // The upload policy reads the channel out of the path, so the path has to
-  // carry it: {uid}/{channelId}/{file}.
-  if (attachmentPath && (!attachmentPath.startsWith(`${user.id}/${channelId}/`) || attachmentPath.includes(".."))) return { error: "Invalid attachment." };
-
-  const { data: allowed, error: permissionError } = await supabase.rpc("community_has", { permission: "send_messages", channel: channelId });
-  if (permissionError) return { error: postgresMessage(permissionError, "Your permissions could not be checked.") };
-  if (allowed !== true) return { error: "You do not have permission to post in this channel." };
-
-  const { data: channel, error: channelError } = await supabase.from("channels").select("type").eq("id", channelId).maybeSingle();
-  if (channelError || !channel) return { error: "You cannot post in this channel." };
-  const { error } = await supabase.from("posts").insert({ channel_id: channelId, author_id: user.id, body: body || null, image_url: attachmentPath || null, post_type: channel.type === "announcements" ? "announcement" : "post" });
-  if (error) return { error: postgresMessage(error, "That post could not be published.") };
-
-  revalidateCommunity();
-  return { success: true };
-}
-
 export async function editMessage(postId: string, body: string): Promise<Result> {
   if (!uuid(postId) || !body.trim() || body.length > 10_000) return { error: "Write a valid post body (up to 10,000 characters)." };
   const supabase = await createClient();
@@ -97,7 +63,7 @@ export async function editMessage(postId: string, body: string): Promise<Result>
   return { success: true };
 }
 
-export async function togglePostHighlight(postId: string): Promise<Result> {
+export async function toggleMessagePin(postId: string): Promise<Result> {
   if (!uuid(postId)) return { error: "Invalid post identifier." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -143,12 +109,11 @@ export async function deleteMessage(postId: string, reason?: string): Promise<Re
 }
 
 // --------------------------------------------------------------- messaging
-// The write half of the model added in 20260912070000.
-//
-// `sendMessage` above is deliberately untouched. It inserts directly and
-// writes `posts.image_url`, which is what the legacy `MessageStream` reads;
-// routing it through the RPC would stop images rendering in the only working
-// community UI. Phase P1 deletes that composer and this becomes the only path.
+// The write half of the model added in 20260912070000, and since phase 9 the
+// only way a message is written. The legacy `sendMessage` that inserted into
+// `posts` directly and wrote `posts.image_url` is gone with the composer that
+// called it, so every message now passes AutoMod before it is inserted rather
+// than after.
 
 /**
  * Send through `community_send_message`.

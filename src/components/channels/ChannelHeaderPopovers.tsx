@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { MessagesSquare, Pin, PinOff } from "lucide-react";
 
-import { togglePostHighlight } from "@/app/community/actions";
+import { toggleMessagePin } from "@/app/community/actions";
 import { useCommunity } from "@/components/channels/CommunityProvider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { createClient } from "@/lib/supabase/client";
@@ -100,7 +100,7 @@ export function PinsPopover({
   // from a list they already have open, is not a journey worth making.
   const unpin = async (postId: string) => {
     setUnpinning(postId);
-    await togglePostHighlight(postId);
+    await toggleMessagePin(postId);
     setUnpinning(null);
     reload();
     onChanged();

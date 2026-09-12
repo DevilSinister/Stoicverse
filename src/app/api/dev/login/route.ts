@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     return new NextResponse(message, { status: 500 });
   }
 
-  const destination = new URL(persona === "creator" ? "/creator" : "/dashboard/community", request.url);
+  const destination = new URL(persona === "creator" ? "/creator" : "/channels", request.url);
   const response = NextResponse.redirect(destination, 303);
   const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {

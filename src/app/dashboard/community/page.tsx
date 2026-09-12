@@ -1,5 +1,13 @@
-import { renderCommunityWorkspace } from "@/components/community/CommunityWorkspace";
+import { permanentRedirect } from "next/navigation";
 
-export default async function DashboardCommunityPage({ searchParams }: { searchParams: Promise<{ channel?: string }> }) {
-  return renderCommunityWorkspace({ nextPath: "/dashboard/community", workspace: "member", selectedChannelId: (await searchParams).channel });
+/**
+ * The member community lives at `/channels` since P1.
+ *
+ * This route rendered the legacy workspace until phase 9. It is kept as a
+ * permanent redirect rather than deleted because it is the href in every
+ * notification `action_url` written before the rebuild, and in whatever the
+ * owner has bookmarked.
+ */
+export default function DashboardCommunityPage() {
+  permanentRedirect("/channels");
 }

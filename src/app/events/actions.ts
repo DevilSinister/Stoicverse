@@ -25,7 +25,7 @@ function isApprovedZoomUrl(input: string) {
 }
 
 function revalidateEvents() {
-  for (const path of ["/dashboard/events", "/creator/events", "/creator/dashboard", "/dashboard/community", "/creator/channels"]) revalidatePath(path);
+  for (const path of ["/dashboard/events", "/creator/events", "/creator/dashboard", "/channels", "/creator/channels"]) revalidatePath(path);
 }
 
 export async function enrollInEvent(eventId: string): Promise<ActionResult> {

@@ -22,7 +22,7 @@ type StructureEditorProps = {
 /**
  * The single home for category and channel editing.
  *
- * `/dashboard/community` and `/creator/channels` render it as a modal from the
+ * `/creator/settings` and `/creator/channels` render it as a modal from the
  * sidebar; `/creator/settings` renders the same panes inline. Only the chrome
  * differs — two copies of this editor would drift the moment either surface
  * gained a field.

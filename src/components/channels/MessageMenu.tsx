@@ -12,7 +12,7 @@ import {
   SmilePlus,
 } from "lucide-react";
 
-import { createThread, deleteMessage, togglePostHighlight, toggleReaction } from "@/app/community/actions";
+import { createThread, deleteMessage, toggleMessagePin, toggleReaction } from "@/app/community/actions";
 import { reportMessage } from "@/app/community/moderation-actions";
 import { ForwardDialog } from "@/components/channels/ForwardDialog";
 import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
@@ -173,7 +173,7 @@ export function MessageMenu({
           </Item>
         ) : null}
         {actions.pin ? (
-          <Item onClick={() => void run(() => togglePostHighlight(message.id))} disabled={busy}>
+          <Item onClick={() => void run(() => toggleMessagePin(message.id))} disabled={busy}>
             <span className="flex items-center gap-2">
               {message.isPinned ? <PinOff size={14} aria-hidden="true" /> : <Pin size={14} aria-hidden="true" />}
               {message.isPinned ? "Unpin message" : "Pin message"}

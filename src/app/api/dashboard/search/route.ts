@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 type SearchKind = "course" | "video" | "lesson" | "event" | "post" | "channel" | "member";
 type SearchResult = { id: string; title: string; description: string | null; href: string; kind: SearchKind };
-type DirectoryRow = { channel_id: string; channel_name: string; channel_description: string | null; min_tier: number; is_locked: boolean };
+type DirectoryRow = { channel_id: string; channel_name: string; channel_description: string | null; unlock_tier: number | null; is_locked: boolean };
 type MemberRow = { id: string; full_name: string | null; platform_role: string };
 type Embedded<T> = T | T[] | null;
 type CourseRow = { id: string; title: string; description: string | null };
@@ -46,7 +46,9 @@ export async function GET(request: Request) {
   // Members search is creator-only: the profiles RLS policy exposes other people's rows
   // to staff alone, and /creator/members is the one page that can receive the click.
   const canSearchMembers = isStaff && base === "/creator";
-  const communityHref = base === "/creator" ? "/creator/community" : "/dashboard/community";
+  // One community surface since phase 9: the creator and the member both read
+  // `/channels`, and the permissions resolver decides what each may do there.
+  const communityHref = "/channels";
 
   const [courses, videos, lessons, events, posts, directory, members] = await Promise.all([
     // Course and video RLS policies only expose published, released curriculum the caller
@@ -84,11 +86,11 @@ export async function GET(request: Request) {
       const channel = firstOf(item.channels as Embedded<{ name: string }>);
       const author = firstOf(item.profiles as Embedded<{ full_name: string | null }>);
       const context = [channel ? `#${channel.name}` : null, author?.full_name?.trim() || "Community staff"].filter(Boolean).join(" · ");
-      return { id: item.id, title: snippet(item.body, 90) ?? "Attachment", description: context, href: `${communityHref}?channel=${item.channel_id}`, kind: "post" as const };
+      return { id: item.id, title: snippet(item.body, 90) ?? "Attachment", description: context, href: `${communityHref}/${item.channel_id}`, kind: "post" as const };
     }),
     // A locked channel links to the community root rather than deep-linking into a channel
     // the member cannot open; the tier hint is the upsell.
-    ...channels.map((row) => ({ id: row.channel_id, title: `#${row.channel_name}`, description: row.is_locked ? `Unlocks at tier ${row.min_tier}` : snippet(row.channel_description), href: row.is_locked ? communityHref : `${communityHref}?channel=${row.channel_id}`, kind: "channel" as const })),
+    ...channels.map((row) => ({ id: row.channel_id, title: `#${row.channel_name}`, description: row.is_locked && row.unlock_tier ? `Unlocks at tier ${row.unlock_tier}` : snippet(row.channel_description), href: row.is_locked ? communityHref : `${communityHref}/${row.channel_id}`, kind: "channel" as const })),
     ...((members.data ?? []) as MemberRow[]).map((item) => ({ id: item.id, title: item.full_name?.trim() || "Member", description: roleName(item.platform_role), href: "/creator/members", kind: "member" as const })),
   ];
 

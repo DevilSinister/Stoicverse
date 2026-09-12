@@ -19,7 +19,7 @@ function currentIsoWeekStart() {
 }
 
 function refreshMemberOperations() {
-  for (const path of ["/creator/members", "/creator/members/turnover", "/creator/dashboard", "/creator", "/dashboard", "/creator/channels", "/dashboard/community"]) revalidatePath(path);
+  for (const path of ["/creator/members", "/creator/members/turnover", "/creator/dashboard", "/creator", "/dashboard", "/creator/channels", "/channels"]) revalidatePath(path);
 }
 
 // The legacy member-workspace role controls, kept working on top of the phase 2

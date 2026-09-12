@@ -300,7 +300,7 @@ export function EventsScreen({ isMaster = false }: { isMaster?: boolean }) {
             <p className="font-label-sm text-label-sm uppercase tracking-[0.16em] text-primary-container">Live schedule</p>
             <h2 className="mt-2 font-headline text-2xl font-bold text-white md:text-3xl">Upcoming sessions and gated rooms</h2>
           </div>
-          <ButtonLink href="/dashboard/community" variant="outline">
+          <ButtonLink href="/channels" variant="outline">
             <Plus size={16} />
             Create Event
           </ButtonLink>

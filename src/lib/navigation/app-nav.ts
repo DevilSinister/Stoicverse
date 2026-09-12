@@ -14,7 +14,7 @@ export function buildAppNav({ routeBase = "" }: { routeBase?: string }): AppNavI
       { href: "/creator", label: "Overview", icon: LayoutDashboard },
       { href: "/creator/events", label: "Events", icon: CalendarDays },
       { href: "/creator/courses", label: "Courses", icon: GraduationCap },
-      { href: "/creator/channels", label: "Channels", icon: MessageSquare },
+      { href: "/channels", label: "Channels", icon: MessageSquare },
       { href: "/creator/members", label: "Members", icon: Users },
       { href: "/creator/analytics", label: "Analytics", icon: BarChart3 },
       { href: "/creator/revenue", label: "Revenue", icon: CircleDollarSign },
@@ -27,7 +27,7 @@ export function buildAppNav({ routeBase = "" }: { routeBase?: string }): AppNavI
     { href: withRouteBase(routeBase, ""), label: "Dashboard", icon: LayoutDashboard },
     { href: withRouteBase(routeBase, "/events"), label: "Events", icon: CalendarDays },
     { href: withRouteBase(routeBase, "/courses"), label: "Courses", icon: GraduationCap },
-    { href: withRouteBase(routeBase, "/community"), label: "Communities", icon: MessageSquare },
+    { href: "/channels", label: "Communities", icon: MessageSquare },
     { href: withRouteBase(routeBase, "/notifications"), label: "Notifications", icon: Bell },
     { href: withRouteBase(routeBase, "/settings"), label: "Settings", icon: Settings },
   ];

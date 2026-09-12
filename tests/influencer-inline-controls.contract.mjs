@@ -59,22 +59,23 @@ test("member and creator route trees expose separate navigation and guards", () 
   const nav = read("src/lib/navigation/app-nav.ts");
   const memberAccess = read("src/lib/supabase/access.ts");
   const memberCommunity = read("src/app/community/page.tsx");
-  const communityWorkspace = read("src/components/community/CommunityWorkspace.tsx");
 
   for (const path of ["events", "courses", "community", "notifications", "settings"]) {
     assert.match(read(`src/app/dashboard/${path}/page.tsx`), /requireActiveMembership|render/);
   }
-  assert.match(read("src/app/dashboard/messages/page.tsx"), /permanentRedirect\("\/dashboard\/community"\)/);
+  assert.match(read("src/app/dashboard/messages/page.tsx"), /permanentRedirect\("\/channels"\)/);
   for (const path of ["members", "analytics", "revenue", "settings", "notifications"]) {
     assert.match(read(`src/app/creator/${path}/page.tsx`), /requireInfluencerWorkspace/);
   }
-  assert.match(read("src/app/creator/channels/page.tsx"), /renderCommunityWorkspace/);
+  assert.match(read("src/app/creator/channels/page.tsx"), /permanentRedirect\("\/creator\/settings\?section=channels"\)/);
   assert.match(nav, /label: "Overview"/);
   assert.match(nav, /label: "Revenue"/);
   assert.match(nav, /label: "Community settings"/);
   assert.doesNotMatch(nav, /label: "Messages"/);
-  assert.match(memberCommunity, /redirect\("\/dashboard\/community"/);
-  assert.match(communityWorkspace, /community_channel_directory/);
-  assert.match(communityWorkspace, /workspace === "creator"/);
+  // Phase 9: one community surface. The member and the creator both land on
+  // /channels, and the directory RPC — not a per-workspace branch — is what
+  // decides which channels either of them is shown.
+  assert.match(memberCommunity, /redirect\("\/channels"\)/);
+  assert.match(read("src/app/channels/layout.tsx"), /community_channel_directory/);
   assert.match(memberAccess, /profile\?\.platform_role === "influencer"/);
 });

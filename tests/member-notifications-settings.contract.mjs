@@ -10,9 +10,9 @@ test("member messages are retired without changing creator navigation", async ()
     read("src/app/dashboard/messages/page.tsx"),
   ]);
   assert.doesNotMatch(nav, /Messages|\/dashboard\/messages/);
-  assert.match(nav, /href: "\/creator\/channels", label: "Channels"/);
+  assert.match(nav, /href: "\/channels", label: "Channels"/);
   assert.match(nav, /href: "\/creator\/members", label: "Members"/);
-  assert.match(retiredPage, /permanentRedirect\("\/dashboard\/community"\)/);
+  assert.match(retiredPage, /permanentRedirect\("\/channels"\)/);
 });
 
 test("notification feed uses owned stable pagination and explicit read mutations", async () => {

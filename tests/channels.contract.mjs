@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
@@ -264,7 +265,7 @@ test("the header panels load when opened, not with the page", async () => {
   assert.equal(/loadedRef/.test(popovers), false, "the panel must not cache across opens");
 
   // And a pin can be removed from the list that shows the pins.
-  assert.match(popovers, /togglePostHighlight\(postId\)/);
+  assert.match(popovers, /toggleMessagePin\(postId\)/);
   assert.match(popovers, /aria-label=\{`Unpin the message from/);
   assert.match(popovers, /rpc\("community_channel_pins"/);
   assert.match(popovers, /rpc\("community_channel_threads"/);
@@ -437,13 +438,35 @@ test("the typing line sits above the composer, not inside it", async () => {
   assert.match(view, /typingSentence\(typistsIn\(channel\.id\)\)/);
 });
 
-test("the legacy community surface is still intact", async () => {
-  // P1 builds the new page alongside the old one. The browser gate cannot run
-  // until the dev-login service-role key is supplied, and deleting the only
-  // working community UI in favour of an unverified replacement is not a
-  // trade this phase is allowed to make on its own.
-  const surface = await read("src/components/community/CommunitySurface.tsx");
-  assert.ok(surface.length > 0);
+test("the legacy community surface is gone and its routes redirect", async () => {
+  // P1 built the new page alongside the old one and this test held the old one
+  // in place until /channels had been driven in a browser. Phase 9 is the other
+  // side of that trade: the surface is deleted, and the hrefs that pointed at it
+  // redirect rather than 404, because they are in notification action_urls
+  // written before the rebuild.
+  const [dashboard, creator, channels, messages, legacy] = await Promise.all([
+    read("src/app/dashboard/community/page.tsx"),
+    read("src/app/creator/community/page.tsx"),
+    read("src/app/creator/channels/page.tsx"),
+    read("src/app/dashboard/messages/page.tsx"),
+    read("src/app/community/page.tsx"),
+  ]);
+  for (const route of [dashboard, creator, messages, legacy]) {
+    assert.match(route, /(permanentR|r)edirect\("\/channels"\)/);
+  }
+  assert.match(channels, /permanentRedirect\("\/creator\/settings\?section=channels"\)/);
+
+  // The components themselves must not come back: a second community UI is how
+  // `posts.image_url` survived three phases after it stopped being the model.
+  for (const gone of [
+    "src/components/community/CommunitySurface.tsx",
+    "src/components/community/CommunityWorkspace.tsx",
+    "src/components/community/ChannelSidebar.tsx",
+    "src/components/community/MessageStream.tsx",
+    "src/components/community/MessageComposer.tsx",
+  ]) {
+    assert.equal(existsSync(new URL(`../${gone}`, import.meta.url)), false, `${gone} was deleted in phase 9`);
+  }
 });
 
 // --------------------------------------------------------------- phase P5
