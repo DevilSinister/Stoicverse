@@ -137,6 +137,7 @@ test("every colour token the channel UI uses is actually defined", async () => {
     "src/components/channels/MessageMenu.tsx",
     "src/components/channels/ThreadPanel.tsx",
     "src/components/channels/ChannelHeaderPopovers.tsx",
+    "src/components/channels/SearchBar.tsx",
   ];
 
   // Utilities that share a prefix with a colour but never take one.
@@ -257,6 +258,86 @@ test("the header panels load when opened, not with the page", async () => {
   assert.equal(/useEffect/.test(popovers), false);
   assert.match(popovers, /rpc\("community_channel_pins"/);
   assert.match(popovers, /rpc\("community_channel_threads"/);
+});
+
+// --------------------------------------------------------------- phase P3
+
+test("search filters narrow the query, never the page", async () => {
+  // The RPC returns one page of 25. Filtering after the fact shows two results
+  // out of a page and a "load more" that behaves at random.
+  const migration = await read("supabase/migrations/20260912100000_community_search_filters.sql");
+  assert.match(migration, /drop function if exists public\.community_search_messages\(text, uuid, timestamptz, integer\)/);
+  assert.match(migration, /author uuid default null/);
+  assert.match(migration, /after_created_at timestamptz default null/);
+  assert.match(migration, /has text default null/);
+  assert.match(migration, /revoke execute on function public\.community_search_messages\(text, uuid, timestamptz, integer, uuid, timestamptz, text\) from public, anon/);
+
+  const loader = await readCode("src/lib/community/messages.ts");
+  assert.match(loader, /author: options\.authorId \?\? null/);
+  assert.match(loader, /has: options\.has \?\? null/);
+});
+
+test("the old search signature is dropped, not left as an overload", async () => {
+  // Two arities and PostgREST picks between them by the argument names a
+  // caller happened to send, which is a coin toss nobody would ever debug.
+  const migration = await read("supabase/migrations/20260912100000_community_search_filters.sql");
+  const dropAt = migration.indexOf("drop function if exists public.community_search_messages(text, uuid, timestamptz, integer)");
+  const createAt = migration.indexOf("create or replace function public.community_search_messages");
+  assert.ok(dropAt > -1 && dropAt < createAt, "the four-argument function must be dropped before the new one is created");
+
+  const down = await read("supabase/rollback/20260912100000_community_search_filters.down.sql");
+  assert.match(down, /drop function if exists public\.community_search_messages\(text, uuid, timestamptz, integer, uuid, timestamptz, text\)/);
+  assert.match(down, /create or replace function public\.community_search_messages/);
+});
+
+test("an unresolved filter stops the search instead of running it", async () => {
+  const bar = await readCode("src/components/channels/SearchBar.tsx");
+  // A search that silently drops `from:someone` returns everybody's messages
+  // and looks like it worked.
+  assert.match(bar, /if \(!parsed\.runnable\)/);
+  assert.match(bar, /setProblems\(parsed\.problems\)/);
+  // And a slow first request must not land on a fast second one.
+  assert.match(bar, /if \(ticket !== runRef\.current\) return;/);
+});
+
+test("unread listens across the community, and marking read is debounced", async () => {
+  const unread = await readCode("src/components/channels/useUnread.ts");
+  // The point of an unread badge is the channel you are not looking at, so
+  // this subscription deliberately carries no channel filter.
+  assert.match(unread, /table: "posts" \}, schedule/);
+  assert.match(unread, /table: "channel_read_states" \}, schedule/);
+  assert.match(unread, /setTimeout\(\(\) => void reread\(\), SETTLE_MS\)/);
+
+  const view = await readCode("src/components/channels/ChannelView.tsx");
+  // A write per arriving message in a busy channel, and scrolling past the
+  // bottom on the way elsewhere is not reading.
+  assert.match(view, /markChannelRead\(channel\.id, newest\.id\)/);
+  assert.match(view, /document\.visibilityState !== "visible" \|\| !atBottomRef\.current/);
+  assert.match(view, /\}, 1500\)/);
+  // An optimistic id is a nonce; marking read against it would fail.
+  assert.match(view, /newest\.id\.startsWith\("optimistic-"\)/);
+});
+
+test("the NEW divider is frozen when the channel opens", async () => {
+  const view = await readCode("src/components/channels/ChannelView.tsx");
+  // A divider that moved as you read would sit permanently at the bottom.
+  assert.match(view, /const \[readBoundary\] = useState<string \| null>/);
+  assert.match(view, /firstUnreadIndex\(messages, readBoundary/);
+  // Read from the live viewer state on every render and it would chase the
+  // bottom as marking-read caught up.
+  const afterFreeze = view.slice(view.indexOf("const rendered = useMemo"));
+  assert.equal(/readStates/.test(afterFreeze), false);
+});
+
+test("muting dims the channel but never hides its mentions", async () => {
+  const shell = await readCode("src/components/channels/ChannelsShell.tsx");
+  // Muting says "do not shout at me", not "hide it from me".
+  assert.match(shell, /const bold = channel\.hasUnread && !active && !muted/);
+  assert.match(shell, /channel\.mentionCount > 0/);
+  assert.match(shell, /setChannelNotificationLevel\(channel\.id, level\)/);
+  // Date.now() during render is impure: an expiring mute would flip on any
+  // re-render rather than on the clock.
+  assert.equal(/Date\.now\(\)\s*[;)]/.test(shell.replace("useState(() => Date.now())", "")), false);
 });
 
 test("the legacy community surface is still intact", async () => {

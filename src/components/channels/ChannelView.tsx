@@ -4,13 +4,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CornerUpLeft, FileText, Hash, Loader2, MessagesSquare, Pin, WifiOff } from "lucide-react";
 
-import { editMessage, toggleReaction } from "@/app/community/actions";
+import { editMessage, markChannelRead, toggleReaction } from "@/app/community/actions";
 import { PinsPopover, ThreadListPopover } from "@/components/channels/ChannelHeaderPopovers";
 import { Composer } from "@/components/channels/Composer";
 import { mergeMessage, useChannelLive, useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
 import { MessageMenu } from "@/components/channels/MessageMenu";
 import { ThreadPanel } from "@/components/channels/ThreadPanel";
-import { continuesGroup, startsNewDay } from "@/lib/channels/grouping";
+import { continuesGroup, firstUnreadIndex, startsNewDay } from "@/lib/channels/grouping";
 import { JUMP_PAGE_BUDGET } from "@/lib/channels/message-actions";
 import { COMPOSER_NOTICE } from "@/lib/channels/permissions";
 import { toClientMessage } from "@/lib/channels/rows";
@@ -230,6 +230,9 @@ function MessageRow({
   return (
     <li
       ref={(node) => registerNode(message.id, node)}
+      // The id on the element, not only in a ref: a jump, a test and P5's
+      // keyboard navigation all need to find a row from outside this component.
+      data-message-id={message.id}
       className={`group relative px-4 transition-colors duration-700 ${grouped ? "py-0.5" : "pb-0.5 pt-3"} ${
         flashed ? "bg-primary-container/20" : "hover:bg-surface-container-lowest/60"
       }`}
@@ -343,7 +346,7 @@ export function ChannelView({
   initialCursor: { createdAt: string; id: string } | null;
   initialUrls: Record<string, string>;
 }) {
-  const { affordances } = useCommunity();
+  const { affordances, viewer, setActiveChannel, refreshUnread } = useCommunity();
   const permissions = affordances(channel.id);
   const router = useRouter();
   const pathname = usePathname();
@@ -373,6 +376,12 @@ export function ChannelView({
   const atBottomRef = useRef(true);
   const nodesRef = useRef(new Map<string, HTMLLIElement>());
   const jumpedRef = useRef<string | null>(null);
+  const markTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Frozen once, on the first render for this channel. Read the live value and
+  // the divider would chase the bottom of the list as marking-read caught up,
+  // which is the one thing it must never do.
+  const [readBoundary] = useState<string | null>(() => viewer?.readStates?.[channel.id]?.lastReadAt ?? null);
 
   const registerNode = useCallback((id: string, node: HTMLLIElement | null) => {
     if (node) nodesRef.current.set(id, node);
@@ -407,6 +416,43 @@ export function ChannelView({
     const pane = paneRef.current;
     if (pane && atBottomRef.current) pane.scrollTop = pane.scrollHeight;
   }, [messages]);
+
+  // The sidebar stops showing this channel unread the moment it is on screen,
+  // rather than waiting for the debounce below to reach the server.
+  useEffect(() => {
+    setActiveChannel(channel.id);
+    return () => setActiveChannel(null);
+  }, [channel.id, setActiveChannel]);
+
+  /**
+   * Mark read, 1.5 s after the reader settles at the bottom.
+   *
+   * Debounced because the alternative is a write per arriving message in a
+   * busy channel, and delayed because scrolling past the bottom on the way
+   * somewhere else is not reading. Only ever called while the tab is visible:
+   * a background tab receiving messages is not somebody reading them.
+   */
+  const scheduleMarkRead = useCallback(() => {
+    if (markTimerRef.current) clearTimeout(markTimerRef.current);
+    markTimerRef.current = setTimeout(() => {
+      if (document.visibilityState !== "visible" || !atBottomRef.current) return;
+      const newest = messages[messages.length - 1];
+      if (!newest || newest.id.startsWith("optimistic-")) return;
+      void markChannelRead(channel.id, newest.id).then(() => refreshUnread());
+    }, 1500);
+  }, [channel.id, messages, refreshUnread]);
+
+  useEffect(() => {
+    if (atBottomRef.current) scheduleMarkRead();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") scheduleMarkRead();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      if (markTimerRef.current) clearTimeout(markTimerRef.current);
+    };
+  }, [scheduleMarkRead]);
 
   const setParam = useCallback(
     (key: string, value: string | null) => {
@@ -496,19 +542,24 @@ export function ChannelView({
   );
 
   const rendered = useMemo(() => {
-    const nodes: { message: ChannelMessage; grouped: boolean; day: string | null }[] = [];
+    const unreadAt = firstUnreadIndex(messages, readBoundary, viewer?.userId ?? null);
+    const nodes: { message: ChannelMessage; grouped: boolean; day: string | null; isNew: boolean }[] = [];
     let previous: ChannelMessage | null = null;
-    for (const message of messages) {
+    for (const [index, message] of messages.entries()) {
       const newDay = startsNewDay(previous, message);
+      const isNew = index === unreadAt;
       nodes.push({
         message,
-        grouped: !newDay && continuesGroup(previous, message),
+        // The divider breaks the block for the same reason a day divider does:
+        // a run of messages split by a line is not one run any more.
+        grouped: !newDay && !isNew && continuesGroup(previous, message),
         day: newDay ? dayOf(message.createdAt) : null,
+        isNew,
       });
       previous = message;
     }
     return nodes;
-  }, [messages]);
+  }, [messages, readBoundary, viewer?.userId]);
 
   return (
     <div className="flex min-h-0 flex-1">
@@ -572,8 +623,15 @@ export function ChannelView({
             </li>
           ) : null}
 
-          {rendered.map(({ message, grouped, day }) => (
+          {rendered.map(({ message, grouped, day, isNew }) => (
             <div key={message.id}>
+              {isNew ? (
+                <li className="flex items-center gap-3 px-4 py-1.5" aria-label="New messages below">
+                  <span className="h-px flex-1 bg-error/60" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-error">New</span>
+                  <span className="h-px flex-1 bg-error/60" />
+                </li>
+              ) : null}
               {day ? (
                 <li className="flex items-center gap-3 px-4 py-3">
                   <span className="h-px flex-1 bg-surgical-steel" />

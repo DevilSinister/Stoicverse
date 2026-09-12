@@ -44,3 +44,32 @@ export function startsNewDay(previous: GroupableMessage | null, message: Groupab
   if (Number.isNaN(before.getTime()) || Number.isNaN(now.getTime())) return false;
   return before.toDateString() !== now.toDateString();
 }
+
+/**
+ * Where the "NEW" divider goes: the index of the first message this person has
+ * not read, or -1.
+ *
+ * `lastReadAt` is frozen when the channel opens and deliberately not updated
+ * while it is open. A divider that moved as you read would sit permanently at
+ * the bottom and tell you nothing — the whole value is that it stays put,
+ * marking where you were when you arrived.
+ *
+ * Your own messages never start the unread run. Posting something and then
+ * being told there is something new below is nonsense.
+ */
+export function firstUnreadIndex(
+  messages: readonly { id: string; createdAt: string; authorId: string | null }[],
+  lastReadAt: string | null,
+  viewerId: string | null,
+): number {
+  if (!lastReadAt) return -1;
+  const boundary = Date.parse(lastReadAt);
+  if (Number.isNaN(boundary)) return -1;
+
+  for (let index = 0; index < messages.length; index += 1) {
+    const message = messages[index];
+    if (viewerId !== null && message.authorId === viewerId) continue;
+    if (Date.parse(message.createdAt) > boundary) return index;
+  }
+  return -1;
+}

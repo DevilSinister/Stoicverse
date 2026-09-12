@@ -6,6 +6,7 @@ import type { MentionDictionary } from "@/lib/channels/mentions";
 import { deriveAffordances, type Affordances } from "@/lib/channels/permissions";
 import type { ChannelMessage, DirectoryMember, ViewerState } from "@/lib/community/messages";
 import type { MentionResolvers } from "@/lib/markdown/render";
+import { useUnread } from "@/components/channels/useUnread";
 import { createClient } from "@/lib/supabase/client";
 
 /**
@@ -42,6 +43,10 @@ type CommunityValue = {
   dictionary: MentionDictionary;
   /** Id-to-name lookups the markdown renderer needs. */
   resolvers: MentionResolvers;
+  /** Tells the sidebar which channel is on screen, so it stops showing itself unread. */
+  setActiveChannel: (channelId: string | null) => void;
+  /** Re-reads unread and mention counts now, rather than waiting for the debounce. */
+  refreshUnread: () => void;
   degraded: string[];
 };
 
@@ -55,7 +60,7 @@ export function useCommunity(): CommunityValue {
 
 export function CommunityProvider({
   viewer,
-  channels,
+  channels: initialChannels,
   members,
   degraded,
   children,
@@ -66,6 +71,10 @@ export function CommunityProvider({
   degraded: string[];
   children: ReactNode;
 }) {
+  // Unread lives here rather than in the sidebar because the open channel has
+  // to be able to say "I am being read" — the two halves are one question.
+  const { channels, setActiveChannel, refreshUnread } = useUnread(initialChannels);
+
   const value = useMemo<CommunityValue>(() => {
     const channelById = new Map(channels.map((channel) => [channel.id, channel]));
     const memberById = new Map(members.map((member) => [member.id, member.fullName]));
@@ -98,9 +107,11 @@ export function CommunityProvider({
         role: (id) => roleById.get(id),
         channel: (id) => channelById.get(id)?.name,
       },
+      setActiveChannel,
+      refreshUnread,
       degraded,
     };
-  }, [viewer, channels, members, degraded]);
+  }, [viewer, channels, members, degraded, setActiveChannel, refreshUnread]);
 
   return <CommunityContext.Provider value={value}>{children}</CommunityContext.Provider>;
 }

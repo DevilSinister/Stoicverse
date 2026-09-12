@@ -219,10 +219,27 @@ export type SearchHit = {
 export async function searchMessages(
   supabase: SupabaseClient,
   query: string,
-  options: { channelId?: string; before?: string } = {},
+  options: {
+    channelId?: string;
+    before?: string;
+    /** From `parseSearchQuery`. Every one of these narrows the SQL, not the page. */
+    authorId?: string;
+    after?: string;
+    has?: string;
+  } = {},
 ): Promise<{ hits: SearchHit[]; degraded: string[] }> {
   const cleaned = query.trim();
-  if (cleaned.length < SEARCH_QUERY_LIMITS.min || cleaned.length > SEARCH_QUERY_LIMITS.max) {
+  const narrowed =
+    options.channelId !== undefined ||
+    options.authorId !== undefined ||
+    options.has !== undefined ||
+    options.before !== undefined ||
+    options.after !== undefined;
+
+  // An empty query is a real search when a filter carries it — "everything Ada
+  // posted in #general" names no words. Without one, there is nothing to ask.
+  if (cleaned === "" && !narrowed) return { hits: [], degraded: [] };
+  if (cleaned !== "" && (cleaned.length < SEARCH_QUERY_LIMITS.min || cleaned.length > SEARCH_QUERY_LIMITS.max)) {
     return { hits: [], degraded: [] };
   }
 
@@ -231,6 +248,9 @@ export async function searchMessages(
     channel: options.channelId ?? null,
     before_created_at: options.before ?? null,
     page_size: SEARCH_QUERY_LIMITS.pageSize,
+    author: options.authorId ?? null,
+    after_created_at: options.after ?? null,
+    has: options.has ?? null,
   });
 
   if (error) {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { continuesGroup, GROUP_WINDOW_MS, startsNewDay } from "../src/lib/channels/grouping.ts";
+import { continuesGroup, firstUnreadIndex, GROUP_WINDOW_MS, startsNewDay } from "../src/lib/channels/grouping.ts";
 import { COMPOSER_NOTICE, deriveAffordances } from "../src/lib/channels/permissions.ts";
 import { activeMentionQuery, decodeMentions, encodeMentions } from "../src/lib/channels/mentions.ts";
 
@@ -138,4 +138,52 @@ test("the autocomplete only fires on the token under the caret", () => {
   assert.equal(activeMentionQuery("hello there", 11), null);
   // Mid-word is not a mention.
   assert.equal(activeMentionQuery("email@example", 13), null);
+});
+
+// ------------------------------------------------- the NEW divider (phase P3)
+
+const READER = "11111111-1111-4111-8111-111111111111";
+const OTHER = "22222222-2222-4222-8222-222222222222";
+const msg = (id, iso, authorId = OTHER) => ({ id, createdAt: iso, authorId });
+
+test("the divider marks the first message that arrived after the last visit", () => {
+  const messages = [
+    msg("a", "2026-09-12T10:00:00Z"),
+    msg("b", "2026-09-12T11:00:00Z"),
+    msg("c", "2026-09-12T12:00:00Z"),
+  ];
+  assert.equal(firstUnreadIndex(messages, "2026-09-12T10:30:00Z", READER), 1);
+});
+
+test("your own messages never start the unread run", () => {
+  // Posting something and then being told there is something new below it is
+  // nonsense. This is also why the divider cannot be exercised in a community
+  // where the only author is the reader.
+  const mine = [msg("a", "2026-09-12T11:00:00Z", READER), msg("b", "2026-09-12T12:00:00Z", READER)];
+  assert.equal(firstUnreadIndex(mine, "2026-09-12T10:00:00Z", READER), -1);
+
+  // But somebody else's message after yours still counts.
+  const mixed = [msg("a", "2026-09-12T11:00:00Z", READER), msg("b", "2026-09-12T12:00:00Z", OTHER)];
+  assert.equal(firstUnreadIndex(mixed, "2026-09-12T10:00:00Z", READER), 1);
+});
+
+test("nothing unread, never read, and an unusable timestamp all mean no divider", () => {
+  const messages = [msg("a", "2026-09-12T10:00:00Z")];
+  assert.equal(firstUnreadIndex(messages, "2026-09-12T23:00:00Z", READER), -1, "all read");
+  assert.equal(firstUnreadIndex(messages, null, READER), -1, "never opened the channel");
+  assert.equal(firstUnreadIndex(messages, "not a date", READER), -1, "unparseable");
+  assert.equal(firstUnreadIndex([], "2026-09-12T10:00:00Z", READER), -1, "empty channel");
+});
+
+test("a message exactly at the boundary is already read", () => {
+  // The boundary is when the reader last looked, so a message written at that
+  // instant was on screen. Using >= would put the divider above a message they
+  // had already seen, on every single visit.
+  const messages = [msg("a", "2026-09-12T10:00:00Z")];
+  assert.equal(firstUnreadIndex(messages, "2026-09-12T10:00:00Z", READER), -1);
+});
+
+test("an anonymous reader owns nothing, so every message can be unread", () => {
+  const messages = [msg("a", "2026-09-12T11:00:00Z", null)];
+  assert.equal(firstUnreadIndex(messages, "2026-09-12T10:00:00Z", null), 0);
 });

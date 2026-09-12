@@ -1,11 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useSelectedLayoutSegment } from "next/navigation";
-import { CalendarDays, Hash, Lock, Megaphone, ScrollText, Settings } from "lucide-react";
+import { BellOff, CalendarDays, Hash, Lock, Megaphone, ScrollText, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { setChannelNotificationLevel } from "@/app/community/actions";
 import { useCommunity, type ChannelRow } from "@/components/channels/CommunityProvider";
+import { SearchBar } from "@/components/channels/SearchBar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CHANNEL_NOTIFICATION_LEVELS } from "@/lib/community/constants";
 
 /**
  * The frame: channels on the left, the conversation on the right.
@@ -23,7 +33,13 @@ const CHANNEL_ICONS: Record<string, typeof Hash> = {
   rules: ScrollText,
 };
 
-function ChannelLink({ channel, active }: { channel: ChannelRow; active: boolean }) {
+const LEVEL_LABEL: Record<string, string> = {
+  all: "Every message",
+  mentions: "Only when I am mentioned",
+  none: "Nothing",
+};
+
+function ChannelLink({ channel, active, muted }: { channel: ChannelRow; active: boolean; muted: boolean }) {
   const Icon = channel.isLocked ? Lock : (CHANNEL_ICONS[channel.type] ?? Hash);
 
   if (channel.isLocked) {
@@ -46,34 +62,71 @@ function ChannelLink({ channel, active }: { channel: ChannelRow; active: boolean
     );
   }
 
+  // A muted channel still counts mentions — muting says "do not shout at me",
+  // not "hide it from me" — but it stops going bold for ordinary traffic.
+  const bold = channel.hasUnread && !active && !muted;
+
   return (
-    <Link
-      href={`/channels/${channel.id}`}
-      aria-current={active ? "page" : undefined}
-      className={`focus-ring flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors ${
-        active
-          ? "bg-surface-container-high text-on-surface"
-          : channel.hasUnread
-            ? "text-on-surface hover:bg-surface-container-low"
-            : "text-fog-muted hover:bg-surface-container-low hover:text-on-surface"
-      }`}
-    >
-      <Icon size={16} aria-hidden="true" className="shrink-0" />
-      <span className={`truncate ${channel.hasUnread && !active ? "font-semibold" : ""}`}>{channel.name}</span>
-      {channel.mentionCount > 0 ? (
-        <span
-          className="ml-auto shrink-0 rounded-full bg-error px-1.5 text-[11px] font-semibold text-monolith-surface"
-          aria-label={`${channel.mentionCount} unread mentions`}
+    <div className="group/channel relative flex items-center">
+      <Link
+        href={`/channels/${channel.id}`}
+        aria-current={active ? "page" : undefined}
+        className={`focus-ring flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors ${
+          active
+            ? "bg-surface-container-high text-on-surface"
+            : bold
+              ? "text-on-surface hover:bg-surface-container-low"
+              : "text-fog-muted hover:bg-surface-container-low hover:text-on-surface"
+        }`}
+      >
+        <Icon size={16} aria-hidden="true" className="shrink-0" />
+        <span className={`truncate ${bold ? "font-semibold" : ""}`}>{channel.name}</span>
+        {muted ? <BellOff size={12} aria-hidden="true" className="shrink-0 text-fog-muted" /> : null}
+        {channel.mentionCount > 0 ? (
+          <span
+            className="ml-auto shrink-0 rounded-full bg-error px-1.5 text-[11px] font-semibold text-monolith-surface"
+            aria-label={`${channel.mentionCount} unread mentions`}
+          >
+            {channel.mentionCount > 99 ? "99+" : channel.mentionCount}
+          </span>
+        ) : null}
+      </Link>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          aria-label={`Notification settings for ${channel.name}`}
+          className="focus-ring absolute right-1 rounded p-1 text-fog-muted opacity-0 group-focus-within/channel:opacity-100 group-hover/channel:opacity-100 hover:text-on-surface"
         >
-          {channel.mentionCount > 99 ? "99+" : channel.mentionCount}
-        </span>
-      ) : null}
-    </Link>
+          <BellOff size={12} aria-hidden="true" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-56">
+          {CHANNEL_NOTIFICATION_LEVELS.map((level) => (
+            <DropdownMenuItem key={level} onClick={() => void setChannelNotificationLevel(channel.id, level)}>
+              {LEVEL_LABEL[level]}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
 
 export function ChannelsShell({ children }: { children: ReactNode }) {
   const { channels, viewer, degraded } = useCommunity();
+  const settings = viewer?.notificationSettings ?? {};
+  // Read once when the shell mounts rather than on every render. `Date.now()`
+  // during render is impure: an expiring mute would flip whenever React
+  // happened to re-render, which is neither predictable nor tied to the clock.
+  // The cost is that a timed mute expiring while the page is open keeps its
+  // icon until the next navigation, which nobody will notice and nobody is
+  // misled by — the server is still the one deciding what to notify.
+  const [mountedAt] = useState(() => Date.now());
+  const isMuted = (channelId: string) => {
+    const setting = settings[channelId];
+    if (!setting) return false;
+    if (setting.level === "none" || setting.level === "mentions") return true;
+    return setting.mutedUntil !== null && Date.parse(setting.mutedUntil) > mountedAt;
+  };
   // `/channels/[channelId]` — the segment is the id of the open channel.
   const activeId = useSelectedLayoutSegment();
 
@@ -109,6 +162,10 @@ export function ChannelsShell({ children }: { children: ReactNode }) {
           ) : null}
         </div>
 
+        <div className="border-b border-surgical-steel px-2 py-2">
+          <SearchBar />
+        </div>
+
         <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
           {degraded.length > 0 ? (
             <p
@@ -130,7 +187,11 @@ export function ChannelsShell({ children }: { children: ReactNode }) {
                 <ul className="space-y-0.5">
                   {category.channels.map((channel) => (
                     <li key={channel.id}>
-                      <ChannelLink channel={channel} active={channel.id === activeId} />
+                      <ChannelLink
+                        channel={channel}
+                        active={channel.id === activeId}
+                        muted={isMuted(channel.id)}
+                      />
                     </li>
                   ))}
                 </ul>
