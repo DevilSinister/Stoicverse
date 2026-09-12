@@ -340,6 +340,31 @@ test("muting dims the channel but never hides its mentions", async () => {
   assert.equal(/Date\.now\(\)\s*[;)]/.test(shell.replace("useState(() => Date.now())", "")), false);
 });
 
+test("a message shows the thread hanging off it", async () => {
+  // The original join was `threads.id = post.thread_id`, and the channel view
+  // returns only posts whose `thread_id is null` — that clause is what keeps
+  // thread replies out of the main list. So the join matched nothing, every
+  // time, and the thread summary was structurally always null in a channel.
+  //
+  // The obvious repair is the wrong one: setting `posts.thread_id` on the root
+  // post would make that join work and would delete the message from its own
+  // channel. A thread hangs off its root post, so the join follows
+  // `root_post_id`.
+  const migration = await read("supabase/migrations/20260912110000_community_thread_summary.sql");
+  assert.match(migration, /left join public\.threads started on started\.root_post_id = post\.id/);
+  assert.match(migration, /left join public\.threads inside on inside\.id = post\.thread_id/);
+  assert.match(migration, /coalesce\(started\.id, post\.thread_id\)/);
+  assert.match(migration, /coalesce\(started\.name, inside\.name\)/);
+  assert.match(migration, /coalesce\(started\.message_count, inside\.message_count\)/);
+
+  // The clause that separates a channel from its threads must survive: without
+  // it every thread reply floods the channel it was moved out of.
+  assert.match(migration, /case when thread is null then post\.thread_id is null else post\.thread_id = thread end/);
+
+  const down = await read("supabase/rollback/20260912110000_community_thread_summary.down.sql");
+  assert.match(down, /left join public\.threads thread_row on thread_row\.id = post\.thread_id/);
+});
+
 test("the legacy community surface is still intact", async () => {
   // P1 builds the new page alongside the old one. The browser gate cannot run
   // until the dev-login service-role key is supplied, and deleting the only
