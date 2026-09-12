@@ -5,11 +5,8 @@ import { revalidatePath } from "next/cache";
 import type { MemberActionResult, PlatformMemberRole, TurnoverChange } from "@/lib/member-operations/types";
 import { isUuid } from "@/lib/security/uuid";
 import { requireInfluencer } from "@/lib/supabase/access";
-import { postgresMessage } from "@/lib/supabase/errors";
 
 const MAX_TURNOVER = 999_999_999_999.99;
-const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
-const value = (data: FormData, key: string) => typeof data.get(key) === "string" ? String(data.get(key)).trim() : "";
 
 function currentIsoWeekStart() {
   const now = new Date();
@@ -22,56 +19,10 @@ function refreshMemberOperations() {
   for (const path of ["/creator/members", "/creator/members/turnover", "/creator/dashboard", "/creator", "/dashboard", "/creator/channels", "/channels"]) revalidatePath(path);
 }
 
-// The legacy member-workspace role controls, kept working on top of the phase 2
-// RPCs. `cosmetic_roles` is a read-only compat view now, so a direct insert or
-// update from here would be refused by the database regardless of what this
-// action believed. Position is no longer a field on the form: it is set when the
-// role is created and changed only by a reorder in the Roles settings section.
-export async function saveCosmeticRole(data: FormData): Promise<MemberActionResult> {
-  const id = value(data, "id");
-  const name = value(data, "name");
-  const roleColor = value(data, "color");
-  if ((id && !isUuid(id)) || name.length < 2 || name.length > 32 || !HEX_PATTERN.test(roleColor)) {
-    return { error: "Enter a 2–32 character name and a valid colour." };
-  }
-
-  const { supabase } = await requireInfluencer();
-  const { error } = await supabase.rpc("community_role_save", {
-    role_id: id || null,
-    role_name: name,
-    role_color: roleColor.toUpperCase(),
-    role_hoist: false,
-    role_mentionable: false,
-    role_icon_emoji: null,
-    role_icon_path: null,
-    role_permissions: [],
-  });
-  if (error) return { error: postgresMessage(error, "The role could not be saved.", "members") };
-  refreshMemberOperations();
-  return { success: true, message: id ? "Role updated." : "Role created." };
-}
-
-export async function deleteCosmeticRole(roleId: string): Promise<MemberActionResult> {
-  if (!isUuid(roleId)) return { error: "Invalid role." };
-  const { supabase } = await requireInfluencer();
-  const { error } = await supabase.rpc("community_role_delete", { role_id: roleId });
-  if (error) return { error: postgresMessage(error, "The role could not be deleted.", "members") };
-  refreshMemberOperations();
-  return { success: true, message: "Role deleted and removed from assigned members." };
-}
-
-export async function setCosmeticRoleAssignment(roleId: string, memberId: string, assigned: boolean): Promise<MemberActionResult> {
-  if (!isUuid(roleId) || !isUuid(memberId)) return { error: "Invalid member or role." };
-  const { supabase } = await requireInfluencer();
-  const { error } = await supabase.rpc(assigned ? "community_role_assign" : "community_role_unassign", {
-    role_id: roleId,
-    member_id: memberId,
-  });
-  if (error) return { error: postgresMessage(error, "The member’s role could not be changed.", "members") };
-  refreshMemberOperations();
-  return { success: true, message: assigned ? "Role assigned." : "Role removed." };
-}
-
+// Role creation, deletion and assignment left this module in phase 9. They were
+// wrappers over the phase 2 RPCs that could not set hoist, mentionable, icon or
+// permissions, and could not check the caller's place in the hierarchy — the
+// Roles settings section calls those RPCs directly and does both.
 export async function setMemberPlatformRole(memberId: string, desiredRole: PlatformMemberRole): Promise<MemberActionResult> {
   if (!isUuid(memberId) || !["member", "moderator"].includes(desiredRole)) return { error: "Invalid role change." };
   const { supabase } = await requireInfluencer();

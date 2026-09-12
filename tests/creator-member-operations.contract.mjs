@@ -39,7 +39,10 @@ test("directory is indexed, cursor-paginated, filterable, and duplicate-safe", a
 
 test("member actions re-authorize and target protected database contracts", async () => {
   const actions = await read("src/app/creator/members/actions.ts");
-  assert.ok((actions.match(/requireInfluencer\(\)/g) ?? []).length >= 7);
+  // Was >= 7 before phase 9 removed saveCosmeticRole, deleteCosmeticRole and
+  // setCosmeticRoleAssignment. Every remaining action still re-authorizes.
+  assert.ok((actions.match(/requireInfluencer\(\)/g) ?? []).length >= 4);
+  assert.doesNotMatch(actions, /community_role_save|community_role_delete|community_role_assign/);
   assert.match(actions, /gift_member_subscription/);
   assert.match(actions, /record_member_moderation/);
   assert.match(actions, /set_member_platform_role/);
@@ -48,15 +51,18 @@ test("member actions re-authorize and target protected database contracts", asyn
 });
 
 test("registry and turnover workspace expose required operational states", async () => {
-  const [registry, details, roles, turnover] = await Promise.all([
-    read("src/components/creator/members/MemberRegistry.tsx"), read("src/components/creator/members/MemberDetailModal.tsx"), read("src/components/creator/members/RoleManagerModal.tsx"), read("src/components/creator/members/TurnoverWorkspace.tsx"),
+  const [registry, details, turnover] = await Promise.all([
+    read("src/components/creator/members/MemberRegistry.tsx"), read("src/components/creator/members/MemberDetailModal.tsx"), read("src/components/creator/members/TurnoverWorkspace.tsx"),
   ]);
   assert.match(registry, /Search by full name or exact member ID/);
   assert.match(registry, /Manage roles/);
   assert.match(registry, /No members match this search/);
   assert.match(details, /Gift access/);
   assert.match(details, /Confirm \{member\.isSuspended \? "reinstatement" : "suspension"\}/);
-  assert.match(roles, /Confirm delete/);
+  // Role editing is the settings section now: one editor that checks the
+  // hierarchy, rather than a modal that could not.
+  assert.match(registry, /href="\/creator\/settings\?section=roles"/);
+  assert.match(details, /Assign roles in Community settings/);
   assert.match(turnover, /unsaved/);
   assert.match(turnover, /Save changes/);
 });

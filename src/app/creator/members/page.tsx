@@ -7,7 +7,12 @@ export default async function CreatorMembersPage() {
   const { supabase, user } = await requireInfluencerWorkspace("/creator/members");
   const [profileResult, rolesResult, initialPage] = await Promise.all([
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-    supabase.from("cosmetic_roles").select("id,name,color,priority").order("priority", { ascending: false }).order("name"),
+    // `community_roles` directly since phase 9 dropped the `cosmetic_roles`
+    // compat view, which was this same select with `position` aliased to
+    // `priority`. The alias stays here because `search_creator_members`
+    // returns the key under the old name too, and one page should not carry
+    // two spellings of one field.
+    supabase.from("community_roles").select("id,name,color,priority:position").order("position", { ascending: false }).order("name"),
     queryMemberDirectory(supabase, {}),
   ]);
   if (profileResult.error || rolesResult.error) throw new Error("Unable to load the member registry.");

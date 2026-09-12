@@ -14,13 +14,13 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
     supabase.from("profiles").select("full_name,avatar_url,platform_role").eq("id", user.id).maybeSingle(),
     supabase.from("memberships").select("status,expires_at").eq("user_id", user.id).maybeSingle(),
     supabase.from("member_notification_preferences").select("event_updates,course_updates,community_mentions,role_achievements").eq("user_id", user.id).maybeSingle(),
-    supabase.from("cosmetic_role_assignments").select("role_id").eq("user_id", user.id),
+    supabase.from("community_role_members").select("role_id").eq("user_id", user.id),
   ]);
   if (profileResult.error || membershipResult.error || preferenceResult.error || assignmentResult.error) throw new Error("Unable to load account settings.");
 
   const roleIds = (assignmentResult.data ?? []).map((assignment) => assignment.role_id);
-  const roleResult = roleIds.length ? await supabase.from("cosmetic_roles").select("id,name,color,priority").in("id", roleIds).order("priority", { ascending: false }) : { data: [], error: null };
-  if (roleResult.error) throw new Error("Unable to load cosmetic roles.");
+  const roleResult = roleIds.length ? await supabase.from("community_roles").select("id,name,color,position").in("id", roleIds).order("position", { ascending: false }) : { data: [], error: null };
+  if (roleResult.error) throw new Error("Unable to load community roles.");
 
   const profile = profileResult.data;
   let avatarUrl: string | null = null;

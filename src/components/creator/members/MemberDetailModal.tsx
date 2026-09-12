@@ -1,16 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { Ban, Check, CircleDollarSign, LoaderCircle, Shield, ShieldOff, Sparkles, UserRoundCog } from "lucide-react";
+import { Ban, CircleDollarSign, LoaderCircle, Shield, ShieldOff, Sparkles, UserRoundCog } from "lucide-react";
 
-import { giftMemberSubscription, moderateMember, setCosmeticRoleAssignment, setMemberPlatformRole } from "@/app/creator/members/actions";
+import Link from "next/link";
+
+import { giftMemberSubscription, moderateMember, setMemberPlatformRole } from "@/app/creator/members/actions";
 import { MemberModalShell } from "@/components/creator/members/MemberModalShell";
-import type { CosmeticRole, MemberSummary } from "@/lib/member-operations/types";
+import type { MemberSummary } from "@/lib/member-operations/types";
 
 const date = (value: string | null) => value ? new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(value)) : "—";
 const money = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 
-export function MemberDetailModal({ memberId, roles, onClose, onChanged }: { memberId: string; roles: CosmeticRole[]; onClose: () => void; onChanged: () => void }) {
+export function MemberDetailModal({ memberId, onClose, onChanged }: { memberId: string; onClose: () => void; onChanged: () => void }) {
   const [member, setMember] = useState<MemberSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -51,7 +53,12 @@ export function MemberDetailModal({ memberId, roles, onClose, onChanged }: { mem
             {notice && <p role={notice.kind === "error" ? "alert" : "status"} className={`rounded-lg border px-4 py-3 text-sm ${notice.kind === "error" ? "border-error/40 bg-error/10 text-error" : "border-primary-container/30 bg-primary-container/10 text-primary-container"}`}>{notice.text}</p>}
             <section aria-labelledby="identity-heading"><div className="flex items-center justify-between gap-4"><h3 id="identity-heading" className="font-semibold text-white">Identity & access</h3><Status status={member.membershipStatus} /></div><dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-5 text-sm"><Detail label="Account created" value={date(member.accountCreatedAt)} /><Detail label="Joined" value={date(member.joinedAt)} /><Detail label="Membership" value={member.membershipStatus} capitalize /><Detail label="Expires" value={member.expiresAt ? date(member.expiresAt) : member.membershipStatus === "active" ? "Lifetime" : "—"} /><Detail label="Tier" value={member.isMaster ? "Master" : `Tier ${member.currentTier}`} /><Detail label="Platform role" value={member.platformRole} capitalize /></dl></section>
 
-            <section aria-labelledby="badges-heading"><div className="flex items-center justify-between"><h3 id="badges-heading" className="font-semibold text-white">Cosmetic roles</h3><span className="text-xs text-fog-muted">{member.cosmeticRoles.length} assigned</span></div><div className="mt-4 flex flex-wrap gap-2">{roles.map((role) => { const assigned = member.cosmeticRoles.some((item) => item.id === role.id); return <button key={role.id} type="button" aria-pressed={assigned} disabled={pending} onClick={() => mutate(() => setCosmeticRoleAssignment(role.id, member.id, !assigned))} className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-xs font-semibold transition disabled:opacity-50" style={{ borderColor: role.color, color: role.color, backgroundColor: assigned ? `${role.color}1F` : "transparent" }}>{assigned && <Check size={13} />}{role.name}</button>; })}{!roles.length && <p className="text-sm text-fog-muted">No cosmetic roles have been created.</p>}</div></section>
+            {/* Read-only since phase 9. Assigning a role is a hierarchy-checked
+                RPC in the Roles settings section: it refuses a role above your
+                own and a permission you do not hold yourself. The buttons that
+                used to sit here called a wrapper that could do neither, and
+                could not set hoist, mentionable, icon or permissions at all. */}
+            <section aria-labelledby="badges-heading"><div className="flex items-center justify-between"><h3 id="badges-heading" className="font-semibold text-white">Community roles</h3><span className="text-xs text-fog-muted">{member.cosmeticRoles.length} assigned</span></div><div className="mt-4 flex flex-wrap gap-2">{member.cosmeticRoles.map((role) => <span key={role.id} className="inline-flex min-h-10 items-center rounded-full border px-3 text-xs font-semibold" style={{ borderColor: role.color, color: role.color, backgroundColor: `${role.color}1F` }}>{role.name}</span>)}{!member.cosmeticRoles.length && <p className="text-sm text-fog-muted">This member holds no roles.</p>}</div><Link href="/creator/settings?section=roles" className="focus-ring mt-4 inline-flex min-h-10 items-center gap-1 text-xs font-semibold text-primary-container hover:underline">Assign roles in Community settings<UserRoundCog size={13} /></Link></section>
 
             <section aria-labelledby="turnover-heading"><h3 id="turnover-heading" className="font-semibold text-white">Turnover</h3><div className="mt-4 grid grid-cols-2 border-y border-surgical-steel py-4"><Detail label="Current week" value={money(member.currentWeekTurnover)} mono /><Detail label="All time" value={money(member.allTimeTurnover)} mono /></div></section>
           </div>

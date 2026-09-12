@@ -6,7 +6,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Filter, LoaderCircle, Search, ShieldCheck, SlidersHorizontal, UserRoundSearch, UsersRound } from "lucide-react";
 
 import { MemberDetailModal } from "@/components/creator/members/MemberDetailModal";
-import { RoleManagerModal } from "@/components/creator/members/RoleManagerModal";
 import { AppShell } from "@/components/layout/AppShell";
 import type { CosmeticRole, MemberDirectoryPage, MemberDirectoryRow, MembershipStatus, PlatformMemberRole } from "@/lib/member-operations/types";
 
@@ -28,7 +27,6 @@ export function MemberRegistry({ memberName, initialPage, initialRoles }: { memb
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
-  const [rolesOpen, setRolesOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const firstRequest = useRef(true);
@@ -59,7 +57,6 @@ export function MemberRegistry({ memberName, initialPage, initialRoles }: { memb
   const changeFilters = (next: Filters) => { setFilters(next); setCursor(""); setCursorHistory([]); };
   const refresh = useCallback(() => { setRefreshKey((key) => key + 1); router.refresh(); }, [router]);
   const closeDetail = useCallback(() => setSelectedMemberId(null), []);
-  const closeRoles = useCallback(() => setRolesOpen(false), []);
   const hasSearch = Boolean(debouncedQuery || filterCount);
 
   return (
@@ -68,7 +65,7 @@ export function MemberRegistry({ memberName, initialPage, initialRoles }: { memb
         <div hidden dangerouslySetInnerHTML={{ __html: "<!-- THESIS: Search-first member operations registry for high-volume creator administration. OWN-WORLD: Stoicverse dark editorial surfaces, emerald actions, hairline separators, dense operational data. STORY: Find, inspect, then act without leaving context. FIRST VIEWPORT: Registry search, primary filters, and member rows. FORM: Search-led registry with focused detail and role sheets; corroborated seed 7cbfba2e; committed staging search → filter → inspect → act. -->" }} />
         <header className="flex flex-col gap-6 border-b border-surgical-steel pb-7 lg:flex-row lg:items-end lg:justify-between">
           <div><p className="terminal-label">Community operations</p><h1 className="mt-2 max-w-3xl font-headline text-3xl font-semibold tracking-[-0.025em] text-white sm:text-4xl">Member registry</h1><p className="mt-3 max-w-[68ch] text-sm leading-6 text-on-surface-variant">Find any account, inspect access and turnover, then make deliberate membership changes from one place.</p></div>
-          <div className="flex flex-wrap gap-2"><button type="button" onClick={() => setRolesOpen(true)} className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-surgical-steel px-4 text-sm font-semibold text-white transition hover:border-primary-container hover:text-primary-container"><ShieldCheck size={16} />Manage roles</button><Link href="/creator/members/turnover" className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full bg-primary-container px-5 text-sm font-semibold text-on-primary-fixed transition hover:brightness-105">Turnover <ArrowRight size={16} /></Link></div>
+          <div className="flex flex-wrap gap-2"><Link href="/creator/settings?section=roles" className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-surgical-steel px-4 text-sm font-semibold text-white transition hover:border-primary-container hover:text-primary-container"><ShieldCheck size={16} />Manage roles</Link><Link href="/creator/members/turnover" className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full bg-primary-container px-5 text-sm font-semibold text-on-primary-fixed transition hover:brightness-105">Turnover <ArrowRight size={16} /></Link></div>
         </header>
 
         <section className="mt-7" aria-label="Member search and filters">
@@ -85,8 +82,7 @@ export function MemberRegistry({ memberName, initialPage, initialRoles }: { memb
         </section>
       </main>
 
-      {selectedMemberId && <MemberDetailModal memberId={selectedMemberId} roles={initialRoles} onClose={closeDetail} onChanged={refresh} />}
-      {rolesOpen && <RoleManagerModal roles={initialRoles} onClose={closeRoles} onChanged={refresh} />}
+      {selectedMemberId && <MemberDetailModal memberId={selectedMemberId} onClose={closeDetail} onChanged={refresh} />}
     </AppShell>
   );
 }
