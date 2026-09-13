@@ -198,7 +198,7 @@ function SignupRail() {
               )}
             </div>
             <div className="pb-6">
-              <p className={isCurrent ? "text-sm font-semibold text-white" : "text-sm font-medium text-on-surface-variant"}>
+              <p className={isCurrent ? "text-sm font-semibold text-text-strong" : "text-sm font-medium text-on-surface-variant"}>
                 {step.title}
                 {isCurrent && <span className="sr-only"> (current step)</span>}
               </p>
@@ -217,7 +217,7 @@ function SignupRail() {
 function MobileStepper() {
   return (
     <div className="lg:hidden">
-      <p className="text-sm font-medium text-white">
+      <p className="text-sm font-medium text-text-strong">
         Step 1 of {SIGNUP_STEPS.length} · {SIGNUP_STEPS[0].title}
       </p>
       <ol aria-hidden className="mt-3 flex gap-1.5">
@@ -252,13 +252,13 @@ function ConfirmEmailPanel({ email, message }: { email: string; message: string 
       <div className="grid size-12 place-items-center rounded-full border border-primary-container/40 bg-primary-container/10 text-primary-container">
         <MailCheck size={22} />
       </div>
-      <h1 ref={headingRef} tabIndex={-1} className="focus-ring mt-6 text-2xl font-bold tracking-[-0.02em] text-white">
+      <h1 ref={headingRef} tabIndex={-1} className="focus-ring mt-6 text-2xl font-bold tracking-[-0.02em] text-text-strong">
         Check your inbox
       </h1>
       <p className="mt-3 leading-relaxed text-on-surface-variant">
         {email ? (
           <>
-            We sent a confirmation link to <span className="font-medium text-white">{email}</span>. Open it to
+            We sent a confirmation link to <span className="font-medium text-text-strong">{email}</span>. Open it to
             verify your account, then log in to continue.
           </>
         ) : (
@@ -327,12 +327,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           }}
         />
 
-        <Link href="/" className="focus-ring relative z-10 inline-flex text-lg font-bold tracking-[-0.02em] text-white">
+        <Link href="/" className="focus-ring relative z-10 inline-flex text-lg font-bold tracking-[-0.02em] text-text-strong">
           Stoicverse
         </Link>
 
         <div className="relative z-10 my-auto max-w-lg py-10">
-          <h2 className="text-balance text-[clamp(1.75rem,2.4vw,2.5rem)] font-bold leading-[1.1] tracking-[-0.025em] text-white">
+          <h2 className="text-balance text-[clamp(1.75rem,2.4vw,2.5rem)] font-bold leading-[1.1] tracking-[-0.025em] text-text-strong">
             {isSignup ? "Four steps to a deliberate practice." : "Enter the operating surface for disciplined study."}
           </h2>
 
@@ -365,7 +365,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         <div className="mx-auto w-full max-w-md">
           {!isSignup && !awaitingConfirmation && (
             <div className="mb-7 flex flex-col items-center text-center lg:hidden">
-              <h1 className="text-2xl font-bold tracking-[-0.02em] text-white">
+              <h1 className="text-2xl font-bold tracking-[-0.02em] text-text-strong">
                 Enter Stoicverse
               </h1>
             </div>
@@ -376,7 +376,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             <div className="mb-7 lg:hidden">
               <Link
                 href="/"
-                className="focus-ring -my-2 inline-flex min-h-11 items-center text-lg font-bold tracking-[-0.02em] text-white"
+                className="focus-ring -my-2 inline-flex min-h-11 items-center text-lg font-bold tracking-[-0.02em] text-text-strong"
               >
                 Stoicverse
               </Link>
@@ -394,7 +394,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
               noValidate={false}
               className="settle rounded-2xl border border-surgical-steel bg-monolith-surface p-6 sm:p-8 md:p-10"
             >
-              <h1 className="text-2xl font-bold tracking-[-0.02em] text-white">
+              <h1 className="text-2xl font-bold tracking-[-0.02em] text-text-strong">
                 {isSignup ? "Create your account" : "Log in"}
               </h1>
               <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">

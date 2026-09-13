@@ -210,7 +210,7 @@ function RailShell({
             >
               {children}
               {badge > 0 ? (
-                <span className="absolute -bottom-0.5 -right-0.5 grid min-w-4 place-items-center rounded-full border-2 border-surface-container-lowest bg-red-500 px-1 text-[9px] font-bold leading-4 text-white">
+                <span className="absolute -bottom-0.5 -right-0.5 grid min-w-4 place-items-center rounded-full border-2 border-surface-container-lowest bg-red-500 px-1 text-[9px] font-bold leading-4 text-text-strong">
                   {badge > 9 ? "9+" : badge}
                 </span>
               ) : null}

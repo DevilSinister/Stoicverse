@@ -51,8 +51,8 @@ const toLocalDatetimeLocal = (value: string | null) => {
   return localDate.toISOString().slice(0, 16);
 };
 
-const inputClass = "w-full h-11 px-5 rounded-full border border-surgical-steel bg-surface-container-low/40 text-sm text-white placeholder-fog-muted outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all";
-const textareaClass = "w-full px-5 py-3 rounded-2xl border border-surgical-steel bg-surface-container-low/40 text-sm text-white placeholder-fog-muted outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all resize-none";
+const inputClass = "w-full h-11 px-5 rounded-full border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong placeholder-fog-muted outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all";
+const textareaClass = "w-full px-5 py-3 rounded-2xl border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong placeholder-fog-muted outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all resize-none";
 
 /* ================= CUSTOM SELECT POP-OVER COMPONENT ================= */
 function CustomSelect({
@@ -75,7 +75,7 @@ function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-11 px-5 rounded-full border border-surgical-steel bg-surface-container-low/40 text-sm text-white flex items-center justify-between hover:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container transition-all cursor-pointer select-none"
+        className="w-full h-11 px-5 rounded-full border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong flex items-center justify-between hover:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container transition-all cursor-pointer select-none"
       >
         <span>{selectedOption?.label}</span>
         <ChevronDown size={15} className={`text-fog-muted transition-transform duration-200 shrink-0 ${isOpen ? "rotate-180" : ""}`} />
@@ -84,7 +84,7 @@ function CustomSelect({
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 mt-2 w-full z-50 rounded-2xl border border-surgical-steel bg-[#16181A] shadow-2xl overflow-hidden py-1 divide-y divide-surgical-steel/20">
+          <div className="absolute left-0 mt-2 w-full z-50 rounded-2xl border border-surgical-steel bg-surface-raised shadow-2xl overflow-hidden py-1 divide-y divide-surgical-steel/20">
             {options.map(opt => (
               <button
                 key={opt.value}
@@ -93,7 +93,7 @@ function CustomSelect({
                   onChange(opt.value);
                   setIsOpen(false);
                 }}
-                className={`w-full text-left px-5 py-3 text-xs uppercase tracking-wider font-label transition-colors cursor-pointer hover:bg-primary-container/10 hover:text-white ${value === opt.value ? "text-primary-container font-semibold bg-primary-container/5" : "text-fog-muted"}`}
+                className={`w-full text-left px-5 py-3 text-xs uppercase tracking-wider font-label transition-colors cursor-pointer hover:bg-primary-container/10 hover:text-accent-contrast ${value === opt.value ? "text-primary-container font-semibold bg-primary-container/5" : "text-fog-muted"}`}
               >
                 {opt.label}
               </button>
@@ -255,12 +255,12 @@ export function CreatorCourseManagerV2({
         
         {/* Banner Messages */}
         {message && (
-          <div role="status" className="flex items-center justify-between gap-4 border border-primary-container/20 bg-primary-container/10 p-4 rounded-xl text-sm text-white animate-fade-in-up">
+          <div role="status" className="flex items-center justify-between gap-4 border border-primary-container/20 bg-primary-container/10 p-4 rounded-xl text-sm text-accent-contrast animate-fade-in-up">
             <div className="flex items-center gap-2">
               <CheckCircle className="text-primary-container shrink-0" size={16} />
               <span>{message}</span>
             </div>
-            <button className="text-xs font-label uppercase text-fog-muted hover:text-white transition-colors cursor-pointer" onClick={() => setMessage(null)}>
+            <button className="text-xs font-label uppercase text-fog-muted hover:text-text-strong transition-colors cursor-pointer" onClick={() => setMessage(null)}>
               Dismiss
             </button>
           </div>
@@ -272,7 +272,7 @@ export function CreatorCourseManagerV2({
             <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b border-surgical-steel pb-6">
               <div>
                 <p className="font-label text-xs uppercase tracking-[.16em] text-primary-container">Influencer curriculum</p>
-                <h1 className="mt-2 font-sans text-3xl font-extrabold text-white tracking-tight">Create and release courses</h1>
+                <h1 className="mt-2 font-sans text-3xl font-extrabold text-text-strong tracking-tight">Create and release courses</h1>
                 <p className="mt-2 text-sm text-fog-muted max-w-2xl">
                   Configure access, release videos over time, and publish finished courses to the member curriculum.
                 </p>
@@ -291,7 +291,7 @@ export function CreatorCourseManagerV2({
             {courses.length === 0 ? (
               <div className="text-center py-20 border border-dashed border-surgical-steel rounded-2xl bg-surface-container-low/5">
                 <Video size={48} className="mx-auto text-fog-muted mb-4 opacity-40" />
-                <h2 className="font-sans text-lg font-bold text-white">No courses created yet</h2>
+                <h2 className="font-sans text-lg font-bold text-text-strong">No courses created yet</h2>
                 <p className="text-sm text-fog-muted mt-1 max-w-md mx-auto">Get started by creating your first open-access member course.</p>
                 <button 
                   onClick={() => {
@@ -329,7 +329,7 @@ export function CreatorCourseManagerV2({
 
                       {/* Course Title and Description */}
                       <div className="space-y-2">
-                        <h2 className="font-sans text-xl font-bold text-white group-hover:text-primary-container transition-colors line-clamp-1">
+                        <h2 className="font-sans text-xl font-bold text-text-strong group-hover:text-primary-container transition-colors line-clamp-1">
                           {course.title}
                         </h2>
                         <p className="font-body text-xs text-fog-muted line-clamp-3 leading-relaxed">
@@ -358,7 +358,7 @@ export function CreatorCourseManagerV2({
               {/* Back Link */}
               <button 
                 onClick={closeCourse}
-                className="inline-flex items-center gap-2 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-white transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer"
               >
                 <ArrowLeft size={14} /> Back to Courses
               </button>
@@ -398,7 +398,7 @@ export function CreatorCourseManagerV2({
 
                 {/* Course Main Details */}
                 <div className="space-y-4">
-                  <h1 className="font-sans text-3xl font-extrabold text-white tracking-tight">{selectedCourse.title}</h1>
+                  <h1 className="font-sans text-3xl font-extrabold text-text-strong tracking-tight">{selectedCourse.title}</h1>
                   <p className="font-body text-base text-on-surface-variant leading-relaxed max-w-3xl">
                     {selectedCourse.description || "No description provided."}
                   </p>
@@ -411,7 +411,7 @@ export function CreatorCourseManagerV2({
                       setModalError(null);
                       setActiveModal('edit-course');
                     }}
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-surgical-steel bg-surface-container-low/20 px-5 font-label text-xs font-bold uppercase tracking-wider text-white hover:border-primary-container hover:text-primary-container transition-colors cursor-pointer"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-surgical-steel bg-surface-container-low/20 px-5 font-label text-xs font-bold uppercase tracking-wider text-text-strong hover:border-primary-container hover:text-primary-container transition-colors cursor-pointer"
                   >
                     <Edit size={14} /> Edit Course Details
                   </button>
@@ -431,7 +431,7 @@ export function CreatorCourseManagerV2({
               <section className="space-y-4">
                 <div className="flex items-center justify-between border-b border-surgical-steel/60 pb-3">
                   <div>
-                    <h2 className="font-sans text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <h2 className="font-sans text-lg font-bold text-text-strong uppercase tracking-wider flex items-center gap-2">
                       <Video size={18} className="text-primary-container" />
                       Videos ({selectedCourse.videos.length})
                     </h2>
@@ -450,18 +450,18 @@ export function CreatorCourseManagerV2({
                       onDragOver={handleDragOver}
                       onDrop={(e) => handleDrop(e, video.id)}
                       onDragEnd={() => setDraggedVideoId(null)}
-                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-surgical-steel bg-monolith-surface transition-all duration-150 shadow-sm ${draggedVideoId === video.id ? "opacity-40 border-primary-container/50 bg-[#16181A]" : "hover:border-primary-container/30"}`}
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-surgical-steel bg-monolith-surface transition-all duration-150 shadow-sm ${draggedVideoId === video.id ? "opacity-40 border-primary-container/50 bg-surface-raised" : "hover:border-primary-container/30"}`}
                     >
                       <div className="flex items-start gap-3 min-w-0">
                         {/* Drag Handle */}
-                        <div className="cursor-grab active:cursor-grabbing text-fog-muted hover:text-white p-1 rounded transition-colors shrink-0">
+                        <div className="cursor-grab active:cursor-grabbing text-fog-muted hover:text-text-strong p-1 rounded transition-colors shrink-0">
                           <GripVertical size={16} />
                         </div>
                         
                         <span className="font-mono text-sm text-fog-muted pt-0.5 shrink-0">{String(idx + 1).padStart(2, '0')}</span>
                         
                         <div className="space-y-1 min-w-0">
-                          <h4 className="font-sans text-base font-bold text-white flex flex-wrap items-center gap-2 truncate">
+                          <h4 className="font-sans text-base font-bold text-text-strong flex flex-wrap items-center gap-2 truncate">
                             {video.title}
                             {video.is_optional && (
                               <span className="inline-flex items-center px-2 py-0.5 rounded border border-surgical-steel bg-surface-container-low text-[9px] font-bold uppercase tracking-wider text-fog-muted shrink-0">
@@ -488,7 +488,7 @@ export function CreatorCourseManagerV2({
                           setEditingVideo(video);
                           setActiveModal('edit-video');
                         }}
-                        className="self-end sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-surgical-steel text-xs font-bold text-fog-muted hover:text-white hover:border-primary-container transition-colors cursor-pointer shrink-0"
+                        className="self-end sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-surgical-steel text-xs font-bold text-fog-muted hover:text-text-strong hover:border-primary-container transition-colors cursor-pointer shrink-0"
                       >
                         <Edit size={12} /> Edit Video
                       </button>
@@ -498,7 +498,7 @@ export function CreatorCourseManagerV2({
                   {videoList.length === 0 && (
                     <div className="text-center py-16 border border-dashed border-surgical-steel rounded-xl bg-surface-container-low/5">
                       <Video size={36} className="mx-auto text-fog-muted mb-3 opacity-40" />
-                      <p className="text-sm font-semibold text-white">No videos added to this course</p>
+                      <p className="text-sm font-semibold text-text-strong">No videos added to this course</p>
                       <p className="text-xs text-fog-muted mt-1 max-w-xs mx-auto">Build out this course curriculum by uploading Google Drive videos.</p>
                       <button 
                         onClick={() => {
@@ -579,10 +579,10 @@ export function CreatorCourseManagerV2({
 /* ================= MODAL SHELL COMPONENT ================= */
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
-    <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-50 grid place-items-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200" onMouseDown={onClose}>
+    <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-50 grid place-items-center bg-scrim backdrop-blur-sm p-4 animate-in fade-in duration-200" onMouseDown={onClose}>
       <div className="max-h-[90vh] w-full max-w-xl overflow-auto border border-surgical-steel bg-monolith-surface p-6 rounded-lg shadow-2xl animate-in zoom-in-95 duration-200" onMouseDown={(event) => event.stopPropagation()}>
         <div className="mb-6 flex items-center justify-between border-b border-surgical-steel pb-4">
-          <h2 className="font-sans text-lg font-bold text-white">{title}</h2>
+          <h2 className="font-sans text-lg font-bold text-text-strong">{title}</h2>
           <button onClick={onClose} className="p-1 text-on-surface-variant hover:text-primary-container transition cursor-pointer" aria-label="Close">
             <X size={20} />
           </button>
@@ -649,7 +649,7 @@ function CourseCreateForm({
       </div>
 
       <div className="pt-4 flex items-center justify-end gap-3 border-t border-surgical-steel">
-        <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-white transition-colors cursor-pointer">
+        <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
           Cancel
         </button>
         <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
@@ -686,7 +686,7 @@ function CourseEditForm({
         <div className="flex items-start gap-4 p-4 border border-red-500/20 bg-red-500/10 rounded-2xl">
           <AlertTriangle className="text-red-400 shrink-0 mt-0.5" size={20} />
           <div className="space-y-1">
-            <h4 className="font-sans font-bold text-white text-base">Delete course: {course.title}?</h4>
+            <h4 className="font-sans font-bold text-text-strong text-base">Delete course: {course.title}?</h4>
             <p className="text-sm text-red-200">
               This will permanently delete the course, its video settings, and related curriculum records.
             </p>
@@ -697,7 +697,7 @@ function CourseEditForm({
           <button 
             type="button" 
             onClick={() => setShowDeleteConfirm(false)}
-            className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-white transition-colors cursor-pointer"
+            className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -766,7 +766,7 @@ function CourseEditForm({
         </button>
 
         <div className="flex items-center justify-end gap-3">
-          <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-white transition-colors cursor-pointer">
+          <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
             Cancel
           </button>
           <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
@@ -874,7 +874,7 @@ function VideoAddForm({
       </div>
 
       <div className="pt-4 flex items-center justify-end gap-3 border-t border-surgical-steel">
-        <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-white transition-colors cursor-pointer">
+        <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
           Cancel
         </button>
         <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
@@ -910,7 +910,7 @@ function VideoEditForm({
         <div className="flex items-start gap-4 p-4 border border-red-500/20 bg-red-500/10 rounded-2xl">
           <AlertTriangle className="text-red-400 shrink-0 mt-0.5" size={20} />
           <div className="space-y-1">
-            <h4 className="font-sans font-bold text-white text-base">Delete video: {video.title}?</h4>
+            <h4 className="font-sans font-bold text-text-strong text-base">Delete video: {video.title}?</h4>
             <p className="text-sm text-red-200">
               This will permanently delete the video and its secure access logs from the database.
             </p>
@@ -921,7 +921,7 @@ function VideoEditForm({
           <button 
             type="button" 
             onClick={() => setShowDeleteConfirm(false)}
-            className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-white transition-colors cursor-pointer"
+            className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -998,7 +998,7 @@ function VideoEditForm({
         </button>
 
         <div className="flex items-center justify-end gap-3">
-          <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-white transition-colors cursor-pointer">
+          <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
             Cancel
           </button>
           <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">

@@ -465,7 +465,7 @@ function ActionDialog({
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-scrim p-4"
       onKeyDown={(event) => {
         if (event.key === "Escape") onCancel();
       }}

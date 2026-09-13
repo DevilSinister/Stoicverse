@@ -92,7 +92,7 @@ export function CheckoutScreen({
               mobile block, and heading-level items there would float without a
               parent on desktop. */}
           <div>
-            <p className="text-sm font-semibold text-white">{item.title}</p>
+            <p className="text-sm font-semibold text-text-strong">{item.title}</p>
             <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">{item.detail}</p>
           </div>
         </li>
@@ -113,14 +113,14 @@ export function CheckoutScreen({
             backgroundSize: "72px 72px",
           }}
         />
-        <Link href="/" className="focus-ring relative z-10 inline-flex text-lg font-bold tracking-[-0.02em] text-white">
+        <Link href="/" className="focus-ring relative z-10 inline-flex text-lg font-bold tracking-[-0.02em] text-text-strong">
           Stoicverse
         </Link>
 
         {/* Deliberately a <p>, not a heading: the page's h1 lives in the summary
             column so phones — which never render this rail — still have one. */}
         <div className="relative z-10 my-auto max-w-lg py-10">
-          <p className="text-balance text-[clamp(1.75rem,2.4vw,2.5rem)] font-bold leading-[1.1] tracking-[-0.025em] text-white">
+          <p className="text-balance text-[clamp(1.75rem,2.4vw,2.5rem)] font-bold leading-[1.1] tracking-[-0.025em] text-text-strong">
             Everything the practice needs, in one place.
           </p>
           <p className="mt-4 max-w-[54ch] leading-relaxed text-on-surface-variant">{offer.blurb}</p>
@@ -146,14 +146,14 @@ export function CheckoutScreen({
           <div className="mb-7 lg:hidden">
             <Link
               href="/"
-              className="focus-ring -my-2 inline-flex min-h-11 items-center text-lg font-bold tracking-[-0.02em] text-white"
+              className="focus-ring -my-2 inline-flex min-h-11 items-center text-lg font-bold tracking-[-0.02em] text-text-strong"
             >
               Stoicverse
             </Link>
           </div>
 
           <div className="settle rounded-2xl border border-surgical-steel bg-monolith-surface p-6 sm:p-8 md:p-10">
-            <h1 className="text-2xl font-bold tracking-[-0.02em] text-white">
+            <h1 className="text-2xl font-bold tracking-[-0.02em] text-text-strong">
               {product === "mentorship" ? "Secure your mentorship" : "Activate your membership"}
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">
@@ -171,13 +171,13 @@ export function CheckoutScreen({
 
             <div className="mt-7 flex items-baseline justify-between gap-4 border-b border-surgical-steel pb-5">
               <span className="font-medium text-on-surface">{offer.name}</span>
-              <span className="text-2xl font-bold tabular-nums tracking-[-0.02em] text-white">{offer.amount}</span>
+              <span className="text-2xl font-bold tabular-nums tracking-[-0.02em] text-text-strong">{offer.amount}</span>
             </div>
 
             <dl className="mt-5 space-y-3 text-sm">
               <div className="flex items-baseline justify-between gap-4">
                 <dt className="text-fog-muted">Due today</dt>
-                <dd className="font-semibold tabular-nums text-white">{offer.amount}</dd>
+                <dd className="font-semibold tabular-nums text-text-strong">{offer.amount}</dd>
               </div>
               {email && (
                 <div className="flex items-baseline justify-between gap-4">
@@ -232,7 +232,7 @@ export function CheckoutScreen({
 
           {/* Phones never see the rail, so the same detail follows the summary. */}
           <div className="mt-8 lg:hidden">
-            <h2 className="text-sm font-semibold text-white">What this unlocks</h2>
+            <h2 className="text-sm font-semibold text-text-strong">What this unlocks</h2>
             <div className="mt-5">{includes}</div>
           </div>
 

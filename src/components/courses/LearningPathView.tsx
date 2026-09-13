@@ -86,7 +86,7 @@ export function LearningPathView({ data, routeBase = "" }: { data: LearningPathD
       <div className="mx-auto max-w-[1440px] space-y-8 px-4 py-8 md:px-8">
         <header className="flex flex-col justify-between gap-6 border-b border-surgical-steel pb-6 md:flex-row md:items-end">
           <div>
-            <h2 className="font-display text-3xl font-bold tracking-tight text-white">Curriculum Path</h2>
+            <h2 className="font-display text-3xl font-bold tracking-tight text-text-strong">Curriculum Path</h2>
             <p className="mt-2 max-w-lg font-body text-sm text-on-surface-variant">
               A rigorous curriculum designed for disciplined capital management and psychological fortitude.
             </p>
@@ -127,7 +127,7 @@ export function LearningPathView({ data, routeBase = "" }: { data: LearningPathD
                   )}
                 </div>
                 <div>
-                  <h3 className="mb-1 font-headline text-lg font-bold text-white">{tier.title}</h3>
+                  <h3 className="mb-1 font-headline text-lg font-bold text-text-strong">{tier.title}</h3>
                   <p className="line-clamp-2 font-body text-xs text-on-surface-variant">{tier.description}</p>
                 </div>
                 {!tier.isLocked && <div className="absolute left-0 top-0 h-[2px] w-full bg-gradient-to-r from-primary-container to-transparent" />}
@@ -141,7 +141,7 @@ export function LearningPathView({ data, routeBase = "" }: { data: LearningPathD
             <button
               key={option}
               onClick={() => setFilter(option)}
-              className={`rounded-full px-4 py-1.5 font-label text-xs uppercase tracking-wider transition ${filter === option ? "border border-primary-container bg-primary-container text-on-primary-fixed" : "border border-transparent bg-transparent text-on-surface-variant hover:border-surgical-steel hover:text-white"}`}
+              className={`rounded-full px-4 py-1.5 font-label text-xs uppercase tracking-wider transition ${filter === option ? "border border-primary-container bg-primary-container text-on-primary-fixed" : "border border-transparent bg-transparent text-on-surface-variant hover:border-surgical-steel hover:text-accent-contrast"}`}
             >
               {option.replace("-", " ")}
             </button>
@@ -191,7 +191,7 @@ export function LearningPathView({ data, routeBase = "" }: { data: LearningPathD
                         </div>
                       )}
                     </div>
-                    <h2 className="mt-2 font-headline text-base font-bold text-white">{lesson.title}</h2>
+                    <h2 className="mt-2 font-headline text-base font-bold text-text-strong">{lesson.title}</h2>
                     <p className="font-body text-sm text-on-surface-variant">{lesson.description}</p>
                   </div>
 
@@ -199,7 +199,7 @@ export function LearningPathView({ data, routeBase = "" }: { data: LearningPathD
                     <div className="pt-2">
                       <Link
                         href={withRouteBase(routeBase, `/courses/lesson/${lesson.id}`)}
-                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-label text-xs uppercase tracking-wider transition ${isCompleted ? "border border-surgical-steel text-on-surface-variant hover:border-primary-container/50 hover:text-white" : inProgress ? "bg-primary-container text-on-primary-fixed hover:bg-opacity-90" : "border border-primary-container text-primary-container hover:bg-primary-container/10"}`}
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-label text-xs uppercase tracking-wider transition ${isCompleted ? "border border-surgical-steel text-on-surface-variant hover:border-primary-container/50 hover:text-accent-contrast" : inProgress ? "bg-primary-container text-on-primary-fixed hover:bg-opacity-90" : "border border-primary-container text-primary-container hover:bg-primary-container/10"}`}
                       >
                         {isCompleted ? "Review" : inProgress ? "Resume" : "Start"}
                         <ChevronRight size={14} />
@@ -213,7 +213,7 @@ export function LearningPathView({ data, routeBase = "" }: { data: LearningPathD
           {filteredLessons.length === 0 && (
             <div className="col-span-full rounded border border-dashed border-surgical-steel bg-surface-container-low/20 py-16 text-center">
               <GraduationCap size={48} className="mx-auto mb-4 text-fog-muted" />
-              <p className="font-headline text-lg font-semibold text-white">No lessons found</p>
+              <p className="font-headline text-lg font-semibold text-text-strong">No lessons found</p>
               <p className="mt-1 font-body text-sm text-on-surface-variant">Try changing your filter options above.</p>
             </div>
           )}

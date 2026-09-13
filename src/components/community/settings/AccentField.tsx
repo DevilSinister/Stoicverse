@@ -34,7 +34,7 @@ export function AccentField({ value, onChange }: { value: string; onChange: (hex
               onClick={() => onChange(swatch.hex)}
               aria-pressed={selected}
               className={`focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 text-sm transition ${
-                selected ? "border-primary-container text-white" : "border-surgical-steel text-on-surface-variant"
+                selected ? "border-primary-container text-text-strong" : "border-surgical-steel text-on-surface-variant"
               }`}
             >
               <span aria-hidden="true" className="size-4 shrink-0 rounded" style={{ background: swatch.hex }} />
@@ -54,7 +54,7 @@ export function AccentField({ value, onChange }: { value: string; onChange: (hex
           value={value}
           onChange={(event) => onChange(event.target.value)}
           spellCheck={false}
-          className="focus-ring h-11 w-32 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 font-label text-base text-white outline-none"
+          className="focus-ring h-11 w-32 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 font-label text-base text-text-strong outline-none"
         />
       </div>
 

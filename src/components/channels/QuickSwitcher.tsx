@@ -45,7 +45,7 @@ export function QuickSwitcher({ onClose }: { onClose: () => void }) {
       role="dialog"
       aria-modal="true"
       aria-label="Go to a channel"
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-[12vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-scrim p-4 pt-[12vh]"
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           onClose();

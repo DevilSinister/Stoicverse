@@ -16,7 +16,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 
 const field =
-  "focus-ring mt-2 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none placeholder:text-fog-muted";
+  "focus-ring mt-2 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none placeholder:text-fog-muted";
 const label = "block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted";
 
 export function IdentitySection({
@@ -125,7 +125,7 @@ export function IdentitySection({
         <fieldset>
           <legend className={label}>Logo</legend>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <label className="focus-ring inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-white transition hover:border-primary-container has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary-container">
+            <label className="focus-ring inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-text-strong transition hover:border-primary-container has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary-container">
               {uploading ? (
                 <Loader2 size={15} aria-hidden="true" className="animate-spin" />
               ) : (
@@ -151,7 +151,7 @@ export function IdentitySection({
                   set("logoPath", null);
                   setLogoUrl(null);
                 }}
-                className="focus-ring min-h-11 rounded-lg px-3 text-sm font-semibold text-fog-muted transition hover:text-white"
+                className="focus-ring min-h-11 rounded-lg px-3 text-sm font-semibold text-fog-muted transition hover:text-text-strong"
               >
                 Remove
               </button>
@@ -183,7 +183,7 @@ export function IdentitySection({
               name="showWelcome"
               checked={values.showWelcome}
               onChange={(event) => set("showWelcome", event.target.checked)}
-              className="size-4 accent-[#10B981]"
+              className="size-4 accent-primary"
             />
             Show this to members who have just joined
           </label>

@@ -60,12 +60,12 @@ export function StructureEditor(props: StructureEditorProps) {
       aria-label="Manage channel structure"
       className="fixed inset-0 z-[70] sm:grid sm:place-items-center sm:p-4"
     >
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-black/75" />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-scrim" />
 
       <div className="relative flex h-full w-full flex-col overflow-hidden border-surgical-steel bg-surface-container-low sm:h-[min(44rem,90vh)] sm:max-w-4xl sm:rounded-xl sm:border">
         <header className="flex shrink-0 items-center justify-between gap-3 border-b border-surgical-steel px-4 py-3 sm:px-6 sm:py-4">
           <div className="min-w-0">
-            <h2 className="text-base font-semibold text-white sm:text-lg">Channel structure</h2>
+            <h2 className="text-base font-semibold text-text-strong sm:text-lg">Channel structure</h2>
             <p className="mt-0.5 text-xs leading-5 text-fog-muted">
               Name, group, and gate every channel members can open.
             </p>
@@ -74,7 +74,7 @@ export function StructureEditor(props: StructureEditorProps) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="focus-ring grid size-10 shrink-0 place-items-center rounded-full text-fog-muted transition hover:bg-surface-container-high hover:text-white"
+            className="focus-ring grid size-10 shrink-0 place-items-center rounded-full text-fog-muted transition hover:bg-surface-container-high hover:text-text-strong"
           >
             <X size={18} />
           </button>
@@ -154,7 +154,7 @@ function StructurePanes({
         <button
           type="button"
           onClick={() => setSelection({ kind: "new-category" })}
-          className="focus-ring mb-4 inline-flex min-h-9 items-center gap-1.5 rounded-lg text-sm font-semibold text-fog-muted transition hover:text-white md:hidden"
+          className="focus-ring mb-4 inline-flex min-h-9 items-center gap-1.5 rounded-lg text-sm font-semibold text-fog-muted transition hover:text-text-strong md:hidden"
         >
           <ChevronLeft size={15} aria-hidden="true" />
           All categories

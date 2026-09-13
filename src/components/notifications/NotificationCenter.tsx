@@ -176,7 +176,7 @@ export function NotificationCenter({ initialView }: { initialView: string | unde
       <header className="flex flex-col gap-6 border-b border-surgical-steel pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold text-primary-container">Member inbox</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.025em] text-white sm:text-4xl">Notifications</h1>
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.025em] text-text-strong sm:text-4xl">Notifications</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-on-surface-variant">Event, course, community, and account updates collected in one calm queue.</p>
         </div>
         <button type="button" onClick={markAllRead} disabled={unreadCount === 0 || loading} className="focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-surgical-steel px-4 text-sm font-semibold text-on-surface transition hover:border-primary-container hover:text-primary-container disabled:cursor-not-allowed disabled:opacity-45">
@@ -187,12 +187,12 @@ export function NotificationCenter({ initialView }: { initialView: string | unde
       <div className="flex items-center justify-between gap-4 border-b border-surgical-steel py-4">
         <div className="flex gap-1" role="tablist" aria-label="Notification views">
           {views.map((tab) => (
-            <button ref={(element) => { tabButtons.current[tab.id] = element; }} key={tab.id} id={`notification-tab-${tab.id}`} type="button" role="tab" aria-selected={view === tab.id} aria-controls="notification-feed-panel" tabIndex={view === tab.id ? 0 : -1} onKeyDown={(event) => moveTabFocus(event, tab.id)} onClick={() => selectView(tab.id)} className={`focus-ring min-h-10 rounded-full px-4 text-sm font-semibold transition ${view === tab.id ? "bg-primary-container text-on-primary-fixed" : "text-on-surface-variant hover:bg-surface-container-high hover:text-white"}`}>
+            <button ref={(element) => { tabButtons.current[tab.id] = element; }} key={tab.id} id={`notification-tab-${tab.id}`} type="button" role="tab" aria-selected={view === tab.id} aria-controls="notification-feed-panel" tabIndex={view === tab.id ? 0 : -1} onKeyDown={(event) => moveTabFocus(event, tab.id)} onClick={() => selectView(tab.id)} className={`focus-ring min-h-10 rounded-full px-4 text-sm font-semibold transition ${view === tab.id ? "bg-primary-container text-on-primary-fixed" : "text-on-surface-variant hover:bg-surface-container-high hover:text-accent-contrast"}`}>
               {tab.label}{tab.id === "unread" && unreadCount > 0 ? ` ${unreadCount}` : ""}
             </button>
           ))}
         </div>
-        <button type="button" onClick={() => void reload()} aria-label="Refresh notifications" className="focus-ring grid size-10 place-items-center rounded-full text-fog-muted transition hover:bg-surface-container-high hover:text-white">
+        <button type="button" onClick={() => void reload()} aria-label="Refresh notifications" className="focus-ring grid size-10 place-items-center rounded-full text-fog-muted transition hover:bg-surface-container-high hover:text-text-strong">
           <RefreshCw size={16} />
         </button>
       </div>
@@ -206,18 +206,18 @@ export function NotificationCenter({ initialView }: { initialView: string | unde
         </div>
       ) : error ? (
         <section role="alert" className="grid min-h-72 place-items-center border-b border-surgical-steel text-center">
-          <div className="max-w-sm py-12"><RefreshCw className="mx-auto text-error" size={28}/><h2 className="mt-4 text-lg font-semibold text-white">Notifications are unavailable</h2><p className="mt-2 text-sm leading-6 text-fog-muted">{error}</p><button type="button" onClick={() => void reload()} className="focus-ring mt-5 min-h-11 rounded-full border border-surgical-steel px-5 text-sm font-semibold text-on-surface transition hover:border-primary-container hover:text-primary-container">Try again</button></div>
+          <div className="max-w-sm py-12"><RefreshCw className="mx-auto text-error" size={28}/><h2 className="mt-4 text-lg font-semibold text-text-strong">Notifications are unavailable</h2><p className="mt-2 text-sm leading-6 text-fog-muted">{error}</p><button type="button" onClick={() => void reload()} className="focus-ring mt-5 min-h-11 rounded-full border border-surgical-steel px-5 text-sm font-semibold text-on-surface transition hover:border-primary-container hover:text-primary-container">Try again</button></div>
         </section>
       ) : items.length === 0 ? (
         <section className="grid min-h-72 place-items-center border-b border-surgical-steel text-center">
-          <div className="max-w-sm py-12"><Bell className="mx-auto text-primary-container" size={28}/><h2 className="mt-4 text-lg font-semibold text-white">{view === "unread" ? "Nothing needs your attention" : view === "mentions" ? "No mentions yet" : "You are all caught up"}</h2><p className="mt-2 text-sm leading-6 text-fog-muted">New updates will appear here as activity happens across Stoicverse.</p></div>
+          <div className="max-w-sm py-12"><Bell className="mx-auto text-primary-container" size={28}/><h2 className="mt-4 text-lg font-semibold text-text-strong">{view === "unread" ? "Nothing needs your attention" : view === "mentions" ? "No mentions yet" : "You are all caught up"}</h2><p className="mt-2 text-sm leading-6 text-fog-muted">New updates will appear here as activity happens across Stoicverse.</p></div>
         </section>
       ) : (
         <div>
           {["Today", "Yesterday", "Earlier"].map((label) => {
             const group = grouped.get(label);
             if (!group?.length) return null;
-            return <section key={label} aria-labelledby={`notification-group-${label.toLowerCase()}`} className="border-b border-surgical-steel py-7"><h2 id={`notification-group-${label.toLowerCase()}`} className="mb-2 text-xs font-semibold text-fog-muted">{label}</h2><div className="divide-y divide-surgical-steel">{group.map((item) => { const Icon = iconFor(item.type); return <button key={item.id} type="button" onClick={() => void openNotification(item)} className="focus-ring group flex w-full items-start gap-4 rounded-lg px-2 py-5 text-left transition hover:bg-surface-container-low"><span className={`grid size-10 shrink-0 place-items-center rounded-full border ${item.is_read ? "border-surgical-steel bg-surface-container-low text-fog-muted" : "border-primary-container/50 bg-primary-container/10 text-primary-container"}`}><Icon size={18}/></span><span className="min-w-0 flex-1"><span className="flex items-start justify-between gap-3"><span className={`text-sm leading-5 ${item.is_read ? "font-medium text-on-surface" : "font-semibold text-white"}`}>{item.title}</span><span className="shrink-0 text-xs text-fog-muted">{timeAgo(item.created_at)}</span></span>{item.body && <span className="mt-1.5 block max-w-3xl text-sm leading-6 text-on-surface-variant">{item.body}</span>}</span><ChevronRight size={17} className="mt-3 shrink-0 text-fog-muted transition group-hover:translate-x-0.5 group-hover:text-primary-container"/></button>; })}</div></section>;
+            return <section key={label} aria-labelledby={`notification-group-${label.toLowerCase()}`} className="border-b border-surgical-steel py-7"><h2 id={`notification-group-${label.toLowerCase()}`} className="mb-2 text-xs font-semibold text-fog-muted">{label}</h2><div className="divide-y divide-surgical-steel">{group.map((item) => { const Icon = iconFor(item.type); return <button key={item.id} type="button" onClick={() => void openNotification(item)} className="focus-ring group flex w-full items-start gap-4 rounded-lg px-2 py-5 text-left transition hover:bg-surface-container-low"><span className={`grid size-10 shrink-0 place-items-center rounded-full border ${item.is_read ? "border-surgical-steel bg-surface-container-low text-fog-muted" : "border-primary-container/50 bg-primary-container/10 text-primary-container"}`}><Icon size={18}/></span><span className="min-w-0 flex-1"><span className="flex items-start justify-between gap-3"><span className={`text-sm leading-5 ${item.is_read ? "font-medium text-on-surface" : "font-semibold text-text-strong"}`}>{item.title}</span><span className="shrink-0 text-xs text-fog-muted">{timeAgo(item.created_at)}</span></span>{item.body && <span className="mt-1.5 block max-w-3xl text-sm leading-6 text-on-surface-variant">{item.body}</span>}</span><ChevronRight size={17} className="mt-3 shrink-0 text-fog-muted transition group-hover:translate-x-0.5 group-hover:text-primary-container"/></button>; })}</div></section>;
           })}
         </div>
       )}

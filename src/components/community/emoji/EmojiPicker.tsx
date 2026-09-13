@@ -437,8 +437,8 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
                 onClick={() => jumpTo(group.id)}
                 className={`focus-ring grid size-9 place-items-center rounded-lg transition ${
                   isActive
-                    ? "bg-surface-container-high text-white"
-                    : "text-fog-muted hover:bg-surface-container-high/60 hover:text-white"
+                    ? "bg-surface-container-high text-text-strong"
+                    : "text-fog-muted hover:bg-surface-container-high/60 hover:text-text-strong"
                 }`}
               >
                 <Icon size={18} aria-hidden="true" />

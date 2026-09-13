@@ -134,7 +134,7 @@ export function EventsView({
       <main className="mx-auto max-w-7xl p-4 md:p-8 space-y-8">
         <header className="mb-4">
           <p className="font-label text-xs tracking-[.14em] text-primary-container uppercase font-bold">Session Ledger</p>
-          <h1 className="mt-2 font-headline text-3xl font-extrabold text-white tracking-tight md:text-4xl">
+          <h1 className="mt-2 font-headline text-3xl font-extrabold text-text-strong tracking-tight md:text-4xl">
             Scheduled practice, held live.
           </h1>
           <p className="mt-2 font-body text-sm text-fog-muted">
@@ -145,7 +145,7 @@ export function EventsView({
         {message && (
           <div
             role="status"
-            className="mb-5 border border-primary-container/30 bg-primary-container/10 p-4 rounded-xl text-sm text-white flex items-center gap-3"
+            className="mb-5 border border-primary-container/30 bg-primary-container/10 p-4 rounded-xl text-sm text-accent-contrast flex items-center gap-3"
           >
             <CheckCircle className="text-primary-container shrink-0" size={18} />
             <span>{message}</span>
@@ -249,7 +249,7 @@ function EventList({
   return (
     <section className="space-y-4">
       <div className="flex items-center gap-4">
-        <h2 className="font-headline text-xl font-bold text-white tracking-tight shrink-0">{title}</h2>
+        <h2 className="font-headline text-xl font-bold text-text-strong tracking-tight shrink-0">{title}</h2>
         <div className="h-px flex-1 bg-surgical-steel" />
       </div>
 
@@ -296,7 +296,7 @@ function EventList({
                           ? "border-primary-container/20 bg-primary-container/10 text-primary-container"
                           : isConcluded
                           ? "border-surgical-steel bg-surface-container-high/30 text-fog-muted/70"
-                          : "border-surgical-steel bg-surface-container-high text-white"
+                          : "border-surgical-steel bg-surface-container-high text-accent-contrast"
                       }`}>
                         {isLive ? "Live Now" : isCancelled ? "Cancelled" : isConcluded ? "Concluded" : "Upcoming"}
                       </span>
@@ -304,14 +304,14 @@ function EventList({
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="font-headline text-2xl font-bold text-white group-hover:text-primary-container transition-colors leading-snug">
+                    <h3 className="font-headline text-2xl font-bold text-text-strong group-hover:text-primary-container transition-colors leading-snug">
                       {event.title}
                     </h3>
                     <p className="text-xs text-on-surface-variant font-body leading-relaxed line-clamp-2">
                       {event.description || "A focused live session for the Stoicverse community."}
                     </p>
                     <p className="text-[11px] text-fog-muted font-body">
-                      Hosted by <span className="text-white/90 font-medium">{event.hostName ?? "Stoicverse Team"}</span>
+                      Hosted by <span className="text-text-strong/90 font-medium">{event.hostName ?? "Stoicverse Team"}</span>
                     </p>
                   </div>
                 </div>
@@ -436,14 +436,14 @@ function MemberEventDetails({
         <div className="flex justify-between items-start border-b border-surgical-steel bg-surface-container-high/60 p-5 md:p-6">
           <div>
             <p className="font-label text-xs text-primary-container font-semibold tracking-wider uppercase">Event Details</p>
-            <h2 id="member-event-title" className="mt-1.5 font-headline text-2xl font-bold text-white tracking-tight leading-snug">
+            <h2 id="member-event-title" className="mt-1.5 font-headline text-2xl font-bold text-text-strong tracking-tight leading-snug">
               {event.title}
             </h2>
           </div>
           <button
             ref={close}
             onClick={onClose}
-            className="text-fog-muted hover:text-white p-1 rounded-full hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-primary-container"
+            className="text-fog-muted hover:text-text-strong p-1 rounded-full hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-primary-container"
             aria-label="Close dialog"
           >
             <X size={20} />

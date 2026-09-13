@@ -72,7 +72,7 @@ export function AuditLogSection({ events, degraded }: { events: AuditEvent[]; de
           id="audit-action"
           value={action}
           onChange={(event) => setAction(event.target.value)}
-          className="focus-ring h-11 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none"
+          className="focus-ring h-11 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none"
         >
           <option value="">All</option>
           {ACTIONS.map((entry) => (
@@ -86,7 +86,7 @@ export function AuditLogSection({ events, degraded }: { events: AuditEvent[]; de
           type="button"
           onClick={download}
           disabled={filtered.length === 0}
-          className="focus-ring ml-auto inline-flex min-h-11 items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-white transition hover:border-primary-container disabled:opacity-40"
+          className="focus-ring ml-auto inline-flex min-h-11 items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-text-strong transition hover:border-primary-container disabled:opacity-40"
         >
           <Download size={15} aria-hidden="true" />
           Export CSV
@@ -133,7 +133,7 @@ export function AuditLogSection({ events, degraded }: { events: AuditEvent[]; de
                   <td className="whitespace-nowrap px-4 py-3 text-fog-muted">
                     {new Date(event.createdAt).toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 text-white">{event.actorName}</td>
+                  <td className="px-4 py-3 text-text-strong">{event.actorName}</td>
                   <td className="px-4 py-3 text-on-surface-variant">
                     {ACTION_COPY[event.action] ?? event.action}
                     {event.channelName && <span className="text-fog-muted"> in {event.channelName}</span>}

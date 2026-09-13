@@ -154,7 +154,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
       role="dialog"
       aria-modal="true"
       aria-label={`Profile for ${name}`}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-scrim p-4"
       onKeyDown={(event) => {
         if (event.key !== "Escape") return;
         // Escape backs out of the reason first: somebody halfway through
@@ -368,7 +368,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
           role="dialog"
           aria-modal="true"
           aria-label={pending.kind === "ban" ? `Ban ${name}` : `Time out ${name}`}
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim p-4"
         >
           <div className="w-full max-w-sm rounded-xl border border-surgical-steel bg-surface-container-low p-4">
             <h2 className="text-sm font-semibold text-on-surface">

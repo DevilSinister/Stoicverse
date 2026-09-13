@@ -102,7 +102,7 @@ export function ReportsSection({
       {visible.map((report) => (
         <li key={report.id} className="rounded-xl border border-surgical-steel p-4">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm font-semibold text-text-strong">
               {REPORT_REASON_LABELS[report.reasonKind] ?? report.reasonKind}
             </p>
             <p className="text-xs text-fog-muted">
@@ -211,7 +211,7 @@ export function BansSection({
           {visible.map((ban) => (
             <li key={ban.caseId} className="flex flex-wrap items-start justify-between gap-3 p-4">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-white">
+                <p className="text-sm font-semibold text-text-strong">
                   {ban.memberName} <span className="font-normal text-fog-muted">· case {ban.caseNumber}</span>
                 </p>
                 <p className="mt-0.5 text-xs leading-5 text-fog-muted">

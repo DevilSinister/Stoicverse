@@ -173,7 +173,7 @@ export function CreatorEventsView({
         {/* Page Header */}
         <header className="flex flex-col justify-between gap-6 border-b border-surgical-steel pb-6 md:flex-row md:items-end">
           <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight text-white">Live Session Calendar</h1>
+            <h1 className="font-display text-3xl font-bold tracking-tight text-text-strong">Live Session Calendar</h1>
             <p className="mt-2 max-w-lg font-body text-sm text-on-surface-variant">
               Draft, schedule, publish, and moderate Stoicverse live community events in one centralized workspace.
             </p>
@@ -215,12 +215,12 @@ export function CreatorEventsView({
                 className={`flex items-center gap-2 rounded-full px-4 py-2 font-label text-xs uppercase tracking-wider transition cursor-pointer ${
                   activeTab === tab 
                     ? "bg-primary-container text-on-primary-fixed font-bold emerald-glow border border-primary-container" 
-                    : "border border-transparent bg-transparent text-on-surface-variant hover:border-surgical-steel hover:text-white"
+                    : "border border-transparent bg-transparent text-on-surface-variant hover:border-surgical-steel hover:text-accent-contrast"
                 }`}
               >
                 <span>{label}</span>
                 <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
-                  activeTab === tab ? "bg-black/20 text-white" : "bg-surface-container-high text-fog-muted"
+                  activeTab === tab ? "bg-black/20 text-text-strong" : "bg-surface-container-high text-fog-muted"
                 }`}>
                   {count}
                 </span>
@@ -257,11 +257,11 @@ export function CreatorEventsView({
 
                     {/* Title and Date */}
                     <div className="md:col-span-4 space-y-1">
-                      <h3 className="font-headline text-base font-bold text-white leading-tight">
+                      <h3 className="font-headline text-base font-bold text-text-strong leading-tight">
                         {event.title}
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-body text-xs text-on-surface-variant">
-                        <span className="text-white font-medium">
+                        <span className="text-text-strong font-medium">
                           {dateTime.format(new Date(event.startsAt))}
                         </span>
                         <span className="text-fog-muted font-label">·</span>
@@ -293,7 +293,7 @@ export function CreatorEventsView({
           ) : (
             <div className="rounded border border-dashed border-surgical-steel bg-surface-container-low/10 py-16 text-center">
               <Calendar size={48} className="mx-auto mb-4 text-fog-muted opacity-60" />
-              <p className="font-headline text-lg font-semibold text-white">No sessions found</p>
+              <p className="font-headline text-lg font-semibold text-text-strong">No sessions found</p>
               <p className="mt-1 font-body text-sm text-on-surface-variant max-w-sm mx-auto">
                 {activeTab === "all" 
                   ? "Get started by creating your first community event." 
@@ -302,7 +302,7 @@ export function CreatorEventsView({
               {(activeTab === "all" || activeTab === "drafts" || activeTab === "scheduled") && (
                 <button
                   onClick={() => { setEditing(null); setCreating(true); }}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-surgical-steel px-4 py-2 font-label text-xs uppercase tracking-wider text-white hover:border-primary-container transition cursor-pointer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-surgical-steel px-4 py-2 font-label text-xs uppercase tracking-wider text-text-strong hover:border-primary-container transition cursor-pointer"
                 >
                   <Plus size={14} /> Create Event
                 </button>
@@ -400,7 +400,7 @@ function RsvpProgress({ enrolled, qualified }: { enrolled: number; qualified: nu
     <div className="space-y-1 w-full max-w-[130px]">
       <div className="flex justify-between text-[11px] font-label text-fog-muted">
         <span>{enrolled} / {qualified} Enrolled</span>
-        <span className="text-white font-medium">{rate}%</span>
+        <span className="text-text-strong font-medium">{rate}%</span>
       </div>
       <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700/50">
         <div 
@@ -439,7 +439,7 @@ function Notice({ text, onClose }: { text: string; onClose?: () => void }) {
       {onClose && (
         <button 
           onClick={onClose}
-          className="font-label text-xs uppercase tracking-wider text-primary-container hover:text-white transition cursor-pointer"
+          className="font-label text-xs uppercase tracking-wider text-primary-container hover:text-text-strong transition cursor-pointer"
         >
           Dismiss
         </button>
@@ -468,7 +468,7 @@ function EventEditor({
     if (!dirty || window.confirm("Discard unsaved event changes?")) onClose(); 
   }); 
 
-  const inputClass = "h-10 w-full rounded border border-surgical-steel bg-surface-container-low/60 px-3 font-body text-sm text-white outline-none focus:border-primary-container transition placeholder:text-fog-muted"; 
+  const inputClass = "h-10 w-full rounded border border-surgical-steel bg-surface-container-low/60 px-3 font-body text-sm text-text-strong outline-none focus:border-primary-container transition placeholder:text-fog-muted"; 
   const labelClass = "block font-label text-xs uppercase tracking-wider text-fog-muted mb-1.5";
 
   return (
@@ -476,7 +476,7 @@ function EventEditor({
       role="dialog" 
       aria-modal="true" 
       aria-labelledby="event-editor-title" 
-      className="fixed inset-0 z-50 grid place-items-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto" 
+      className="fixed inset-0 z-50 grid place-items-center bg-scrim backdrop-blur-sm p-4 overflow-y-auto" 
       onMouseDown={() => { if (!dirty || window.confirm("Discard unsaved event changes?")) onClose(); }}
     >
       <form 
@@ -494,7 +494,7 @@ function EventEditor({
         <div className="flex justify-between items-center border-b border-surgical-steel bg-surface-container-high/40 px-6 py-4">
           <div>
             <p className="font-label text-xs uppercase tracking-wider text-primary-container font-semibold">Event Control</p>
-            <h2 id="event-editor-title" className="mt-1 font-display text-xl font-bold text-white">
+            <h2 id="event-editor-title" className="mt-1 font-display text-xl font-bold text-text-strong">
               {event ? "Modify Event Details" : "Schedule New Event"}
             </h2>
           </div>
@@ -502,7 +502,7 @@ function EventEditor({
             ref={close} 
             type="button" 
             onClick={onClose} 
-            className="text-fog-muted hover:text-white transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
+            className="text-fog-muted hover:text-text-strong transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
           >
             <X size={20} />
           </button>
@@ -656,7 +656,7 @@ function EventEditor({
           <button 
             type="button" 
             onClick={onClose} 
-            className="min-h-10 px-4 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-white transition cursor-pointer"
+            className="min-h-10 px-4 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-text-strong transition cursor-pointer"
           >
             Cancel
           </button>
@@ -718,7 +718,7 @@ function EventDetails({
       role="dialog" 
       aria-modal="true" 
       aria-labelledby="event-details-title" 
-      className="fixed inset-0 z-50 grid place-items-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto" 
+      className="fixed inset-0 z-50 grid place-items-center bg-scrim backdrop-blur-sm p-4 overflow-y-auto" 
       onMouseDown={onClose}
     >
       <div 
@@ -729,14 +729,14 @@ function EventDetails({
         <div className="flex justify-between items-center border-b border-surgical-steel bg-surface-container-high/40 px-6 py-4">
           <div>
             <p className="font-label text-xs uppercase tracking-wider text-primary-container font-semibold">Event Details</p>
-            <h2 id="event-details-title" className="mt-1 font-display text-xl font-bold text-white">
+            <h2 id="event-details-title" className="mt-1 font-display text-xl font-bold text-text-strong">
               {event.title}
             </h2>
           </div>
           <button 
             ref={close} 
             onClick={onClose} 
-            className="text-fog-muted hover:text-white transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
+            className="text-fog-muted hover:text-text-strong transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
           >
             <X size={20} />
           </button>
@@ -758,19 +758,19 @@ function EventDetails({
               <dl className="grid grid-cols-2 gap-4 text-sm font-body">
                 <div>
                   <dt className="text-fog-muted font-label text-xs uppercase tracking-wider mb-0.5">When</dt>
-                  <dd className="text-white font-medium">{dateTime.format(new Date(event.startsAt))}</dd>
+                  <dd className="text-text-strong font-medium">{dateTime.format(new Date(event.startsAt))}</dd>
                 </div>
                 <div>
                   <dt className="text-fog-muted font-label text-xs uppercase tracking-wider mb-0.5">Duration</dt>
-                  <dd className="text-white font-medium">{duration(event)}</dd>
+                  <dd className="text-text-strong font-medium">{duration(event)}</dd>
                 </div>
                 <div>
                   <dt className="text-fog-muted font-label text-xs uppercase tracking-wider mb-0.5">Access Level</dt>
-                  <dd className="text-white font-medium">{accessLabel(event.minTier)}</dd>
+                  <dd className="text-text-strong font-medium">{accessLabel(event.minTier)}</dd>
                 </div>
                 <div>
                   <dt className="text-fog-muted font-label text-xs uppercase tracking-wider mb-0.5">Zoom Room</dt>
-                  <dd className="text-white font-medium">
+                  <dd className="text-text-strong font-medium">
                     {event.roomPublished ? "Published & Active" : "Missing Meeting URL"}
                   </dd>
                 </div>
@@ -802,7 +802,7 @@ function EventDetails({
                   {event.attendees.length ? (
                     event.attendees.map((attendee) => (
                       <li key={attendee.id} className="flex justify-between items-center p-3 hover:bg-surface-container-high/40">
-                        <span className="text-white font-medium">{attendee.name}</span>
+                        <span className="text-text-strong font-medium">{attendee.name}</span>
                         <span className="text-fog-muted font-label text-[10px]">
                           {dateTime.format(new Date(attendee.enrolledAt))}
                         </span>
@@ -821,7 +821,7 @@ function EventDetails({
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-surgical-steel px-6 py-4 bg-surface-container-high/20">
           <button 
             onClick={onClose} 
-            className="min-h-10 px-4 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-white transition cursor-pointer"
+            className="min-h-10 px-4 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-text-strong transition cursor-pointer"
           >
             Close
           </button>
@@ -869,7 +869,7 @@ function EventDetails({
 function Metric({ value, label }: { value: string; label: string }) { 
   return (
     <div className="border border-surgical-steel bg-surface-container-high/15 p-3 text-center rounded">
-      <p className="font-display text-lg font-bold text-white">{value}</p>
+      <p className="font-display text-lg font-bold text-text-strong">{value}</p>
       <p className="font-label text-[9px] uppercase tracking-wider text-fog-muted mt-1 leading-none">{label}</p>
     </div>
   ); 
@@ -897,7 +897,7 @@ function PublishRoomModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[60] grid place-items-center bg-black/85 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[60] grid place-items-center bg-scrim backdrop-blur-sm p-4"
       onMouseDown={onClose}
     >
       <div 
@@ -907,11 +907,11 @@ function PublishRoomModal({
         <div className="flex justify-between items-center border-b border-surgical-steel bg-surface-container-high/40 px-5 py-3.5">
           <div>
             <p className="font-label text-[10px] uppercase tracking-wider text-primary-container font-semibold">Delivery Access</p>
-            <h3 className="font-headline text-base font-bold text-white">Publish Room Link</h3>
+            <h3 className="font-headline text-base font-bold text-text-strong">Publish Room Link</h3>
           </div>
           <button 
             onClick={onClose} 
-            className="text-fog-muted hover:text-white transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
+            className="text-fog-muted hover:text-text-strong transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
           >
             <X size={16} />
           </button>
@@ -926,7 +926,7 @@ function PublishRoomModal({
         >
           <div className="space-y-1">
             <p className="text-xs text-on-surface-variant font-body leading-relaxed">
-              Enter the live meeting link for <strong className="text-white">&ldquo;{event.title}&rdquo;</strong>. Members will be notified and can join directly when the session opens.
+              Enter the live meeting link for <strong className="text-text-strong">&ldquo;{event.title}&rdquo;</strong>. Members will be notified and can join directly when the session opens.
             </p>
           </div>
 
@@ -937,7 +937,7 @@ function PublishRoomModal({
             <input
               id="roomUrl"
               ref={inputRef}
-              className="h-10 w-full rounded border border-surgical-steel bg-surface-container-low/60 px-3 font-body text-sm text-white outline-none focus:border-primary-container transition placeholder:text-fog-muted"
+              className="h-10 w-full rounded border border-surgical-steel bg-surface-container-low/60 px-3 font-body text-sm text-text-strong outline-none focus:border-primary-container transition placeholder:text-fog-muted"
               type="url"
               placeholder="https://zoom.us/j/..."
               value={url}
@@ -953,7 +953,7 @@ function PublishRoomModal({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-9 px-3 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-white transition cursor-pointer"
+              className="min-h-9 px-3 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-text-strong transition cursor-pointer"
             >
               Cancel
             </button>
@@ -993,7 +993,7 @@ function CancelEventModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[60] grid place-items-center bg-black/85 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[60] grid place-items-center bg-scrim backdrop-blur-sm p-4"
       onMouseDown={onClose}
     >
       <div 
@@ -1003,11 +1003,11 @@ function CancelEventModal({
         <div className="flex justify-between items-center border-b border-surgical-steel bg-surface-container-high/40 px-5 py-3.5">
           <div>
             <p className="font-label text-[10px] uppercase tracking-wider text-rose-400 font-semibold">Moderation</p>
-            <h3 className="font-headline text-base font-bold text-white">Cancel Event</h3>
+            <h3 className="font-headline text-base font-bold text-text-strong">Cancel Event</h3>
           </div>
           <button 
             onClick={onClose} 
-            className="text-fog-muted hover:text-white transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
+            className="text-fog-muted hover:text-text-strong transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
           >
             <X size={16} />
           </button>
@@ -1022,7 +1022,7 @@ function CancelEventModal({
         >
           <div className="space-y-1">
             <p className="text-xs text-on-surface-variant font-body leading-relaxed">
-              Are you sure you want to cancel <strong className="text-white">&ldquo;{event.title}&rdquo;</strong>?
+              Are you sure you want to cancel <strong className="text-text-strong">&ldquo;{event.title}&rdquo;</strong>?
               Registered members will be notified immediately. This action cannot be reversed.
             </p>
           </div>
@@ -1034,7 +1034,7 @@ function CancelEventModal({
             <textarea
               id="cancelReason"
               ref={textareaRef}
-              className="w-full h-24 rounded border border-surgical-steel bg-surface-container-low/60 p-3 font-body text-sm text-white outline-none focus:border-primary-container transition placeholder:text-fog-muted resize-none"
+              className="w-full h-24 rounded border border-surgical-steel bg-surface-container-low/60 p-3 font-body text-sm text-text-strong outline-none focus:border-primary-container transition placeholder:text-fog-muted resize-none"
               placeholder="Provide a cancellation message for the registered members..."
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -1045,14 +1045,14 @@ function CancelEventModal({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-9 px-3 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-white transition cursor-pointer"
+              className="min-h-9 px-3 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-text-strong transition cursor-pointer"
             >
               Keep Event
             </button>
             <button
               type="submit"
               disabled={pending}
-              className="min-h-9 rounded bg-rose-600 px-4 font-label text-xs font-bold uppercase tracking-wider text-white hover:bg-rose-500 transition disabled:opacity-60 cursor-pointer"
+              className="min-h-9 rounded bg-rose-600 px-4 font-label text-xs font-bold uppercase tracking-wider text-text-strong hover:bg-rose-500 transition disabled:opacity-60 cursor-pointer"
             >
               {pending ? "Cancelling..." : "Confirm Cancellation"}
             </button>

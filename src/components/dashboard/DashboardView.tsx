@@ -78,7 +78,7 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
       {/* Dashboard Grid */}
       <main className="relative grid gap-6 p-4 md:p-8 md:grid-cols-12 max-w-[1440px] mx-auto">
         {/* Subtle Grid Background */}
-        <div className="pointer-events-none absolute inset-0 opacity-10 [background-image:linear-gradient(#334155_1px,transparent_1px),linear-gradient(90deg,#334155_1px,transparent_1px)] [background-size:64px_64px]" />
+        <div className="pointer-events-none absolute inset-0 opacity-10 [background-image:linear-gradient(var(--color-border-hairline)_1px,transparent_1px),linear-gradient(90deg,var(--color-border-hairline)_1px,transparent_1px)] [background-size:64px_64px]" />
 
         {/* Left Column: Progress & Active Study */}
         <div className="relative space-y-6 md:col-span-8">
@@ -97,7 +97,7 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-1.5">
                   <span className="font-label text-xs font-semibold text-primary-container uppercase tracking-wider">STOIC PATHWAY</span>
-                  <h2 className="font-headline text-3xl font-extrabold text-white tracking-tight mt-1">
+                  <h2 className="font-headline text-3xl font-extrabold text-text-strong tracking-tight mt-1">
                     {data.isMaster ? "Stoic Master" : data.currentTierTitle}
                   </h2>
                   <p className="text-sm text-fog-muted font-body">
@@ -110,7 +110,7 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
                 <div className="flex items-center gap-4 bg-surface-container-high border border-surgical-steel/60 px-5 py-3.5 rounded-xl shrink-0">
                   <div className="text-right">
                     <p className="text-[10px] font-label text-fog-muted uppercase tracking-wider font-bold">Pathway Status</p>
-                    <p className="font-headline text-lg font-bold text-white mt-1">
+                    <p className="font-headline text-lg font-bold text-text-strong mt-1">
                       {data.isMaster ? (
                         <span className="text-primary-container flex items-center gap-1.5 font-extrabold text-sm uppercase tracking-wider">
                           <Sparkles size={14} /> Mastered
@@ -118,7 +118,7 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
                       ) : coursesToMastery === 0 ? (
                         <span className="text-primary-container font-extrabold text-sm uppercase tracking-wider">Prereqs Met</span>
                       ) : (
-                        <span className="text-white font-extrabold text-sm uppercase tracking-wider">{coursesToMastery} course{coursesToMastery === 1 ? "" : "s"} left</span>
+                        <span className="text-text-strong font-extrabold text-sm uppercase tracking-wider">{coursesToMastery} course{coursesToMastery === 1 ? "" : "s"} left</span>
                       )}
                     </p>
                   </div>
@@ -159,7 +159,7 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
                           />
                         </div>
                         <div className="flex justify-between items-center text-[10px] font-label px-0.5">
-                          <span className={`${tier.status === "locked" ? "text-fog-muted" : "text-white font-medium"}`}>
+                          <span className={`${tier.status === "locked" ? "text-fog-muted" : "text-text-strong font-medium"}`}>
                             T0{tier.level}
                           </span>
                           <span className={`${tier.status === "locked" ? "text-fog-muted/65" : "text-primary-container font-mono"}`}>
@@ -206,7 +206,7 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
                       </div>
 
                       <div>
-                        <h4 className="text-sm font-headline font-bold text-white leading-tight">
+                        <h4 className="text-sm font-headline font-bold text-text-strong leading-tight">
                           {tier.title}
                         </h4>
                         <p className="text-[11px] font-label text-fog-muted mt-1">
@@ -218,7 +218,7 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
                         {isCompleted ? (
                           <span className="text-primary-container font-semibold">Tier Completed</span>
                         ) : isActive ? (
-                          <span className="text-white font-medium">Currently Studying</span>
+                          <span className="text-text-strong font-medium">Currently Studying</span>
                         ) : (
                           <span className="text-fog-muted">Locked</span>
                         )}
@@ -249,8 +249,8 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
                         <span className="border border-surgical-steel bg-surface-container-high px-2 py-0.5 rounded font-label text-[10px] text-fog-muted font-semibold tracking-wider">ACTIVE</span>
                         <span className="text-xs font-label text-primary-container/70 group-hover:text-primary-container transition-colors font-medium">Resume course &rarr;</span>
                       </div>
-                      <h3 className="font-headline text-xl font-bold text-white leading-snug group-hover:text-primary-container transition-colors">{data.activeLesson.title}</h3>
-                      <p className="max-w-xl font-body text-sm text-on-surface-variant group-hover:text-white transition-colors">{data.activeLesson.description || "Continue your current course."}</p>
+                      <h3 className="font-headline text-xl font-bold text-text-strong leading-snug group-hover:text-primary-container transition-colors">{data.activeLesson.title}</h3>
+                      <p className="max-w-xl font-body text-sm text-on-surface-variant group-hover:text-text-strong transition-colors">{data.activeLesson.description || "Continue your current course."}</p>
                       
                       <div className="space-y-2 pt-2 max-w-md">
                         <div className="flex justify-between font-label text-xs">
@@ -262,8 +262,8 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
                         </div>
                       </div>
                       <div className="grid max-w-md grid-cols-3 divide-x divide-surgical-steel border border-surgical-steel bg-surface-container-low/30 text-center">
-                        <div className="px-3 py-3"><p className="text-[10px] font-label uppercase tracking-wide text-fog-muted">Lessons</p><p className="mt-1 text-sm font-semibold tabular-nums text-white">{data.activeLesson.completedVideos}/{data.activeLesson.totalVideos}</p></div>
-                        <div className="px-3 py-3"><p className="text-[10px] font-label uppercase tracking-wide text-fog-muted">Remaining</p><p className="mt-1 text-sm font-semibold tabular-nums text-white">{data.activeLesson.remainingMinutes}m</p></div>
+                        <div className="px-3 py-3"><p className="text-[10px] font-label uppercase tracking-wide text-fog-muted">Lessons</p><p className="mt-1 text-sm font-semibold tabular-nums text-text-strong">{data.activeLesson.completedVideos}/{data.activeLesson.totalVideos}</p></div>
+                        <div className="px-3 py-3"><p className="text-[10px] font-label uppercase tracking-wide text-fog-muted">Remaining</p><p className="mt-1 text-sm font-semibold tabular-nums text-text-strong">{data.activeLesson.remainingMinutes}m</p></div>
                         <div className="px-3 py-3"><p className="text-[10px] font-label uppercase tracking-wide text-fog-muted">Status</p><p className="mt-1 text-sm font-semibold text-primary-container">{data.activeLesson.isCompleted ? "Complete" : "Active"}</p></div>
                       </div>
                     </div>
@@ -275,7 +275,7 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
                   </div>
                 ) : (
                   <div className="text-center py-6 space-y-3">
-                    <h3 className="font-headline text-lg font-bold text-white">Your curriculum is clear</h3>
+                    <h3 className="font-headline text-lg font-bold text-text-strong">Your curriculum is clear</h3>
                     <p className="text-sm text-on-surface-variant max-w-md mx-auto">New courses and videos will appear here as they are released.</p>
                     <span className="inline-block text-xs font-label text-primary-container uppercase tracking-wider hover:underline">Explore Curriculum &rarr;</span>
                   </div>
@@ -304,9 +304,9 @@ function LegacyDashboardView({ data, routeBase = "" }: { data: DashboardData; ro
                       </span>
                       <span className="font-label text-xs text-primary-container/70 group-hover:text-primary-container transition-colors font-medium">View Event &rarr;</span>
                     </div>
-                    <h3 className="font-headline text-lg font-bold text-white leading-snug group-hover:text-primary-container transition-colors">{data.upcomingEvent.title}</h3>
+                    <h3 className="font-headline text-lg font-bold text-text-strong leading-snug group-hover:text-primary-container transition-colors">{data.upcomingEvent.title}</h3>
                     <p className="text-sm text-on-surface-variant line-clamp-2">{data.upcomingEvent.description || "Live member session"}</p>
-                    <div className="border-t border-surgical-steel pt-4 font-label text-xs text-primary-container uppercase tracking-wider font-semibold group-hover:text-white transition-colors">
+                    <div className="border-t border-surgical-steel pt-4 font-label text-xs text-primary-container uppercase tracking-wider font-semibold group-hover:text-text-strong transition-colors">
                       {eventDate(data.upcomingEvent.starts_at)}
                     </div>
                   </>
@@ -350,7 +350,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="border border-surgical-steel bg-monolith-surface p-5 rounded-xl hover:border-primary-container/20 transition-colors duration-200">
       <p className="font-label text-xs uppercase tracking-[0.14em] text-fog-muted font-bold">{label}</p>
-      <p className="mt-2.5 font-headline text-2xl font-bold text-white tracking-tight">{value}</p>
+      <p className="mt-2.5 font-headline text-2xl font-bold text-text-strong tracking-tight">{value}</p>
     </div>
   );
 }

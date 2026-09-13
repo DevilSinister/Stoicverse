@@ -45,7 +45,7 @@ export function StructureList({
                 onClick={() => onSelect({ kind: "category", id: category.id })}
                 aria-current={isCurrent ? "true" : undefined}
                 className={`focus-ring flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] transition ${
-                  isCurrent ? "bg-surface-container-high text-white" : "text-fog-muted hover:text-on-surface-variant"
+                  isCurrent ? "bg-surface-container-high text-text-strong" : "text-fog-muted hover:text-on-surface-variant"
                 }`}
               >
                 <span className="truncate">{category.name}</span>
@@ -75,7 +75,7 @@ export function StructureList({
                       aria-current={isActive ? "true" : undefined}
                       className={`focus-ring flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left transition ${
                         isActive
-                          ? "bg-surface-container-high font-semibold text-white"
+                          ? "bg-surface-container-high font-semibold text-text-strong"
                           : "text-on-surface-variant hover:bg-surface-container-high/50"
                       } ${channel.isArchived ? "opacity-60" : ""}`}
                     >
@@ -153,7 +153,7 @@ function MoveGroup({
   };
 
   const buttonClass =
-    "focus-ring grid size-11 shrink-0 place-items-center rounded-lg text-fog-muted transition hover:bg-surface-container-high hover:text-white disabled:pointer-events-none disabled:opacity-30";
+    "focus-ring grid size-11 shrink-0 place-items-center rounded-lg text-fog-muted transition hover:bg-surface-container-high hover:text-text-strong disabled:pointer-events-none disabled:opacity-30";
 
   return (
     <div role="group" aria-label={`Reorder ${label}`} className="flex shrink-0">

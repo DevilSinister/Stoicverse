@@ -93,14 +93,14 @@ function LegacyCourseVideoPlayer({
   };
 
   return (
-    <section className="overflow-hidden rounded-xl border border-surgical-steel bg-[#101214]">
+    <section className="overflow-hidden rounded-xl border border-surgical-steel bg-surface-sunken">
       <div className="grid lg:grid-cols-[minmax(0,1fr)_19rem]">
         <div className="min-w-0">
           <div className="relative aspect-video bg-black">
             {sourceError ? (
               <div role="alert" className="absolute inset-0 grid place-items-center p-8 text-center">
                 <div className="max-w-sm space-y-3">
-                  <p className="font-semibold text-white">Video unavailable</p>
+                  <p className="font-semibold text-text-strong">Video unavailable</p>
                   <p className="text-sm leading-6 text-on-surface-variant">{sourceError}</p>
                 </div>
               </div>
@@ -135,7 +135,7 @@ function LegacyCourseVideoPlayer({
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0 space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary-container">{courseTitle}</p>
-                <h1 className="font-headline text-2xl font-bold leading-tight text-white md:text-3xl">{title}</h1>
+                <h1 className="font-headline text-2xl font-bold leading-tight text-text-strong md:text-3xl">{title}</h1>
               </div>
             </div>
 
@@ -161,7 +161,7 @@ function LegacyCourseVideoPlayer({
         </div>
 
         <aside className="border-t border-surgical-steel bg-monolith-surface lg:border-l lg:border-t-0">
-          <div className="flex items-center gap-2 border-b border-surgical-steel px-4 py-4 text-sm font-semibold text-white">
+          <div className="flex items-center gap-2 border-b border-surgical-steel px-4 py-4 text-sm font-semibold text-text-strong">
             <ListVideo size={17} className="text-primary-container" />
             Course queue
           </div>
@@ -174,7 +174,7 @@ function LegacyCourseVideoPlayer({
                     {video.isCompleted ? <CheckCircle2 size={15} /> : active ? <Play size={13} fill="currentColor" /> : index + 1}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className={`block truncate text-sm font-medium ${active ? "text-white" : "text-on-surface-variant"}`}>{video.title}</span>
+                    <span className={`block truncate text-sm font-medium ${active ? "text-text-strong" : "text-on-surface-variant"}`}>{video.title}</span>
                     <span className="mt-1 flex items-center gap-1 text-xs text-fog-muted"><Clock3 size={12} />{formatDuration(video.durationSeconds)}</span>
                   </span>
                   {video.isUnlocked && !active ? <ChevronRight size={15} className="text-fog-muted" /> : !video.isUnlocked ? <LockKeyhole size={14} className="text-fog-muted" /> : null}

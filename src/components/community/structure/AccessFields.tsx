@@ -29,7 +29,7 @@ export function AccessFields({ rule }: { rule?: { visibilityMode: string } }) {
           id="structure-visibility"
           name="visibilityMode"
           defaultValue={value.visibilityMode}
-          className="focus-ring mt-2 h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none"
+          className="focus-ring mt-2 h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none"
         >
           <option value="locked">Show it locked</option>
           <option value="hidden">Hide it entirely</option>

@@ -19,11 +19,11 @@ import {
 
 const label = "block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted";
 const field =
-  "focus-ring h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none";
+  "focus-ring h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none";
 const numberField =
-  "focus-ring h-11 w-28 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none";
+  "focus-ring h-11 w-28 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none";
 const textArea =
-  "focus-ring mt-2 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-3 text-base text-white outline-none";
+  "focus-ring mt-2 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-3 text-base text-text-strong outline-none";
 
 export type RuleDraft = AutomodRule & { exemptions: AutomodExemptions };
 

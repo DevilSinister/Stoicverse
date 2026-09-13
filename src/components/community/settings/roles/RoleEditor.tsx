@@ -51,7 +51,7 @@ export function RoleEditor({
   return (
     <section className="min-w-0">
       <header className="min-w-0">
-        <h2 className="flex items-center gap-2 font-headline text-lg font-bold text-white">
+        <h2 className="flex items-center gap-2 font-headline text-lg font-bold text-text-strong">
           {role.iconEmoji && <span aria-hidden="true">{role.iconEmoji}</span>}
           <span className="truncate" style={{ color: role.color }}>
             {role.name}
@@ -85,8 +85,8 @@ export function RoleEditor({
             onClick={() => setTab(entry.id)}
             className={`focus-ring -mb-px min-h-11 rounded-t-lg px-4 text-sm font-semibold transition ${
               tab === entry.id
-                ? "border-b-2 border-primary-container text-white"
-                : "text-on-surface-variant hover:text-white"
+                ? "border-b-2 border-primary-container text-text-strong"
+                : "text-on-surface-variant hover:text-text-strong"
             }`}
           >
             {entry.label}
@@ -201,7 +201,7 @@ function RoleForm({
                 required
                 readOnly={isEveryone}
                 aria-describedby={isEveryone ? `${confirmId}-everyone` : undefined}
-                className="focus-ring mt-2 h-12 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none read-only:opacity-60 sm:text-sm"
+                className="focus-ring mt-2 h-12 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none read-only:opacity-60 sm:text-sm"
               />
               {isEveryone && (
                 <span id={`${confirmId}-everyone`} className="mt-1 block text-xs leading-5 text-fog-muted">
@@ -264,7 +264,7 @@ function RoleForm({
             value={confirmation}
             onChange={(event) => setConfirmation(event.target.value)}
             autoComplete="off"
-            className="focus-ring mt-3 h-11 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none"
+            className="focus-ring mt-3 h-11 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none"
           />
         </div>
       )}
@@ -317,10 +317,10 @@ function ToggleRow({
         name={name}
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="mt-0.5 size-4 shrink-0 accent-[#10B981]"
+        className="mt-0.5 size-4 shrink-0 accent-primary"
       />
       <span className="min-w-0">
-        <span className="block text-sm font-semibold text-white">{label}</span>
+        <span className="block text-sm font-semibold text-text-strong">{label}</span>
         <span className="mt-0.5 block text-xs leading-5 text-fog-muted">{detail}</span>
       </span>
     </label>
@@ -419,7 +419,7 @@ function MembersTab({ role, editable }: { role: CommunityRole; editable: boolean
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search by name"
-            className="focus-ring mt-2 h-12 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none sm:text-sm"
+            className="focus-ring mt-2 h-12 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none sm:text-sm"
           />
           <ul className="mt-2 space-y-1">
             {candidates
@@ -454,7 +454,7 @@ function MembersTab({ role, editable }: { role: CommunityRole; editable: boolean
           <ul className="mt-2 divide-y divide-surgical-steel">
             {members.map((member) => (
               <li key={member.id} className="flex min-h-11 items-center justify-between gap-3 py-2">
-                <span className="min-w-0 truncate text-sm text-white">{member.fullName}</span>
+                <span className="min-w-0 truncate text-sm text-text-strong">{member.fullName}</span>
                 {member.source === "system" ? (
                   <span className="shrink-0 text-xs text-fog-muted">Automatic</span>
                 ) : (

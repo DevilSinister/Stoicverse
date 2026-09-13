@@ -81,7 +81,7 @@ export function SettingsOverlayShell({
                 </button>
 
                 <header className="mb-6">
-                  <DialogPrimitive.Title className="font-headline text-2xl font-bold text-white">
+                  <DialogPrimitive.Title className="font-headline text-2xl font-bold text-text-strong">
                     {active.label}
                   </DialogPrimitive.Title>
                   <DialogPrimitive.Description className="mt-1 text-sm leading-6 text-on-surface-variant">
@@ -105,7 +105,7 @@ export function SettingsOverlayShell({
               <div className="absolute right-4 top-4 flex flex-col items-center gap-1 sm:right-8 sm:top-8">
                 <DialogPrimitive.Close
                   aria-label="Close settings"
-                  className="focus-ring flex size-11 items-center justify-center rounded-full border border-surgical-steel text-on-surface-variant transition hover:border-fog-muted hover:text-white"
+                  className="focus-ring flex size-11 items-center justify-center rounded-full border border-surgical-steel text-on-surface-variant transition hover:border-fog-muted hover:text-text-strong"
                 >
                   <X size={20} aria-hidden="true" />
                 </DialogPrimitive.Close>

@@ -54,7 +54,7 @@ export function MobilePaneDrawer({
         type="button"
         aria-label={`Close ${label.toLowerCase()}`}
         onClick={onClose}
-        className={`absolute inset-0 bg-black/60 ${side === "left" ? "order-2" : "order-1"}`}
+        className={`absolute inset-0 bg-scrim ${side === "left" ? "order-2" : "order-1"}`}
       />
 
       <div

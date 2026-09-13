@@ -102,7 +102,7 @@ export function StructureForm({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-semibold text-white">{isNew ? `New ${kind}` : `Edit ${kind}`}</h3>
+        <h3 className="text-sm font-semibold text-text-strong">{isNew ? `New ${kind}` : `Edit ${kind}`}</h3>
         <p className="mt-1 text-xs leading-5 text-fog-muted">
           {kind === "category"
             ? "A category groups channels in the sidebar and sets the default access for channels added to it."
@@ -170,7 +170,7 @@ export function StructureForm({
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder={kind === "category" ? "Foundations" : meta.namePlaceholder}
-            className="focus-ring mt-2 h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none placeholder:text-fog-muted"
+            className="focus-ring mt-2 h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none placeholder:text-fog-muted"
           />
           {kind === "channel" && (
             <p className="mt-2 min-h-5 text-xs leading-5 text-fog-muted">
@@ -201,7 +201,7 @@ export function StructureForm({
             name="description"
             defaultValue={subject?.description ?? ""}
             placeholder={kind === "category" ? "What this group of channels covers." : meta.descriptionPlaceholder}
-            className="focus-ring mt-2 h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none placeholder:text-fog-muted"
+            className="focus-ring mt-2 h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none placeholder:text-fog-muted"
           />
         </div>
 
@@ -241,7 +241,7 @@ export function StructureForm({
               type="button"
               disabled={pending}
               onClick={() => setArchived(!subject.isArchived)}
-              className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-white transition hover:border-primary-container disabled:opacity-40"
+              className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-text-strong transition hover:border-primary-container disabled:opacity-40"
             >
               <Settings2 size={15} aria-hidden="true" />
               {subject.isArchived ? "Restore" : "Archive"}
@@ -279,7 +279,7 @@ const CATEGORY_HINT =
 function FormHeader({ isNew, kind, hint }: { isNew: boolean; kind: string; hint: string }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-white">{isNew ? `New ${kind}` : `Edit ${kind}`}</h3>
+      <h3 className="text-sm font-semibold text-text-strong">{isNew ? `New ${kind}` : `Edit ${kind}`}</h3>
       <p className="mt-1 text-xs leading-5 text-fog-muted">{hint}</p>
     </div>
   );
@@ -303,8 +303,8 @@ function StructureTabs({
           onClick={() => onChange(entry)}
           className={`focus-ring -mb-px min-h-11 rounded-t-lg px-4 text-sm font-semibold capitalize transition ${
             tab === entry
-              ? "border-b-2 border-primary-container text-white"
-              : "text-on-surface-variant hover:text-white"
+              ? "border-b-2 border-primary-container text-text-strong"
+              : "text-on-surface-variant hover:text-text-strong"
           }`}
         >
           {entry}

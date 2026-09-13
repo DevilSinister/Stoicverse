@@ -47,8 +47,8 @@ export function SettingsRail({
                     onClick={() => onNavigate?.(section.id)}
                     className={`focus-ring flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${
                       isCurrent
-                        ? "bg-surface-container-high text-white"
-                        : "text-on-surface-variant hover:bg-surface-container-high/50 hover:text-white"
+                        ? "bg-surface-container-high text-text-strong"
+                        : "text-on-surface-variant hover:bg-surface-container-high/50 hover:text-text-strong"
                     }`}
                   >
                     <Icon size={15} aria-hidden="true" className="shrink-0 text-fog-muted" />

@@ -58,7 +58,7 @@ export const ACCENT_SWATCHES = [
   { hex: "#A78BFA", name: "Iris" },
   { hex: "#FB923C", name: "Amber" },
   { hex: "#2DD4BF", name: "Teal" },
-  { hex: "#E2E8F0", name: "Bone" },
+  { hex: "#d4e4fa", name: "Bone" },
 ] as const;
 
 // Composer and reaction rules are platform constants, not settings — see

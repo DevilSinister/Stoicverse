@@ -40,7 +40,7 @@ export function SettingsPageShell({
 
           <section aria-label={active.label} className="min-w-0">
             <header className="mb-4">
-              <h1 className="font-headline text-2xl font-bold text-white">{active.label}</h1>
+              <h1 className="font-headline text-2xl font-bold text-text-strong">{active.label}</h1>
               <p className="mt-1 text-sm leading-6 text-on-surface-variant">{active.blurb}</p>
             </header>
 

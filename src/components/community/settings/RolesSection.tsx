@@ -243,7 +243,7 @@ function RoleRow({
           aria-current={current ? "true" : undefined}
           className={`focus-ring flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left text-sm transition ${
             current
-              ? "bg-surface-container-high text-white"
+              ? "bg-surface-container-high text-text-strong"
               : "text-on-surface-variant hover:bg-surface-container-high/50"
           }`}
         >
@@ -272,7 +272,7 @@ function RoleRow({
               onClick={() => onMove(role.id, "up")}
               disabled={!manageable || !canMoveUp}
               aria-label={`Move ${role.name} up`}
-              className="focus-ring inline-flex size-6 items-center justify-center rounded text-fog-muted transition hover:text-white disabled:opacity-30"
+              className="focus-ring inline-flex size-6 items-center justify-center rounded text-fog-muted transition hover:text-text-strong disabled:opacity-30"
             >
               <ChevronUp size={14} aria-hidden="true" />
             </button>
@@ -281,7 +281,7 @@ function RoleRow({
               onClick={() => onMove(role.id, "down")}
               disabled={!manageable || !canMoveDown}
               aria-label={`Move ${role.name} down`}
-              className="focus-ring inline-flex size-6 items-center justify-center rounded text-fog-muted transition hover:text-white disabled:opacity-30"
+              className="focus-ring inline-flex size-6 items-center justify-center rounded text-fog-muted transition hover:text-text-strong disabled:opacity-30"
             >
               <ChevronDown size={14} aria-hidden="true" />
             </button>
@@ -339,7 +339,7 @@ function CreateRoleButton({ disabled, onCreated }: { disabled: boolean; onCreate
         autoFocus
         minLength={ROLE_LIMITS.name.min}
         maxLength={ROLE_LIMITS.name.max}
-        className="focus-ring h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none sm:text-sm"
+        className="focus-ring h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none sm:text-sm"
       />
       {error && (
         <p role="alert" className="text-xs leading-5 text-error">
@@ -358,7 +358,7 @@ function CreateRoleButton({ disabled, onCreated }: { disabled: boolean; onCreate
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="focus-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm text-fog-muted transition hover:text-white"
+          className="focus-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm text-fog-muted transition hover:text-text-strong"
         >
           Cancel
         </button>
@@ -417,7 +417,7 @@ function DeleteRoleCard({
             value={confirmation}
             onChange={(event) => setConfirmation(event.target.value)}
             autoComplete="off"
-            className="focus-ring mt-3 h-11 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none"
+            className="focus-ring mt-3 h-11 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none"
           />
         </>
       )}

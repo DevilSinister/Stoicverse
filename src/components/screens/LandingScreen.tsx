@@ -121,7 +121,7 @@ export function LandingScreen() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-8 lg:px-12">
           <Link
             href="/"
-            className={`inline-flex min-h-11 items-center text-lg font-bold tracking-[-0.02em] text-white ${FOCUS}`}
+            className={`inline-flex min-h-11 items-center text-lg font-bold tracking-[-0.02em] text-text-strong ${FOCUS}`}
           >
             Stoicverse
           </Link>
@@ -167,7 +167,7 @@ export function LandingScreen() {
           />
           <div className="relative mx-auto flex min-h-[min(44rem,calc(100svh-4rem))] max-w-7xl flex-col justify-center px-4 py-24 md:px-8 md:py-28 lg:px-12">
             <div className="settle max-w-4xl" style={{ "--settle-duration": "620ms" } as React.CSSProperties}>
-              <h1 className="text-balance text-[clamp(2.4rem,6.4vw,4.75rem)] font-bold leading-[1.02] tracking-[-0.035em] text-white">
+              <h1 className="text-balance text-[clamp(2.4rem,6.4vw,4.75rem)] font-bold leading-[1.02] tracking-[-0.035em] text-text-strong">
                 Master the discipline of perception in a noisy world.
               </h1>
             </div>
@@ -221,7 +221,7 @@ export function LandingScreen() {
         <section id="curriculum" className="border-b border-surgical-steel bg-surface-container-low/40">
           <div className="mx-auto max-w-7xl px-4 py-20 md:px-8 md:py-28 lg:px-12">
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-              <h2 className="max-w-2xl text-balance text-[clamp(1.75rem,3.2vw,2.75rem)] font-bold leading-[1.1] tracking-[-0.025em] text-white">
+              <h2 className="max-w-2xl text-balance text-[clamp(1.75rem,3.2vw,2.75rem)] font-bold leading-[1.1] tracking-[-0.025em] text-text-strong">
                 A practice that gets more useful under pressure.
               </h2>
               <p className="max-w-sm text-on-surface-variant">
@@ -253,7 +253,7 @@ export function LandingScreen() {
 
                   <div>
                     <p className="hidden text-sm text-fog-muted md:block">{stage.phase}</p>
-                    <h3 className="text-xl font-bold tracking-[-0.015em] text-white md:mt-2">
+                    <h3 className="text-xl font-bold tracking-[-0.015em] text-text-strong md:mt-2">
                       {stage.title}
                     </h3>
                   </div>
@@ -272,7 +272,7 @@ export function LandingScreen() {
         <section id="membership" className="border-b border-surgical-steel">
           <div className="mx-auto max-w-7xl px-4 py-20 md:px-8 md:py-28 lg:px-12">
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-              <h2 className="max-w-xl text-balance text-[clamp(1.75rem,3.2vw,2.75rem)] font-bold leading-[1.1] tracking-[-0.025em] text-white">
+              <h2 className="max-w-xl text-balance text-[clamp(1.75rem,3.2vw,2.75rem)] font-bold leading-[1.1] tracking-[-0.025em] text-text-strong">
                 Start with a simple commitment.
               </h2>
               <p className="max-w-sm text-on-surface-variant">
@@ -283,7 +283,7 @@ export function LandingScreen() {
 
             <div className="mt-12 grid overflow-hidden rounded-2xl border border-surgical-steel bg-monolith-surface lg:grid-cols-[minmax(0,1fr)_minmax(0,25rem)]">
               <div className="p-7 md:p-10">
-                <h3 className="text-lg font-bold text-white">Community Membership</h3>
+                <h3 className="text-lg font-bold text-text-strong">Community Membership</h3>
                 <p className="mt-3 max-w-[58ch] leading-relaxed text-on-surface-variant">
                   Monthly access to the Stoicverse community, the complete opening curriculum, live
                   events, and your progression path.
@@ -301,7 +301,7 @@ export function LandingScreen() {
               <div className="flex flex-col justify-center gap-6 border-t border-surgical-steel bg-surface-container-low p-7 md:p-10 lg:border-l lg:border-t-0">
                 <div>
                   <p className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold tracking-[-0.03em] tabular-nums text-white">$10</span>
+                    <span className="text-5xl font-bold tracking-[-0.03em] tabular-nums text-text-strong">$10</span>
                     <span className="text-sm text-fog-muted">/ month</span>
                   </p>
                   <p className="mt-3 text-sm leading-relaxed text-fog-muted">
@@ -332,7 +332,7 @@ export function LandingScreen() {
         {/* FAQ */}
         <section id="faq" className="bg-surface-container-low/40">
           <div className="mx-auto grid max-w-7xl gap-10 px-4 py-20 md:px-8 md:py-28 lg:grid-cols-[0.7fr_1.3fr] lg:px-12">
-            <h2 className="max-w-sm text-balance text-[clamp(1.75rem,3.2vw,2.75rem)] font-bold leading-[1.1] tracking-[-0.025em] text-white">
+            <h2 className="max-w-sm text-balance text-[clamp(1.75rem,3.2vw,2.75rem)] font-bold leading-[1.1] tracking-[-0.025em] text-text-strong">
               Questions before you begin.
             </h2>
 
@@ -341,7 +341,7 @@ export function LandingScreen() {
                 {FAQS.map(({ question, answer }) => (
                   <details key={question} name="faq" className="group border-b border-surgical-steel">
                     <summary
-                      className={`flex min-h-16 cursor-pointer list-none items-center justify-between gap-6 py-5 text-base font-semibold text-white transition hover:text-primary-container [&::-webkit-details-marker]:hidden ${FOCUS}`}
+                      className={`flex min-h-16 cursor-pointer list-none items-center justify-between gap-6 py-5 text-base font-semibold text-text-strong transition hover:text-primary-container [&::-webkit-details-marker]:hidden ${FOCUS}`}
                     >
                       <span>{question}</span>
                       <PlusIcon />
@@ -372,7 +372,7 @@ export function LandingScreen() {
         <div className="mx-auto max-w-7xl px-4 py-14 md:px-8 lg:px-12">
           <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr] md:gap-16">
             <div>
-              <Link href="/" className={`inline-flex min-h-11 items-center text-lg font-bold tracking-[-0.02em] text-white ${FOCUS}`}>
+              <Link href="/" className={`inline-flex min-h-11 items-center text-lg font-bold tracking-[-0.02em] text-text-strong ${FOCUS}`}>
                 Stoicverse
               </Link>
               <p className="mt-1 max-w-xs text-sm leading-6 text-fog-muted">

@@ -192,7 +192,7 @@ export function ChannelPermissionsTab({
               if (!roleId) return;
               setRows((current) => [...current, { roleId, grid: gridFrom(undefined) }]);
             }}
-            className="focus-ring mt-2 h-12 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none sm:text-sm"
+            className="focus-ring mt-2 h-12 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none sm:text-sm"
           >
             <option value="">Choose a role…</option>
             {unused.map((role) => (
@@ -258,7 +258,7 @@ function TriStateControl({
   return (
     <div className="flex items-start justify-between gap-3 rounded-lg px-2 py-1.5 transition hover:bg-surface-container-high/40">
       <span className="min-w-0">
-        <span className="block text-sm text-white">{meta.label}</span>
+        <span className="block text-sm text-text-strong">{meta.label}</span>
         <span className="mt-0.5 block text-xs leading-5 text-fog-muted">{meta.detail}</span>
       </span>
 
@@ -386,7 +386,7 @@ function ViewAsRolePreview({
         id={selectId}
         value={selectedRoleId ?? ""}
         onChange={(event) => onSelect(event.target.value || null)}
-        className="focus-ring mt-2 h-12 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none sm:text-sm"
+        className="focus-ring mt-2 h-12 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none sm:text-sm"
       >
         <option value="">Choose a role…</option>
         {roles
@@ -464,7 +464,7 @@ export function SlowModeField({
           value={value}
           disabled={disabled || pending}
           onChange={(event) => commit(Number(event.target.value))}
-          className="focus-ring h-12 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none disabled:opacity-40 sm:text-sm"
+          className="focus-ring h-12 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none disabled:opacity-40 sm:text-sm"
         >
           {SLOW_MODE_STOPS.map((stop) => (
             <option key={stop} value={stop}>

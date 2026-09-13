@@ -55,7 +55,7 @@ export function IdentityPreview({
           </span>
         )}
         <div className="min-w-0">
-          <p className="truncate font-headline text-base font-bold text-white">{name || "Your community"}</p>
+          <p className="truncate font-headline text-base font-bold text-text-strong">{name || "Your community"}</p>
           {tagline && <p className="truncate text-xs leading-5 text-on-surface-variant">{tagline}</p>}
         </div>
       </div>

@@ -177,7 +177,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
       role="dialog"
       aria-modal="true"
       aria-label="Search the community"
-      className="fixed inset-0 z-70 flex items-start justify-center bg-black/60 p-0 sm:p-6"
+      className="fixed inset-0 z-70 flex items-start justify-center bg-scrim p-0 sm:p-6"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}

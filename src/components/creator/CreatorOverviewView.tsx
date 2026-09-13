@@ -184,7 +184,7 @@ function PremiumDateFilter({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-monolith-surface border border-surgical-steel rounded-full text-white text-xs font-medium hover:border-primary-container transition-colors duration-200 cursor-pointer"
+        className="flex items-center gap-2 px-4 py-2 bg-monolith-surface border border-surgical-steel rounded-full text-text-strong text-xs font-medium hover:border-primary-container transition-colors duration-200 cursor-pointer"
       >
         <Calendar size={14} className="text-primary-container" />
         <span>{getDisplayLabel(value, customRange)}</span>
@@ -202,7 +202,7 @@ function PremiumDateFilter({
                   key={preset.id}
                   type="button"
                   onClick={() => handlePresetClick(preset.id)}
-                  className={`w-full text-left px-3 py-2 rounded text-xs font-body transition-colors duration-150 cursor-pointer ${value === preset.id ? "bg-primary-container/20 text-white font-medium" : "text-fog-muted hover:bg-white/[0.04] hover:text-white"}`}
+                  className={`w-full text-left px-3 py-2 rounded text-xs font-body transition-colors duration-150 cursor-pointer ${value === preset.id ? "bg-primary-container/20 text-accent-contrast font-medium" : "text-fog-muted hover:bg-white/[0.04] hover:text-accent-contrast"}`}
                 >
                   {preset.label}
                 </button>
@@ -212,9 +212,9 @@ function PremiumDateFilter({
             {/* Calendar panel */}
             <div className="p-4 flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <button type="button" onClick={prevMonth} className="p-1 rounded hover:bg-white/[0.04] text-white cursor-pointer">&larr;</button>
-                <span className="text-xs font-medium text-white font-sans">{months[month]} {year}</span>
-                <button type="button" onClick={nextMonth} className="p-1 rounded hover:bg-white/[0.04] text-white cursor-pointer">&rarr;</button>
+                <button type="button" onClick={prevMonth} className="p-1 rounded hover:bg-white/[0.04] text-text-strong cursor-pointer">&larr;</button>
+                <span className="text-xs font-medium text-text-strong font-sans">{months[month]} {year}</span>
+                <button type="button" onClick={nextMonth} className="p-1 rounded hover:bg-white/[0.04] text-text-strong cursor-pointer">&rarr;</button>
               </div>
 
               <div className="grid grid-cols-7 gap-1 text-center w-[232px]">
@@ -236,10 +236,10 @@ function PremiumDateFilter({
                       disabled={!isSelectable}
                       onClick={() => handleDayClick(day)}
                       className={`w-8 h-8 rounded text-xs transition-all duration-150 relative flex items-center justify-center cursor-pointer
-                        ${!isSelectable ? "text-white/20 cursor-not-allowed" : "text-white hover:bg-primary-container/30"}
+                        ${!isSelectable ? "text-accent-contrast/20 cursor-not-allowed" : "text-accent-contrast hover:bg-primary-container/30"}
                         ${isSelectedStart ? "bg-primary-container text-on-primary-fixed font-bold" : ""}
                         ${isSelectedEnd ? "bg-primary-container text-on-primary-fixed font-bold" : ""}
-                        ${isInRange ? "bg-primary-container/10 text-white" : ""}
+                        ${isInRange ? "bg-primary-container/10 text-accent-contrast" : ""}
                       `}
                     >
                       {day.getDate()}
@@ -257,7 +257,7 @@ function PremiumDateFilter({
                   <button
                     type="button"
                     onClick={() => { setTempStart(null); setTempEnd(null); }}
-                    className="px-2 py-1 text-[10px] text-fog-muted hover:text-white transition-colors duration-150 cursor-pointer"
+                    className="px-2 py-1 text-[10px] text-fog-muted hover:text-text-strong transition-colors duration-150 cursor-pointer"
                   >
                     Clear
                   </button>
@@ -334,10 +334,10 @@ export function CreatorOverviewView({ memberName, notifications, turnoverMetrics
     <main className="mx-auto max-w-[1440px] px-4 py-8 md:px-8">
       <div className="animate-fade-in-up mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between" style={{ animationDelay: '0ms' }}>
         <div>
-          <h2 className="font-sans text-2xl font-semibold text-white">Overview</h2>
+          <h2 className="font-sans text-2xl font-semibold text-text-strong">Overview</h2>
           <p className="mt-1 font-body text-sm text-fog-muted">Monitor growth, revenue, and the work that needs your attention today.</p>
         </div>
-        <Link href="/creator/members/turnover" className="focus-ring inline-flex min-h-11 items-center gap-3 rounded-full border border-surgical-steel px-5 text-sm font-semibold text-white transition hover:border-primary-container hover:text-primary-container"><span className="font-mono tabular-nums">{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(turnoverMetrics.turnoverThisWeek)}</span><span className="text-fog-muted">this week</span></Link>
+        <Link href="/creator/members/turnover" className="focus-ring inline-flex min-h-11 items-center gap-3 rounded-full border border-surgical-steel px-5 text-sm font-semibold text-text-strong transition hover:border-primary-container hover:text-primary-container"><span className="font-mono tabular-nums">{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(turnoverMetrics.turnoverThisWeek)}</span><span className="text-fog-muted">this week</span></Link>
       </div>
 
       {error ? (
@@ -351,8 +351,8 @@ export function CreatorOverviewView({ memberName, notifications, turnoverMetrics
           <div className="grid gap-8 xl:grid-cols-5">
             <section className="animate-fade-in-up xl:col-span-3 bg-monolith-surface border border-surgical-steel rounded-lg p-6 shadow-md" style={{ animationDelay: '50ms' }}>
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-sans text-sm font-semibold text-white uppercase tracking-wider">Today’s schedule</h3>
-                <Link href="/creator/events?create=1" className="flex items-center gap-1.5 font-label text-xs text-primary-container transition-colors duration-200 hover:text-white">
+                <h3 className="font-sans text-sm font-semibold text-text-strong uppercase tracking-wider">Today’s schedule</h3>
+                <Link href="/creator/events?create=1" className="flex items-center gap-1.5 font-label text-xs text-primary-container transition-colors duration-200 hover:text-text-strong">
                   <Plus size={14} /> Create event
                 </Link>
               </div>
@@ -368,10 +368,10 @@ export function CreatorOverviewView({ memberName, notifications, turnoverMetrics
                               {event.status === "live" ? "LIVE NOW" : eventTime(event.startsAt)}
                             </p>
                           </div>
-                          <h4 className="mt-1 font-sans text-base font-medium text-white transition-colors duration-200 group-hover:text-primary-container">{event.title}</h4>
+                          <h4 className="mt-1 font-sans text-base font-medium text-text-strong transition-colors duration-200 group-hover:text-primary-container">{event.title}</h4>
                           <p className="mt-1 font-body text-sm tabular-nums text-fog-muted">{number.format(event.enrollmentCount)} enrolled</p>
                         </div>
-                        <Link href={`/creator/events#${event.id}`} className="font-body text-sm text-primary-container transition-colors duration-200 hover:text-white">
+                        <Link href={`/creator/events#${event.id}`} className="font-body text-sm text-primary-container transition-colors duration-200 hover:text-text-strong">
                           Manage &rarr;
                         </Link>
                       </div>
@@ -384,7 +384,7 @@ export function CreatorOverviewView({ memberName, notifications, turnoverMetrics
             </section>
 
             <section className="animate-fade-in-up xl:col-span-2 bg-monolith-surface border border-surgical-steel rounded-lg p-6 shadow-md" style={{ animationDelay: '100ms' }}>
-              <h3 className="mb-4 font-sans text-sm font-semibold text-white uppercase tracking-wider">Needs attention</h3>
+              <h3 className="mb-4 font-sans text-sm font-semibold text-text-strong uppercase tracking-wider">Needs attention</h3>
               <div className="border-t border-surgical-steel/60 pt-2">
                 {loading ? <LoadingRow /> : data && data.attention.missingRoomLinkCount + data.attention.pendingReviewCount + data.attention.draftLessonCount + data.attention.draftEventCount > 0 ? (
                   <div className="divide-y divide-surgical-steel/40">
@@ -403,7 +403,7 @@ export function CreatorOverviewView({ memberName, notifications, turnoverMetrics
           {/* Metrics Section */}
           <section aria-label="Creator metrics" className="animate-fade-in-up" style={{ animationDelay: '150ms' }}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
-              <h3 className="font-sans text-sm font-semibold text-white uppercase tracking-wider">Metrics Overview</h3>
+              <h3 className="font-sans text-sm font-semibold text-text-strong uppercase tracking-wider">Metrics Overview</h3>
               <PremiumDateFilter
                 value={metricsFilter}
                 customRange={metricsCustomRange}
@@ -431,7 +431,7 @@ export function CreatorOverviewView({ memberName, notifications, turnoverMetrics
                     key={metric.id}
                     type="button"
                     onClick={() => setActiveMetric(metric.id as "revenue" | "totalMembers" | "newMembers")}
-                    className={`font-body text-sm transition-colors duration-200 cursor-pointer ${activeMetric === metric.id ? "font-medium text-white" : "text-fog-muted hover:text-white"}`}
+                    className={`font-body text-sm transition-colors duration-200 cursor-pointer ${activeMetric === metric.id ? "font-medium text-text-strong" : "text-fog-muted hover:text-text-strong"}`}
                   >
                     {metric.label}
                   </button>
@@ -449,18 +449,18 @@ export function CreatorOverviewView({ memberName, notifications, turnoverMetrics
                   <AreaChart data={data.trendData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorMetric" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={activeMetric === "revenue" ? "#10B981" : "#E2E8F0"} stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor={activeMetric === "revenue" ? "#10B981" : "#E2E8F0"} stopOpacity={0}/>
+                        <stop offset="5%" stopColor={activeMetric === "revenue" ? "var(--color-chart-1)" : "var(--color-text-default)"} stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor={activeMetric === "revenue" ? "var(--color-chart-1)" : "var(--color-text-default)"} stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <XAxis dataKey="date" stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} dy={10} />
+                    <XAxis dataKey="date" stroke="var(--color-text-muted)" fontSize={12} tickLine={false} axisLine={false} dy={10} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', borderRadius: '4px', fontSize: '14px', color: '#fff' }}
-                      itemStyle={{ color: activeMetric === "revenue" ? '#10B981' : '#E2E8F0' }}
+                      contentStyle={{ backgroundColor: 'var(--color-surface-panel)', borderColor: 'var(--color-border-hairline)', borderRadius: '4px', fontSize: '14px', color: '#fff' }}
+                      itemStyle={{ color: activeMetric === "revenue" ? 'var(--color-chart-1)' : 'var(--color-text-default)' }}
                       formatter={(value: unknown) => { const numeric = typeof value === "number" ? value : Number(value ?? 0); return activeMetric === "revenue" ? currency.format(numeric) : number.format(numeric); }}
-                      labelStyle={{ color: '#94A3B8', marginBottom: '4px' }}
+                      labelStyle={{ color: 'var(--color-text-muted)', marginBottom: '4px' }}
                     />
-                    <Area type="monotone" dataKey={activeMetric} stroke={activeMetric === "revenue" ? "#10B981" : "#E2E8F0"} strokeWidth={2} fillOpacity={1} fill="url(#colorMetric)" />
+                    <Area type="monotone" dataKey={activeMetric} stroke={activeMetric === "revenue" ? "var(--color-chart-1)" : "var(--color-text-default)"} strokeWidth={2} fillOpacity={1} fill="url(#colorMetric)" />
                   </AreaChart>
                 </ResponsiveContainer>
               )}
@@ -477,7 +477,7 @@ function MetricItem({ label, value, detail, loading }: { label: string; value: s
   return (
     <div className="py-6 px-6 transition-colors duration-300 hover:bg-white/[0.02] flex flex-col justify-between min-h-[110px]">
       <p className="font-body text-xs uppercase tracking-wider text-fog-muted">{label}</p>
-      <p className={`mt-2 font-sans text-2xl font-semibold tabular-nums text-white ${loading ? "animate-pulse" : ""}`}>{value}</p>
+      <p className={`mt-2 font-sans text-2xl font-semibold tabular-nums text-text-strong ${loading ? "animate-pulse" : ""}`}>{value}</p>
       <p className="mt-1 font-body text-[10px] text-on-surface-variant">{detail}</p>
     </div>
   );
@@ -487,7 +487,7 @@ function AttentionRow({ href, label, count }: { href: string; label: string; cou
   if (!count) return null;
   return (
     <Link href={href} className="group flex items-center justify-between gap-4 py-3 transition-colors duration-200 hover:bg-white/[0.02] px-2 -mx-2 rounded">
-      <span className="font-body text-sm text-on-surface-variant transition-colors duration-200 group-hover:text-white">{label}</span>
+      <span className="font-body text-sm text-on-surface-variant transition-colors duration-200 group-hover:text-text-strong">{label}</span>
       <span className="font-label text-sm tabular-nums text-primary-container font-semibold">{count}</span>
     </Link>
   ); 
@@ -498,7 +498,7 @@ function EmptyState({ text, action }: { text: string; action?: { href: string; l
     <div className="py-8">
       <p className="font-body text-sm text-fog-muted">{text}</p>
       {action && (
-        <Link href={action.href} className="mt-2 inline-block font-body text-sm text-primary-container transition-colors duration-200 hover:text-white">
+        <Link href={action.href} className="mt-2 inline-block font-body text-sm text-primary-container transition-colors duration-200 hover:text-text-strong">
           {action.label} &rarr;
         </Link>
       )}

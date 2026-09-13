@@ -81,7 +81,7 @@ function PricingCard({ title, price, body, featured }: { title: string; price: s
         <h3 className="font-label-md text-label-md uppercase tracking-[0.12em] text-fog-muted">{title}</h3>
         {featured && <span className="bg-primary-container px-2 py-0.5 rounded font-label-sm text-label-sm text-on-primary-fixed uppercase tracking-wider">Priority</span>}
       </div>
-      <div className="mt-5 font-headline text-3xl md:text-4xl font-extrabold text-white">
+      <div className="mt-5 font-headline text-3xl md:text-4xl font-extrabold text-text-strong">
         {price}
         <span className="ml-2 font-body text-sm text-on-surface-variant">/month</span>
       </div>
@@ -104,12 +104,12 @@ export function DashboardScreen() {
   return (
     <AppShell active="Dashboard" title="Welcome back, Practitioner">
       <main className="relative grid gap-4 p-4 md:grid-cols-12 md:p-8">
-        <div className="pointer-events-none absolute inset-0 opacity-15 [background-image:linear-gradient(#334155_1px,transparent_1px),linear-gradient(90deg,#334155_1px,transparent_1px)] [background-size:64px_64px]" />
+        <div className="pointer-events-none absolute inset-0 opacity-15 [background-image:linear-gradient(var(--color-border-hairline)_1px,transparent_1px),linear-gradient(90deg,var(--color-border-hairline)_1px,transparent_1px)] [background-size:64px_64px]" />
         <div className="relative space-y-4 md:col-span-8">
           <Panel title="Training Vector" action={<Gauge size={16} />}>
             <div className="p-6">
               <p className="font-label-sm text-label-sm text-primary-container">Current Tier</p>
-              <h2 className="mt-2 font-headline text-xl font-bold text-white">The Disciplined Mind - Level II</h2>
+              <h2 className="mt-2 font-headline text-xl font-bold text-text-strong">The Disciplined Mind - Level II</h2>
               <div className="mt-8 flex justify-between font-label text-xs text-fog-muted">
                 <span>Module 04 / 12</span>
                 <span className="text-primary-container font-semibold">33%</span>
@@ -123,7 +123,7 @@ export function DashboardScreen() {
             <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <span className="border border-surgical-steel bg-surface-container-high px-2 py-0.5 rounded font-label text-[10px] text-fog-muted">TRACTATUS 4.1</span>
-                <h3 className="mt-4 font-headline text-lg font-bold text-white">Perception: The Objective View</h3>
+                <h3 className="mt-4 font-headline text-lg font-bold text-text-strong">Perception: The Objective View</h3>
                 <p className="mt-2 max-w-xl font-body text-sm text-on-surface-variant">Strip away value judgments from immediate impressions and analyze the core geometry of the event.</p>
               </div>
               <ButtonLink href="/courses/lesson/perception-objective-view">
@@ -141,7 +141,7 @@ export function DashboardScreen() {
           <Panel title="Chronos">
             <div className="p-6">
               <span className="border border-primary-container/30 bg-primary-container/10 px-2 py-0.5 rounded font-label text-[10px] text-primary-container">UPCOMING LIVE</span>
-              <h3 className="mt-4 font-headline text-lg font-bold text-white">Amor Fati: Monthly Workshop</h3>
+              <h3 className="mt-4 font-headline text-lg font-bold text-text-strong">Amor Fati: Monthly Workshop</h3>
               <div className="mt-8 border-t border-surgical-steel pt-4">
                 <p className="font-label-sm text-label-sm uppercase text-fog-muted">T-minus</p>
                 <div className="mt-2 flex justify-between font-label text-base text-primary-container font-bold">
@@ -216,7 +216,7 @@ export function FeedScreen({
                   isSelected
                     ? "border-l-2 border-primary-container bg-surface-container-high text-primary-container"
                     : isUnread
-                      ? "text-white font-bold hover:bg-surface-container-high"
+                      ? "text-text-strong font-bold hover:bg-surface-container-high"
                       : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container"
                 )}
               >
@@ -241,7 +241,7 @@ export function FeedScreen({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <h3 className="font-label-md text-label-md text-white font-semibold">{post.authorName}</h3>
+                    <h3 className="font-label-md text-label-md text-text-strong font-semibold">{post.authorName}</h3>
                     <span className="font-label text-[10px] text-fog-muted">{new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(post.createdAt))}</span>
                     <span className="border border-surgical-steel bg-surface-container-low px-2 py-0.5 rounded font-label text-[10px] text-primary-container">{post.isPinned ? "Pinned" : `${post.reactionCount} reactions`}</span>
                   </div>
@@ -260,7 +260,7 @@ export function FeedScreen({
                 )}
               </article>
             ))}
-            {posts.length === 0 && <div className="border border-dashed border-surgical-steel bg-monolith-surface p-8 text-center rounded-lg"><p className="font-headline text-base font-semibold text-white">No posts yet</p><p className="mt-2 font-body text-sm text-fog-muted">New community updates will appear here.</p></div>}
+            {posts.length === 0 && <div className="border border-dashed border-surgical-steel bg-monolith-surface p-8 text-center rounded-lg"><p className="font-headline text-base font-semibold text-text-strong">No posts yet</p><p className="mt-2 font-body text-sm text-fog-muted">New community updates will appear here.</p></div>}
           </div>
           {canPost && (
             <div className="absolute inset-x-0 bottom-0 border-t border-surgical-steel bg-surface-container-low p-4">
@@ -298,7 +298,7 @@ export function EventsScreen({ isMaster = false }: { isMaster?: boolean }) {
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <p className="font-label-sm text-label-sm uppercase tracking-[0.16em] text-primary-container">Live schedule</p>
-            <h2 className="mt-2 font-headline text-2xl font-bold text-white md:text-3xl">Upcoming sessions and gated rooms</h2>
+            <h2 className="mt-2 font-headline text-2xl font-bold text-text-strong md:text-3xl">Upcoming sessions and gated rooms</h2>
           </div>
           <ButtonLink href="/channels" variant="outline">
             <Plus size={16} />
@@ -310,7 +310,7 @@ export function EventsScreen({ isMaster = false }: { isMaster?: boolean }) {
             <Panel key={title} title={tier}>
               <div className="p-5 flex flex-col justify-between min-h-[160px]">
                 <div>
-                  <h3 className="font-headline text-lg font-bold text-white">{title}</h3>
+                  <h3 className="font-headline text-lg font-bold text-text-strong">{title}</h3>
                   <p className="mt-2 font-body text-sm text-on-surface-variant leading-relaxed">Tier-gated event card with Zoom visibility based on earned access.</p>
                 </div>
                 <div className="mt-6 flex items-center justify-between border-t border-surgical-steel pt-4">
@@ -337,7 +337,7 @@ export function LessonScreen() {
           </div>
           <Panel title="Perception / Lesson 04">
             <div className="p-6">
-              <h2 className="font-headline text-xl font-bold text-white">The Objective View</h2>
+              <h2 className="font-headline text-xl font-bold text-text-strong">The Objective View</h2>
               <p className="mt-3 font-body text-sm text-on-surface-variant leading-relaxed">
                 A disciplined pass through impression, judgment, action, and review. Progress is tracked by watch-time threshold.
               </p>
@@ -385,7 +385,7 @@ export function AdminScreen() {
         <Panel title="Stoicverse Platform">
           <div className="divide-y divide-surgical-steel text-on-surface-variant">
             <div className="p-5">
-              <p className="font-headline text-lg font-bold text-white">One community, one operating surface.</p>
+              <p className="font-headline text-lg font-bold text-text-strong">One community, one operating surface.</p>
               <p className="mt-2 font-body text-sm">Manage members, content, payments, moderators, and the single optional influencer account from this platform.</p>
             </div>
             <div className="grid gap-4 p-5 sm:grid-cols-3">
@@ -405,14 +405,14 @@ export function AuthScreen({ mode }: { mode: "login" | "signup" }) {
   return (
     <main className="grid min-h-screen lg:grid-cols-[1fr_30rem] bg-surface-container-lowest">
       <section className="hidden border-r border-surgical-steel p-12 lg:flex lg:flex-col lg:justify-between relative overflow-hidden bg-surface-container-low">
-        <div className="absolute inset-0 opacity-10 [background-image:linear-gradient(#334155_1px,transparent_1px),linear-gradient(90deg,#334155_1px,transparent_1px)] [background-size:60px_60px]" />
+        <div className="absolute inset-0 opacity-10 [background-image:linear-gradient(var(--color-border-hairline)_1px,transparent_1px),linear-gradient(90deg,var(--color-border-hairline)_1px,transparent_1px)] [background-size:60px_60px]" />
         <div className="relative z-10">
           <Link href="/" className="font-headline text-2xl font-bold text-primary-container tracking-wider">
             Stoicverse
           </Link>
         </div>
         <div className="relative z-10 my-auto max-w-2xl border-l-2 border-primary-container pl-8 py-6">
-          <h1 className="font-headline text-3xl font-extrabold text-white leading-tight md:text-4xl">
+          <h1 className="font-headline text-3xl font-extrabold text-text-strong leading-tight md:text-4xl">
             Enter the operating surface for disciplined study.
           </h1>
           <p className="mt-6 font-body text-base text-on-surface-variant leading-relaxed">
@@ -425,7 +425,7 @@ export function AuthScreen({ mode }: { mode: "login" | "signup" }) {
       </section>
 
       <section className="relative flex items-center justify-center p-6 md:p-12 overflow-hidden bg-surface">
-        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(#334155_1px,transparent_1px),linear-gradient(90deg,#334155_1px,transparent_1px)] [background-size:60px_60px]" />
+        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(var(--color-border-hairline)_1px,transparent_1px),linear-gradient(90deg,var(--color-border-hairline)_1px,transparent_1px)] [background-size:60px_60px]" />
         <div className="relative z-10 w-full max-w-md border-t-2 border-t-primary-container border-x border-b border-surgical-steel bg-monolith-surface p-8 md:p-10 rounded-lg shadow-xl hover:shadow-primary-container/5 transition-all">
           <div className="mb-8 flex items-center gap-3 text-primary-container">
             {isSignup ? <Shield size={24} className="animate-pulse" /> : <LogIn size={24} />}
@@ -472,7 +472,7 @@ export function CommunitySelectionScreen() {
     <main className="min-h-screen p-4 md:p-8 bg-surface">
       <div className="mx-auto max-w-xl border border-surgical-steel bg-monolith-surface p-8 rounded-lg">
         <Link href="/" className="font-headline text-lg font-bold text-primary-container">Stoicverse</Link>
-        <h1 className="mt-10 font-headline text-2xl font-bold text-white md:text-3xl">Join Stoicverse.</h1>
+        <h1 className="mt-10 font-headline text-2xl font-bold text-text-strong md:text-3xl">Join Stoicverse.</h1>
         <p className="mt-4 font-body text-sm text-on-surface-variant leading-relaxed">One membership unlocks the Stoicverse community, curriculum, events, and progression path.</p>
         <div className="mt-8">
           <ButtonLink href="/checkout">Continue to checkout</ButtonLink>
@@ -487,7 +487,7 @@ export function SubscriptionScreen() {
     <main className="min-h-screen p-4 md:p-8 bg-surface">
       <div className="mx-auto max-w-5xl">
         <Link href="/" className="font-headline text-lg font-bold text-primary-container">Stoicverse</Link>
-        <h1 className="mt-10 font-headline text-3xl font-extrabold text-white leading-tight md:text-4xl">Subscription cadence.</h1>
+        <h1 className="mt-10 font-headline text-3xl font-extrabold text-text-strong leading-tight md:text-4xl">Subscription cadence.</h1>
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <PricingCard title="Monthly" price="$10" body="Maintain access to community surfaces, lessons, events, and tier progression." />
           <PricingCard title="Annual Commitment" price="$100" body="Commit for a full year and keep the learning system active without monthly interruption." featured />
@@ -502,7 +502,7 @@ export function CommitmentScreen() {
     <main className="min-h-screen p-4 md:p-8 bg-surface">
       <div className="mx-auto max-w-4xl border border-surgical-steel bg-monolith-surface p-6 md:p-10 rounded-lg">
         <Link href="/" className="font-headline text-lg font-bold text-primary-container">Stoicverse</Link>
-        <h1 className="mt-10 font-headline text-3xl font-extrabold text-white leading-tight md:text-4xl">Confirm the commitment.</h1>
+        <h1 className="mt-10 font-headline text-3xl font-extrabold text-text-strong leading-tight md:text-4xl">Confirm the commitment.</h1>
         <p className="mt-6 font-body text-base text-on-surface-variant leading-relaxed">
           This screen clarifies what membership does and does not unlock before payment: community access, ordered lessons, events, and progression tracking. Mentorship remains a separate purchase.
         </p>

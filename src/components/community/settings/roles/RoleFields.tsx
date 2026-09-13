@@ -168,7 +168,7 @@ export function RoleIconField({
           <button
             type="button"
             onClick={() => onChange({ emoji: null, path: null, url: null })}
-            className="focus-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-3 text-sm text-fog-muted transition hover:text-white"
+            className="focus-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-3 text-sm text-fog-muted transition hover:text-text-strong"
           >
             <X size={14} aria-hidden="true" />
             Remove
@@ -316,10 +316,10 @@ function PermissionToggleRow({
         checked={checked}
         disabled={locked}
         onChange={(event) => onToggle(permissionKey, event.target.checked)}
-        className="mt-0.5 size-4 shrink-0 accent-[#10B981]"
+        className="mt-0.5 size-4 shrink-0 accent-primary"
       />
       <span className="min-w-0">
-        <span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-white">
+        <span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-text-strong">
           {meta.label}
           {meta.escalating && (
             <span className="inline-flex items-center gap-1 rounded-full border border-error/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-error">
