@@ -75,9 +75,19 @@ test("settings actions validate identity, avatars, sessions, deletion, and acces
   assert.doesNotMatch(workspace, /upgrade|locked content|access tier/i);
   assert.match(workspace, /<form action=\{removeAction\}>/);
   assert.match(workspace, /mobileBackButton\.current\?\.focus/);
-  assert.match(shell, /notificationPanel\.current\?\.querySelector/);
-  assert.match(shell, /notificationTrigger\.current\?\.focus/);
-  assert.match(shell, /mobileMenuOpen && <aside/);
+  /*
+    These three pinned hand-written behaviour that P2a deleted rather than
+    changed: `notificationPanel.current?.querySelector` moved focus into the
+    preview, `notificationTrigger.current?.focus` restored it on close, and
+    `mobileMenuOpen && <aside` was the drawer. All three are Base UI's job now —
+    the popover and the overlay own focus move, focus restore, Escape and scroll
+    lock. The behaviour is what mattered, so the assertions follow it to where
+    it lives instead of being deleted with the code that used to provide it.
+  */
+  assert.match(shell, /from "@\/components\/ui\/popover"/, "the preview is a portalled popover");
+  assert.match(shell, /<PopoverTrigger/, "the bell is its trigger, so focus returns to the bell");
+  assert.match(shell, /placement="sheet-left"/, "the drawer is the overlay primitive");
+  assert.doesNotMatch(shell, /"Tab"/, "no hand-rolled Tab cycle survives in the chrome");
   assert.match(center, /tabIndex=\{view === tab\.id \? 0 : -1\}/);
   assert.match(center, /ArrowLeft/);
   assert.match(center, /role="tabpanel"/);

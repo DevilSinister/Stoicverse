@@ -168,12 +168,44 @@ test("src/components/ui carries no literal colour and no arbitrary z-index", asy
   }
 });
 
-test("nobody hand-rolls a focus trap", async () => {
-  // Base UI's Dialog owns trap, restore, scroll lock and Escape. Three separate
-  // hand-rolled traps existed before Monolith; this is the one that must stay
-  // at zero rather than merely trending down.
-  const { total, where } = await countAcross(/key === "Tab"/g);
-  assert.equal(total, 0, `a hand-rolled Tab trap is back in: ${where.join(", ")}`);
+test("hand-rolled focus traps only ever decrease", async () => {
+  /*
+    This assertion used to match /key === "Tab"/ and claim a hard zero. It was
+    wrong, and passing for the wrong reason: AppShell's notification panel wrote
+    the inverted guard, `event.key !== "Tab"`, so the trap was there the whole
+    time and the test could not see it. Two traps existed, not one.
+
+    Widened to the bare token, which catches both spellings, and demoted to a
+    ratchet because MemberModalShell still carries the other one. Base UI's
+    Dialog owns trap, restore, scroll lock and Escape; P8 retires the last copy
+    onto it, and the number goes to zero then rather than being asserted now.
+  */
+  const { total, where } = await countAcross(/"Tab"/g);
+  assert.ok(total <= 1, `a hand-rolled Tab trap was added; found ${total} in: ${where.join(", ")}`);
+});
+
+test("every hit-target sits on a positioned element", async () => {
+  /*
+    `hit-target` paints its 44px area with an absolutely positioned ::before at
+    inset -6px. Without a positioning context on the element itself, that box
+    resolves against the nearest positioned ancestor — in practice the page —
+    and lands 6px outside the document on every side. It is invisible, so what
+    you see is not a stray box but an unexplained 6px of horizontal overflow,
+    which then steals a scrollbar's height and produces a vertical one too.
+
+    Caught in the browser on the P2a header, where the search trigger had no
+    `relative`. ui/button.tsx carries it in the base, which is why none of its
+    six hit-target sizes ever showed this.
+  */
+  const files = await sourceFiles();
+  const offenders = [];
+  for (const file of files) {
+    for (const hit of (await read(file)).match(/className=(?:"[^"]*"|\{`[^`]*`\})/g) ?? []) {
+      if (!/\bhit-target\b/.test(hit)) continue;
+      if (!/\b(relative|absolute|fixed|sticky)\b/.test(hit)) offenders.push(`${file}: ${hit.slice(0, 60)}…`);
+    }
+  }
+  assert.deepEqual(offenders, [], "a hit-target with no positioning context overflows the page");
 });
 
 test("isTypingTarget stays identical in its two homes", async () => {
@@ -197,16 +229,16 @@ test("the hand-rolled overlays only ever decrease", async () => {
   for (const file of outside) {
     if ((await read(file)).includes("fixed inset-0")) count += 1;
   }
-  // 16 at the end of phase 1. P2 takes the AppShell search modal and the mobile
-  // drawer, P3 takes the ten in /channels, P11-P13 take the rest.
-  assert.ok(count <= 16, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
+  // 15 after P2a took AppShell's search modal and mobile drawer. P3 takes the
+  // ten in /channels, P11-P13 take the rest.
+  assert.ok(count <= 15, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
 });
 
 test("arbitrary z-index only ever decreases", async () => {
   const { total, where } = await countAcross(/\bz-\[\d+\]/g);
-  // 12 at the end of phase 1, all in surfaces that portal in-tree. They go as
-  // those surfaces move onto the overlay, which portals to body and needs none.
-  assert.ok(total <= 12, `arbitrary z-index grew to ${total}: ${where.join(", ")}`);
+  // 11 after P2a: the notification panel's z-[60] went away with the panel,
+  // because a portalled popover has no ancestor left to out-rank.
+  assert.ok(total <= 11, `arbitrary z-index grew to ${total}: ${where.join(", ")}`);
 });
 
 test("the native dialogs only ever decrease", async () => {
@@ -219,8 +251,8 @@ test("the native dialogs only ever decrease", async () => {
 
 test("pill controls only ever decrease", async () => {
   const { total } = await countAcross(/\brounded-full\b/g);
-  // 242 at the end of phase 1. rounded-full is legitimate for avatars, presence
-  // dots, unread badges and the rail marker; every other use is a pill button,
-  // chip or input left over from the previous design system.
-  assert.ok(total <= 242, `pill controls grew to ${total}; buttons and inputs are 4px`);
+  // 234 after P2a flattened the rail pills and both headers. rounded-full is
+  // legitimate for avatars, presence dots and unread badges; every other use is
+  // a pill button, chip or input left over from the previous design system.
+  assert.ok(total <= 234, `pill controls grew to ${total}; buttons and inputs are 4px`);
 });

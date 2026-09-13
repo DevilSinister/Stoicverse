@@ -6,6 +6,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "//": "Serves the .next-build output on a port of its own. next dev holds 3000 and shares .next, and its CSS goes stale against a globals.css rewrite, so redesign work is verified against a production build instead.",
+      "name": "monolith-preview",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set NEXT_BUILD_DIR=.next-build&& npx next start -p 3100"],
+      "port": 3100
     }
   ]
 }

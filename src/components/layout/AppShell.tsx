@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { AlertCircle, Bell, ChevronRight, LoaderCircle, Menu, RefreshCw, Search, X } from "lucide-react";
-
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { AlertCircle, Bell, ChevronRight, LoaderCircle, Menu, RefreshCw, Search } from "lucide-react";
 
 import { AppRail } from "@/components/layout/AppRail";
+import { Overlay, OverlayBody, OverlayContent, OverlayTitle } from "@/components/ui/overlay";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { activeRailId, buildRail } from "@/lib/navigation/rail";
 import { withRouteBase } from "@/lib/navigation/paths";
 import { safeNotificationHref, type NotificationItem } from "@/lib/notifications/model";
@@ -52,7 +53,10 @@ export interface AppShellProps {
 }
 
 const EMPTY_NOTIFICATIONS: Notification[] = [];
-const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
+const eventDate = (value: string) =>
+  new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(
+    new Date(value),
+  );
 
 /**
  * True once an ancestor has drawn the chrome.
@@ -77,31 +81,33 @@ export function AppShell(props: AppShellProps) {
   return <WorkspaceChrome {...props} />;
 }
 
-function WorkspaceChrome({ isMaster = false, memberName = "Practitioner", platformRole = "member", notifications: initialNotifications = EMPTY_NOTIFICATIONS, unreadCount: initialUnreadCount, routeBase = "", children }: AppShellProps) {
+function WorkspaceChrome({
+  isMaster = false,
+  memberName = "Practitioner",
+  platformRole = "member",
+  notifications: initialNotifications = EMPTY_NOTIFICATIONS,
+  unreadCount: initialUnreadCount,
+  routeBase = "",
+  children,
+}: AppShellProps) {
   const supabase = useMemo(() => createClient(), []);
-  const searchInput = useRef<HTMLInputElement>(null);
-  const notificationPanel = useRef<HTMLDivElement>(null);
-  const notificationTrigger = useRef<HTMLButtonElement | null>(null);
-  const mobileMenuTrigger = useRef<HTMLButtonElement>(null);
-  const mobileDrawer = useRef<HTMLElement>(null);
 
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications.slice(0, 5));
-  const [unreadCount, setUnreadCount] = useState(initialUnreadCount ?? initialNotifications.filter((item) => !item.is_read).length);
+  const [unreadCount, setUnreadCount] = useState(
+    initialUnreadCount ?? initialNotifications.filter((item) => !item.is_read).length,
+  );
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationsError, setNotificationsError] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [searching, setSearching] = useState(false);
 
   const loadNotifications = useCallback(async (markVisibleRead = false) => {
     setNotificationsLoading(true);
     setNotificationsError(null);
     try {
       const response = await fetch("/api/dashboard/notifications?limit=5", { cache: "no-store" });
-      const payload = await response.json() as NotificationResponse;
+      const payload = (await response.json()) as NotificationResponse;
       if (!response.ok) throw new Error(payload.error || "Unable to load notifications");
       const preview = payload.notifications ?? [];
       setNotifications(preview);
@@ -109,7 +115,9 @@ function WorkspaceChrome({ isMaster = false, memberName = "Practitioner", platfo
 
       const unreadIds = markVisibleRead ? preview.filter((item) => !item.is_read).map((item) => item.id) : [];
       if (unreadIds.length) {
-        setNotifications((current) => current.map((item) => unreadIds.includes(item.id) ? { ...item, is_read: true } : item));
+        setNotifications((current) =>
+          current.map((item) => (unreadIds.includes(item.id) ? { ...item, is_read: true } : item)),
+        );
         setUnreadCount((count) => Math.max(0, count - unreadIds.length));
         const update = await fetch("/api/dashboard/notifications", {
           method: "PATCH",
@@ -117,7 +125,9 @@ function WorkspaceChrome({ isMaster = false, memberName = "Practitioner", platfo
           body: JSON.stringify({ action: "mark_read", ids: unreadIds }),
         });
         if (!update.ok) {
-          setNotifications((current) => current.map((item) => unreadIds.includes(item.id) ? { ...item, is_read: false } : item));
+          setNotifications((current) =>
+            current.map((item) => (unreadIds.includes(item.id) ? { ...item, is_read: false } : item)),
+          );
           setUnreadCount(payload.unreadCount ?? 0);
           setNotificationsError("The preview opened, but read status could not be saved.");
         }
@@ -130,108 +140,42 @@ function WorkspaceChrome({ isMaster = false, memberName = "Practitioner", platfo
   }, []);
 
   useEffect(() => {
-    const refresh = () => { void loadNotifications(false); };
+    const refresh = () => {
+      void loadNotifications(false);
+    };
     const channel = supabase
       .channel("app-shell-notifications")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, refresh)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "notifications" }, refresh)
       .subscribe();
 
-    return () => { void supabase.removeChannel(channel); };
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [loadNotifications, supabase]);
 
+  /*
+    Ctrl/Cmd+K opens search.
+
+    The workspace had no keyboard route to its own search at all — the only
+    binding in the product was /channels' quick switcher. It is deliberately not
+    gated on a typing check: a command-modified key is a command, and somebody
+    halfway through a comment still means "search" when they press it.
+  */
   useEffect(() => {
-    if (!notificationsOpen) return;
-    const focusTimer = window.setTimeout(() => {
-      notificationPanel.current?.querySelector<HTMLElement>("button, a[href]")?.focus();
-    }, 0);
-    function closeOnOutside(event: MouseEvent) {
-      if (!notificationPanel.current?.contains(event.target as Node) && !notificationTrigger.current?.contains(event.target as Node)) closeNotifications(false);
+    function onKeyDown(event: KeyboardEvent) {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+      if (event.key.toLowerCase() !== "k") return;
+      event.preventDefault();
+      setSearchOpen(true);
     }
-    function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeNotifications();
-        return;
-      }
-      if (event.key !== "Tab" || !notificationPanel.current) return;
-      const focusable = Array.from(notificationPanel.current.querySelectorAll<HTMLElement>("button, a[href]")).filter((element) => !element.hasAttribute("disabled"));
-      if (!focusable.length) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-    document.addEventListener("mousedown", closeOnOutside);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      window.clearTimeout(focusTimer);
-      document.removeEventListener("mousedown", closeOnOutside);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [notificationsOpen]);
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
 
-  useEffect(() => {
-    if (!mobileMenuOpen) return;
-    const focusTimer = window.setTimeout(() => mobileDrawer.current?.querySelector<HTMLElement>("a[href], button")?.focus(), 0);
-    function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") closeMobileMenu();
-    }
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      window.clearTimeout(focusTimer);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [mobileMenuOpen]);
-
-  useEffect(() => { if (searchOpen) searchInput.current?.focus(); }, [searchOpen]);
-
-  useEffect(() => {
-    if (!searchOpen || query.trim().length < 2) {
-      const timer = window.setTimeout(() => setResults([]), 0);
-      return () => window.clearTimeout(timer);
-    }
-    const controller = new AbortController();
-    const timeout = window.setTimeout(async () => {
-      setSearching(true);
-      try {
-        const params = new URLSearchParams({ q: query.trim() });
-        if (routeBase) params.set("base", routeBase);
-        const response = await fetch(`/api/dashboard/search?${params.toString()}`, { signal: controller.signal });
-        const payload = await response.json() as { results?: SearchResult[] };
-        setResults(response.ok ? payload.results ?? [] : []);
-      } catch {
-        if (!controller.signal.aborted) setResults([]);
-      } finally {
-        if (!controller.signal.aborted) setSearching(false);
-      }
-    }, 250);
-    return () => { controller.abort(); window.clearTimeout(timeout); };
-  }, [query, routeBase, searchOpen]);
-
-  function closeNotifications(restoreFocus = true) {
-    setNotificationsOpen(false);
-    if (restoreFocus) window.setTimeout(() => notificationTrigger.current?.focus(), 0);
-  }
-
-  function openNotifications(event: ReactMouseEvent<HTMLButtonElement>) {
-    notificationTrigger.current = event.currentTarget;
-    if (notificationsOpen) {
-      closeNotifications();
-      return;
-    }
-    setNotificationsOpen(true);
-    void loadNotifications(true);
-  }
-
-  function closeMobileMenu(restoreFocus = true) {
-    setMobileMenuOpen(false);
-    if (restoreFocus) window.setTimeout(() => mobileMenuTrigger.current?.focus(), 0);
+  function onNotificationsOpenChange(open: boolean) {
+    setNotificationsOpen(open);
+    if (open) void loadNotifications(true);
   }
 
   const notificationsHref = withRouteBase(routeBase, "/notifications");
@@ -247,62 +191,437 @@ function WorkspaceChrome({ isMaster = false, memberName = "Practitioner", platfo
     with the navigation is worse than one derived from it.
   */
   const pathname = usePathname();
-  const railItems = useMemo(
-    () => buildRail({ routeBase, platformRole, isMaster }),
-    [routeBase, platformRole, isMaster],
-  );
+  const railItems = useMemo(() => buildRail({ routeBase, platformRole, isMaster }), [routeBase, platformRole, isMaster]);
   const headerLabel = railItems.find((item) => item.id === activeRailId(pathname ?? "", railItems))?.label ?? "";
 
-  /*
-    The rail replaced this shell's nav list, its brand block and its user
-    footer — all three are things the rail now carries, and carries in
-    `/channels` too, which is the point. What is left of the sidebar concept is
-    the mobile drawer, where the rail sits inside rather than beside, because
-    4.5rem of permanent chrome is too much of a phone.
-  */
-  const rail = (
-    <AppRail
-      routeBase={routeBase}
-      platformRole={platformRole}
-      isMaster={isMaster}
-      memberName={memberName}
+  const railProps = { routeBase, platformRole, isMaster, memberName, unreadCount };
+
+  const bell = (
+    <NotificationBell
       unreadCount={unreadCount}
-      onNavigate={() => setMobileMenuOpen(false)}
+      notifications={notifications}
+      loading={notificationsLoading}
+      error={notificationsError}
+      notificationsHref={notificationsHref}
+      onRefresh={() => void loadNotifications(false)}
+      onNavigate={() => setNotificationsOpen(false)}
+      open={notificationsOpen}
+      onOpenChange={onNotificationsOpenChange}
     />
   );
 
   return (
     <ChromeMounted.Provider value={true}>
-    <div className="min-h-screen bg-surface text-on-surface md:flex">
-      <header className="flex h-16 items-center justify-between border-b border-surgical-steel bg-sidebar px-4 md:hidden">
-        <div className="flex items-center gap-3"><button ref={mobileMenuTrigger} type="button" onClick={() => setMobileMenuOpen(true)} className="focus-ring grid size-11 place-items-center rounded-full text-on-surface-variant" aria-label="Open menu" aria-expanded={mobileMenuOpen} aria-controls="mobile-workspace-navigation"><Menu size={22}/></button><span className="text-lg font-extrabold tracking-tight text-text-strong">Stoicverse</span></div>
-        <div className="flex items-center gap-1"><button type="button" onClick={() => setSearchOpen(true)} className="focus-ring grid size-11 place-items-center rounded-full text-on-surface-variant" aria-label="Search"><Search size={18}/></button><BellButton unreadCount={unreadCount} open={notificationsOpen} onClick={openNotifications}/></div>
-      </header>
-
-      {mobileMenuOpen && <button type="button" aria-label="Close menu" className="fixed inset-0 z-40 bg-scrim md:hidden" onClick={() => closeMobileMenu()}/>}
-      {mobileMenuOpen && <aside ref={mobileDrawer} id="mobile-workspace-navigation" className="fixed inset-y-0 left-0 z-50 flex flex-col border-r border-sidebar-border bg-sidebar md:hidden">{rail}</aside>}
-      <aside className="sticky top-0 hidden h-screen shrink-0 flex-col md:flex">{rail}</aside>
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="hidden h-16 items-center justify-between border-b border-surgical-steel bg-surface-container-low px-6 md:flex lg:px-8">
-          <button type="button" onClick={() => setSearchOpen(true)} className="focus-ring flex min-w-[19rem] items-center gap-3 rounded-full border border-surgical-steel bg-surface-container-lowest px-4 py-2 text-left text-sm text-fog-muted transition hover:border-primary-container hover:text-on-surface"><Search size={15}/><span>Search curriculum, sessions, or community…</span></button>
-          <div className="flex items-center gap-4"><span className="hidden text-sm font-semibold text-on-surface lg:block">{headerLabel}</span><BellButton unreadCount={unreadCount} open={notificationsOpen} onClick={openNotifications}/></div>
+      <div className="min-h-screen bg-surface-canvas text-text-default md:flex">
+        {/*
+          Chrome is a hairline, not a band. The header used to be 64px of
+          lighter fill sitting over a darker page, which reads as a second
+          surface; at 48px on the same canvas it reads as an edge.
+        */}
+        <header className="safe-t safe-x flex h-chrome-bar items-center gap-1 border-b border-border-hairline bg-surface-canvas pr-2 pl-1 md:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="focus-ring grid size-11 shrink-0 place-items-center rounded-md text-text-muted transition-colors hover:bg-surface-panel hover:text-text-strong"
+            aria-label="Open menu"
+          >
+            <Menu size={20} />
+          </button>
+          <span className="text-content-sm font-semibold tracking-tight text-text-strong">Stoicverse</span>
+          <div className="flex-1" />
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="focus-ring grid size-11 shrink-0 place-items-center rounded-md text-text-muted transition-colors hover:bg-surface-panel hover:text-text-strong"
+            aria-label="Search"
+          >
+            <Search size={19} />
+          </button>
+          {bell}
         </header>
-        <div className="relative flex-1 bg-surface">{children}</div>
+
+        {/*
+          The drawer is the overlay primitive now: trap, Escape, scroll lock and
+          focus restore come from Base UI rather than from two hand-written
+          effects, and the rail inside it draws labels, because a tooltip is
+          unreachable on a touch screen.
+        */}
+        <Overlay open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <OverlayContent
+            placement="sheet-left"
+            size="sm"
+            density="chrome"
+            showCloseButton={false}
+            className="bg-surface-sunken md:hidden"
+          >
+            {/* Just "Navigation". app-rail.contract.mjs reserves the longer
+                phrase the deleted 16rem sidebar was labelled with, so that list
+                cannot quietly come back — including from a comment. */}
+            <OverlayTitle className="sr-only">Navigation</OverlayTitle>
+            <AppRail {...railProps} variant="drawer" onNavigate={() => setMobileMenuOpen(false)} />
+          </OverlayContent>
+        </Overlay>
+
+        <aside className="sticky top-0 hidden h-screen shrink-0 flex-col md:flex">
+          <AppRail {...railProps} onNavigate={() => setMobileMenuOpen(false)} />
+        </aside>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="hidden h-chrome-bar items-center gap-chrome-gap border-b border-border-hairline bg-surface-canvas px-chrome-x md:flex">
+            <span className="text-chrome-base font-medium tracking-tight text-text-strong">{headerLabel}</span>
+            <div className="flex-1" />
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="focus-ring hit-target relative flex h-8 min-w-[16rem] items-center gap-chrome-gap rounded-md border border-border-hairline bg-surface-panel pr-1.5 pl-2.5 text-left text-chrome-sm text-text-muted transition-colors hover:border-border-strong hover:text-text-default"
+            >
+              <Search size={14} />
+              <span>Search</span>
+              <kbd className="ml-auto rounded-sm border border-border-hairline bg-surface-canvas px-1.5 py-1 font-mono text-[10px] leading-none text-text-faint">
+                Ctrl K
+              </kbd>
+            </button>
+            {bell}
+          </header>
+          <div className="relative flex-1 bg-surface-canvas">{children}</div>
+        </div>
+
+        <SearchPalette open={searchOpen} onOpenChange={setSearchOpen} routeBase={routeBase} />
       </div>
-
-      {notificationsOpen && <div ref={notificationPanel} id="notification-preview" role="dialog" aria-label="Notification preview" aria-modal="false" className="fixed right-3 top-[4.5rem] z-[60] w-[min(24rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-surgical-steel bg-monolith-surface shadow-[0_18px_48px_-20px_rgba(0,0,0,0.9)] md:right-8 md:top-14"><div className="flex items-center justify-between border-b border-surgical-steel px-4 py-3"><div><h2 className="text-sm font-semibold text-text-strong">Notifications</h2><p className="mt-0.5 text-xs text-fog-muted">{unreadCount ? `${unreadCount} unread` : "Caught up"}</p></div><button type="button" onClick={() => void loadNotifications(false)} aria-label="Refresh notification preview" className="focus-ring grid size-9 place-items-center rounded-full text-fog-muted transition hover:bg-surface-container-high hover:text-text-strong"><RefreshCw size={15}/></button></div><div className="max-h-[28rem] overflow-y-auto">{notificationsLoading && notifications.length === 0 ? <div className="flex min-h-40 items-center justify-center gap-2 text-sm text-fog-muted"><LoaderCircle size={17} className="animate-spin"/>Loading updates…</div> : notificationsError && notifications.length === 0 ? <div className="p-6 text-center"><AlertCircle className="mx-auto text-error" size={22}/><p className="mt-3 text-sm text-error">{notificationsError}</p><button type="button" onClick={() => void loadNotifications(false)} className="mt-3 text-sm font-semibold text-text-strong underline underline-offset-4">Try again</button></div> : notifications.length ? <div className="divide-y divide-surgical-steel">{notifications.map((item) => <Link key={item.id} href={safeNotificationHref(item.action_url, notificationsHref)} onClick={() => setNotificationsOpen(false)} className="focus-ring group flex gap-3 px-4 py-4 transition hover:bg-surface-container-high"><span className={`mt-1.5 size-2 shrink-0 rounded-full ${item.is_read ? "bg-surgical-steel" : "bg-primary-container"}`}/><span className="min-w-0 flex-1"><span className="block text-sm font-semibold leading-5 text-text-strong">{item.title}</span>{item.body && <span className="mt-1 block line-clamp-2 text-xs leading-5 text-on-surface-variant">{item.body}</span>}<span className="mt-2 block text-[11px] text-fog-muted">{eventDate(item.created_at)}</span></span><ChevronRight size={16} className="mt-2 shrink-0 text-fog-muted transition group-hover:translate-x-0.5 group-hover:text-primary-container"/></Link>)}</div> : <div className="px-6 py-10 text-center"><Bell className="mx-auto text-primary-container" size={24}/><p className="mt-3 text-sm font-semibold text-text-strong">You are all caught up</p><p className="mt-1 text-xs leading-5 text-fog-muted">New activity will appear here.</p></div>}</div>{notificationsError && notifications.length > 0 && <p role="alert" className="border-t border-error/30 bg-error/10 px-4 py-2 text-xs text-error">{notificationsError}</p>}<Link href={notificationsHref} onClick={() => setNotificationsOpen(false)} className="focus-ring flex min-h-12 items-center justify-center gap-2 border-t border-surgical-steel text-sm font-semibold text-primary-container transition hover:bg-surface-container-high">View all notifications <ChevronRight size={15}/></Link></div>}
-
-      {searchOpen && <Modal title="Search Stoicverse" onClose={() => setSearchOpen(false)}><label className="sr-only" htmlFor="dashboard-search">Search lessons, events, posts, channels and members</label><input ref={searchInput} id="dashboard-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search lessons, events, posts…" className="focus-ring w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-3.5 text-base text-on-surface placeholder:text-fog-muted"/>{searching && <div className="mt-4 flex items-center gap-2 text-sm text-fog-muted"><LoaderCircle size={16} className="animate-spin"/>Searching…</div>}<div className="mt-5 max-h-[50vh] space-y-5 overflow-y-auto">{SEARCH_GROUPS.map(({ kind, label }) => { const items = results.filter((result) => result.kind === kind); if (!items.length) return null; return <section key={kind}><h3 className="text-xs font-semibold text-primary-container">{label}</h3><div className="mt-2 divide-y divide-surgical-steel">{items.map((result) => <Link key={`${result.kind}-${result.id}`} href={result.href} onClick={() => setSearchOpen(false)} className="focus-ring block rounded-lg py-3 transition hover:text-primary-container"><p className="text-sm font-semibold text-text-strong">{result.title}</p>{result.description && <p className="mt-1 line-clamp-1 text-xs text-fog-muted">{result.description}</p>}</Link>)}</div></section>; })}{query.trim().length >= 2 && !searching && results.length === 0 && <div className="py-8 text-center text-sm text-fog-muted"><AlertCircle size={20} className="mx-auto mb-2 opacity-60"/>No accessible results found.</div>}</div></Modal>}
-    </div>
     </ChromeMounted.Provider>
   );
 }
 
-function BellButton({ unreadCount, open, onClick }: { unreadCount: number; open: boolean; onClick: (event: ReactMouseEvent<HTMLButtonElement>) => void }) {
-  return <button type="button" onClick={onClick} aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} aria-expanded={open} aria-controls="notification-preview" className="focus-ring relative grid size-11 place-items-center rounded-full border border-surgical-steel text-on-surface-variant transition hover:border-primary-container hover:text-primary-container"><Bell size={18}/>{unreadCount > 0 && <span className="absolute -right-1 -top-1 grid min-w-5 size-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-text-strong">{unreadCount > 9 ? "9+" : unreadCount}</span>}</button>;
+/* ------------------------------------------------------------ notifications */
+
+/**
+ * The bell and its preview.
+ *
+ * This replaces a `fixed … z-[60]` panel with a hand-written Tab cycle, an
+ * outside-mousedown listener and a focus-restore timeout. The popover portals
+ * to `<body>`, so there is no ancestor left to out-rank and the z-index goes
+ * away rather than being renumbered.
+ */
+function NotificationBell({
+  unreadCount,
+  notifications,
+  loading,
+  error,
+  notificationsHref,
+  onRefresh,
+  onNavigate,
+  open,
+  onOpenChange,
+}: {
+  unreadCount: number;
+  notifications: Notification[];
+  loading: boolean;
+  error: string | null;
+  notificationsHref: string;
+  onRefresh: () => void;
+  onNavigate: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger
+        aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}
+        className="focus-ring hit-target relative grid size-11 shrink-0 place-items-center rounded-md text-text-muted transition-colors hover:bg-surface-panel hover:text-text-strong md:size-8"
+      >
+        <Bell size={18} />
+        {unreadCount > 0 ? (
+          <span className="absolute top-1.5 right-1.5 grid min-w-3.5 place-items-center rounded-full bg-status-danger px-1 font-mono text-[9px] leading-[0.875rem] font-medium text-surface-canvas ring-2 ring-surface-canvas md:top-1 md:right-1">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        ) : null}
+      </PopoverTrigger>
+
+      <PopoverContent
+        align="end"
+        sideOffset={6}
+        className="w-[min(21rem,calc(100vw-1.5rem))] gap-0 overflow-hidden rounded-md p-0"
+      >
+        <div className="flex h-chrome-row shrink-0 items-center gap-chrome-gap border-b border-border-hairline pr-1 pl-chrome-x">
+          <h2 className="text-chrome-base font-medium text-text-strong">Notifications</h2>
+          <span className="font-mono text-mono-xs text-primary">
+            {unreadCount ? `${unreadCount} unread` : "Caught up"}
+          </span>
+          <button
+            type="button"
+            onClick={onRefresh}
+            aria-label="Refresh notification preview"
+            className="focus-ring hit-target relative ml-auto grid size-7 place-items-center rounded-md text-text-muted transition-colors hover:bg-surface-raised hover:text-text-strong"
+          >
+            <RefreshCw size={14} />
+          </button>
+        </div>
+
+        <div className="max-h-[24rem] overflow-y-auto overscroll-contain">
+          {loading && notifications.length === 0 ? (
+            <div className="flex min-h-32 items-center justify-center gap-2 text-chrome-base text-text-muted">
+              <LoaderCircle size={16} className="animate-spin" />
+              Loading updates…
+            </div>
+          ) : error && notifications.length === 0 ? (
+            <div className="px-content-gap py-content-gap text-center">
+              <AlertCircle className="mx-auto text-status-danger" size={20} />
+              <p className="mt-2.5 text-chrome-base text-status-danger">{error}</p>
+              <button
+                type="button"
+                onClick={onRefresh}
+                className="focus-ring mt-2.5 rounded-sm text-chrome-base font-medium text-text-strong underline underline-offset-4"
+              >
+                Try again
+              </button>
+            </div>
+          ) : notifications.length ? (
+            <div className="divide-y divide-border-hairline">
+              {notifications.map((item) => (
+                <Link
+                  key={item.id}
+                  href={safeNotificationHref(item.action_url, notificationsHref)}
+                  onClick={onNavigate}
+                  className="focus-ring group flex gap-2.5 px-chrome-x py-2.5 transition-colors hover:bg-surface-raised"
+                >
+                  <span
+                    className={`mt-1.5 size-1.5 shrink-0 rounded-full ${item.is_read ? "bg-border-hairline" : "bg-primary"}`}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-chrome-base leading-snug font-medium text-text-strong">{item.title}</span>
+                    {item.body ? (
+                      <span className="mt-0.5 block line-clamp-2 text-chrome-sm leading-snug text-text-muted">
+                        {item.body}
+                      </span>
+                    ) : null}
+                    <span className="mt-1 block font-mono text-mono-xs text-text-faint">{eventDate(item.created_at)}</span>
+                  </span>
+                  <ChevronRight
+                    size={14}
+                    className="mt-1 shrink-0 text-text-faint transition-colors group-hover:text-primary"
+                  />
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="px-content-gap py-8 text-center">
+              <Bell className="mx-auto text-primary" size={22} />
+              <p className="mt-2.5 text-chrome-base font-medium text-text-strong">You are all caught up</p>
+              <p className="mt-1 text-chrome-sm leading-snug text-text-muted">New activity will appear here.</p>
+            </div>
+          )}
+        </div>
+
+        {error && notifications.length > 0 ? (
+          <p
+            role="alert"
+            className="border-t border-status-danger/30 bg-status-danger/10 px-chrome-x py-1.5 text-chrome-sm text-status-danger"
+          >
+            {error}
+          </p>
+        ) : null}
+
+        <Link
+          href={notificationsHref}
+          onClick={onNavigate}
+          className="focus-ring flex h-chrome-row shrink-0 items-center justify-center gap-1.5 border-t border-border-hairline bg-surface-canvas text-chrome-base font-medium text-primary transition-colors hover:bg-surface-raised"
+        >
+          View all notifications <ChevronRight size={14} />
+        </Link>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
-function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
-  return <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[70] grid items-end bg-scrim sm:place-items-center sm:p-4" onMouseDown={onClose}><div className="max-h-[calc(100svh-1rem)] w-full max-w-xl overflow-auto rounded-t-xl border border-surgical-steel bg-monolith-surface p-4 shadow-2xl sm:max-h-[85vh] sm:rounded-xl sm:p-6" onMouseDown={(event) => event.stopPropagation()}><div className="mb-5 flex items-center justify-between border-b border-surgical-steel pb-4 sm:mb-6"><h2 className="text-lg font-bold text-text-strong">{title}</h2><button type="button" onClick={onClose} className="focus-ring grid size-11 place-items-center rounded-full text-on-surface-variant transition hover:bg-surface-container-high hover:text-primary-container" aria-label="Close"><X size={18}/></button></div>{children}</div></div>;
+/* ------------------------------------------------------------------ search */
+
+/**
+ * Global search, as a command palette.
+ *
+ * What this replaces had no focus trap, no Escape handler and no scroll lock —
+ * it closed on an outside mousedown and nothing else, so Tab walked straight
+ * out of it into the page behind the scrim. All four now come from the overlay
+ * primitive. The arrow keys and the kind chips are new: seven result groups in
+ * one list is not navigable with a pointer alone, and two things that share a
+ * name are indistinguishable without saying which is which.
+ */
+function SearchPalette({
+  open,
+  onOpenChange,
+  routeBase,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  routeBase: string;
+}) {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [cursor, setCursor] = useState(0);
+
+  // One flat sequence in group order, so the arrow keys cross a group boundary
+  // the way the eye does rather than stopping at it.
+  const ordered = useMemo(
+    () => SEARCH_GROUPS.flatMap(({ kind }) => results.filter((result) => result.kind === kind)),
+    [results],
+  );
+
+  // Clamped at read time rather than reset in an effect: results arrive
+  // asynchronously and a shorter list must not leave the cursor past its end.
+  const selectedIndex = cursor < ordered.length ? cursor : 0;
+
+  function setOpen(next: boolean) {
+    if (!next) {
+      setQuery("");
+      setResults([]);
+      setCursor(0);
+    }
+    onOpenChange(next);
+  }
+
+  useEffect(() => {
+    if (!open || query.trim().length < 2) {
+      const timer = window.setTimeout(() => setResults([]), 0);
+      return () => window.clearTimeout(timer);
+    }
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setSearching(true);
+      try {
+        const params = new URLSearchParams({ q: query.trim() });
+        if (routeBase) params.set("base", routeBase);
+        const response = await fetch(`/api/dashboard/search?${params.toString()}`, { signal: controller.signal });
+        const payload = (await response.json()) as { results?: SearchResult[] };
+        setResults(response.ok ? (payload.results ?? []) : []);
+      } catch {
+        if (!controller.signal.aborted) setResults([]);
+      } finally {
+        if (!controller.signal.aborted) setSearching(false);
+      }
+    }, 250);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [query, routeBase, open]);
+
+  function go(href: string) {
+    setOpen(false);
+    router.push(href);
+  }
+
+  function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (!ordered.length) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setCursor((index) => (index + 1) % ordered.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setCursor((index) => (index - 1 + ordered.length) % ordered.length);
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      const target = ordered[selectedIndex];
+      if (target) go(target.href);
+    }
+  }
+
+  return (
+    <Overlay open={open} onOpenChange={setOpen}>
+      <OverlayContent placement="responsive" size="md" density="chrome" showCloseButton={false} className="overflow-hidden">
+        <OverlayTitle className="sr-only">Search Stoicverse</OverlayTitle>
+
+        <div className="flex h-11 shrink-0 items-center gap-2.5 border-b border-border-hairline px-chrome-x">
+          <Search size={16} className="shrink-0 text-text-faint" />
+          <label className="sr-only" htmlFor="dashboard-search">
+            Search lessons, events, posts, channels and members
+          </label>
+          <input
+            id="dashboard-search"
+            autoFocus
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder="Search lessons, events, posts…"
+            className="min-w-0 flex-1 bg-transparent text-content-base text-text-strong outline-none placeholder:text-text-faint"
+          />
+          {searching ? <LoaderCircle size={15} className="shrink-0 animate-spin text-text-faint" /> : null}
+        </div>
+
+        <OverlayBody className="px-0 py-1.5">
+          {SEARCH_GROUPS.map(({ kind, label }) => {
+            const items = results.filter((result) => result.kind === kind);
+            if (!items.length) return null;
+            return (
+              <section key={kind}>
+                <h3 className="px-chrome-x pt-2.5 pb-1.5 font-mono text-mono-xs tracking-widest text-text-faint uppercase">
+                  {label}
+                </h3>
+                {items.map((result) => {
+                  const selected =
+                    ordered[selectedIndex]?.id === result.id && ordered[selectedIndex]?.kind === result.kind;
+                  return (
+                    <button
+                      key={`${result.kind}-${result.id}`}
+                      type="button"
+                      onClick={() => go(result.href)}
+                      onPointerMove={() => setCursor(ordered.indexOf(result))}
+                      aria-current={selected ? true : undefined}
+                      className={`focus-ring relative flex min-h-11 w-full items-center gap-2.5 px-chrome-x text-left transition-colors sm:min-h-[34px] ${
+                        selected ? "bg-surface-raised text-text-strong" : "text-text-default hover:bg-surface-raised"
+                      }`}
+                    >
+                      {selected ? (
+                        <span
+                          aria-hidden="true"
+                          className="absolute top-1/2 left-0 h-[18px] w-0.5 -translate-y-1/2 bg-primary"
+                        />
+                      ) : null}
+                      <span className="min-w-0 truncate text-content-sm">{result.title}</span>
+                      {result.description ? (
+                        <span className="hidden min-w-0 truncate text-chrome-sm text-text-faint sm:block">
+                          {result.description}
+                        </span>
+                      ) : null}
+                      <span className="ml-auto shrink-0 rounded-sm border border-border-hairline px-1.5 py-0.5 font-mono text-[10px] text-text-faint">
+                        {result.kind}
+                      </span>
+                    </button>
+                  );
+                })}
+              </section>
+            );
+          })}
+
+          {query.trim().length >= 2 && !searching && results.length === 0 ? (
+            <div className="py-8 text-center text-chrome-base text-text-muted">
+              <AlertCircle size={18} className="mx-auto mb-2 opacity-60" />
+              No accessible results found.
+            </div>
+          ) : null}
+
+          {query.trim().length < 2 ? (
+            <p className="py-8 text-center text-chrome-base text-text-faint">Type at least two characters to search.</p>
+          ) : null}
+        </OverlayBody>
+
+        <div className="hidden h-chrome-row shrink-0 items-center gap-4 border-t border-border-hairline bg-surface-canvas px-chrome-x font-mono text-mono-xs text-text-faint sm:flex">
+          <span>
+            <Key>↑</Key>
+            <Key>↓</Key> move
+          </span>
+          <span>
+            <Key>↵</Key> open
+          </span>
+          <span>
+            <Key>esc</Key> close
+          </span>
+        </div>
+      </OverlayContent>
+    </Overlay>
+  );
+}
+
+function Key({ children }: { children: React.ReactNode }) {
+  return <kbd className="mr-1 inline-block rounded-sm border border-border-hairline px-1 text-text-muted">{children}</kbd>;
 }
