@@ -11,7 +11,7 @@ import { useCommunity, type ChannelRow } from "@/components/channels/CommunityPr
 import { MemberProfileDialog } from "@/components/channels/MemberProfileDialog";
 import { MobilePaneDrawer } from "@/components/channels/MobilePane";
 import { AppRail } from "@/components/layout/AppRail";
-import { QuickSwitcher } from "@/components/channels/QuickSwitcher";
+import { SearchOverlay } from "@/components/channels/SearchOverlay";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -200,10 +200,9 @@ function ChannelNav({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export function ChannelsShell({ children, isMaster = false }: { children: ReactNode; isMaster?: boolean }) {
-  const { channels, viewer, pane, setPane, profileFor, closeProfile } = useCommunity();
+  const { channels, viewer, pane, setPane, profileFor, closeProfile, searchOpen, setSearchOpen } = useCommunity();
   const router = useRouter();
   const activeId = useSelectedLayoutSegment();
-  const [switcherOpen, setSwitcherOpen] = useState(false);
 
   /**
    * The page's keyboard shortcuts.
@@ -226,17 +225,21 @@ export function ChannelsShell({ children, isMaster = false }: { children: ReactN
       });
       if (action === null || action === "editLastMessage") return;
 
-      if (action === "quickSwitcher") {
+      if (action === "search") {
         event.preventDefault();
-        setSwitcherOpen(true);
+        setSearchOpen(true);
         return;
       }
 
       if (action === "closeTopmost") {
         // One layer at a time, outermost last. Escape with a pane open closes
         // the pane, not the page.
-        if (switcherOpen) setSwitcherOpen(false);
-        else if (profileFor) closeProfile();
+        //
+        // The palette is not in this list. It is a Base UI dialog and dismisses
+        // itself; closing it here as well would be the same double-close that
+        // the nested confirm had, on a different pair of layers.
+        if (searchOpen) return;
+        if (profileFor) closeProfile();
         else if (pane) setPane(null);
         return;
       }
@@ -258,7 +261,7 @@ export function ChannelsShell({ children, isMaster = false }: { children: ReactN
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [channels, activeId, router, switcherOpen, pane, setPane, profileFor, closeProfile]);
+  }, [channels, activeId, router, searchOpen, setSearchOpen, pane, setPane, profileFor, closeProfile]);
 
   // A pane left open across a navigation would sit over the channel somebody
   // just chose from inside it.
@@ -322,7 +325,13 @@ export function ChannelsShell({ children, isMaster = false }: { children: ReactN
       */}
       {profileFor ? <MemberProfileDialog key={profileFor} userId={profileFor} onClose={closeProfile} /> : null}
 
-      {switcherOpen ? <QuickSwitcher onClose={() => setSwitcherOpen(false)} /> : null}
+      {/*
+        One palette for the page, mounted here rather than in the channel view.
+        Ctrl+K has to answer on /channels with no channel chosen, where there is
+        no ChannelView to hold it - and the header button that also opens it is
+        two subtrees away, which is why the open flag lives in the provider.
+      */}
+      <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }

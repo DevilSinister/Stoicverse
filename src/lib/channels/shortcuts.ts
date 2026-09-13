@@ -27,7 +27,7 @@ export type ShortcutEvent = {
 };
 
 export type ShortcutAction =
-  | "quickSwitcher"
+  | "search"
   | "previousChannel"
   | "nextChannel"
   | "closeTopmost"
@@ -40,15 +40,21 @@ export function resolveShortcut(event: ShortcutEvent): ShortcutAction {
   // Ctrl/Cmd+K, from anywhere including the composer. No text field binds it,
   // and somebody halfway through a message who wants another channel should
   // not have to leave the box first.
-  if (command && !event.altKey && event.key.toLowerCase() === "k") return "quickSwitcher";
+  //
+  // It opens the search palette, which is also the channel switcher. The two
+  // used to be different components on the same key - the switcher here and
+  // global search in the workspace - so what Ctrl+K did depended on which half
+  // of the product you were in. One meaning now: find something, from here.
+  if (command && !event.altKey && event.key.toLowerCase() === "k") return "search";
 
   // Alt+arrow walks the channel list. Alt rather than Ctrl because Ctrl+arrow
   // is word-wise caret movement in every text field on every platform.
   if (event.altKey && !command && event.key === "ArrowUp") return "previousChannel";
   if (event.altKey && !command && event.key === "ArrowDown") return "nextChannel";
 
-  // Escape closes whatever is on top — a pane, the switcher — and is left
-  // alone inside a text field, where it already cancels a reply or an edit.
+  // Escape closes whatever is on top — a pane, a drawer — and is left alone
+  // inside a text field, where it already cancels a reply or an edit. The
+  // palette is not in that list: it is a Base UI dialog and dismisses itself.
   if (event.key === "Escape" && !event.typing) return "closeTopmost";
 
   // Up arrow on an empty composer edits your last message, the way it does in

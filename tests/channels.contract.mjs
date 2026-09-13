@@ -614,7 +614,11 @@ test("only messages leave the browser when somebody searches", async () => {
   // that asked the server for them would be a round trip to re-learn what the
   // sidebar is currently drawn from, and results that arrive after the
   // keystroke instead of on it.
-  assert.match(overlay, /localCandidates\(channels, members\)/);
+  // `reachable`, not `channels`: the palette absorbed the quick switcher in P3,
+  // and the switcher's rule came with it - a locked channel is shown in the
+  // sidebar but is not a place a search result can send anybody.
+  assert.match(overlay, /localCandidates\(reachable, members\)/);
+  assert.match(overlay, /channels\.filter\(\(channel\) => !channel\.isLocked\)/);
   const rpcCalls = [...overlay.matchAll(/supabase\.rpc\("([a-z_]+)"/g)].map((match) => match[1]);
   assert.deepEqual(rpcCalls, ["community_search_messages"], "one RPC, and it is the message one");
 });

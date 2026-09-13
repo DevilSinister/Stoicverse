@@ -25,7 +25,6 @@ import { MemberList } from "@/components/channels/MemberList";
 import { MessageMenu } from "@/components/channels/MessageMenu";
 import { MobilePaneDrawer } from "@/components/channels/MobilePane";
 import { RulesGateNotice } from "@/components/channels/RulesGateNotice";
-import { SearchOverlay } from "@/components/channels/SearchOverlay";
 import { VoicePlayer } from "@/components/channels/VoicePlayer";
 import { ThreadPanel } from "@/components/channels/ThreadPanel";
 import { useToast } from "@/components/ui/toast";
@@ -472,7 +471,8 @@ export function ChannelView({
   initialCursor: { createdAt: string; id: string } | null;
   initialUrls: Record<string, string>;
 }) {
-  const { affordances, viewer, setActiveChannel, refreshUnread, typistsIn, channels, pane, setPane } = useCommunity();
+  const { affordances, viewer, setActiveChannel, refreshUnread, typistsIn, channels, pane, setPane, setSearchOpen } =
+    useCommunity();
 
   /**
    * Is there anywhere at all to forward to?
@@ -504,7 +504,6 @@ export function ChannelView({
   const [openThreadName, setOpenThreadName] = useState<string | null>(null);
 
   const notify = useToast();
-  const [searchOpen, setSearchOpen] = useState(false);
 
   // The RPC returns newest first; the list reads oldest at the top.
   const [messages, setMessages] = useState<ChannelMessage[]>(() => [...initialMessages].reverse());
@@ -934,8 +933,6 @@ export function ChannelView({
           />
         </MobilePaneDrawer>
       ) : null}
-
-      {searchOpen ? <SearchOverlay onClose={() => setSearchOpen(false)} /> : null}
 
       {openThreadId ? (
         <ThreadPanel

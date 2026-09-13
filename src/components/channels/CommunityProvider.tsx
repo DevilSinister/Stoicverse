@@ -78,6 +78,16 @@ type CommunityValue = {
    */
   pane: MobilePane;
   setPane: (pane: MobilePane) => void;
+  /**
+   * Whether the search palette is open.
+   *
+   * It lives here and the palette is mounted once by the shell, because two
+   * things open it and they are in different subtrees: the channel header's
+   * button, and Ctrl+K, which the shell binds on the document so it answers on
+   * `/channels` with no channel chosen too.
+   */
+  searchOpen: boolean;
+  setSearchOpen: (open: boolean) => void;
   degraded: string[];
 };
 
@@ -115,6 +125,7 @@ export function CommunityProvider({
 
   const [profileFor, setProfileFor] = useState<string | null>(null);
   const [pane, setPane] = useState<MobilePane>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const value = useMemo<CommunityValue>(() => {
     const channelById = new Map(channels.map((channel) => [channel.id, channel]));
@@ -163,6 +174,8 @@ export function CommunityProvider({
       closeProfile: () => setProfileFor(null),
       pane,
       setPane,
+      searchOpen,
+      setSearchOpen,
       degraded,
     };
   }, [
@@ -178,6 +191,7 @@ export function CommunityProvider({
     typistsIn,
     profileFor,
     pane,
+    searchOpen,
   ]);
 
   return <CommunityContext.Provider value={value}>{children}</CommunityContext.Provider>;

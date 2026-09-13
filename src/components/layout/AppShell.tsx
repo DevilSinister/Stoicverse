@@ -543,7 +543,9 @@ function SearchPalette({
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Search lessons, events, posts…"
-            className="min-w-0 flex-1 bg-transparent text-content-base text-text-strong outline-none placeholder:text-text-faint"
+            // The twin of the /channels palette field, and it had the same 24px
+            // target inside a 44px row. Same one-word fix.
+            className="min-w-0 flex-1 self-stretch bg-transparent text-content-base text-text-strong outline-none placeholder:text-text-faint"
           />
           {searching ? <LoaderCircle size={15} className="shrink-0 animate-spin text-text-faint" /> : null}
         </div>
