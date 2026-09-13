@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Gift, Loader2, ShieldBan, ShieldMinus, Timer } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Gift, ShieldBan, ShieldMinus, Timer } from "lucide-react";
 
 import { giftMembership } from "@/app/community/member-actions";
 import { banMember, timeoutMember, untimeoutMember } from "@/app/community/moderation-actions";
 import { useCommunity } from "@/components/channels/CommunityProvider";
 import { GIFT_OPTIONS } from "@/components/channels/MemberMenuItems";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Overlay, OverlayContent, OverlayTitle } from "@/components/ui/overlay";
 import { useToast } from "@/components/ui/toast";
 import {
   DropdownMenu,
@@ -78,6 +80,24 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
   const [pending, setPending] = useState<Pending>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
+  /*
+    Whether a confirm is on top, readable synchronously.
+
+    The `pending` state cannot answer this. Both overlays listen for Escape on
+    the document, the confirm's handler runs first and calls setPending(null),
+    and the card's handler then reads a closure in which pending is already
+    gone — so one Escape closed both layers at once. A ref cleared on the next
+    frame is still true for every listener in the same dispatch, which is
+    exactly the window that matters.
+  */
+  const confirmOpen = useRef(false);
+
+  /** Opening a confirm marks the ref before any listener can read it. */
+  const askFor = (next: Exclude<Pending, null>) => {
+    confirmOpen.current = true;
+    setReason("");
+    setPending(next);
+  };
   const notify = useToast();
 
   // Loads once, on mount. The shell keys this component on the person it is
@@ -149,21 +169,32 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
     setReason("");
   };
 
+  /*
+    Two overlays, and the inner one is why /channels was migrated second.
+
+    The stacking works, and was measured: both popups resolve to the same
+    z-index, and the confirm still paints above the card because Base UI
+    portals in mount order. The `z-[60]` that used to force it is gone, and it
+    was the last arbitrary z-index in the folder.
+
+    Escape does NOT fall out of the stack, which is the part worth writing
+    down. The card is a Dialog and the confirm is an AlertDialog — two separate
+    Base UI roots, each with its own document-level dismiss listener — so one
+    Escape reached both and closed the card out from under the confirm. Caught
+    in the browser, not in review. The guard below is the same rule the
+    hand-written version had: while a confirm is open, Escape belongs to it.
+  */
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Profile for ${name}`}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-scrim p-4"
-      onKeyDown={(event) => {
-        if (event.key !== "Escape") return;
-        // Escape backs out of the reason first: somebody halfway through
-        // typing why they are banning a person has not asked to close the card.
-        if (pending) setPending(null);
-        else if (!busy) onClose();
+    <Overlay
+      open
+      onOpenChange={(next) => {
+        if (confirmOpen.current) return;
+        if (!next && !busy) onClose();
       }}
     >
-      <div className="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-xl border border-surgical-steel bg-surface-container-low">
+      <OverlayContent placement="responsive" size="sm">
+        <OverlayTitle className="sr-only">{`Profile for ${name}`}</OverlayTitle>
+        <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="flex items-start gap-3 border-b border-surgical-steel p-4">
           <span className="relative shrink-0">
             {profile?.avatar_url ? (
@@ -278,10 +309,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                           {TIMEOUT_PRESETS.map((preset) => (
                             <DropdownMenuItem
                               key={preset.seconds}
-                              onClick={() => {
-                                setReason("");
-                                setPending({ kind: "timeout", seconds: preset.seconds });
-                              }}
+                              onClick={() => askFor({ kind: "timeout", seconds: preset.seconds })}
                             >
                               {preset.label}
                             </DropdownMenuItem>
@@ -309,10 +337,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                   {canBan && moderating ? (
                     <button
                       type="button"
-                      onClick={() => {
-                        setReason("");
-                        setPending({ kind: "ban" });
-                      }}
+                      onClick={() => askFor({ kind: "ban" })}
                       className="focus-ring flex items-center gap-1.5 rounded-lg border border-error/50 px-2 py-1 text-[11px] text-error hover:bg-error/10"
                     >
                       <ShieldBan size={12} aria-hidden="true" />
@@ -364,17 +389,25 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
       </div>
 
       {pending ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={pending.kind === "ban" ? `Ban ${name}` : `Time out ${name}`}
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim p-4"
+        <ConfirmDialog
+          open
+          onOpenChange={(next) => {
+            if (next || busy) return;
+            setPending(null);
+            // Cleared a frame later, so the card's own Escape listener - which
+            // fires after this one, in the same dispatch - still sees a confirm.
+            requestAnimationFrame(() => {
+              confirmOpen.current = false;
+            });
+          }}
+          title={pending.kind === "ban" ? `Ban ${name} from the community?` : `Time out ${name}`}
+          confirmLabel={pending.kind === "ban" ? "Ban" : "Time out"}
+          tone={pending.kind === "ban" ? "danger" : "default"}
+          busy={busy}
+          confirmDisabled={reason.trim().length < SANCTION_LIMITS.reason.min}
+          onConfirm={() => run()}
         >
-          <div className="w-full max-w-sm rounded-xl border border-surgical-steel bg-surface-container-low p-4">
-            <h2 className="text-sm font-semibold text-on-surface">
-              {pending.kind === "ban" ? `Ban ${name} from the community?` : `Time out ${name}`}
-            </h2>
-            <label className="mt-3 block text-xs text-on-surface-variant">
+          <label className="block text-chrome-base text-text-default">
               {/*
                 Required, not optional. `parseModerationReason` refuses an
                 empty one for every sanction that is not an undo.
@@ -387,34 +420,13 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                 minLength={SANCTION_LIMITS.reason.min}
                 maxLength={SANCTION_LIMITS.reason.max}
                 autoFocus
-                className="mt-1 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-2 text-sm text-on-surface outline-none"
+                className="focus-ring mt-1 w-full rounded-md border border-border-hairline bg-surface-sunken p-2 text-content-sm text-text-strong outline-none"
               />
             </label>
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setPending(null)}
-                disabled={busy}
-                className="focus-ring rounded-lg border border-surgical-steel px-3 py-1.5 text-xs text-on-surface-variant disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => void run()}
-                disabled={busy}
-                className={`focus-ring flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-monolith-surface disabled:opacity-50 ${
-                  pending.kind === "ban" ? "bg-error" : "bg-primary-container"
-                }`}
-              >
-                {busy ? <Loader2 size={12} aria-hidden="true" className="animate-spin" /> : null}
-                {pending.kind === "ban" ? "Ban" : "Time out"}
-              </button>
-            </div>
-          </div>
-        </div>
+        </ConfirmDialog>
       ) : null}
-    </div>
+      </OverlayContent>
+    </Overlay>
   );
 }
 

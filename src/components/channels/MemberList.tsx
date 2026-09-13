@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { Loader2, MoreVertical } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 
 import { giftMembership, restrictMember, unrestrictMember } from "@/app/community/member-actions";
 import { banMember, timeoutMember, untimeoutMember } from "@/app/community/moderation-actions";
@@ -31,6 +31,7 @@ import {
 import { groupMembers } from "@/lib/channels/presence";
 import { SANCTION_LIMITS } from "@/lib/community-settings/model";
 import type { DirectoryMember } from "@/lib/community/messages";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 /**
  * Who is in the community, and what can be done about them.
@@ -372,40 +373,22 @@ function ReasonDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  // The twin of MessageMenu's ActionDialog, down to the props. Both are thin
+  // wrappers over the one confirm now, which is why they can stay separate
+  // local components without being a second implementation of anything.
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-scrim p-4"
-      onKeyDown={(event) => {
-        if (event.key === "Escape") onCancel();
+    <ConfirmDialog
+      open
+      onOpenChange={(next) => {
+        if (!next) onCancel();
       }}
+      title={title}
+      confirmLabel={confirmLabel}
+      tone={destructive ? "danger" : "default"}
+      busy={busy}
+      onConfirm={onConfirm}
     >
-      <div className="w-full max-w-sm rounded-xl border border-surgical-steel bg-surface-container-low p-4">
-        <h2 className="text-sm font-semibold text-on-surface">{title}</h2>
-        <div className="mt-3">{children}</div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="focus-ring rounded-lg border border-surgical-steel px-3 py-1.5 text-xs text-on-surface-variant"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={busy}
-            className={`focus-ring inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-50 ${
-              destructive ? "bg-error text-monolith-surface" : "bg-primary-container text-monolith-surface"
-            }`}
-          >
-            {busy ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : null}
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
+      {children}
+    </ConfirmDialog>
   );
 }

@@ -4,7 +4,6 @@ import { useState, type ComponentType, type ReactNode } from "react";
 import {
   CornerUpLeft,
   Forward,
-  Loader2,
   MessagesSquare,
   MoreHorizontal,
   Pin,
@@ -38,6 +37,7 @@ import { deriveMessageActions, messagePermalink, type MessageAbilities } from "@
 import { THREAD_NAME_LIMITS } from "@/lib/community/constants";
 import { REPORT_REASONS, REPORT_REASON_LABELS } from "@/lib/community-settings/model";
 import type { ChannelMessage } from "@/lib/community/messages";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 /**
  * The hover bar and the menu behind it.
@@ -460,40 +460,30 @@ function ActionDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  /*
+    Deliberately still a local component with the same props: every call site in
+    this file keeps working, and the whole difference is in what backs it. This
+    was a `fixed inset-0` that closed on Escape and nothing else — an outside
+    click could not dismiss it, but neither was focus trapped, so Tab left the
+    dialog while it still covered the screen.
+
+    `ConfirmDialog` is an alert dialog, which is the right kind here: these
+    actions delete a message or file a report, and an outside click must not be
+    able to discard a decision half-made.
+  */
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-scrim p-4"
-      onKeyDown={(event) => {
-        if (event.key === "Escape") onCancel();
+    <ConfirmDialog
+      open
+      onOpenChange={(next) => {
+        if (!next) onCancel();
       }}
+      title={title}
+      confirmLabel={confirmLabel}
+      tone={destructive ? "danger" : "default"}
+      busy={busy}
+      onConfirm={onConfirm}
     >
-      <div className="w-full max-w-sm rounded-xl border border-surgical-steel bg-surface-container-low p-4">
-        <h2 className="text-sm font-semibold text-on-surface">{title}</h2>
-        <div className="mt-3 space-y-3">{children}</div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="focus-ring rounded-lg border border-surgical-steel px-3 py-1.5 text-xs text-on-surface-variant"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={busy}
-            className={`focus-ring inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-50 ${
-              destructive ? "bg-error text-monolith-surface" : "bg-primary-container text-monolith-surface"
-            }`}
-          >
-            {busy ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : null}
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
+      <div className="space-y-3">{children}</div>
+    </ConfirmDialog>
   );
 }

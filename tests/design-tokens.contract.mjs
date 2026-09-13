@@ -229,9 +229,10 @@ test("the hand-rolled overlays only ever decrease", async () => {
   for (const file of outside) {
     if ((await read(file)).includes("fixed inset-0")) count += 1;
   }
-  // 15 after P2a took AppShell's search modal and mobile drawer. P3 takes the
-  // ten in /channels, P11-P13 take the rest.
-  assert.ok(count <= 15, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
+  // 13 after P3b took the member profile card, its nested confirm, the mobile
+  // pane and the two ActionDialogs. ForwardDialog, SearchOverlay and QuickSwitcher
+  // are the three left in /channels; P11-P13 take the rest.
+  assert.ok(count <= 13, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
 });
 
 test("arbitrary z-index only ever decreases", async () => {
