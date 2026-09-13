@@ -320,8 +320,16 @@ export function Composer({
     onSettled();
   };
 
+  /*
+    The composer is the last thing above the home indicator, and it ended 21px
+    short of the viewport bottom while the indicator is 34px — so a thumb
+    reaching for send landed on the system gesture area instead.
+
+    Additive, not `safe-b`: that utility sets padding-bottom outright and would
+    have replaced py-3's 12px with 0 on every device without an inset.
+  */
   return (
-    <div className="border-t border-surgical-steel px-4 py-3">
+    <div className="border-t border-surgical-steel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
       {replyTo ? (
         <p className="mb-2 flex items-center gap-2 rounded-lg bg-surface-container-low px-3 py-1.5 text-xs text-fog-muted">
           <span className="truncate">{`Replying to ${replyTo.authorName}`}</span>
@@ -329,7 +337,7 @@ export function Composer({
             type="button"
             onClick={onClearReply}
             aria-label="Cancel reply"
-            className="focus-ring ml-auto rounded p-0.5 hover:text-on-surface"
+            className="focus-ring hit-target relative ml-auto rounded p-0.5 hover:text-on-surface"
           >
             <X size={12} aria-hidden="true" />
           </button>
@@ -348,7 +356,7 @@ export function Composer({
                 type="button"
                 onClick={() => setAttachments((current) => current.filter((entry) => entry.path !== attachment.path))}
                 aria-label={`Remove ${attachment.name}`}
-                className="focus-ring rounded p-0.5 hover:text-on-surface"
+                className="focus-ring hit-target relative rounded p-0.5 hover:text-on-surface"
               >
                 <X size={12} aria-hidden="true" />
               </button>
@@ -379,7 +387,7 @@ export function Composer({
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               aria-label="Attach a file"
-              className="focus-ring shrink-0 rounded-lg p-1.5 text-fog-muted hover:text-on-surface disabled:opacity-50"
+              className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-fog-muted hover:text-on-surface disabled:opacity-50"
             >
               {uploading ? (
                 <Loader2 size={16} className="animate-spin" aria-hidden="true" />
@@ -399,7 +407,7 @@ export function Composer({
         <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
           <PopoverTrigger
             aria-label="Insert an emoji"
-            className="focus-ring shrink-0 rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
           >
             <Smile size={16} aria-hidden="true" />
           </PopoverTrigger>
@@ -491,7 +499,7 @@ export function Composer({
             onClick={() => void send()}
             disabled={!canSend}
             aria-label="Send"
-            className="focus-ring flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface disabled:opacity-40"
+            className="focus-ring hit-target relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface disabled:opacity-40"
           >
             {sending ? (
               <Loader2 size={16} className="animate-spin" aria-hidden="true" />

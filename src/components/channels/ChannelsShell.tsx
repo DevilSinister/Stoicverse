@@ -99,7 +99,7 @@ function ChannelLink({ channel, active, muted }: { channel: ChannelRow; active: 
       <DropdownMenu>
         <DropdownMenuTrigger
           aria-label={`Notification settings for ${channel.name}`}
-          className="focus-ring absolute right-1 rounded p-1 text-fog-muted opacity-0 group-focus-within/channel:opacity-100 group-hover/channel:opacity-100 hover:text-on-surface"
+          className="focus-ring hit-target absolute right-1 rounded p-1 text-fog-muted opacity-0 group-focus-within/channel:opacity-100 group-hover/channel:opacity-100 hover:text-on-surface"
         >
           <BellOff size={12} aria-hidden="true" />
         </DropdownMenuTrigger>
@@ -155,7 +155,7 @@ function ChannelNav({ onNavigate }: { onNavigate?: () => void }) {
           <Link
             href="/creator/settings"
             aria-label="Community settings"
-            className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring hit-target relative rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
           >
             <Settings size={16} aria-hidden="true" />
           </Link>

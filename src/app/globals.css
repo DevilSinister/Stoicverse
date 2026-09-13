@@ -336,11 +336,32 @@
 /* A 44px touch target around a control that is visually smaller. Dense chrome
    needs 32px buttons and a legal hit area at the same time; this belongs in the
    component, never in call sites. Requires position: relative on the element. */
+/*
+  An invisible 44px target around a control drawn smaller than that.
+
+  This was `inset: -0.375rem`, a flat 12px of growth, which only reaches 44px if
+  the control is already 32px. Measured in /channels, a 28px control got 40px and
+  the 25x22 playback-speed button got 37x34 - so the utility was quietly failing
+  the rule it exists to enforce, and failing it worst on the smallest controls,
+  which need it most.
+
+  A centred box of at least 44px instead. `max()` so it never shrinks a control
+  that is already larger, and centring so the target grows evenly rather than
+  drifting off one corner.
+
+  The cost, stated: adjacent controls need roughly 8px between them, or their
+  boxes reach into each other's painted pixels and the wrong button fires. That
+  is a real constraint on how tightly icons may be packed, not a free win.
+*/
 @utility hit-target {
   &::before {
     content: "";
     position: absolute;
-    inset: -0.375rem;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
   }
 }
 

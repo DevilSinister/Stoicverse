@@ -126,7 +126,7 @@ function Reactions({
   if (message.reactions.length === 0) return null;
 
   return (
-    <ul className="mt-1 flex flex-wrap gap-1">
+    <ul className="mt-1 flex flex-wrap gap-1.5">
       {message.reactions.map((reaction) => (
         <li key={reaction.emoji}>
           <button
@@ -139,7 +139,7 @@ function Reactions({
               onChanged();
             }}
             aria-pressed={reaction.mine}
-            className={`focus-ring flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors disabled:opacity-50 ${
+            className={`focus-ring flex min-h-7 items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors disabled:opacity-50 ${
               reaction.mine
                 ? "border-primary-container bg-primary-container/15 text-on-surface"
                 : "border-surgical-steel text-fog-muted hover:bg-surface-container-low"
@@ -729,7 +729,13 @@ export function ChannelView({
   return (
     <div className="flex min-h-0 flex-1">
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-2 border-b border-surgical-steel px-4 py-3">
+        {/*
+          On a phone this header is the top of the app — /channels mounts no
+          chrome above it — so it is what has to clear the notch. `safe-t` on
+          its own would replace py-3's top padding rather than add to it, hence
+          the calc: the inset is additive to the padding the bar already has.
+        */}
+        <header className="flex items-center gap-2 border-b border-surgical-steel px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3">
           {/*
             The way back to the channel list on a phone. Above `md` the list
             is always on screen, so the button would be a second door to a
@@ -739,7 +745,7 @@ export function ChannelView({
             type="button"
             onClick={() => setPane("sidebar")}
             aria-label="Show channels"
-            className="focus-ring -ml-1 rounded-lg p-1 text-fog-muted hover:text-on-surface md:hidden"
+            className="focus-ring hit-target relative -ml-1 rounded-lg p-1 text-fog-muted hover:text-on-surface md:hidden"
           >
             <Menu size={18} aria-hidden="true" />
           </button>
@@ -751,7 +757,13 @@ export function ChannelView({
             </p>
           ) : null}
 
-          <div className="ml-auto flex shrink-0 items-center gap-1">
+          {/*
+            gap-2, not gap-1. These four are 28px apart edge to edge, and a 44px
+            hit area around each is 8px wider than the icon on every side — at
+            4px of gap the boxes reach 2px into the neighbour's painted pixels,
+            so tapping the edge of Search fired Threads. Measured, not guessed.
+          */}
+          <div className="ml-auto flex shrink-0 items-center gap-2">
             {connected ? null : (
               <span className="flex items-center gap-1 text-xs text-amber-300" role="status">
                 <WifiOff size={12} aria-hidden="true" />
@@ -767,7 +779,7 @@ export function ChannelView({
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Search the community"
-              className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+              className="focus-ring hit-target relative rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
             >
               <Search size={16} aria-hidden="true" />
             </button>
@@ -785,7 +797,7 @@ export function ChannelView({
               type="button"
               onClick={() => setPane("members")}
               aria-label="Show members"
-              className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface xl:hidden"
+              className="focus-ring hit-target relative rounded-lg p-1.5 text-fog-muted hover:text-on-surface xl:hidden"
             >
               <Users size={16} aria-hidden="true" />
             </button>

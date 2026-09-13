@@ -121,7 +121,7 @@ export function ThreadPanel({
               type="button"
               onClick={() => void setThreadState(threadId, { locked: true })}
               aria-label="Lock this thread"
-              className="focus-ring ml-auto rounded p-1.5 text-fog-muted hover:text-on-surface"
+              className="focus-ring hit-target relative ml-auto rounded p-1.5 text-fog-muted hover:text-on-surface"
             >
               <Lock size={14} aria-hidden="true" />
             </button>
@@ -129,7 +129,7 @@ export function ThreadPanel({
               type="button"
               onClick={() => void setThreadState(threadId, { locked: false })}
               aria-label="Unlock this thread"
-              className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+              className="focus-ring hit-target relative rounded p-1.5 text-fog-muted hover:text-on-surface"
             >
               <LockOpen size={14} aria-hidden="true" />
             </button>
@@ -137,7 +137,7 @@ export function ThreadPanel({
               type="button"
               onClick={() => void setThreadState(threadId, { archived: true }).then(onClose)}
               aria-label="Archive this thread"
-              className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+              className="focus-ring hit-target relative rounded p-1.5 text-fog-muted hover:text-on-surface"
             >
               <Archive size={14} aria-hidden="true" />
             </button>
@@ -159,7 +159,7 @@ export function ThreadPanel({
       <ol ref={paneRef} className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
         {loading ? <li className="py-6 text-center text-xs text-fog-muted">Loading the thread…</li> : null}
         {error ? (
-          <li role="alert" className="py-6 text-center text-xs text-red-300">
+          <li role="alert" className="py-6 text-center text-xs text-status-danger">
             {error}
           </li>
         ) : null}

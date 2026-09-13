@@ -270,7 +270,7 @@ export function MemberList({
                             */}
                             <DropdownMenuTrigger
                               aria-label={`Actions for ${member.fullName}`}
-                              className="focus-ring absolute right-1 rounded p-1 text-fog-muted opacity-0 group-focus-within/member:opacity-100 group-hover/member:opacity-100 data-[popup-open]:opacity-100 hover:text-on-surface"
+                              className="focus-ring hit-target absolute right-1 rounded p-1 text-fog-muted opacity-0 group-focus-within/member:opacity-100 group-hover/member:opacity-100 data-[popup-open]:opacity-100 hover:text-on-surface"
                             >
                               <MoreVertical size={13} aria-hidden="true" />
                             </DropdownMenuTrigger>

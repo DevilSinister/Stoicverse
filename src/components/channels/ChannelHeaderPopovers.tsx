@@ -116,7 +116,7 @@ export function PinsPopover({
     >
       <PopoverTrigger
         aria-label="Pinned messages"
-        className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+        className="focus-ring hit-target relative rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
       >
         <Pin size={16} aria-hidden="true" />
       </PopoverTrigger>
@@ -125,7 +125,7 @@ export function PinsPopover({
           Pinned
         </p>
         <div className="max-h-80 overflow-y-auto">
-          {failed ? <p className="px-3 py-4 text-xs text-red-300">Pinned messages could not be read.</p> : null}
+          {failed ? <p className="px-3 py-4 text-xs text-status-danger">Pinned messages could not be read.</p> : null}
           {!failed && rows === null ? <p className="px-3 py-4 text-xs text-fog-muted">Loading…</p> : null}
           {rows !== null && rows.length === 0 ? (
             <p className="px-3 py-4 text-xs text-fog-muted">Nothing is pinned in this channel yet.</p>
@@ -159,7 +159,7 @@ export function PinsPopover({
                   onClick={() => void unpin(pin.id)}
                   disabled={unpinning === pin.id}
                   aria-label={`Unpin the message from ${pin.author_name ?? "a former member"}`}
-                  className="focus-ring mr-1 mt-2 shrink-0 rounded p-1 text-fog-muted hover:text-on-surface disabled:opacity-50"
+                  className="focus-ring hit-target relative mr-1 mt-2 shrink-0 rounded p-1 text-fog-muted hover:text-on-surface disabled:opacity-50"
                 >
                   <PinOff size={12} aria-hidden="true" />
                 </button>
@@ -198,7 +198,7 @@ export function ThreadListPopover({
         onOpenChange(next);
       }}
     >
-      <PopoverTrigger aria-label="Threads" className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface">
+      <PopoverTrigger aria-label="Threads" className="focus-ring hit-target relative rounded-lg p-1.5 text-fog-muted hover:text-on-surface">
         <MessagesSquare size={16} aria-hidden="true" />
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
@@ -207,7 +207,7 @@ export function ThreadListPopover({
         </p>
         <div className="max-h-80 overflow-y-auto">
           {failed ? (
-            <p className="px-3 py-4 text-xs text-red-300">
+            <p className="px-3 py-4 text-xs text-status-danger">
               Threads could not be read. They need migration 20260912090000.
             </p>
           ) : null}
@@ -223,7 +223,7 @@ export function ThreadListPopover({
                 setOpen(false);
                 onOpenThread(thread.id, thread.name);
               }}
-              className="focus-ring block w-full border-b border-surgical-steel/40 px-3 py-2 text-left last:border-0 hover:bg-surface-container-low"
+              className="focus-ring min-h-11 block w-full border-b border-surgical-steel/40 px-3 py-2 text-left last:border-0 hover:bg-surface-container-low"
             >
               <span className="flex items-center gap-2">
                 <span className="truncate text-xs font-medium text-on-surface">{thread.name}</span>

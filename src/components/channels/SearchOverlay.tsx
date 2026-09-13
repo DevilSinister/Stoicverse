@@ -211,7 +211,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
             type="button"
             onClick={onClose}
             aria-label="Close search"
-            className="focus-ring shrink-0 rounded-lg p-1 text-fog-muted hover:text-on-surface"
+            className="focus-ring hit-target relative shrink-0 rounded-lg p-1 text-fog-muted hover:text-on-surface"
           >
             <X size={16} aria-hidden="true" />
           </button>
@@ -237,7 +237,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
                     key={`${result.kind}-${result.id}`}
                     type="button"
                     onClick={() => open(result)}
-                    className="focus-ring flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-surface-container-lowest"
+                    className="focus-ring min-h-11 flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-surface-container-lowest"
                   >
                     <KindIcon kind={result.kind} />
                     <span className="truncate text-sm text-on-surface">{result.name}</span>
@@ -291,7 +291,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
                   // The channel view honours `?jump=` once, scrolling to the
                   // message and flashing it.
                   onClick={() => go(`/channels/${hit.channel_id}?jump=${hit.id}`)}
-                  className="focus-ring block w-full px-3 py-2 text-left hover:bg-surface-container-lowest"
+                  className="focus-ring min-h-11 block w-full px-3 py-2 text-left hover:bg-surface-container-lowest"
                 >
                   <span className="flex items-baseline gap-1.5">
                     <span className="truncate text-xs font-medium text-on-surface">

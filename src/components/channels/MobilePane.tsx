@@ -70,7 +70,7 @@ export function MobilePaneDrawer({
             type="button"
             onClick={onClose}
             aria-label={`Close ${label.toLowerCase()}`}
-            className="focus-ring rounded-lg p-1 text-fog-muted hover:text-on-surface"
+            className="focus-ring hit-target relative rounded-lg p-1 text-fog-muted hover:text-on-surface"
           >
             <X size={16} aria-hidden="true" />
           </button>

@@ -254,7 +254,7 @@ export function MessageMenu({
           <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
             <PopoverTrigger
               aria-label="Add a reaction"
-              className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+              className="focus-ring hit-target relative rounded p-1.5 text-fog-muted hover:text-on-surface"
             >
               <SmilePlus size={14} aria-hidden="true" />
             </PopoverTrigger>
@@ -284,7 +284,7 @@ export function MessageMenu({
             type="button"
             onClick={onReply}
             aria-label={`Reply to ${message.authorName}`}
-            className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring hit-target relative rounded p-1.5 text-fog-muted hover:text-on-surface"
           >
             <CornerUpLeft size={14} aria-hidden="true" />
           </button>
@@ -295,7 +295,7 @@ export function MessageMenu({
             type="button"
             onClick={() => message.threadId && onOpenThread(message.threadId, message.threadName)}
             aria-label="Open thread"
-            className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring hit-target relative rounded p-1.5 text-fog-muted hover:text-on-surface"
           >
             <MessagesSquare size={14} aria-hidden="true" />
           </button>
@@ -306,7 +306,7 @@ export function MessageMenu({
             type="button"
             onClick={() => setDialog("forward")}
             aria-label={`Forward the message from ${message.authorName}`}
-            className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring hit-target relative rounded p-1.5 text-fog-muted hover:text-on-surface"
           >
             <Forward size={14} aria-hidden="true" />
           </button>
@@ -315,7 +315,7 @@ export function MessageMenu({
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenuTrigger
             aria-label={`More actions for the message from ${message.authorName}`}
-            className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring hit-target relative rounded p-1.5 text-fog-muted hover:text-on-surface"
           >
             <MoreHorizontal size={14} aria-hidden="true" />
           </DropdownMenuTrigger>

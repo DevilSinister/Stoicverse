@@ -185,7 +185,7 @@ export function VoicePlayer({
         type="button"
         onClick={toggle}
         aria-label={playing ? `Pause ${label}` : `Play ${label}`}
-        className="focus-ring flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-container text-monolith-surface"
+        className="focus-ring hit-target relative flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-container text-monolith-surface"
       >
         {playing ? <Pause size={13} aria-hidden="true" /> : <Play size={13} aria-hidden="true" />}
       </button>
@@ -222,7 +222,7 @@ export function VoicePlayer({
         type="button"
         onClick={cycleSpeed}
         aria-label={`Playback speed, currently ${speed} times. Change it.`}
-        className="focus-ring shrink-0 rounded border border-surgical-steel px-1.5 py-0.5 text-[11px] tabular-nums text-on-surface-variant hover:text-on-surface"
+        className="focus-ring hit-target relative shrink-0 rounded border border-surgical-steel px-1.5 py-0.5 text-[11px] tabular-nums text-on-surface-variant hover:text-on-surface"
       >
         {`${speed}×`}
       </button>

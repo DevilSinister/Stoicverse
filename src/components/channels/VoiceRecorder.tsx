@@ -312,7 +312,7 @@ export function VoiceRecorder({
           type="button"
           onClick={cancel}
           aria-label="Delete this recording"
-          className="focus-ring shrink-0 rounded-lg p-1.5 text-fog-muted hover:text-error"
+          className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-fog-muted hover:text-error"
         >
           <Trash2 size={16} aria-hidden="true" />
         </button>
@@ -337,7 +337,7 @@ export function VoiceRecorder({
           type="button"
           onClick={() => (paused ? resume() : pause())}
           aria-label={paused ? "Resume recording" : "Pause recording"}
-          className="focus-ring shrink-0 rounded-lg p-1.5 text-on-surface-variant hover:text-on-surface"
+          className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-on-surface-variant hover:text-on-surface"
         >
           {paused ? <Play size={16} aria-hidden="true" /> : <Pause size={16} aria-hidden="true" />}
         </button>
@@ -346,7 +346,7 @@ export function VoiceRecorder({
           type="button"
           onClick={finish}
           aria-label="Send this voice note"
-          className="focus-ring flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface"
+          className="focus-ring hit-target relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface"
         >
           <SendHorizontal size={16} aria-hidden="true" />
         </button>
@@ -365,7 +365,7 @@ export function VoiceRecorder({
       onClick={() => void start()}
       disabled={disabled}
       aria-label="Record a voice note"
-      className="focus-ring flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface disabled:opacity-40"
+      className="focus-ring hit-target relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface disabled:opacity-40"
     >
       <Mic size={16} aria-hidden="true" />
     </button>
