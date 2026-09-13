@@ -109,16 +109,6 @@
     "ast_hash": "a95c9862d39d3dbc660edeb2b81f5200",
     "semantic_hash": "a95c9862d39d3dbc660edeb2b81f5200"
   },
-  "src/components/layout/Footer.tsx": {
-    "mtime": 1785069973.7732987,
-    "ast_hash": "778b6b1b8b46c603cdb0c31567cc14c4",
-    "semantic_hash": "778b6b1b8b46c603cdb0c31567cc14c4"
-  },
-  "src/components/layout/Header.tsx": {
-    "mtime": 1789275078.4426458,
-    "ast_hash": "9f3eeb760c23e3d21f1389d154afa9ef",
-    "semantic_hash": ""
-  },
   "src/components/screens/AskStoicScreens.tsx": {
     "mtime": 1789283881.1261456,
     "ast_hash": "0ba8ad16250021df4ab3d199945597c5",
@@ -400,9 +390,9 @@
     "semantic_hash": ""
   },
   "src/app/privacy/page.tsx": {
-    "mtime": 1785069973.750084,
-    "ast_hash": "8021be2eb57639b2390f7e27f345bac4",
-    "semantic_hash": "8021be2eb57639b2390f7e27f345bac4"
+    "mtime": 1789330609.6024306,
+    "ast_hash": "447f27f75fd8a43274dce0e15c5d76ab",
+    "semantic_hash": ""
   },
   "src/app/robots.ts": {
     "mtime": 1785069973.750084,
@@ -415,9 +405,9 @@
     "semantic_hash": "1c592c4fd888d72f532b2ae7ca552360"
   },
   "src/app/terms/page.tsx": {
-    "mtime": 1785069973.761127,
-    "ast_hash": "e89089378ee522a51dae65494efc3edd",
-    "semantic_hash": "e89089378ee522a51dae65494efc3edd"
+    "mtime": 1789330609.6391194,
+    "ast_hash": "fb83c23201f6ba7269d46adf9d05a37a",
+    "semantic_hash": ""
   },
   "src/components/auth/AuthForm.tsx": {
     "mtime": 1789329151.9173,
@@ -995,8 +985,8 @@
     "semantic_hash": ""
   },
   "src/components/screens/LandingScreen.tsx": {
-    "mtime": 1789283881.1387942,
-    "ast_hash": "12be348424fa1d92d5d78f1683cb2b4a",
+    "mtime": 1789330709.2402294,
+    "ast_hash": "f519542afbb5f351312f9fd896a21677",
     "semantic_hash": ""
   },
   "src/components/workspace/WorkspacePage.tsx": {
@@ -2632,6 +2622,21 @@
   "tests/auth-recovery.contract.mjs": {
     "mtime": 1789329531.9883773,
     "ast_hash": "3867f2986f9f28d94d9dcfe72f1740ff",
+    "semantic_hash": ""
+  },
+  "src/components/layout/PublicChrome.tsx": {
+    "mtime": 1789330862.8834336,
+    "ast_hash": "05ee369bd2d7a2345d8ecac811854e1e",
+    "semantic_hash": ""
+  },
+  "src/components/legal/LegalPage.tsx": {
+    "mtime": 1789330571.037814,
+    "ast_hash": "2454eb425a0b47deceffb290b237afad",
+    "semantic_hash": ""
+  },
+  "tests/public-chrome.contract.mjs": {
+    "mtime": 1789330909.1655183,
+    "ast_hash": "de7fa6386bc748b131674d81761064bc",
     "semantic_hash": ""
   }
 }
