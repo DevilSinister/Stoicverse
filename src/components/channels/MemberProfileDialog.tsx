@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Gift, ShieldBan, ShieldMinus, Timer } from "lucide-react";
 
 import { giftMembership } from "@/app/community/member-actions";
@@ -80,21 +80,8 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
   const [pending, setPending] = useState<Pending>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
-  /*
-    Whether a confirm is on top, readable synchronously.
 
-    The `pending` state cannot answer this. Both overlays listen for Escape on
-    the document, the confirm's handler runs first and calls setPending(null),
-    and the card's handler then reads a closure in which pending is already
-    gone — so one Escape closed both layers at once. A ref cleared on the next
-    frame is still true for every listener in the same dispatch, which is
-    exactly the window that matters.
-  */
-  const confirmOpen = useRef(false);
-
-  /** Opening a confirm marks the ref before any listener can read it. */
   const askFor = (next: Exclude<Pending, null>) => {
-    confirmOpen.current = true;
     setReason("");
     setPending(next);
   };
@@ -177,18 +164,25 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
     portals in mount order. The `z-[60]` that used to force it is gone, and it
     was the last arbitrary z-index in the folder.
 
-    Escape does NOT fall out of the stack, which is the part worth writing
-    down. The card is a Dialog and the confirm is an AlertDialog — two separate
-    Base UI roots, each with its own document-level dismiss listener — so one
-    Escape reached both and closed the card out from under the confirm. Caught
-    in the browser, not in review. The guard below is the same rule the
-    hand-written version had: while a confirm is open, Escape belongs to it.
+    **Escape does not fall out of the stack either, and nothing here makes that
+    true.** This card carried a hand-written guard - a ref marking that a
+    confirm was on top, cleared a frame late so the card's own listener would
+    still see it - on the belief that two Base UI roots each run their own
+    document dismiss listener and one Escape reaches both. Measured in the
+    browser with the guard deleted: Escape closes the confirm and leaves the
+    card. `DialogInteractions` passes `escapeKey: isTopmost`, and a dialog root
+    rendered inside another's React tree reports itself through
+    `parentDialogRootContext`, so the outer card's Escape listener is not
+    registered at all while the inner one is open. The same `isTopmost` gates
+    outside-press. Re-adding a guard would not be harmless: the only writer that
+    could clear it is the confirm's `onOpenChange`, and a *successful* sanction
+    closes the confirm through `setPending(null)` instead - so the ref would
+    stick true and the card could never be dismissed again.
   */
   return (
     <Overlay
       open
       onOpenChange={(next) => {
-        if (confirmOpen.current) return;
         if (!next && !busy) onClose();
       }}
     >
@@ -394,11 +388,6 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
           onOpenChange={(next) => {
             if (next || busy) return;
             setPending(null);
-            // Cleared a frame later, so the card's own Escape listener - which
-            // fires after this one, in the same dispatch - still sees a confirm.
-            requestAnimationFrame(() => {
-              confirmOpen.current = false;
-            });
           }}
           title={pending.kind === "ban" ? `Ban ${name} from the community?` : `Time out ${name}`}
           confirmLabel={pending.kind === "ban" ? "Ban" : "Time out"}

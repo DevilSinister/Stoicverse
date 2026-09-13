@@ -229,10 +229,11 @@ test("the hand-rolled overlays only ever decrease", async () => {
   for (const file of outside) {
     if ((await read(file)).includes("fixed inset-0")) count += 1;
   }
-  // 13 after P3b took the member profile card, its nested confirm, the mobile
-  // pane and the two ActionDialogs. ForwardDialog, SearchOverlay and QuickSwitcher
-  // are the three left in /channels; P11-P13 take the rest.
-  assert.ok(count <= 13, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
+  // 10 at the end of P3. The three that were left in /channels are gone:
+  // ForwardDialog and SearchOverlay moved onto the primitive and QuickSwitcher
+  // was deleted into SearchOverlay. MessageMenu and MobilePane still match on
+  // prose rather than markup. The rest belong to the creator phases.
+  assert.ok(count <= 10, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
 });
 
 test("arbitrary z-index only ever decreases", async () => {
