@@ -1,10 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Forward, Hash, Loader2, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, Hash, Loader2, Search } from "lucide-react";
 
 import { forwardMessage, type ForwardOutcome } from "@/app/community/actions";
 import { useCommunity } from "@/components/channels/CommunityProvider";
+import { Button } from "@/components/ui/button";
+import {
+  Overlay,
+  OverlayBody,
+  OverlayContent,
+  OverlayDescription,
+  OverlayFooter,
+  OverlayHeader,
+  OverlayTitle,
+} from "@/components/ui/overlay";
 import { useToast } from "@/components/ui/toast";
 import { FORWARD_CHANNEL_LIMIT, MESSAGE_MAX_CHARS } from "@/lib/community/constants";
 import type { ChannelMessage } from "@/lib/community/messages";
@@ -21,6 +31,12 @@ import type { ChannelMessage } from "@/lib/community/messages";
  * channel, so a message can land in four of five and say which one refused it
  * and why; the dialog stays open on a partial result rather than closing over
  * the half that failed.
+ *
+ * The shell is `ui/overlay` rather than the hand-rolled scrim-and-card it was. What
+ * that buys, none of which was written here: a focus trap, focus restore to the
+ * forward button, a scroll lock, a portal out of the message row, and — the one
+ * that mattered on a phone — a bottom sheet that clears the home indicator
+ * instead of a centred card a software keyboard shoves off screen.
  */
 
 type Stage =
@@ -44,11 +60,6 @@ export function ForwardDialog({
   const [query, setQuery] = useState("");
   const [note, setNote] = useState("");
   const [stage, setStage] = useState<Stage>({ kind: "picking" });
-  const searchRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    searchRef.current?.focus();
-  }, []);
 
   // Where this person may post, in the order the creator arranged. A locked
   // channel is one they cannot open at all, so it is not a destination.
@@ -105,41 +116,37 @@ export function ForwardDialog({
   const busy = stage.kind === "sending";
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Forward this message"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-scrim p-4"
-      onKeyDown={(event) => {
-        if (event.key === "Escape" && !busy) onClose();
+    <Overlay
+      open
+      onOpenChange={(next) => {
+        // A send in flight is not interruptible: the server is already writing
+        // copies, and closing over it would lose the per-channel answer.
+        if (!next && !busy) onClose();
       }}
     >
-      <div className="flex max-h-[85vh] w-full max-w-md flex-col rounded-xl border border-surgical-steel bg-surface-container-low">
-        <div className="border-b border-surgical-steel px-4 py-3">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-on-surface">
-            <Forward size={14} aria-hidden="true" />
-            Forward
-          </h2>
-          <p className="mt-1 line-clamp-2 text-xs text-fog-muted">
+      <OverlayContent placement="responsive" size="sm" density="chrome" showCloseButton={false}>
+        <OverlayHeader className="pr-chrome-x">
+          <OverlayTitle>Forward</OverlayTitle>
+          <OverlayDescription className="line-clamp-2">
             {preview
               ? `${message.authorName}: ${preview}`
               : `${message.authorName} — ${message.attachments.length > 0 ? "an attachment" : "a message"}`}
-          </p>
-        </div>
+          </OverlayDescription>
+        </OverlayHeader>
 
         {stage.kind === "done" ? (
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
-            <ul className="space-y-1.5 text-xs">
+          <OverlayBody>
+            <ul className="space-y-1.5 text-chrome-base">
               {stage.outcomes.map((outcome) => (
                 <li key={outcome.channelId} className="flex items-start gap-2">
                   {outcome.postId ? (
-                    <Check size={13} aria-hidden="true" className="mt-0.5 shrink-0 text-primary-container" />
+                    <Check size={13} aria-hidden="true" className="mt-0.5 shrink-0 text-primary" />
                   ) : (
-                    <span aria-hidden="true" className="mt-0.5 shrink-0 text-error">
+                    <span aria-hidden="true" className="mt-0.5 shrink-0 text-status-danger">
                       &times;
                     </span>
                   )}
-                  <span className={outcome.postId ? "text-on-surface-variant" : "text-error"}>
+                  <span className={outcome.postId ? "text-text-default" : "text-status-danger"}>
                     {outcome.postId
                       ? `Sent to #${nameOf(outcome.channelId)}`
                       : `#${nameOf(outcome.channelId)} — ${outcome.failure}`}
@@ -147,26 +154,28 @@ export function ForwardDialog({
                 </li>
               ))}
             </ul>
-          </div>
+          </OverlayBody>
         ) : (
           <>
-            <div className="border-b border-surgical-steel px-4 py-2">
-              <label className="flex items-center gap-2 rounded-lg border border-surgical-steel bg-surface-container-lowest px-2 py-1.5">
-                <Search size={13} aria-hidden="true" className="shrink-0 text-fog-muted" />
+            <div className="shrink-0 border-b border-border-hairline px-chrome-x py-chrome-y">
+              <label className="flex h-8 items-center gap-2 rounded-lg border border-border-hairline bg-surface-sunken px-2.5">
+                <Search size={13} aria-hidden="true" className="shrink-0 text-text-faint" />
                 <span className="sr-only">Search channels</span>
                 <input
-                  ref={searchRef}
+                  // The first field in the sheet, so Base UI's initial focus
+                  // lands here without a ref and an effect to put it there.
+                  autoFocus
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search channels"
-                  className="w-full bg-transparent text-sm text-on-surface outline-none placeholder:text-fog-muted"
+                  className="min-w-0 flex-1 bg-transparent text-chrome-base text-text-strong outline-none placeholder:text-text-faint"
                 />
               </label>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+            <OverlayBody className="px-1.5">
               {groups.length === 0 ? (
-                <p className="px-2 py-4 text-center text-xs text-fog-muted">
+                <p className="px-2 py-6 text-center text-chrome-base text-text-muted">
                   {query.trim()
                     ? "No channel of that name that you can post in."
                     : "There is no channel here you can post in."}
@@ -174,7 +183,7 @@ export function ForwardDialog({
               ) : (
                 groups.map((group) => (
                   <div key={group.id} className="mb-3">
-                    <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-fog-muted">
+                    <p className="px-2 pb-1 font-mono text-mono-xs tracking-widest text-text-faint uppercase">
                       {group.name}
                     </p>
                     <ul className="space-y-0.5">
@@ -190,19 +199,19 @@ export function ForwardDialog({
                               // would get somebody back under it.
                               disabled={busy || (atLimit && !ticked)}
                               onClick={() => toggle(channel.id)}
-                              className={`focus-ring flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm disabled:opacity-40 ${
+                              className={`focus-ring flex min-h-11 w-full items-center gap-2 rounded-lg px-2 text-left text-chrome-base transition-colors disabled:opacity-40 sm:min-h-[34px] ${
                                 ticked
-                                  ? "bg-surface-container-high text-on-surface"
-                                  : "text-fog-muted hover:bg-surface-container-low hover:text-on-surface"
+                                  ? "bg-surface-raised text-text-strong"
+                                  : "text-text-muted hover:bg-surface-raised hover:text-text-strong"
                               }`}
                             >
                               <span
                                 aria-hidden="true"
-                                className={`flex size-4 shrink-0 items-center justify-center rounded border ${
-                                  ticked ? "border-primary-container bg-primary-container" : "border-surgical-steel"
+                                className={`flex size-4 shrink-0 items-center justify-center rounded-sm border ${
+                                  ticked ? "border-primary bg-primary" : "border-border-strong"
                                 }`}
                               >
-                                {ticked ? <Check size={11} className="text-monolith-surface" /> : null}
+                                {ticked ? <Check size={11} className="text-primary-foreground" /> : null}
                               </span>
                               <Hash size={14} aria-hidden="true" className="shrink-0" />
                               <span className="truncate">{channel.name}</span>
@@ -214,10 +223,10 @@ export function ForwardDialog({
                   </div>
                 ))
               )}
-            </div>
+            </OverlayBody>
 
-            <div className="border-t border-surgical-steel px-4 py-2">
-              <label className="block text-[11px] text-fog-muted">
+            <div className="shrink-0 border-t border-border-hairline px-chrome-x py-chrome-y">
+              <label className="block text-chrome-sm text-text-muted">
                 Add a message — optional
                 <textarea
                   value={note}
@@ -225,15 +234,15 @@ export function ForwardDialog({
                   rows={2}
                   maxLength={MESSAGE_MAX_CHARS}
                   disabled={busy}
-                  className="mt-1 w-full resize-none rounded-lg border border-surgical-steel bg-surface-container-lowest p-2 text-sm text-on-surface outline-none"
+                  className="focus-ring mt-1 w-full resize-none rounded-lg border border-border-hairline bg-surface-sunken p-2 text-chrome-base text-text-strong outline-none"
                 />
               </label>
             </div>
           </>
         )}
 
-        <div className="flex items-center justify-between gap-3 border-t border-surgical-steel px-4 py-3">
-          <p className="text-[11px] text-fog-muted">
+        <OverlayFooter className="sm:items-center sm:justify-between">
+          <p className="text-chrome-sm text-text-faint">
             {stage.kind === "done"
               ? null
               : atLimit
@@ -242,29 +251,19 @@ export function ForwardDialog({
                   ? `${selected.length} selected`
                   : null}
           </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={busy}
-              className="focus-ring rounded-lg border border-surgical-steel px-3 py-1.5 text-xs text-on-surface-variant disabled:opacity-50"
-            >
+          <div className="flex gap-chrome-gap sm:justify-end">
+            <Button variant="outline" size="chrome" disabled={busy} onClick={onClose}>
               {stage.kind === "done" ? "Close" : "Cancel"}
-            </button>
+            </Button>
             {stage.kind === "done" ? null : (
-              <button
-                type="button"
-                onClick={() => void send()}
-                disabled={busy || selected.length === 0}
-                className="focus-ring flex items-center gap-1.5 rounded-lg bg-primary-container px-3 py-1.5 text-xs font-semibold text-monolith-surface disabled:opacity-50"
-              >
+              <Button size="chrome" disabled={busy || selected.length === 0} onClick={() => void send()}>
                 {busy ? <Loader2 size={12} aria-hidden="true" className="animate-spin" /> : null}
                 Send
-              </button>
+              </Button>
             )}
           </div>
-        </div>
-      </div>
-    </div>
+        </OverlayFooter>
+      </OverlayContent>
+    </Overlay>
   );
 }
