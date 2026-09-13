@@ -1,209 +1,352 @@
-# Stoicverse Design System
+# Stoicverse Design System — Monolith
 
-**Last updated:** August 14, 2026
+Last updated: September 13, 2026
 
-This document describes the system **as it is implemented**. Tokens are defined in
-`src/app/globals.css` (`@theme` block); fonts are loaded in `src/app/layout.tsx`.
-When code and this document disagree, the code is the source of truth — update
-this file rather than letting them drift.
+This describes the system **as it is implemented**. When code and this document disagree, the
+code is the source of truth and this document is the bug. Exact token values live in
+`src/app/globals.css`; this file explains what they mean and when to reach for them.
+
+> **Rewritten for the Monolith direction.** Rules this document previously carried that are now
+> *reversed* — pill-shaped buttons, `text-white` headings, emerald as accent, gradient panels —
+> are listed under "Reversed rules" so nobody re-introduces them from memory or an older branch.
+
+---
 
 ## Direction
 
-Stoicverse uses a quiet editorial interface built on visible hairline structure:
-serious, cold, and precise. Deep navy canvas, a single emerald accent reserved
-for progression and primary action, and 1px rules that carry the layout before
-any decoration does. It should feel like dependable learning infrastructure, not
-a social feed, trading terminal, or generic SaaS dashboard.
+Stoicverse is a precise instrument, not a loud trading terminal, a generic SaaS dashboard, or a
+social feed. The product is dense, quiet, and achromatic; colour is information, never decoration.
+
+- **Achromatic surfaces.** Near-black greys carry every panel, header, menu and list. A surface's
+  meaning comes from its depth in the stack, not from a hue.
+- **Hairlines before fills.** Structure is drawn with 1px rules. Reach for a border before a
+  background, and a background before a shadow.
+- **One accent, and it means something.** Electric lime marks progression, focus, state and the
+  primary action. If a lime pixel is not telling the reader something, it is wrong.
+- **4px corners.** Sharp enough to read as an instrument, soft enough not to be brutalist.
+- **Two rhythms, one language.** Chrome is dense. Reading content is generous. See "Density".
+
+Banned: gradients, glassmorphism, decorative hero metrics, grids of identical icon-heading-text
+cards, coloured glows, and any colour used because a section "needed some life".
+
+---
 
 ## Palette
 
-Tailwind utilities are generated from the `@theme` block, so `--color-surface`
-is used as `bg-surface`, `text-surface`, etc.
+All values are semantic roles. Components name the role, never the literal.
+
+### Surfaces
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `surface` | `#051424` | Page background |
-| `surface-container-lowest` | `#010f1f` | Deepest recess: inputs, `<body>` |
-| `surface-container-low` | `#0D1C2D` | Recessed panels, sidebars, footers |
-| `monolith-surface` | `#1E293B` | Cards and primary panels |
-| `surface-container-high` | `#1c2b3c` | Raised rows, hover fills, panel headers |
-| `surgical-steel` | `#334155` | Hairlines, borders, grid dividers |
-| `on-surface` | `#d4e4fa` | Body text |
-| `on-surface-variant` | `#c6c6cd` | Supporting copy |
-| `fog-muted` | `#94A3B8` | Metadata and tertiary copy |
-| `primary-container` | `#10B981` | Accent: focus, progress, primary action |
-| `on-primary-fixed` | `#131b2e` | Text on the emerald accent |
-| `error` | `#ffb4ab` | Error text and borders |
+| `--surface-sunken` | `#050506` | Wells the eye sits *below*: the rail, scroll containers, the composer, inputs |
+| `--surface-canvas` | `#0A0A0B` | The page |
+| `--surface-panel` | `#141416` | Cards, panels, dialog bodies, popovers |
+| `--surface-raised` | `#1F1F23` | Hover fills, table headers, row-raise, active list items |
 
-Plain `text-white` is used for headings sitting above `on-surface`.
+`sunken` is deliberately **darker than canvas**. The rail and the composer read as recessed, not
+elevated. Inverting that relationship flattens the rail against the page.
 
-Verified contrast on `surface`: `on-surface-variant` 11.1:1, `fog-muted` 7.2:1,
-`primary-container` 7.2:1. `on-primary-fixed` on `primary-container` is 6.8:1.
-All pass AA for body text.
+### Borders
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--border-hairline` | `#242427` | The default rule. Almost every border in the product |
+| `--border-strong` | `#35353A` | Emphasis, hover, an input at rest |
+
+### Text
+
+Measured contrast, not estimated:
+
+| Token | Value | On canvas | On panel | On raised | Use |
+| --- | --- | --- | --- | --- | --- |
+| `--text-strong` | `#F2F2F3` | 17.69:1 | 16.45:1 | 14.68:1 | Headings, active nav, emphasis |
+| `--text-default` | `#C9C9CE` | 12.00:1 | 11.15:1 | 9.96:1 | Body |
+| `--text-muted` | `#8E8E97` | 6.09:1 | 5.67:1 | 5.06:1 | Metadata, labels, **placeholders**, rest-state nav |
+| `--text-faint` | `#5A5A62` | 2.90:1 | 2.69:1 | 2.40:1 | **Disabled controls only** |
+
+`--text-faint` does not meet AA and must never carry information a reader needs. A placeholder is
+information, so placeholders use `--text-muted`. WCAG exempts disabled controls, and that is the
+only thing `faint` is for.
+
+`--text-muted` was set at `#8E8E97` rather than a darker grey on purpose: roughly 600 call sites
+resolve to this one value, so it must clear AA on the *brightest* surface (`raised`, 5.06:1), not
+merely on canvas. Any downward tweak for "quiet" is a product-wide accessibility regression from
+a single CSS line.
+
+Do not use `text-white`. Pure `#FFF` on `#0A0A0B` is 20.4:1 and reads as glare against an
+achromatic ground.
+
+### Accent and status
+
+| Token | Value | On canvas | Use |
+| --- | --- | --- | --- |
+| `--accent` | `#C6F24E` | 15.28:1 | Progression, focus, state, primary action, brand |
+| `--accent-contrast` | `#0A0A0B` | 15.28:1 on accent | Text and icons *on* an accent fill |
+| `--accent-soft` | `color-mix(in oklab, accent 12%, transparent)` | — | Active rows, selected states |
+| `--status-danger` | `#FF6B6B` | 7.13:1 | Destructive action, error |
+| `--status-warn` | `#F5A524` | 9.70:1 | Warning, pending, expiring |
+| `--status-ok` | `#4ADE9B` | 11.51:1 | Success, healthy, complete |
+| `--scrim` | `rgb(0 0 0 / .72)` | — | Behind every overlay |
+
+The accent is not a success colour. A completed course is `--status-ok`; a course you are
+*currently progressing through* is `--accent`. Keeping those distinct is why both exist.
+
+> **`tests/community-settings-ui.contract.mjs:50` pinned the old emerald accent**
+> (`assert.match(dark, /--primary: #10B981;/)`). Changing the accent means changing that
+> assertion in the same commit, with a comment saying what it now pins. It is a design decision
+> under test, which is correct — it simply means the decision is changed deliberately, never
+> incidentally.
+
+---
 
 ## Typography
 
-Both faces are self-hosted through `next/font/google` and exposed as
-`--font-inter` and `--font-jetbrains-mono`.
+**Geist** for everything. **JetBrains Mono** for data, measurement, timestamps, counts, IDs and
+code — never as a costume for "technical".
 
-- **Inter** — everything: display, headings, body, navigation, controls, forms,
-  labels, metadata. Reached via `font-headline`, `font-body`, `font-display`,
-  `font-body-lg`, and the `font-*-md`/`font-*-sm` variants.
-- **JetBrains Mono** — reached via `font-label`, `font-label-md`, `font-label-sm`,
-  and `font-code-block`.
+| Ramp | Tokens | Sizes | Line height |
+| --- | --- | --- | --- |
+| Chrome | `--text-chrome-xs / -sm / -base` | 11 / 12 / 13px | 1.3–1.4 |
+| Content | `--text-content-sm / -base / -lg` | 14 / 15 / 17px | 1.6 |
+| Titles | `--text-title-sm / -md / -lg` | 16 / 20 / 28px | tracking −0.01 to −0.02em |
+| Display | `--text-display` | `clamp(2rem, 1.2rem + 3vw, 3.25rem)` | 1.1 |
+| Mono | `--text-mono-xs / -sm` | 11 / 12px | tabular figures |
 
-Mono is for code, data, and measurement. Do not use it as a costume for
-"technical" — nav links, buttons, and section eyebrows belong in Inter. The
-public surfaces (landing, auth) use Inter throughout for this reason; the app
-interior still applies mono via the `font-label-*` tokens.
+Two weights: 400 and 500. There is no 600 or 700 — weight is carried by colour and size, and a
+heavier face on a near-black ground blooms rather than emphasises.
 
-Display type uses `clamp()` with tight tracking (`-0.02em` to `-0.035em`) and
-caps around 4.75rem. Body measure stays in the 65–75 character band.
+Body measure stays 65–75ch on reading surfaces.
 
-## Layout and components
+---
 
-- Hairline structure first: 1px `surgical-steel` rules define regions before any
-  card, fill, or shadow is added.
-- Cards and panels use `rounded-lg` to `rounded-2xl`. Buttons, tags, and inputs
-  are pill-shaped (`rounded-full`) except form inputs, which use `rounded-lg`.
-- Content is capped at `max-w-7xl` with `px-4 / md:px-8 / lg:px-12` gutters.
-- Minimum 44px touch targets for controls and navigation links. Inline links
-  inside running text are the one exception.
-- A faint 1px grid field (`surgical-steel`, 60–88px cells) appears on hero and
-  auth surfaces as a background material. Fade it with a `mask-image` rather
-  than letting it hard-cut at a section edge.
+## Density — two rhythms, one language
 
-### Identity command center
+Enforced by *which token family a component names*, not by judgement.
 
-Member settings are a dedicated workspace, not a modal stack. At wide desktop
-sizes they use three visible regions: a compact category rail, one focused
-editor, and a live identity preview. Medium layouts retain the rail and editor;
-the preview is supporting context and may collapse first. The rail owns global
-settings navigation and keeps logout visually separated below the categories.
+**Chrome** — the rail, headers, toolbars, menus, context menus, tables, lists, the member column,
+the channel list, dialog headers and footers. Dense, scannable, many things visible at once.
 
-The editor shows one category at a time and divides related forms with hairlines
-instead of nesting every form in a separate card. The live preview is a truthful
-read-only mirror of account identity: avatar, display name, email, membership
-status, and cosmetic community badges. A cosmetic badge communicates identity
-only; it must never be presented as a permission, lock, or progression tier.
+```
+--spacing-chrome-x    12px      --spacing-chrome-row   32px
+--spacing-chrome-y     8px      --spacing-chrome-bar   48px
+--spacing-chrome-gap   8px
+```
 
-### Member operations registry
+**Content** — courses, lessons, events, analytics narrative, settings bodies, marketing, auth.
+Generous, one idea at a time, comfortable to read for minutes.
 
-High-volume operational directories are search-first. Place one prominent,
-full-width search field before secondary filters, then render stable 50-row
-pages with dense desktop tables and equivalent compact rows on mobile. Keep the
-result surface quiet: hairline row separators, restrained status pills, and one
-clear details affordance per account. Names lead; exact account identifiers are
-supporting monospace metadata.
+```
+--spacing-content-x   24px      --spacing-section      48px
+--spacing-content-y   32px      --spacing-gutter-page  16px (20px at sm and up)
+--spacing-content-gap 20px
+```
 
-Member mutations stay in one focused detail sheet so operators can inspect
-identity, access, roles, and turnover without losing their registry context.
-Use inline action states rather than nested dialogs. Destructive or access-
-changing actions expose their consequence before confirmation, require a reason
-where enforcement is involved, and announce pending, success, and error states.
-Catalog-level management, such as cosmetic role creation and deletion, belongs
-in a separate focused sheet opened from the page toolbar.
+Shared components (`Card`, `PageHeader`, `Section`, `DataTable`, `EmptyState`) take
+`density?: "chrome" | "content"`, defaulting to `"content"`. A contract test asserts chrome
+surfaces use only `*-chrome-*` spacing and reading surfaces only `*-content-*`.
 
-Batch-edit workspaces establish a visible save boundary. Track changes only for
-the current page, freeze search, filters, and pagination while rows are dirty,
-and show a persistent save bar with the changed-row count and explicit Save and
-Discard actions. Pair editable current-period values with read-only derived
-totals so operators can distinguish input from history at a glance.
+Mixed surfaces are legitimate: `ChannelView` is chrome (dense header, dense list) wrapping content
+(message bodies are reading text). The tokens make that choice nameable and reviewable; they do
+not make it automatic.
 
-### Notification preview and inbox
+---
 
-The AppShell bell opens a compact, bounded preview (up to 24rem wide) of the five
-newest notifications. It includes the unread count, distinct unread markers,
-loading/error/empty states, and one persistent “View all notifications” exit.
-Keep this surface scan-first: title, at most two lines of body copy, timestamp,
-and direction affordance. Opening the preview may acknowledge the visible five;
-it must not visually imply that the entire inbox was cleared.
+## Shape and elevation
 
-The full notification inbox is a quiet chronological queue. Use the All, Unread,
-and Mentions controls as a roving tablist, group rows under Today, Yesterday, and
-Earlier, and append history with “Load older” rather than infinite scroll. Every
-data state is a first-class composition: skeleton rows for initial loading, a
-retry action for failure, view-specific empty copy, and an inline alert when a
-refresh fails while usable rows remain.
+**Radii are flat, not derived.** A derived scale off a 4px base produces 5.6px and 7.2px corners,
+which shimmer on non-retina displays.
+
+```
+--radius-sm 2px   --radius-md 4px   --radius-lg 4px
+--radius-xl 6px   --radius-2xl 6px  --radius-3xl 8px   --radius-4xl 8px
+```
+
+`rounded-full` survives for exactly four things: avatars, presence dots, unread badges, and the
+rail's active marker. Buttons, inputs, chips and tags are **4px**. They were pill-shaped in the
+previous system; they are not any more.
+
+**Shadows are near-black and low-spread.** Elevation comes from the hairline, not the blur.
+
+```
+--shadow-xs   0 1px 0 0 rgb(0 0 0 / .40)
+--shadow-sm   0 1px 2px 0 rgb(0 0 0 / .50)
+--shadow-md   0 4px 12px -4px rgb(0 0 0 / .65)
+--shadow-lg   0 12px 28px -12px rgb(0 0 0 / .75)
+--shadow-xl   0 20px 48px -20px rgb(0 0 0 / .82)
+--shadow-2xl  0 28px 72px -28px rgb(0 0 0 / .88)
+```
+
+Arbitrary `shadow-[...]` values are banned and gated by a contract test. Zero-offset coloured
+halos are banned; there is no accent glow in this system.
+
+---
+
+## Layering
+
+There is no `--z-*` namespace in Tailwind v4, so the scale is custom utilities:
+
+| Utility | z | Use |
+| --- | --- | --- |
+| `z-base` | 0 | In-flow |
+| `z-raised` | 10 | Sticky rows, in-flow layering |
+| `z-sticky` | 20 | Sticky headers, composer |
+| `z-rail` | 30 | The rail |
+| `z-drawer` | 40 | Mobile panes |
+| `z-scrim` | 50 | Overlay backdrop |
+| `z-overlay` | 60 | Dialog and sheet popups |
+| `z-menu` | 70 | A menu or popover opened *over* a dialog |
+| `z-toast` | 90 | Toasts |
+
+Arbitrary `z-[...]` and bare `z-50` are banned outside `globals.css`.
+
+**This scale only works because overlays portal to `<body>`.** The previous ladder reached
+`z-[81]` and `z-100` because `createPortal` appeared **zero times** in `src/` — every overlay
+rendered in-tree and had to out-rank whatever ancestor it happened to sit inside. If you need a
+number above 90, the real bug is that something is not portalling.
+
+---
+
+## Overlays
+
+**One primitive: `src/components/ui/overlay.tsx`**, built on `@base-ui/react`'s Dialog, which
+owns portalling, scroll lock, focus trap, focus restore and Escape. Do not hand-roll any of those
+— a contract test bans `fixed inset-0` outside that file and bans keydown-Tab traps outside
+`src/components/ui/`.
+
+```
+<Overlay open onOpenChange>
+  <OverlayContent placement="responsive" size="md" density="content">
+    <OverlayHeader/> <OverlayBody/> <OverlayFooter/>
+  </OverlayContent>
+</Overlay>
+```
+
+- `placement="responsive"` is the default: a bottom sheet below `sm`, a centred dialog at and
+  above it. Written once, here, not re-derived per screen.
+- Safe-area bottom padding and `max-h-[100svh]` live on `OverlayContent`.
+- `alert-dialog` stays separate — `role="alertdialog"` and no dismiss-on-outside-click are
+  genuinely different semantics, not a style variant.
+- Destructive confirmation is `ui/confirm-dialog.tsx`. **`window.confirm`, `window.alert` and
+  `window.prompt` are banned** and gated by a contract test. Transient failures are toasts, not
+  in-flow error blocks — an error that reflows the page costs the reader their place.
+- A dialog raised from *inside another dialog's dismiss path* (the unsaved-changes guard) must
+  compose without a manual `z-[60]`. That is the primitive's hardest requirement.
+
+---
 
 ## Interaction and accessibility
 
-- Motion is quiet and purposeful, 150–300ms for state changes and up to ~1s for
-  a single page entrance. Exponential ease-out (`cubic-bezier(0.16, 1, 0.3, 1)`).
-- Entrance animations must start from a **visible** default: animate transform
-  and blur, never opacity to zero, and use no fill mode. A page whose animation
-  never runs must render finished, not blank. See `.settle` / `.draw-down`.
-- All motion is disabled under `prefers-reduced-motion: reduce`.
-- Focus uses the shared `.focus-ring` utility: a 2px emerald outline at 2px
-  offset, on `:focus-visible` only. Do not hand-roll focus styles.
-- Temporary shell surfaces move focus into their first action when opened, trap
-  Tab within the surface, close on Escape, and restore focus to the trigger.
-  Mobile settings detail moves focus to its back control, then restores focus to
-  the category that launched it when returning to the category list.
-- Tab sets use one tab stop and support Left/Right Arrow, Home, and End. Async
-  results use `status` or `alert` semantics and must remain understandable when
-  pulse, spin, and transition animation are suppressed.
-- Shadows carry a real offset and blur. `.emerald-glow` is the primary-action
-  shadow: `0 8px 24px -12px` emerald plus a 1px inset top highlight. Zero-offset
-  colored halos are not part of the system.
-- `scroll-padding-top: 5rem` on `html` keeps in-page anchors clear of the fixed
-  header; smooth scrolling is enabled only when motion is allowed.
-- Avoid gradients, glassmorphism, warm themes, decorative hero metrics, and
-  grids of identically-sized icon-plus-heading-plus-text cards.
+- **Focus is the shared `.focus-ring` only** — 2px accent at 2px offset, on `:focus-visible`.
+  Do not hand-roll focus styles.
+- **Touch targets are ≥44×44.** Dense chrome achieves this without growing visually: a 32px
+  control ships an expanded hit area (`before:absolute before:-inset-1.5`). This belongs in the
+  component, never in call sites.
+- **Temporary surfaces trap Tab, close on Escape, and restore focus to their trigger.** Because
+  every overlay is the shared primitive, this is free — which is why hand-rolling one is banned
+  rather than discouraged.
+- Escape unwinds **one layer at a time**, outermost last.
+- **Motion begins with visible content.** 150–300ms for a state change, up to ~1s for a page
+  entrance, `cubic-bezier(0.16, 1, 0.3, 1)`. Entrances animate transform and blur, **never
+  opacity from zero, and never with a fill-mode** — a page whose animation does not run must
+  still render finished. `prefers-reduced-motion` is honoured in `globals.css`.
+- Transition specific properties with intent (`transition-colors`), not blanket `transition-all`.
+- Hover must not shift layout.
+- Destructive actions are explicit and, where possible, reversible.
 
-## Surfaces
-
-- **Landing** (`src/components/screens/LandingScreen.tsx`) — Persuade. A server
-  component with no client bundle; it must never import from the app's
-  `"use client"` screen modules, which would ship admin and checkout internals
-  to anonymous visitors.
-- **Auth** (`src/components/auth/AuthForm.tsx`) — Operate. Signup carries a
-  four-step context rail so the email-confirmation step is not a surprise; the
-  rail is `hidden lg:flex`, so phones get the same sequence as a segmented
-  stepper rather than losing it.
-- **Member settings** (`AccountSettingsWorkspace`) — Operate. An identity command
-  center with a category rail, focused editor, and supporting live preview.
-- **Member notifications** (`NotificationCenter` and the AppShell bell preview) —
-  Operate. A compact recency preview opens into a filterable chronological inbox;
-  state changes are communicated by copy, color, and semantics, never motion alone.
-- **Creator member registry** (`MemberRegistry`, `MemberDetailModal`, and
-  `RoleManagerModal`) — Operate. Search and filters lead into cursor-paginated
-  member rows; focused sheets keep inspection and deliberate account actions in
-  context without stacking dialogs.
-- **Creator turnover workspace** (`TurnoverWorkspace`) — Operate. Current-week
-  amounts are edited as a page-scoped batch, lifetime totals remain read-only,
-  and a persistent Save/Discard bar owns the commit boundary.
+---
 
 ## Mobile
 
-- Full-height auth and hero surfaces use `100svh`, not `100vh`. Mobile browser
-  chrome makes `vh` taller than the visible area, which pushes primary actions
-  under the URL bar.
-- Form inputs must compute to **16px or larger**. Below that, iOS Safari zooms
-  the page on focus and does not zoom back out.
-- Full-bleed surfaces pad with `max(<value>, env(safe-area-inset-*))` so content
-  clears notches and the home indicator.
-- Anything hidden behind `lg:` must have a mobile equivalent, not simply vanish.
-- Member settings become list-to-detail navigation below `md`: begin with the
-  category list, push into one section, and provide an explicit “All settings”
-  back control. Preserve the selected category and restore keyboard focus when
-  returning; do not compress the desktop rail and editor side by side.
-- Member-operation tables become compact, complete rows below `md`; do not hide
-  account state or force horizontal table scrolling. Member detail and role
-  surfaces become full-height sheets (`100svh`) with safe-area padding, trapped
-  focus, Escape dismissal, and focus restoration to the launching control.
-- **Checkout** (`src/components/checkout/CheckoutScreen.tsx`) — Operate. Payment
-  happens on Stripe Checkout. This surface reviews the order and hands off; it
-  must never render card, CVC, or billing-address inputs. Cardholder data must
-  not touch a page that is not PCI-scoped, and fields that are collected but
-  never transmitted misrepresent what the button does.
-- **App interior** (`AppShell` and the dashboard/community/course views) — Operate.
+- `export const viewport` in `src/app/layout.tsx` sets `viewportFit: "cover"`. **Without it every
+  `env(safe-area-inset-*)` resolves to `0px`.** Before Monolith this export did not exist, so the
+  four files that appeared to handle safe area — `MemberModalShell.tsx`, `MemberDetailModal.tsx`,
+  `AuthForm.tsx`, `CheckoutScreen.tsx` — were silently no-ops on every notched device.
+- Use `100svh` / `h-svh`. `100vh` is banned.
+- Fixed chrome uses the `safe-t` / `safe-b` / `safe-x` utilities. This includes the channel
+  composer, which otherwise sits under the home indicator.
+- Inputs compute to ≥16px so iOS does not zoom on focus.
+- Page gutter is 16px, 20px at `sm` and up.
+- Nothing hidden at a desktop breakpoint may simply vanish — it needs a mobile equivalent.
 
-## Two-pane auth and checkout layout
+### Breakpoint contract
 
-Auth and checkout share one shell: a `hidden lg:flex` context rail on the left
-and the task column on the right. Two rules follow from the rail being desktop-only:
+| Token | Width | Meaning |
+| --- | --- | --- |
+| `sm` | 640px | Phone → large phone; single column becomes two |
+| `md` | 768px | **The drawer boundary.** The rail becomes permanent; side regions stop being drawers |
+| `lg` | 1024px | A third column becomes possible |
+| `xl` | 1280px | Content max-width reached; the member column appears |
 
-- The page's single `<h1>` belongs in the **task column**, never in the rail —
-  otherwise phones render a page with no top-level heading.
-- Anything the rail explains needs a mobile equivalent in the task column.
+**`md` is the drawer boundary.** Below it, every side region is a `MobilePane`. At and above, it
+is a column.
+
+---
+
+## Components
+
+`src/components/ui/` is the only place a primitive lives. A screen that hand-rolls a modal, a
+select, a status badge or a table row is a bug, not a style choice — that divergence is what
+produced two design languages in this product once already.
+
+**New primitives are built *on top of* the existing shadcn set, never beside it.** `DataTable`
+composes `ui/table`; `Overlay` composes `ui/dialog`'s base-ui root; `PresenceAvatar` composes
+`ui/avatar`; `Field`/`Section` compose `ui/field`. Eighteen primitives sat unimported before
+Monolith, including `avatar`, `field`, `table`, `badge`, `select`, `tabs` and `skeleton` — the
+exact set the redesign needs. Building new files beside them would have produced a graveyard and
+a third dialect.
+
+> `tests/community-settings-ui.contract.mjs:56` asserts `files.length >= 25` for
+> `src/components/ui/*.tsx`, and `:10` reads `SettingsOverlayShell.tsx`. Neither the unused
+> primitives nor that shell can be deleted without editing that test. Composing on top of them
+> satisfies the assertion honestly rather than working around it.
+
+`ui/dialog.tsx` and `ui/sheet.tsx` are thin shims over `ui/overlay.tsx`, kept so the familiar
+shadcn API still works.
+
+**Do not run `shadcn add` without restyling the result.** The CLI fetches default styling and
+would quietly re-introduce a second design language.
+
+---
+
+## Per-surface specifications
+
+The previous version of this document carried detailed specifications for the identity command
+center, the member operations registry, the notification preview and inbox, and the two-pane auth
+and checkout layout. Those described pre-Monolith implementations of screens being redesigned
+phase by phase.
+
+**Each screen phase writes its own section here as it lands**, describing what shipped rather than
+what was intended. A section describing an unshipped intention is worse than no section.
+
+---
+
+## A note on contract tests and copy
+
+Fifteen contract files assert on component **source text**, including user-visible strings —
+`tests/creator-events.contract.mjs` alone pins `Save Draft`, `Publish Event`, `RSVP Metrics`,
+`Members Registered`, `Event Details` and `Masters`. A copy change in one component therefore
+breaks a test in a different file.
+
+The convention, which holds for every phase of this redesign: **when a label changes, the
+assertion changes in the same commit, with a one-line comment saying what it now pins and why.**
+Without that audit trail the suite erodes into assertions that pass because they assert nothing.
+
+---
+
+## Reversed rules
+
+Explicitly reversed from the previous system. If you find one of these in code or an older
+branch, it is stale, not a precedent.
+
+| Was | Now |
+| --- | --- |
+| Buttons, tags and inputs are pill-shaped (`rounded-full`) | 4px. `rounded-full` is avatars, presence dots, unread badges and the rail marker only |
+| Plain `text-white` for headings | `--text-strong` `#F2F2F3` |
+| Deep navy surfaces (`#051424`) with `surgical-steel` `#334155` rules | Achromatic near-black with `--border-hairline` `#242427` |
+| Emerald `#10B981` as the accent, also used decoratively | Electric lime `#C6F24E`, state and primary action only |
+| `.emerald-glow` is the primary-action shadow | No coloured glows. Elevation is hairline plus a near-black shadow |
+| `.terminal-card` — a 135° gradient panel | `ui/card.tsx`. Gradients are banned |
+| Inter for display, body, navigation and forms | Geist. JetBrains Mono unchanged, for data and measurement |
+| Radii derived from one `--radius` via `calc()` | Flat, explicit, integer values |
+| `--color-primary` defined in two places, the later silently winning | One semantic system; `--color-primary` resolves once |
