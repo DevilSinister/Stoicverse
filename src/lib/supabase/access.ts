@@ -50,9 +50,32 @@ const membershipState = cache(async () => {
     ]);
 
   if (membershipError || deletionError) {
-    console.error("Membership Error:", membershipError);
-    console.error("Deletion Error:", deletionError);
-    throw new Error("Unable to validate membership.");
+    /*
+      Say which read failed, and why.
+
+      This threw a bare "Unable to validate membership." and logged the two raw
+      error objects. That is not enough to act on: both reads run in one
+      `Promise.all`, so a request-level failure — a token PostgREST rejects, or
+      the project being unreachable — fails both at once and looks identical to
+      a real problem with one query. That distinction is the whole diagnosis,
+      and it was being discarded at the one point where it was known.
+
+      Codes and messages only, matching `currentProfile`. The error object
+      echoes the filter values back, and one of those is a user id.
+    */
+    const failures = [
+      membershipError && `memberships (${membershipError.code ?? "?"}: ${membershipError.message})`,
+      deletionError && `account_deletion_requests (${deletionError.code ?? "?"}: ${deletionError.message})`,
+    ].filter(Boolean);
+
+    console.error("[membership]", failures.join("; "));
+
+    // Both failing together is a property of the request, not of either query.
+    const cause =
+      membershipError && deletionError
+        ? "both reads failed, so the session was rejected or the database is unreachable"
+        : failures[0];
+    throw new Error(`Unable to validate membership — ${cause}`);
   }
 
   const expiresAt = membership?.expires_at as string | null | undefined;
