@@ -59,10 +59,20 @@ test("the rail draws labels wherever hover does not exist", async () => {
   assert.match(rail, /variant\?: RailVariant/, "the rail has a labelled shape");
   assert.match(shell, /variant="drawer"/, "and the mobile drawer asks for it");
 
-  // One list, two presentations. A second array here is how a destination comes
-  // to exist in one variant and not the other.
+  /*
+    /channels has a drawer of its own and it carries two levels of navigation at
+    once, so a full-width labelled row does not fit. `stack` is the same list as
+    a labelled icon column. The label is `text-chrome-xs` - the 11px floor - and
+    is pinned here because shrinking it is the obvious way to buy the width back.
+  */
+  const channels = stripComments(await read("src/components/channels/ChannelsShell.tsx"));
+  assert.match(channels, /variant="stack"/, "the channels drawer asks for the labelled column");
+  assert.match(rail, /line-clamp-2 text-chrome-xs/, "and its label wraps rather than going under 11px");
+
+  // One list, three presentations. A second array here is how a destination
+  // comes to exist in one variant and not the others.
   const buildRailCalls = rail.match(/buildRail\(/g) ?? [];
-  assert.equal(buildRailCalls.length, 1, "both variants render the same buildRail list");
+  assert.equal(buildRailCalls.length, 1, "every variant renders the same buildRail list");
 });
 
 test("the active marker composites instead of laying out", async () => {

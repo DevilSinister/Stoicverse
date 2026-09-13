@@ -43,7 +43,27 @@ const LEVEL_LABEL: Record<string, string> = {
   none: "Nothing",
 };
 
-function ChannelLink({ channel, active, muted }: { channel: ChannelRow; active: boolean; muted: boolean }) {
+/**
+ * `touch` is the drawer, and it is the only place the row grows.
+ *
+ * The sidebar keeps the chat density the owner chose - 32px rows - because it
+ * is operated with a pointer. In the drawer the same row is the primary action
+ * on a phone and was 32px of target. `hit-target` is the wrong tool here: the
+ * rows are stacked at a 34px pitch, so a 44px invisible box on each one would
+ * reach 10px into both neighbours, which is precisely the overlap P3a measured
+ * and removed from the header. Below `md` the row is simply 44px tall.
+ */
+function ChannelLink({
+  channel,
+  active,
+  muted,
+  touch = false,
+}: {
+  channel: ChannelRow;
+  active: boolean;
+  muted: boolean;
+  touch?: boolean;
+}) {
   const Icon = channel.isLocked ? Lock : (CHANNEL_ICONS[channel.type] ?? Hash);
 
   if (channel.isLocked) {
@@ -52,7 +72,7 @@ function ChannelLink({ channel, active, muted }: { channel: ChannelRow; active: 
     // behind it for this person yet.
     return (
       <span
-        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-fog-muted/70"
+        className={`flex items-center gap-2 rounded-lg px-2 text-sm text-fog-muted/70 ${touch ? "min-h-11" : "py-1.5"}`}
         title={channel.unlockTier ? `Unlocks at tier ${channel.unlockTier}` : "You do not have access"}
       >
         <Icon size={16} aria-hidden="true" className="shrink-0" />
@@ -75,7 +95,11 @@ function ChannelLink({ channel, active, muted }: { channel: ChannelRow; active: 
       <Link
         href={`/channels/${channel.id}`}
         aria-current={active ? "page" : undefined}
-        className={`focus-ring flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors ${
+        className={`focus-ring flex min-w-0 flex-1 items-center gap-2 rounded-lg pl-2 text-sm transition-colors ${
+          // The bell is always visible off a pointer, so the name has to stop
+          // before it rather than truncate underneath it.
+          touch ? "min-h-11 pr-11" : "py-1.5 pr-2"
+        } ${
           active
             ? "bg-surface-container-high text-on-surface"
             : bold
@@ -99,7 +123,21 @@ function ChannelLink({ channel, active, muted }: { channel: ChannelRow; active: 
       <DropdownMenu>
         <DropdownMenuTrigger
           aria-label={`Notification settings for ${channel.name}`}
-          className="focus-ring hit-target absolute right-1 rounded p-1 text-fog-muted opacity-0 group-focus-within/channel:opacity-100 group-hover/channel:opacity-100 hover:text-on-surface"
+          /*
+            An `opacity-0` control still takes the tap.
+
+            This bell is revealed on hover, which no touch screen has - so on a
+            phone it was invisible and live over the right 44px of every channel
+            row, and tapping the end of a channel name opened its notification
+            menu instead of the channel. Two halves to the fix: off a pointer it
+            is simply visible, and where it does hide it stops receiving pointer
+            events until it is revealed.
+          */
+          className={`focus-ring hit-target absolute right-1 rounded p-1 text-fog-muted hover:text-on-surface ${
+            touch
+              ? ""
+              : "pointer-events-none opacity-0 group-focus-within/channel:pointer-events-auto group-focus-within/channel:opacity-100 group-hover/channel:pointer-events-auto group-hover/channel:opacity-100"
+          }`}
         >
           <BellOff size={12} aria-hidden="true" />
         </DropdownMenuTrigger>
@@ -115,7 +153,7 @@ function ChannelLink({ channel, active, muted }: { channel: ChannelRow; active: 
   );
 }
 
-function ChannelNav({ onNavigate }: { onNavigate?: () => void }) {
+function ChannelNav({ onNavigate, touch = false }: { onNavigate?: () => void; touch?: boolean }) {
   const { channels, viewer, degraded } = useCommunity();
   const settings = viewer?.notificationSettings ?? {};
   // Read once when the nav mounts rather than on every render. `Date.now()`
@@ -183,7 +221,12 @@ function ChannelNav({ onNavigate }: { onNavigate?: () => void }) {
               <ul className="space-y-0.5">
                 {category.channels.map((channel) => (
                   <li key={channel.id} onClick={onNavigate}>
-                    <ChannelLink channel={channel} active={channel.id === activeId} muted={isMuted(channel.id)} />
+                    <ChannelLink
+                      channel={channel}
+                      active={channel.id === activeId}
+                      muted={isMuted(channel.id)}
+                      touch={touch}
+                    />
                   </li>
                 ))}
               </ul>
@@ -278,19 +321,19 @@ export function ChannelsShell({ children, isMaster = false }: { children: ReactN
     one route for everybody — the resolver decides what each person may do once
     they are here — while the rail's other destinations are per-role.
   */
-  const rail = (
-    <AppRail
-      routeBase={viewer?.isInfluencer ? "/creator" : "/dashboard"}
-      isMaster={isMaster}
-      memberName={viewer?.profile?.fullName ?? "Member"}
-      avatarUrl={viewer?.profile?.avatarUrl ?? null}
-      onNavigate={() => setPane(null)}
-    />
-  );
+  const railProps = {
+    routeBase: viewer?.isInfluencer ? "/creator" : "/dashboard",
+    isMaster,
+    memberName: viewer?.profile?.fullName ?? "Member",
+    avatarUrl: viewer?.profile?.avatarUrl ?? null,
+    onNavigate: () => setPane(null),
+  };
 
   return (
     <div className="grid h-svh grid-cols-1 bg-monolith-surface md:grid-cols-[4.5rem_15rem_1fr]">
-      <div className="hidden min-h-0 md:block">{rail}</div>
+      <div className="hidden min-h-0 md:block">
+        <AppRail {...railProps} />
+      </div>
 
       <nav
         aria-label="Channels"
@@ -303,16 +346,23 @@ export function ChannelsShell({ children, isMaster = false }: { children: ReactN
 
       {/* The same list as a pane, for the screens with no column to put it in. */}
       {pane === "sidebar" ? (
-        <MobilePaneDrawer side="left" label="Channels" onClose={() => setPane(null)}>
+        <MobilePaneDrawer side="left" label="Channels" size="lg" onClose={() => setPane(null)}>
           {/*
             Both columns from one gesture. A permanent 4.5rem rail is too much
             of a phone, and a second drawer to reach the rest of the product
             would be a gesture nobody discovers.
           */}
-          <div className="flex min-h-0 flex-1">
-            {rail}
+          <div className="flex h-full min-h-0 flex-1">
+            {/*
+              `stack`, not the bare rail. Inside the drawer there is no hover,
+              so the icons-only rail's tooltips never fire and this was nine
+              unnamed glyphs - the entire primary navigation, anonymous, on
+              every phone. The labelled column costs 80px of the drawer's 319
+              and is the reason the channel names beside it can truncate.
+            */}
+            <AppRail {...railProps} variant="stack" />
             <div className="flex min-h-0 flex-1 flex-col">
-              <ChannelNav onNavigate={() => setPane(null)} />
+              <ChannelNav touch onNavigate={() => setPane(null)} />
             </div>
           </div>
         </MobilePaneDrawer>

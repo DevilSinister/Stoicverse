@@ -27,11 +27,18 @@ export function MobilePaneDrawer({
   side,
   label,
   onClose,
+  size = "md",
   children,
 }: {
   side: "left" | "right";
   label: string;
   onClose: () => void;
+  /**
+   * `md` is 17rem, enough for one list. The channel drawer carries two levels
+   * of navigation side by side, so it asks for `lg` - 20rem, which the
+   * primitive caps at 85vw.
+   */
+  size?: "md" | "lg";
   children: ReactNode;
 }) {
   return (
@@ -43,7 +50,7 @@ export function MobilePaneDrawer({
     >
       <OverlayContent
         placement={side === "left" ? "sheet-left" : "sheet-right"}
-        size="md"
+        size={size}
         density="chrome"
         className="bg-surface-sunken"
       >
