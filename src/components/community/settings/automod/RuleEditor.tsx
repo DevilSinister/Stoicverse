@@ -447,7 +447,7 @@ export function RuleEditor({
           type="button"
           onClick={save}
           disabled={pending || !canSave}
-          className="focus-ring inline-flex h-11 items-center gap-2 rounded-lg bg-accent px-4 text-sm font-semibold text-monolith-surface disabled:opacity-50"
+          className="focus-ring inline-flex h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50"
         >
           {pending ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : null}
           Save rule

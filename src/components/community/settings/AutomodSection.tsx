@@ -132,7 +132,7 @@ export function AutomodSection({
               onClick={() => setCreating((open) => !open)}
               disabled={!canSave || atCap}
               aria-expanded={creating}
-              className="focus-ring inline-flex h-11 items-center gap-2 rounded-lg bg-accent px-4 text-sm font-semibold text-monolith-surface disabled:opacity-50"
+              className="focus-ring inline-flex h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50"
             >
               <Plus size={16} aria-hidden="true" />
               Create rule

@@ -284,7 +284,11 @@
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
+  /* shadcn's --accent is a HOVER FILL, not the brand colour - 35 call sites in
+     src/components/ui read it as `focus:bg-accent`. Pointing it at the lime would
+     paint every menu hover lime with near-white text on top, about 1.2:1. The
+     brand accent is --primary / --color-primary-container. */
+  --color-accent: var(--surface-raised);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
