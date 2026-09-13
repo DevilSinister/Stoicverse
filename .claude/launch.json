@@ -13,6 +13,13 @@
       "runtimeExecutable": "cmd",
       "runtimeArgs": ["/c", "set NEXT_BUILD_DIR=.next-build&& npx next start -p 3100"],
       "port": 3100
+    },
+    {
+      "//": "A dev server with a dist dir of its own, so a second agent session in this repo cannot collide with the first on .next or on port 3000. Behaviour probing only - judge colour and layout against monolith-preview.",
+      "name": "monolith-probe",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set NEXT_BUILD_DIR=.next-probe&& npx next dev -p 3200"],
+      "port": 3200
     }
   ]
 }
