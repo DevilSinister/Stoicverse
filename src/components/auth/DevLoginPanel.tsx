@@ -15,9 +15,9 @@ export function DevLoginPanel() {
     return (
       <aside
         aria-label="Development sign-in"
-        className="mx-auto mt-6 w-full max-w-md rounded-xl border border-dashed border-surgical-steel p-4 text-xs leading-5 text-fog-muted"
+        className="mx-auto mt-content-y w-full max-w-[26rem] rounded-md border border-dashed border-border-hairline p-3.5 text-chrome-sm text-text-muted"
       >
-        <p className="font-semibold text-on-surface-variant">Development sign-in is off.</p>
+        <p className="font-medium text-text-default">Development sign-in is off.</p>
         <ul className="mt-1 list-disc pl-4">
           {blockers.map((blocker) => (
             <li key={blocker}>{blocker}</li>
@@ -33,27 +33,27 @@ export function DevLoginPanel() {
   return (
     <aside
       aria-label="Development sign-in"
-      className="mx-auto mt-6 w-full max-w-md rounded-xl border border-surgical-steel bg-surface-container-low p-4"
+      className="mx-auto mt-content-y w-full max-w-[26rem] overflow-hidden rounded-md border border-border-hairline bg-surface-panel"
     >
-      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-fog-muted">
+      <p className="flex items-center gap-2 border-b border-border-hairline px-3 py-2.5 font-mono text-mono-xs tracking-widest text-text-faint uppercase">
         <FlaskConical size={14} aria-hidden="true" />
         Development sign-in
       </p>
-      <p className="mt-1 text-xs leading-5 text-on-surface-variant">
+      <p className="px-3 pt-2.5 text-chrome-sm text-text-muted">
         Seeds a local test account and signs you in as it. Only reachable from this machine while the bypass is
         enabled.
       </p>
-      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+      <div className="grid gap-2 p-3 sm:grid-cols-3">
         {DEV_PERSONAS.map((persona) => (
           <form key={persona} method="post" action="/api/dev/login">
             <input type="hidden" name="as" value={persona} />
             <input type="hidden" name="secret" value={secret} />
             <button
               type="submit"
-              className="focus-ring flex min-h-11 w-full flex-col items-start rounded-lg border border-surgical-steel bg-monolith-surface px-3 py-2 text-left text-sm font-semibold text-on-surface hover:bg-surface-container-high"
+              className="focus-ring flex min-h-11 w-full flex-col items-start justify-center rounded-lg border border-border-hairline bg-surface-canvas px-2.5 py-2 text-left text-chrome-base font-medium text-text-default transition-colors hover:border-border-strong hover:text-text-strong"
             >
               {DEV_PERSONA_LABELS[persona].label}
-              <span className="text-xs font-normal text-fog-muted">{DEV_PERSONA_LABELS[persona].detail}</span>
+              <span className="mt-0.5 text-chrome-sm font-normal text-text-faint">{DEV_PERSONA_LABELS[persona].detail}</span>
             </button>
           </form>
         ))}
