@@ -75,6 +75,37 @@ test("the rail draws labels wherever hover does not exist", async () => {
   assert.equal(buildRailCalls.length, 1, "every variant renders the same buildRail list");
 });
 
+test("two bells cannot open one panel each into the same screen", async () => {
+  const shell = stripComments(await read("src/components/layout/AppShell.tsx"));
+
+  /*
+    The breakpoint hides a header with `display`, not by unmounting it, so both
+    bells are always mounted. They shared one `open` state, and a popup portals
+    to <body> - so opening the visible bell opened the hidden one's panel too
+    and the product drew two. Each bell owns its state now; the hidden one's
+    trigger is unclickable, so nothing can open it.
+  */
+  const mounts = shell.match(/<NotificationBell /g) ?? [];
+  assert.equal(mounts.length, 2, "one bell per header");
+  assert.doesNotMatch(shell, /open=\{notificationsOpen\}/, "and no shared open state between them");
+  assert.match(shell, /const \[open, setOpen\] = useState\(false\);/, "the bell holds its own");
+});
+
+test("every role's notification bell points somewhere that role may go", async () => {
+  const rail = stripComments(await read("src/lib/navigation/rail.ts"));
+  const proxy = await read("proxy.ts");
+
+  /*
+    The rail sent every role to /dashboard/notifications, and `proxy.ts` bounces
+    an influencer off every /dashboard route - so a creator pressing
+    Notifications was redirected to /creator and their notifications could not
+    be reached from anywhere in the product.
+  */
+  assert.match(rail, /href: `\$\{base\}\/notifications`/, "the rail's notifications entry is per-role");
+  assert.doesNotMatch(rail, /href: "\/dashboard\/notifications"/);
+  assert.match(proxy, /requiresMembership && isInfluencer/, "which matters because the proxy still bounces them");
+});
+
 test("the active marker composites instead of laying out", async () => {
   const rail = stripComments(await read("src/components/layout/AppRail.tsx"));
 

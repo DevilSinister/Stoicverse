@@ -64,8 +64,26 @@ test("member and creator route trees expose separate navigation and guards", () 
     assert.match(read(`src/app/dashboard/${path}/page.tsx`), /requireActiveMembership|render/);
   }
   assert.match(read("src/app/dashboard/messages/page.tsx"), /permanentRedirect\("\/channels"\)/);
+  /*
+    Follows the delegation rather than requiring the call to be inline.
+
+    Two creator routes - /creator/account and /creator/notifications - are the
+    member page's renderer behind the influencer guard, which is how the
+    duplicate screens phase 9 deleted stay deleted. Matching only on the guard's
+    name in the page file would push those back into being copies; matching on
+    "render" alone would let an unguarded page pass by mentioning the word. So:
+    the guard is either here, or in the module this page imports its renderer
+    from, and that module is read and checked.
+  */
   for (const path of ["members", "analytics", "revenue", "settings", "notifications"]) {
-    assert.match(read(`src/app/creator/${path}/page.tsx`), /requireInfluencerWorkspace/);
+    const page = read(`src/app/creator/${path}/page.tsx`);
+    if (/requireInfluencerWorkspace/.test(page)) continue;
+
+    const delegate = page.match(/import \{ (render\w+) \} from "@\/(app\/[^"]+)"/);
+    assert.ok(delegate, `src/app/creator/${path}/page.tsx must guard itself or delegate to a renderer`);
+    const source = read(`src/${delegate[2]}.tsx`);
+    assert.match(source, /requireInfluencerWorkspace/, `${delegate[2]} guards the creator path`);
+    assert.match(source, new RegExp(`${delegate[1]}`), "and exports the renderer the page imports");
   }
   assert.match(read("src/app/creator/channels/page.tsx"), /permanentRedirect\("\/creator\/settings\?section=channels"\)/);
   // The rail carries these, and "Overview" is now "Dashboard" — one label for

@@ -96,7 +96,6 @@ function WorkspaceChrome({
   const [unreadCount, setUnreadCount] = useState(
     initialUnreadCount ?? initialNotifications.filter((item) => !item.is_read).length,
   );
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationsError, setNotificationsError] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -173,10 +172,7 @@ function WorkspaceChrome({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  function onNotificationsOpenChange(open: boolean) {
-    setNotificationsOpen(open);
-    if (open) void loadNotifications(true);
-  }
+
 
   const notificationsHref = withRouteBase(routeBase, "/notifications");
 
@@ -196,19 +192,25 @@ function WorkspaceChrome({
 
   const railProps = { routeBase, platformRole, isMaster, memberName, unreadCount };
 
-  const bell = (
-    <NotificationBell
-      unreadCount={unreadCount}
-      notifications={notifications}
-      loading={notificationsLoading}
-      error={notificationsError}
-      notificationsHref={notificationsHref}
-      onRefresh={() => void loadNotifications(false)}
-      onNavigate={() => setNotificationsOpen(false)}
-      open={notificationsOpen}
-      onOpenChange={onNotificationsOpenChange}
-    />
-  );
+  /*
+    Two headers render a bell - one below `md`, one above - and this used to be
+    a single element with one shared `open` state, reused in both. Both were
+    always mounted, because the breakpoint hides a header with `display`, not by
+    unmounting it. Base UI portals a popup to <body>, so opening the visible
+    bell opened the hidden one's panel too and the product drew **two** panels.
+
+    Each bell owns its own open state now. The hidden one has a hidden trigger,
+    so nothing can open it.
+  */
+  const bellProps = {
+    unreadCount,
+    notifications,
+    loading: notificationsLoading,
+    error: notificationsError,
+    notificationsHref,
+    onRefresh: () => void loadNotifications(false),
+    onOpen: () => void loadNotifications(true),
+  };
 
   return (
     <ChromeMounted.Provider value={true}>
@@ -237,7 +239,7 @@ function WorkspaceChrome({
           >
             <Search size={19} />
           </button>
-          {bell}
+          <NotificationBell {...bellProps} />
         </header>
 
         {/*
@@ -281,7 +283,7 @@ function WorkspaceChrome({
                 Ctrl K
               </kbd>
             </button>
-            {bell}
+            <NotificationBell {...bellProps} />
           </header>
           <div className="relative flex-1 bg-surface-canvas">{children}</div>
         </div>
@@ -309,9 +311,7 @@ function NotificationBell({
   error,
   notificationsHref,
   onRefresh,
-  onNavigate,
-  open,
-  onOpenChange,
+  onOpen,
 }: {
   unreadCount: number;
   notifications: Notification[];
@@ -319,12 +319,19 @@ function NotificationBell({
   error: string | null;
   notificationsHref: string;
   onRefresh: () => void;
-  onNavigate: () => void;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  /** Fires when this bell opens, so the shell can re-read and mark read. */
+  onOpen: () => void;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) onOpen();
+      }}
+    >
       <PopoverTrigger
         aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}
         className="focus-ring hit-target relative grid size-11 shrink-0 place-items-center rounded-md text-text-muted transition-colors hover:bg-surface-panel hover:text-text-strong md:size-8"
@@ -381,7 +388,7 @@ function NotificationBell({
                 <Link
                   key={item.id}
                   href={safeNotificationHref(item.action_url, notificationsHref)}
-                  onClick={onNavigate}
+                  onClick={() => setOpen(false)}
                   className="focus-ring group flex gap-2.5 px-chrome-x py-2.5 transition-colors hover:bg-surface-raised"
                 >
                   <span
@@ -423,7 +430,7 @@ function NotificationBell({
 
         <Link
           href={notificationsHref}
-          onClick={onNavigate}
+          onClick={() => setOpen(false)}
           className="focus-ring flex h-chrome-row shrink-0 items-center justify-center gap-1.5 border-t border-border-hairline bg-surface-canvas text-chrome-base font-medium text-primary transition-colors hover:bg-surface-raised"
         >
           View all notifications <ChevronRight size={14} />

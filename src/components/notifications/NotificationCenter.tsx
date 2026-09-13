@@ -50,7 +50,20 @@ function timeAgo(value: string) {
   return relativeTime.format(Math.round(hours / 24), "day");
 }
 
-export function NotificationCenter({ initialView }: { initialView: string | undefined }) {
+export function NotificationCenter({
+  initialView,
+  basePath = "/dashboard/notifications",
+}: {
+  initialView: string | undefined;
+  /**
+   * Where the view tabs write themselves in the URL.
+   *
+   * Hard-coded to `/dashboard/notifications` before the creator got this
+   * screen, which would have bounced an influencer off their own page the
+   * moment they changed tab - `proxy.ts` refuses them every /dashboard route.
+   */
+  basePath?: string;
+}) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [view, setView] = useState<NotificationView>(() => notificationView(initialView));
@@ -104,7 +117,7 @@ export function NotificationCenter({ initialView }: { initialView: string | unde
   function selectView(next: NotificationView) {
     setView(next);
     const params = next === "all" ? "" : `?view=${next}`;
-    router.replace(`/dashboard/notifications${params}`, { scroll: false });
+    router.replace(`${basePath}${params}`, { scroll: false });
   }
 
   function moveTabFocus(event: ReactKeyboardEvent<HTMLButtonElement>, current: NotificationView) {
@@ -175,7 +188,12 @@ export function NotificationCenter({ initialView }: { initialView: string | unde
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
       <header className="flex flex-col gap-6 border-b border-surgical-steel pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold text-primary-container">Member inbox</p>
+          {/* Was hard-coded "Member inbox", which is the wrong words on the
+              creator's own notifications page - the one this screen serves
+              since the rail stopped sending them to a route they cannot open. */}
+          <p className="text-xs font-semibold text-primary-container">
+            {basePath.startsWith("/creator") ? "Creator inbox" : "Member inbox"}
+          </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-[-0.025em] text-text-strong sm:text-4xl">Notifications</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-on-surface-variant">Event, course, community, and account updates collected in one calm queue.</p>
         </div>
