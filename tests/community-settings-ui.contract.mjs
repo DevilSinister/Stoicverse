@@ -47,8 +47,11 @@ test("unbuilt sections render no controls, and every section names a real permis
 test("shadcn primitives render in the Stoicverse skin and use the project cn helper", async () => {
   const css = await read("src/app/globals.css");
   const dark = css.slice(css.indexOf(".dark {"), css.indexOf("}", css.indexOf(".dark {")));
-  assert.match(dark, /--primary: #10B981;/, "primary actions are emerald, not the lavender default");
-  assert.match(dark, /--destructive: #ffb4ab;/, "one red, shared with --color-error");
+  // Monolith: the accent moved from emerald to electric lime, and the one red moved
+  // with it. Both stay pinned because they are design decisions, not incidental
+  // values - changing either should require editing this line and saying why.
+  assert.match(dark, /--primary: #C6F24E;/, "primary actions are the Monolith accent, not the lavender default");
+  assert.match(dark, /--destructive: #FF6B6B;/, "one red, aliased by --color-error");
 
   const files = (await readdir(new URL("../src/components/ui", import.meta.url))).filter((name) =>
     name.endsWith(".tsx"),
