@@ -1,43 +1,84 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { currentIsMaster, currentProfile, currentViewer, type Viewer } from "@/lib/supabase/viewer";
 
-export async function requireActiveMembership(nextPath: string) {
+/**
+ * The access guards.
+ *
+ * Every one of these returns `{ supabase, user }` and every caller reads only
+ * `user.id` and `user.email`, so `user` is the claims-derived `Viewer` rather
+ * than the auth server's `User` object. That is the whole of the change: the
+ * identity now comes from verifying the token's ES256 signature in process
+ * instead of asking the auth server over the network, and the profile read
+ * behind it is request-cached so a guard and the page it guards share one.
+ *
+ * A page that calls a guard and then reads its own `profiles` row now costs
+ * one round trip where it used to cost three.
+ */
+
+/** Anonymous visitors go to the login page; the guards differ only in where back. */
+async function requireViewer(nextPath: string): Promise<Viewer> {
+  const viewer = await currentViewer();
+  if (!viewer) redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+  return viewer;
+}
+
+/**
+ * The membership facts that are not on the profile.
+ *
+ * Cached alongside the profile so `requireActiveMembership` and
+ * `requireCommunityAccess` — which ask the same three questions and differ
+ * only in what they conclude — read the database once between them.
+ */
+const membershipState = cache(async () => {
+  const viewer = await currentViewer();
+  if (!viewer) return { hasActiveMembership: false, deletionPending: false };
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [{ data: membership, error: membershipError }, { data: deletionRequest, error: deletionError }] =
+    await Promise.all([
+      supabase.from("memberships").select("id, expires_at").eq("user_id", viewer.id).eq("status", "active").maybeSingle(),
+      supabase
+        .from("account_deletion_requests")
+        .select("id")
+        .eq("user_id", viewer.id)
+        .in("status", ["pending", "processing", "failed"])
+        .limit(1)
+        .maybeSingle(),
+    ]);
 
-  if (!user) {
-    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
-  }
-
-  const [{ data: membership, error: membershipError }, { data: profile, error: profileError }, { data: deletionRequest, error: deletionError }] = await Promise.all([
-    supabase.from("memberships").select("id, expires_at").eq("user_id", user.id).eq("status", "active").maybeSingle(),
-    supabase.from("profiles").select("is_suspended, platform_role").eq("id", user.id).maybeSingle(),
-    supabase.from("account_deletion_requests").select("id").eq("user_id", user.id).in("status", ["pending", "processing", "failed"]).limit(1).maybeSingle(),
-  ]);
-
-  if (membershipError || profileError || deletionError) {
+  if (membershipError || deletionError) {
     console.error("Membership Error:", membershipError);
-    console.error("Profile Error:", profileError);
     console.error("Deletion Error:", deletionError);
     throw new Error("Unable to validate membership.");
   }
 
-  if (deletionRequest) redirect("/account/deletion-pending");
+  const expiresAt = membership?.expires_at as string | null | undefined;
+  return {
+    hasActiveMembership: Boolean(membership) && (!expiresAt || new Date(expiresAt) > new Date()),
+    deletionPending: Boolean(deletionRequest),
+  };
+});
 
-  if (profile?.platform_role === "influencer" && !profile.is_suspended) {
+export async function requireActiveMembership(nextPath: string) {
+  const user = await requireViewer(nextPath);
+  const [profile, membership] = await Promise.all([currentProfile(), membershipState()]);
+  const supabase = await createClient();
+
+  if (membership.deletionPending) redirect("/account/deletion-pending");
+
+  if (profile?.platformRole === "influencer" && !profile.isSuspended) {
     redirect("/creator");
   }
 
-  if (profile?.platform_role === "super_admin" && !profile.is_suspended) {
+  if (profile?.platformRole === "super_admin" && !profile.isSuspended) {
     redirect("/admin");
   }
 
-  const hasActiveMembership = Boolean(membership) && (!membership?.expires_at || new Date(membership.expires_at) > new Date());
-  const isModerator = profile?.platform_role === "moderator" && !profile.is_suspended;
-  if ((!hasActiveMembership && !isModerator) || profile?.is_suspended) {
+  const isModerator = profile?.platformRole === "moderator" && !profile.isSuspended;
+  if ((!membership.hasActiveMembership && !isModerator) || profile?.isSuspended) {
     redirect("/checkout");
   }
 
@@ -45,31 +86,16 @@ export async function requireActiveMembership(nextPath: string) {
 }
 
 export async function requireInfluencerWorkspace(nextPath: string) {
+  const user = await requireViewer(nextPath);
+  const profile = await currentProfile();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
-  }
-
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("is_suspended, platform_role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error("Unable to validate influencer access.");
-  }
-
-  if (profile?.is_suspended) {
+  if (profile?.isSuspended) {
     redirect("/login");
   }
 
-  if (profile?.platform_role !== "influencer") {
-    redirect(profile?.platform_role === "super_admin" ? "/admin" : "/dashboard");
+  if (profile?.platformRole !== "influencer") {
+    redirect(profile?.platformRole === "super_admin" ? "/admin" : "/dashboard");
   }
 
   return { supabase, user };
@@ -77,63 +103,26 @@ export async function requireInfluencerWorkspace(nextPath: string) {
 
 export async function requireMasterMembership(nextPath: string) {
   const { supabase, user } = await requireActiveMembership(nextPath);
-  const { data: tier, error } = await supabase
-    .from("member_tiers")
-    .select("is_master")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error("Unable to validate master access.");
-  }
-
-  if (!tier?.is_master) {
+  if (!(await currentIsMaster())) {
     redirect("/dashboard");
   }
-
   return { supabase, user };
 }
 
 export async function requireInfluencerMasterWorkspace(nextPath: string) {
   const { supabase, user } = await requireInfluencerWorkspace(nextPath);
-  const { data: tier, error } = await supabase
-    .from("member_tiers")
-    .select("is_master")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error("Unable to validate master access.");
-  }
-
-  if (!tier?.is_master) {
+  if (!(await currentIsMaster())) {
     redirect("/creator/dashboard");
   }
-
   return { supabase, user };
 }
 
 export async function requirePlatformRole(requiredRole: "super_admin" | "influencer") {
+  const user = await requireViewer("/");
+  const profile = await currentProfile();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("platform_role, is_suspended")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error("Unable to validate admin access.");
-  }
-
-  if (profile?.is_suspended || profile?.platform_role !== requiredRole) {
+  if (profile?.isSuspended || profile?.platformRole !== requiredRole) {
     redirect("/");
   }
 
@@ -142,20 +131,14 @@ export async function requirePlatformRole(requiredRole: "super_admin" | "influen
 
 /** Re-authorize every influencer mutation. Proxy redirects are never an access boundary. */
 export async function requireInfluencer() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await currentViewer();
   if (!user) throw new Error("Authentication required.");
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("platform_role, is_suspended")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (error || !profile || profile.is_suspended || profile.platform_role !== "influencer") {
+  const profile = await currentProfile();
+  if (!profile || profile.isSuspended || profile.platformRole !== "influencer") {
     throw new Error("Influencer access is required.");
   }
-  return { supabase, user };
+  return { supabase: await createClient(), user };
 }
 
 /**
@@ -167,10 +150,10 @@ export async function requireInfluencer() {
  * policy error, and so the action fails before it writes anything.
  */
 export async function requireCommunityPermission(permission: string, channelId?: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await currentViewer();
   if (!user) throw new Error("Authentication required.");
 
+  const supabase = await createClient();
   const { data, error } = await supabase.rpc("community_has", {
     permission,
     channel: channelId ?? null,
@@ -199,38 +182,19 @@ export async function requireCommunityPermission(permission: string, channelId?:
  * different thing from "you do not have an account".
  */
 export async function requireCommunityAccess(nextPath: string) {
+  const user = await requireViewer(nextPath);
+  const [profile, membership] = await Promise.all([currentProfile(), membershipState()]);
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
-  }
-
-  const [{ data: membership }, { data: profile }, { data: deletionRequest }] = await Promise.all([
-    supabase.from("memberships").select("id, expires_at").eq("user_id", user.id).eq("status", "active").maybeSingle(),
-    supabase.from("profiles").select("is_suspended, platform_role").eq("id", user.id).maybeSingle(),
-    supabase
-      .from("account_deletion_requests")
-      .select("id")
-      .eq("user_id", user.id)
-      .in("status", ["pending", "processing", "failed"])
-      .limit(1)
-      .maybeSingle(),
-  ]);
-
-  if (deletionRequest) redirect("/account/deletion-pending");
-  if (profile?.is_suspended) redirect("/checkout");
+  if (membership.deletionPending) redirect("/account/deletion-pending");
+  if (profile?.isSuspended) redirect("/checkout");
 
   const isStaff =
-    profile?.platform_role === "moderator" ||
-    profile?.platform_role === "influencer" ||
-    profile?.platform_role === "super_admin";
-  const hasActiveMembership =
-    Boolean(membership) && (!membership?.expires_at || new Date(membership.expires_at) > new Date());
+    profile?.platformRole === "moderator" ||
+    profile?.platformRole === "influencer" ||
+    profile?.platformRole === "super_admin";
 
-  if (!hasActiveMembership && !isStaff) redirect("/checkout");
+  if (!membership.hasActiveMembership && !isStaff) redirect("/checkout");
 
   return { supabase, user, isStaff };
 }

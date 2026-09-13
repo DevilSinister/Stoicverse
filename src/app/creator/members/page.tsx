@@ -2,11 +2,12 @@ import { MemberRegistry } from "@/components/creator/members/MemberRegistry";
 import { queryMemberDirectory } from "@/lib/member-operations/server";
 import type { CosmeticRole } from "@/lib/member-operations/types";
 import { requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 
 export default async function CreatorMembersPage() {
-  const { supabase, user } = await requireInfluencerWorkspace("/creator/members");
+  const { supabase } = await requireInfluencerWorkspace("/creator/members");
   const [profileResult, rolesResult, initialPage] = await Promise.all([
-    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    profileRow(),
     // `community_roles` directly since phase 9 dropped the `cosmetic_roles`
     // compat view, which was this same select with `position` aliased to
     // `priority`. The alias stays here because `search_creator_members`

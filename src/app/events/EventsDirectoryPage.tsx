@@ -1,11 +1,12 @@
 import { EventsView, type EventRecord } from "@/components/events/EventsView";
 import { requireActiveMembership } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 
 export async function renderEventsPage({ nextPath = "/dashboard/events", routeBase = "/dashboard" }: { nextPath?: string; routeBase?: string } = {}) {
   const { supabase, user } = await requireActiveMembership(nextPath);
   const [{ data: tier, error: tierError }, { data: profile, error: profileError }, { data: events, error: eventsError }, { data: enrollments, error: enrollmentError }] = await Promise.all([
     supabase.from("member_tiers").select("is_master, current_tier").eq("user_id", user.id).maybeSingle(),
-    supabase.from("profiles").select("full_name, platform_role, is_suspended").eq("id", user.id).maybeSingle(),
+    profileRow(),
     supabase.from("events").select("*").in("status", ["upcoming", "live", "completed", "cancelled"]).order("starts_at", { ascending: true }),
     supabase.from("event_enrollments").select("event_id").eq("user_id", user.id),
   ]);

@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { AccountSettingsWorkspace, type SettingsSection } from "@/components/settings/AccountSettingsWorkspace";
 import { safeNextPath } from "@/lib/security/safe-path";
 import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 
 const validSections = new Set<SettingsSection>(["account", "notifications", "sessions", "deletion"]);
 
@@ -26,7 +27,7 @@ export async function renderAccountSettings({ searchParams, creatorWorkspace = f
   const [params, headerList, profileResult, membershipResult, preferenceResult, assignmentResult] = await Promise.all([
     searchParams,
     headers(),
-    supabase.from("profiles").select("full_name,avatar_url,platform_role").eq("id", user.id).maybeSingle(),
+    profileRow(),
     supabase.from("memberships").select("status,expires_at").eq("user_id", user.id).maybeSingle(),
     supabase.from("member_notification_preferences").select("event_updates,course_updates,community_mentions,role_achievements").eq("user_id", user.id).maybeSingle(),
     supabase.from("community_role_members").select("role_id").eq("user_id", user.id),

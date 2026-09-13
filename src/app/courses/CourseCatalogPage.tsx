@@ -1,5 +1,6 @@
 import { CourseCatalog, type CourseCard } from "@/components/courses/CourseCatalog";
 import { requireActiveMembership } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 interface CourseVideo {
@@ -18,7 +19,7 @@ export async function renderCoursesPage({nextPath="/courses",routeBase=""}:{next
   const { supabase, user } = await requireActiveMembership(nextPath);
   
   const [profileResult, tierResult, coursesResult, enrollmentsResult, videosResult, progressResult] = await Promise.all([
-    supabase.from("profiles").select("full_name,platform_role").eq("id",user.id).maybeSingle(),
+    profileRow(),
     supabase.from("member_tiers").select("current_tier,is_master").eq("user_id",user.id).maybeSingle(),
     supabase.from("courses").select("id,title,description,completion_tier,is_finished,status,created_at").eq("status","published").order("created_at"),
     supabase.from("course_enrollments").select("course_id,completion_current,first_completed_at").eq("user_id",user.id),

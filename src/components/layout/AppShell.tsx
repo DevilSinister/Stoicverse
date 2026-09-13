@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { AlertCircle, Bell, ChevronRight, LoaderCircle, Menu, RefreshCw, Search, X } from "lucide-react";
 
+import { usePathname } from "next/navigation";
+
 import { AppRail } from "@/components/layout/AppRail";
+import { activeRailId, buildRail } from "@/lib/navigation/rail";
 import { withRouteBase } from "@/lib/navigation/paths";
 import { safeNotificationHref, type NotificationItem } from "@/lib/notifications/model";
 import { createClient } from "@/lib/supabase/client";
@@ -39,6 +42,11 @@ export interface AppShellProps {
   platformRole?: string;
   currentTier?: number;
   notifications?: Notification[];
+  /**
+   * The badge's starting value, for the layout that mounts the chrome without
+   * the rows. A page passing `notifications` still derives it from those.
+   */
+  unreadCount?: number;
   routeBase?: string;
   children: React.ReactNode;
 }
@@ -46,7 +54,30 @@ export interface AppShellProps {
 const EMPTY_NOTIFICATIONS: Notification[] = [];
 const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 
-export function AppShell({ title, isMaster = false, memberName = "Practitioner", platformRole = "member", notifications: initialNotifications = EMPTY_NOTIFICATIONS, routeBase = "", children }: AppShellProps) {
+/**
+ * True once an ancestor has drawn the chrome.
+ *
+ * The workspace layouts render the shell, so the rail and the header belong to
+ * the layout and survive a navigation instead of being torn down and rebuilt
+ * with the page. But ~19 page components still wrap their own content in
+ * `AppShell`, and rewriting all of them to stop would be a large diff in which
+ * every file is a chance to break a route that has nothing to do with
+ * performance. So a nested shell renders its children and nothing else.
+ *
+ * The consequence worth stating: props passed to an inner shell — `title`,
+ * `notifications`, `memberName` — are ignored, because the outer one already
+ * loaded those for the whole segment. They join `active`, which the rail
+ * replaced.
+ */
+const ChromeMounted = createContext(false);
+
+export function AppShell(props: AppShellProps) {
+  const alreadyDrawn = useContext(ChromeMounted);
+  if (alreadyDrawn) return <>{props.children}</>;
+  return <WorkspaceChrome {...props} />;
+}
+
+function WorkspaceChrome({ isMaster = false, memberName = "Practitioner", platformRole = "member", notifications: initialNotifications = EMPTY_NOTIFICATIONS, unreadCount: initialUnreadCount, routeBase = "", children }: AppShellProps) {
   const supabase = useMemo(() => createClient(), []);
   const searchInput = useRef<HTMLInputElement>(null);
   const notificationPanel = useRef<HTMLDivElement>(null);
@@ -55,7 +86,7 @@ export function AppShell({ title, isMaster = false, memberName = "Practitioner",
   const mobileDrawer = useRef<HTMLElement>(null);
 
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications.slice(0, 5));
-  const [unreadCount, setUnreadCount] = useState(initialNotifications.filter((item) => !item.is_read).length);
+  const [unreadCount, setUnreadCount] = useState(initialUnreadCount ?? initialNotifications.filter((item) => !item.is_read).length);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationsError, setNotificationsError] = useState<string | null>(null);
@@ -206,6 +237,23 @@ export function AppShell({ title, isMaster = false, memberName = "Practitioner",
   const notificationsHref = withRouteBase(routeBase, "/notifications");
 
   /*
+    The header's label comes from the rail, not from a `title` prop.
+
+    The chrome is mounted by the layout now, and a layout does not re-render
+    between sibling routes — which is the point, it is why the rail survives a
+    navigation — so it cannot be handed a title by the page it is framing. The
+    rail already knows which destination is open, and naming it the same thing
+    the tooltip names it is the honest answer anyway: a header that disagrees
+    with the navigation is worse than one derived from it.
+  */
+  const pathname = usePathname();
+  const railItems = useMemo(
+    () => buildRail({ routeBase, platformRole, isMaster }),
+    [routeBase, platformRole, isMaster],
+  );
+  const headerLabel = railItems.find((item) => item.id === activeRailId(pathname ?? "", railItems))?.label ?? "";
+
+  /*
     The rail replaced this shell's nav list, its brand block and its user
     footer — all three are things the rail now carries, and carries in
     `/channels` too, which is the point. What is left of the sidebar concept is
@@ -224,6 +272,7 @@ export function AppShell({ title, isMaster = false, memberName = "Practitioner",
   );
 
   return (
+    <ChromeMounted.Provider value={true}>
     <div className="min-h-screen bg-surface text-on-surface md:flex">
       <header className="flex h-16 items-center justify-between border-b border-surgical-steel bg-sidebar px-4 md:hidden">
         <div className="flex items-center gap-3"><button ref={mobileMenuTrigger} type="button" onClick={() => setMobileMenuOpen(true)} className="focus-ring grid size-11 place-items-center rounded-full text-on-surface-variant" aria-label="Open menu" aria-expanded={mobileMenuOpen} aria-controls="mobile-workspace-navigation"><Menu size={22}/></button><span className="text-lg font-extrabold tracking-tight text-white">Stoicverse</span></div>
@@ -237,7 +286,7 @@ export function AppShell({ title, isMaster = false, memberName = "Practitioner",
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="hidden h-16 items-center justify-between border-b border-surgical-steel bg-surface-container-low px-6 md:flex lg:px-8">
           <button type="button" onClick={() => setSearchOpen(true)} className="focus-ring flex min-w-[19rem] items-center gap-3 rounded-full border border-surgical-steel bg-surface-container-lowest px-4 py-2 text-left text-sm text-fog-muted transition hover:border-primary-container hover:text-on-surface"><Search size={15}/><span>Search curriculum, sessions, or community…</span></button>
-          <div className="flex items-center gap-4"><span className="hidden text-sm font-semibold text-on-surface lg:block">{title}</span><BellButton unreadCount={unreadCount} open={notificationsOpen} onClick={openNotifications}/></div>
+          <div className="flex items-center gap-4"><span className="hidden text-sm font-semibold text-on-surface lg:block">{headerLabel}</span><BellButton unreadCount={unreadCount} open={notificationsOpen} onClick={openNotifications}/></div>
         </header>
         <div className="relative flex-1 bg-surface">{children}</div>
       </div>
@@ -246,6 +295,7 @@ export function AppShell({ title, isMaster = false, memberName = "Practitioner",
 
       {searchOpen && <Modal title="Search Stoicverse" onClose={() => setSearchOpen(false)}><label className="sr-only" htmlFor="dashboard-search">Search lessons, events, posts, channels and members</label><input ref={searchInput} id="dashboard-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search lessons, events, posts…" className="focus-ring w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-3.5 text-base text-on-surface placeholder:text-fog-muted"/>{searching && <div className="mt-4 flex items-center gap-2 text-sm text-fog-muted"><LoaderCircle size={16} className="animate-spin"/>Searching…</div>}<div className="mt-5 max-h-[50vh] space-y-5 overflow-y-auto">{SEARCH_GROUPS.map(({ kind, label }) => { const items = results.filter((result) => result.kind === kind); if (!items.length) return null; return <section key={kind}><h3 className="text-xs font-semibold text-primary-container">{label}</h3><div className="mt-2 divide-y divide-surgical-steel">{items.map((result) => <Link key={`${result.kind}-${result.id}`} href={result.href} onClick={() => setSearchOpen(false)} className="focus-ring block rounded-lg py-3 transition hover:text-primary-container"><p className="text-sm font-semibold text-white">{result.title}</p>{result.description && <p className="mt-1 line-clamp-1 text-xs text-fog-muted">{result.description}</p>}</Link>)}</div></section>; })}{query.trim().length >= 2 && !searching && results.length === 0 && <div className="py-8 text-center text-sm text-fog-muted"><AlertCircle size={20} className="mx-auto mb-2 opacity-60"/>No accessible results found.</div>}</div></Modal>}
     </div>
+    </ChromeMounted.Provider>
   );
 }
 

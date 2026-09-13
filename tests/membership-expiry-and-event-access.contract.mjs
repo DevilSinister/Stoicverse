@@ -20,6 +20,9 @@ test("staff can enroll in events without the member tier gate", () => {
   const events = read("src/components/events/EventsView.tsx");
 
   assert.match(migration, /public\.is_staff\(\)/);
-  assert.match(access, /platform_role === "moderator"/);
+  // `platformRole`, camelCase, since the guards read the request-cached
+  // profile rather than a raw PostgREST row. The staff override is the same
+  // rule; only the spelling of the field moved.
+  assert.match(access, /platformRole === "moderator"/);
   assert.match(events, /isStaff \|\| isMaster \|\| currentTier >= event\.minTier/);
 });

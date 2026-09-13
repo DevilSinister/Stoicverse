@@ -40,6 +40,21 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "6mb",
     },
+    // How long a page segment already fetched stays reusable in the client
+    // cache. `dynamic` defaults to 0 in Next 15+, which means bouncing between
+    // two rail destinations — Analytics to Revenue and back — re-renders both
+    // on the server every single time, even a second apart. Thirty seconds is
+    // what Next itself shipped as the default until 15.0.
+    //
+    // The trade is that a page returned to inside that window can be up to
+    // thirty seconds stale. Every surface this covers is a dashboard read, and
+    // none of them is the source of truth for a decision made in seconds; a
+    // mutation still revalidates its own path, so nothing you just changed
+    // shows you the old value.
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
   },
   turbopack: {
     root: "D:\\Projects\\StoicWealthSociety",

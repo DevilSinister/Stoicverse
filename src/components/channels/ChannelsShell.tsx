@@ -327,14 +327,69 @@ export function ChannelsShell({ children, isMaster = false }: { children: ReactN
   );
 }
 
-/** Shown while the shell's data is in flight, so the frame does not jump in. */
+/**
+ * Shown while the shell's data is in flight, so the frame does not jump in.
+ *
+ * It has to be the *same* grid as the shell it stands in for. It was
+ * `[15rem_1fr]` — two columns, written before the rail existed — against the
+ * real shell's `[4.5rem_15rem_1fr]`, so every arrival at /channels drew a frame
+ * 4.5rem narrower than the one that replaced it and the whole conversation slid
+ * sideways once the data landed.
+ *
+ * The rail column is drawn as its strip of discs rather than left blank: it is
+ * the one part of the page about to be identical, and showing its shape is the
+ * difference between "this is loading" and "this is broken".
+ */
 export function ShellSkeleton() {
   return (
-    <div className="grid h-svh grid-cols-1 bg-monolith-surface md:grid-cols-[15rem_1fr]">
-      <div className="hidden border-r border-surgical-steel bg-surface-container-lowest md:block" />
-      <div className="flex items-center justify-center">
-        <p className="text-sm text-fog-muted">Loading the community…</p>
+    <div
+      role="status"
+      aria-busy="true"
+      aria-label="Loading the community"
+      className="grid h-svh grid-cols-1 bg-monolith-surface md:grid-cols-[4.5rem_15rem_1fr]"
+    >
+      <div className="hidden flex-col items-center gap-3 border-r border-surgical-steel bg-sidebar py-3 md:flex">
+        {Array.from({ length: 7 }, (_, item) => (
+          <div key={item} className="size-11 animate-pulse rounded-2xl bg-surface-container-high" />
+        ))}
       </div>
+
+      <div className="hidden min-h-0 flex-col border-r border-surgical-steel bg-surface-container-lowest md:flex">
+        <div className="border-b border-surgical-steel px-3 py-3">
+          <div className="h-4 w-28 animate-pulse rounded-lg bg-surface-container-high" />
+        </div>
+        <div className="space-y-2 px-3 py-3">
+          {Array.from({ length: 9 }, (_, row) => (
+            <div
+              key={row}
+              className="h-4 animate-pulse rounded-lg bg-surface-container-high"
+              style={{ width: `${55 + ((row * 13) % 40)}%` }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="flex min-h-0 flex-col">
+        <div className="flex h-14 items-center border-b border-surgical-steel px-4">
+          <div className="h-4 w-40 animate-pulse rounded-lg bg-surface-container-high" />
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col justify-end gap-5 p-4">
+          {Array.from({ length: 6 }, (_, message) => (
+            <div key={message} className="flex gap-3">
+              <div className="size-10 shrink-0 animate-pulse rounded-full bg-surface-container-high" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="h-3 w-32 animate-pulse rounded-lg bg-surface-container-high" />
+                <div
+                  className="h-3 animate-pulse rounded-lg bg-surface-container-high"
+                  style={{ width: `${45 + ((message * 17) % 45)}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <span className="sr-only">Loading the community</span>
     </div>
   );
 }

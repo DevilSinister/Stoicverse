@@ -1,11 +1,12 @@
 /* Legacy tier path retained below for migration reference.
 import { requireActiveMembership } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 import { LearningPathView, type LearningPathData } from "@/components/courses/LearningPathView";
 
 export async function renderCoursesPage({ nextPath = "/courses", routeBase = "" }: { nextPath?: string; routeBase?: string } = {}) {
   const { supabase, user } = await requireActiveMembership(nextPath);
   const [profileResult, tierResult, progressResult, lessonsResult, tiersResult] = await Promise.all([
-    supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
+    profileRow(),
     supabase.from("member_tiers").select("current_tier, is_master").eq("user_id", user.id).maybeSingle(),
     supabase.from("lesson_progress").select("lesson_id, is_completed, completion_percentage").eq("user_id", user.id),
     supabase.from("lessons").select("id, title, description, sort_order, tier_id, duration_seconds, release_at").eq("status", "published").order("sort_order"),

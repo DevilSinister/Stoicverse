@@ -1,6 +1,7 @@
 import { FeedScreen } from "@/components/screens/AskStoicScreens";
 import { signAttachmentUrls } from "@/lib/channels/attachment-urls";
 import { requireInfluencerMasterWorkspace, requireMasterMembership } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 
 type MasterPageOptions = {
   nextPath?: string;
@@ -21,7 +22,7 @@ export async function renderMasterPage({
     ? await requireInfluencerMasterWorkspace(nextPath)
     : await requireMasterMembership(nextPath);
   const [profileResult, tierResult, channelsResult, postsResult, notificationsResult] = await Promise.all([
-    supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
+    profileRow(),
     supabase.from("member_tiers").select("current_tier").eq("user_id", user.id).maybeSingle(),
     supabase.from("channels").select("id, name, type, description").eq("is_active", true).eq("type", "master").order("sort_order"),
     // `post_attachments` since phase 9, which dropped `posts.image_url`. The old

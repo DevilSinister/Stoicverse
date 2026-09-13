@@ -44,14 +44,71 @@ test("settings uses fixed desktop regions and phone list-to-detail navigation", 
   assert.match(settings, /Back to dashboard/);
 });
 
-test("workspace loading states stream useful dashboard-shaped skeletons without repeating page access checks", async () => {
-  const [dashboardLoading, creatorLoading, dashboardLayout, creatorLayout, appShell] = await Promise.all([
-    read("src/app/dashboard/loading.tsx"), read("src/app/creator/loading.tsx"), read("src/app/dashboard/layout.tsx"), read("src/app/creator/layout.tsx"), read("src/components/layout/AppShell.tsx"),
+/**
+ * This test used to assert the opposite of two lines below: that neither
+ * workspace layout ran an access check. That was right while the layouts were
+ * pass-throughs — an `await` in a layout delays the `loading.tsx` fallback
+ * beneath it, so a layout that reads for no reason costs a skeleton.
+ *
+ * The layouts own the chrome now, which is what keeps the rail on screen
+ * through a navigation instead of tearing it down with the outgoing page, and
+ * chrome cannot be drawn without knowing who is looking at it. So the rule
+ * changed rather than lapsed, and what replaces it is stricter: a layout may
+ * read, but only through the request-cached viewer helpers, so the guard every
+ * page below still runs costs nothing the second time. A layout reaching for
+ * `supabase.from(...)` directly would put back exactly the duplicate round
+ * trip this work removed.
+ */
+test("workspace layouts own the chrome and read it through the request cache", async () => {
+  const [dashboardLoading, creatorLoading, dashboardLayout, creatorLayout, skeletons, appShell] = await Promise.all([
+    read("src/app/dashboard/loading.tsx"), read("src/app/creator/loading.tsx"), read("src/app/dashboard/layout.tsx"),
+    read("src/app/creator/layout.tsx"), read("src/components/layout/Skeletons.tsx"), read("src/components/layout/AppShell.tsx"),
   ]);
-  assert.match(dashboardLoading, /aria-busy="true"/);
-  assert.match(dashboardLoading, /MetricSkeleton/);
-  assert.match(creatorLoading, /MetricSkeleton/);
-  assert.doesNotMatch(dashboardLayout, /requireActiveMembership/);
-  assert.doesNotMatch(creatorLayout, /requireInfluencerWorkspace/);
+
+  // The skeleton is the content's shape, drawn inside chrome already on
+  // screen — so it must not paint a page of its own.
+  assert.match(dashboardLoading, /OverviewSkeleton/);
+  assert.match(creatorLoading, /OverviewSkeleton/);
+  assert.doesNotMatch(dashboardLoading, /min-h-screen/);
+  assert.doesNotMatch(creatorLoading, /min-h-screen/);
+  assert.match(skeletons, /aria-busy="true"/);
+  assert.match(skeletons, /role="status"/);
+
+  // The chrome belongs to the layout, which is what makes it survive a
+  // navigation: Next re-renders only below the layout two routes share.
+  for (const layout of [dashboardLayout, creatorLayout]) {
+    assert.match(layout, /<AppShell/);
+    assert.match(layout, /currentProfile\(\)/);
+    assert.doesNotMatch(layout, /supabase\s*\n?\s*\.from\(/);
+  }
+  assert.match(dashboardLayout, /requireActiveMembership/);
+  assert.match(creatorLayout, /requireInfluencerWorkspace/);
+
   assert.doesNotMatch(appShell, /window\.setTimeout\(\(\) => \{ void loadNotifications\(false\); \}, 0\)/);
+});
+
+/**
+ * Why a page may call a guard the layout above it already called.
+ *
+ * A layout is not an access boundary in the App Router — a client navigation
+ * renders a page without re-rendering the layout — so the pages keep their
+ * guards. That is only affordable because identity is verified from the token
+ * in process and the profile behind it is read once per request.
+ */
+test("identity is verified in process and read once per request", async () => {
+  const [viewer, server, access] = await Promise.all([
+    read("src/lib/supabase/viewer.ts"), read("src/lib/supabase/server.ts"), read("src/lib/supabase/access.ts"),
+  ]);
+
+  // `getClaims` verifies the ES256 signature against a cached JWKS. `getUser`
+  // was an HTTP round trip to the auth server on every single request.
+  assert.match(viewer, /auth\.getClaims\(\)/);
+  assert.doesNotMatch(access, /auth\.getUser\(\)/);
+
+  // Request-scoped, so a guard and the page it guards share one read.
+  assert.match(viewer, /^import \{ cache \} from "react";/m);
+  assert.match(server, /export const createClient = cache\(/);
+  for (const name of ["currentViewer", "currentProfile", "currentIsMaster", "profileRow", "unreadNotificationCount"]) {
+    assert.match(viewer, new RegExp(`export const ${name} = cache\\(`));
+  }
 });

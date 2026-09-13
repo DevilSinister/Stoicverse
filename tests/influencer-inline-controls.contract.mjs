@@ -79,5 +79,7 @@ test("member and creator route trees expose separate navigation and guards", () 
   // decides which channels either of them is shown.
   assert.match(memberCommunity, /redirect\("\/channels"\)/);
   assert.match(read("src/app/channels/layout.tsx"), /community_channel_directory/);
-  assert.match(memberAccess, /profile\?\.platform_role === "influencer"/);
+  // `platformRole`, camelCase, since the guards read the request-cached
+  // profile rather than a raw PostgREST row.
+  assert.match(memberAccess, /profile\?\.platformRole === "influencer"/);
 });

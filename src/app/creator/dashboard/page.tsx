@@ -1,11 +1,12 @@
 import { CreatorOverviewView } from "@/components/creator/CreatorOverviewView";
 import { requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 
 export async function CreatorDashboardPage() {
   const { supabase, user } = await requireInfluencerWorkspace("/creator/dashboard");
 
   const [profileResult, notificationsResult, turnoverResult] = await Promise.all([
-    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    profileRow(),
     supabase.from("notifications").select("id, type, title, body, action_url, is_read, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
     supabase.rpc("creator_turnover_totals"),
   ]);

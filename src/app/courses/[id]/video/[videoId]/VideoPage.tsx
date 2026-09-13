@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CourseVideoPlayer } from "@/components/courses/CourseVideoPlayer";
 import { requireActiveMembership } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 import { AppShell } from "@/components/layout/AppShell";
 import { withRouteBase } from "@/lib/navigation/paths";
 
@@ -23,7 +24,7 @@ export async function renderVideoPage({
     supabase.from("course_videos").select("id,title,description,course_id,duration_seconds,sort_order,is_optional").eq("id", videoId).eq("course_id", id).maybeSingle(),
     supabase.from("course_videos").select("id,title,duration_seconds,sort_order,is_optional").eq("course_id", id).order("sort_order"),
     supabase.from("course_video_progress").select("video_id,completion_percentage,is_completed").eq("user_id", user.id),
-    supabase.from("profiles").select("full_name,platform_role").eq("id", user.id).maybeSingle(),
+    profileRow(),
     supabase.from("member_tiers").select("current_tier,is_master").eq("user_id", user.id).maybeSingle(),
   ]);
 

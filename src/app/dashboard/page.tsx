@@ -1,5 +1,6 @@
 import { DashboardView, type DashboardData } from "@/components/dashboard/DashboardView";
 import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 
 type DashboardPageOptions = {
   nextPath?: string;
@@ -14,7 +15,7 @@ export async function renderDashboardPage({ nextPath = "/dashboard", routeBase =
 
   const now = new Date().toISOString();
   const [profileResult, tierResult, enrollmentResult, coursesResult, courseVideosResult, videoProgressResult, eventsResult, notificationsResult, turnoverResult] = await Promise.all([
-    supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
+    profileRow(),
     supabase.from("member_tiers").select("current_tier, is_master").eq("user_id", user.id).maybeSingle(),
     supabase.from("course_enrollments").select("course_id, completion_current, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }),
     supabase.from("courses").select("id, title, description, min_tier, created_at").eq("status", "published").order("created_at"),

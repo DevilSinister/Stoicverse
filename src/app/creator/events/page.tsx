@@ -1,11 +1,12 @@
 import { CreatorEventsView, type CreatorEventRecord } from "@/components/creator/CreatorEventsView";
 import { requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 
 export default async function CreatorEventsPage() {
   const { supabase, user } = await requireInfluencerWorkspace("/creator/events");
   const [tierResult, profileResult, eventsResult, enrollmentResult, membershipsResult, tiersResult, roomsResult] = await Promise.all([
     supabase.from("member_tiers").select("is_master, current_tier").eq("user_id", user.id).maybeSingle(),
-    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    profileRow(),
     supabase.from("events").select("*").order("starts_at", { ascending: true }),
     supabase.from("event_enrollments").select("event_id, user_id, enrolled_at, profiles(full_name)").order("enrolled_at", { ascending: true }),
     supabase.from("memberships").select("user_id").eq("status", "active"),

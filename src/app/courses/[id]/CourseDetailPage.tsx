@@ -6,6 +6,7 @@ import { EnrollButton } from "@/app/courses/[id]/EnrollButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { withRouteBase } from "@/lib/navigation/paths";
 import { requireActiveMembership } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 
 export async function renderCourseDetailPage({ id, routeBase = "" }: { id: string; routeBase?: string }) {
   const { supabase, user } = await requireActiveMembership(routeBase ? `${routeBase}/courses/${id}` : `/courses/${id}`);
@@ -15,7 +16,7 @@ export async function renderCourseDetailPage({ id, routeBase = "" }: { id: strin
     supabase.from("course_videos").select("id,title,description,duration_seconds,sort_order,is_optional").eq("course_id", id).order("sort_order"),
     supabase.from("course_video_progress").select("video_id,completion_percentage,is_completed").eq("user_id", user.id),
     supabase.from("member_tiers").select("current_tier,is_master").eq("user_id", user.id).maybeSingle(),
-    supabase.from("profiles").select("full_name,platform_role").eq("id", user.id).maybeSingle(),
+    profileRow(),
   ]);
 
   if (courseResult.error || !courseResult.data || videosResult.error || progressResult.error || tierResult.error || profileResult.error) notFound();

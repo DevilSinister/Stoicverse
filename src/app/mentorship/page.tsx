@@ -1,5 +1,6 @@
 import MentorshipView from "@/components/mentorship/MentorshipView";
 import { requireActiveMembership, requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 
 type MentorshipPageOptions = {
   nextPath?: string;
@@ -13,7 +14,7 @@ export async function renderMentorshipPage({ nextPath = "/mentorship", routeBase
     : await requireActiveMembership(nextPath);
 
   const [profileResult, tierResult, notificationsResult, mentorshipResult] = await Promise.all([
-    supabase.from("profiles").select("full_name, platform_role").eq("id", user.id).maybeSingle(),
+    profileRow(),
     supabase.from("member_tiers").select("current_tier, is_master").eq("user_id", user.id).maybeSingle(),
     supabase.from("notifications").select("id, type, title, body, action_url, is_read, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
     supabase.from("mentorships").select("status, booking_url, mentor:assigned_mentor_id(full_name), starts_at, ends_at").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle(),

@@ -1,10 +1,11 @@
 import { CreatorCourseManagerV2, type ManagedCourse } from "@/components/creator/CreatorCourseManagerV2";
 import { requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { profileRow } from "@/lib/supabase/viewer";
 
 export default async function CreatorCourseManagerPageV2() {
   const { supabase, user } = await requireInfluencerWorkspace("/creator/courses");
   const [profile, tier, courseRows, videoRows, assetRows] = await Promise.all([
-    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    profileRow(),
     supabase.from("member_tiers").select("current_tier,is_master").eq("user_id", user.id).maybeSingle(),
     supabase.from("courses").select("id,title,description,completion_tier,status,is_finished,finished_at").order("created_at"),
     supabase.from("course_videos").select("id,course_id,title,description,duration_seconds,sort_order,is_optional,release_at").order("sort_order"),
