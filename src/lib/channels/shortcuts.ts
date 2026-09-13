@@ -62,6 +62,19 @@ export function resolveShortcut(event: ShortcutEvent): ShortcutAction {
 }
 
 /** Whether the event's target is somewhere a keystroke means text, not a command. */
+/*
+  Deliberately duplicated from lib/ui/is-typing-target.ts, and gated by a contract
+  test that asserts the two bodies stay identical.
+
+  This module is imported as raw TypeScript by tests/channels-shortcuts.test.mjs
+  under `node --test`, where the "@/" path alias does not resolve - the same reason
+  rail.ts is written zero-import. Re-exporting the shared copy from here makes the
+  whole test file fail to load, taking seven other tests with it.
+
+  So: lib/ui/is-typing-target.ts is the canonical copy for everything that is not
+  reached by a node test, this stays self-contained, and the contract test is what
+  stops them drifting.
+*/
 export function isTypingTarget(target: EventTarget | null): boolean {
   if (!target || !(target instanceof HTMLElement)) return false;
   if (target.isContentEditable) return true;
