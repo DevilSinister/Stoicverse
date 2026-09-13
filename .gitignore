@@ -44,3 +44,4 @@ next-env.d.ts
 .pnpm-store/
 .codex-dev.*
 .next-build/
+.impeccable/hook.cache.json
