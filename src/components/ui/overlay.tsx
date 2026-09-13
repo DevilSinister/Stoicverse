@@ -36,7 +36,10 @@ const DensityContext = React.createContext<Density>("content")
 const overlayContentVariants = cva(
   "fixed z-overlay flex min-h-0 flex-col bg-popover text-popover-foreground outline-none " +
     "border border-border-hairline shadow-xl duration-150 " +
-    "data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+    "data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 " +
+    // See OverlayBackdrop: a closed popup must not be clickable either, or a
+    // stuck exit leaves invisible controls live over the page behind it.
+    "data-closed:pointer-events-none",
   {
     variants: {
       placement: {
@@ -99,6 +102,16 @@ function OverlayBackdrop({ className, ...props }: DialogPrimitive.Backdrop.Props
       data-slot="overlay-backdrop"
       className={cn(
         "fixed inset-0 z-scrim bg-scrim duration-150 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        /*
+          A closed overlay must never swallow a click, whatever the animation is
+          doing. Base UI keeps the node mounted until the exit animation reports
+          finished, and an animation can fail to report: the tab is backgrounded
+          mid-close and the browser freezes it, or the animation is interrupted.
+          The node then sits over the whole page at pointer-events: auto and the
+          product is silently unclickable. This costs nothing and removes the
+          entire failure class rather than the one path that produced it.
+        */
+        "data-closed:pointer-events-none",
         className,
       )}
       {...props}

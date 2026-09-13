@@ -31,6 +31,16 @@ test("the overlay owns none of the behaviour it could get wrong", async () => {
   assert.match(overlay, /z-scrim/);
   assert.match(overlay, /z-overlay/);
   assert.doesNotMatch(overlay, /z-\[\d+\]/);
+
+  /*
+    Base UI unmounts once the exit animation reports finished, and an animation
+    can fail to report — a tab backgrounded mid-close freezes it outright. The
+    scrim then stays over the page at pointer-events: auto and nothing is
+    clickable. Both the backdrop and the popup must go inert the moment they are
+    marked closed, independent of whether anything animates.
+  */
+  const inert = overlay.match(/data-closed:pointer-events-none/g) ?? [];
+  assert.equal(inert.length, 2, "the backdrop and the popup both go inert when closed");
 });
 
 test("the mobile sheet and the safe area are written once", async () => {
