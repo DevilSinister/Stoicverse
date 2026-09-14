@@ -1,7 +1,7 @@
 # Graph Report - StoicWealthSociety  (2026-09-14)
 
 ## Corpus Check
-- 487 files · ~427,726 words
+- 487 files · ~428,240 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d67579d8`
+- Built from commit: `72b48930`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,7 +31,7 @@
 - DashboardView.tsx
 - dependencies
 - devDependencies
-- Composer.tsx
+- constants.ts
 - EmojiPicker.tsx
 - Influencer Implementation Plan
 - app/courses/lesson/[id]/page.tsx
@@ -94,6 +94,7 @@
 - Skeletons.tsx
 - data-table.tsx
 - plans.ts
+- @base-ui/react
 - card.tsx
 - SetPasswordForm.tsx
 - Premium Account Registration
@@ -118,7 +119,7 @@
 - Creator Analytics and Revenue Plan
 - createClient
 - Stoicverse project and branch status
-- channels-helpers.test.mjs
+- CommunityProvider.tsx
 - withRouteBase
 - role-model.ts
 - AppRail.tsx
@@ -155,9 +156,8 @@
 - MessageMenu.tsx
 - presence.ts
 - auth/actions.ts
-- CommunityProvider.tsx
+- Composer.tsx
 - toggle-group.tsx
-- @supabase/ssr
 - lucide-react
 - CourseCatalogPage.tsx
 - @dnd-kit/core
@@ -259,15 +259,15 @@ Nodes (12): DashboardPage(), DashboardPageOptions, renderDashboardPage(), Dashbo
 
 ### Community 14 - "dependencies"
 Cohesion: 0.12
-Nodes (17): @base-ui/react, class-variance-authority, clsx, emojibase-data, dependencies, @base-ui/react, class-variance-authority, clsx (+9 more)
+Nodes (17): class-variance-authority, clsx, emojibase-data, dependencies, class-variance-authority, clsx, emojibase-data, recharts (+9 more)
 
 ### Community 15 - "devDependencies"
 Cohesion: 0.12
 Nodes (17): eslint, eslint-config-next, devDependencies, eslint, eslint-config-next, tailwindcss, @tailwindcss/postcss, @types/node (+9 more)
 
-### Community 16 - "Composer.tsx"
-Cohesion: 0.10
-Nodes (29): sendChannelMessage(), Composer(), PendingAttachment, Popover(), PopoverContent(), PopoverDescription(), PopoverHeader(), PopoverTitle() (+21 more)
+### Community 16 - "constants.ts"
+Cohesion: 0.15
+Nodes (18): ATTACHMENT_MAX_BYTES, ATTACHMENT_MIME_TYPES, ATTACHMENTS_PER_MESSAGE, ChannelNotificationLevel, CUSTOM_EMOJI_TOKEN, formatBytes(), isAllowedAttachmentType(), isValidReactionToken() (+10 more)
 
 ### Community 17 - "EmojiPicker.tsx"
 Cohesion: 0.07
@@ -489,9 +489,9 @@ Nodes (8): GET(), POST(), dynamic, GET(), PERIODS, GET(), accessGranted(), creat
 Cohesion: 0.15
 Nodes (12): Branch inventory, Concrete unfinished work and risks, Documentation and maintenance, Executive assessment, Feature gaps, Implemented in committed history, Integration history, Recommended next steps (+4 more)
 
-### Community 127 - "channels-helpers.test.mjs"
-Cohesion: 0.16
-Nodes (12): continuesGroup(), firstUnreadIndex(), GROUP_WINDOW_MS, GroupableMessage, startsNewDay(), activeMentionQuery(), decodeMentions(), EMPTY (+4 more)
+### Community 127 - "CommunityProvider.tsx"
+Cohesion: 0.10
+Nodes (23): CommunityContext, CommunityProvider(), CommunityValue, MobilePane, continuesGroup(), firstUnreadIndex(), GROUP_WINDOW_MS, GroupableMessage (+15 more)
 
 ### Community 128 - "withRouteBase"
 Cohesion: 0.12
@@ -605,9 +605,9 @@ Nodes (10): TypingPayload, useCommunityLive(), activeTypists(), groupMembers(), 
 Cohesion: 0.26
 Nodes (13): POST(), PATCH(), appOrigin(), AuthActionState, clientKey(), loginAction(), rememberPendingEmail(), requestPasswordResetAction() (+5 more)
 
-### Community 187 - "CommunityProvider.tsx"
-Cohesion: 0.15
-Nodes (18): Pinned, PinsPopover(), Thread, ThreadListPopover(), useLazyRows(), CommunityContext, CommunityProvider(), CommunityValue (+10 more)
+### Community 187 - "Composer.tsx"
+Cohesion: 0.16
+Nodes (18): sendChannelMessage(), Pinned, PinsPopover(), Thread, ThreadListPopover(), useLazyRows(), Composer(), PendingAttachment (+10 more)
 
 ### Community 188 - "toggle-group.tsx"
 Cohesion: 0.27
@@ -629,11 +629,11 @@ Nodes (23): ComboboxChip(), ComboboxChips(), ComboboxChipsInput(), ComboboxClear
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `AppRail.tsx`, `combobox.tsx`, `alert-dialog.tsx`, `member-avatar.tsx`, `status-badge.tsx`, `utils.ts`, `Composer.tsx`, `data-table.tsx`, `tabs.tsx`, `MessageMenu.tsx`, `SearchOverlay.tsx`, `toggle-group.tsx`, `card.tsx`?**
+- **Why does `cn()` connect `cn` to `AppRail.tsx`, `combobox.tsx`, `alert-dialog.tsx`, `member-avatar.tsx`, `status-badge.tsx`, `utils.ts`, `data-table.tsx`, `tabs.tsx`, `MessageMenu.tsx`, `SearchOverlay.tsx`, `Composer.tsx`, `toggle-group.tsx`, `card.tsx`?**
   _High betweenness centrality (0.112) - this node is a cross-community bridge._
-- **Why does `createClient` connect `createClient` to `withRouteBase`, `SetPasswordForm.tsx`, `requireInfluencer`, `CreatorRevenueView.tsx`, `CreatorEventsView.tsx`, `AccountSettingsWorkspace.tsx`, `useCommunity`, `proxy.ts`, `member-operations/server.ts`, `requireInfluencerWorkspace`, `Composer.tsx`, `postgresMessage`, `plans.ts`, `NotificationCenter.tsx`, `auth/actions.ts`, `access.ts`, `ChannelView.tsx`?**
+- **Why does `createClient` connect `createClient` to `withRouteBase`, `SetPasswordForm.tsx`, `requireInfluencer`, `CreatorRevenueView.tsx`, `CreatorEventsView.tsx`, `AccountSettingsWorkspace.tsx`, `useCommunity`, `proxy.ts`, `member-operations/server.ts`, `requireInfluencerWorkspace`, `access.ts`, `postgresMessage`, `plans.ts`, `NotificationCenter.tsx`, `auth/actions.ts`, `Composer.tsx`, `ChannelView.tsx`?**
   _High betweenness centrality (0.081) - this node is a cross-community bridge._
-- **Why does `createClient()` connect `CommunityProvider.tsx` to `community-settings/model.ts`, `role-model.ts`, `AppRail.tsx`, `NotificationCenter.tsx`, `proxy.ts`, `AppShell.tsx`, `Composer.tsx`, `postgresMessage`, `SearchOverlay.tsx`, `presence.ts`, `ChannelView.tsx`?**
+- **Why does `createClient()` connect `Composer.tsx` to `community-settings/model.ts`, `role-model.ts`, `AppRail.tsx`, `NotificationCenter.tsx`, `proxy.ts`, `AppShell.tsx`, `postgresMessage`, `SearchOverlay.tsx`, `presence.ts`, `ChannelView.tsx`, `CommunityProvider.tsx`?**
   _High betweenness centrality (0.042) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `rsc` to the rest of the system?**
   _676 weakly-connected nodes found - possible documentation gaps or missing edges._

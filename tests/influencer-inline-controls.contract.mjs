@@ -36,7 +36,21 @@ test("canonical creator pages use creator-only routes and workspace access", () 
 test("member screens are clean while creator screens own the management controls", () => {
   const nav = read("src/lib/navigation/rail.ts");
   const shell = read("src/components/layout/AppShell.tsx");
-  const dashboard = read("src/components/dashboard/DashboardView.tsx");
+  /*
+    The live dashboard, not `DashboardView.tsx`.
+
+    That file used to hold `LegacyDashboardView`, a second complete dashboard
+    with no importer, and this assertion was pinned to a template literal inside
+    it — so it was testing a screen nobody could reach. Phase 7 deleted it;
+    `DashboardView.tsx` is now the type surface plus a re-export.
+
+    What the assertion is actually for is that the member dashboard's course
+    link respects the viewer's route base, so the creator's copy of the screen
+    points at `/creator/courses/...` rather than a member route their own proxy
+    refuses. The live screen does that through `withRouteBase`, which is
+    stronger than the hard-coded path this used to match.
+  */
+  const dashboard = read("src/components/dashboard/TerminalDashboard.tsx");
   const memberLearning = read("src/components/courses/CourseCatalog.tsx");
   const memberEvents = read("src/components/events/EventsView.tsx");
   const creatorLearning = read("src/components/creator/CreatorCourseManagerV2.tsx");
@@ -44,7 +58,8 @@ test("member screens are clean while creator screens own the management controls
 
   assert.match(nav, /routeBase/);
   assert.match(shell, /params\.set\("base", routeBase\)/);
-  assert.match(dashboard, /`\/courses\/\$\{data\.activeLesson\.id\}`/);
+  assert.match(dashboard, /withRouteBase\(routeBase, courseId \? `\/courses\/\$\{courseId\}`/);
+  assert.match(dashboard, /courseHref\(data\.activeLesson\?\.id\)/);
   assert.doesNotMatch(memberLearning, /Add lesson/);
   assert.doesNotMatch(memberEvents, /Create event/);
   assert.doesNotMatch(memberEvents, /Publish Zoom link/);

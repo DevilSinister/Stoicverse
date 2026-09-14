@@ -38,13 +38,14 @@ async function sourceFiles(dir = "src") {
   return out;
 }
 
-async function countAcross(pattern, { skip = () => false } = {}) {
+async function countAcross(pattern, { skip = () => false, strip = false } = {}) {
   const files = await sourceFiles();
   let total = 0;
   const where = [];
   for (const file of files) {
     if (skip(file)) continue;
-    const hits = (await read(file)).match(pattern);
+    const source = await read(file);
+    const hits = (strip ? stripComments(source) : source).match(pattern);
     if (hits) {
       total += hits.length;
       where.push(`${file} (${hits.length})`);
@@ -149,10 +150,17 @@ test("the body rule is not overridden inline by the root layout", async () => {
 });
 
 test("text-white is gone and does not come back", async () => {
-  // Pure white on a near-black ground is 20.4:1 and reads as glare. 371 sites
-  // were replaced; 16 of them sat on an accent fill and needed the contrast
-  // colour rather than the strong text colour.
-  const { total, where } = await countAcross(/\btext-white\b/g);
+  /*
+    Pure white on a near-black ground is 20.4:1 and reads as glare. 371 sites
+    were replaced; 16 of them sat on an accent fill and needed the contrast
+    colour rather than the strong text colour.
+
+    Comments are stripped, and that is not a loosening. A file that removes this
+    class has every reason to *name* it in the docblock explaining why - phase 7
+    did exactly that and turned this assertion red over prose. The rule stays a
+    hard zero for anything that renders. Lesson 45, from the other direction.
+  */
+  const { total, where } = await countAcross(/\btext-white\b/g, { strip: true });
   assert.equal(total, 0, `text-white survives in: ${where.join(", ")}`);
 });
 
@@ -296,6 +304,42 @@ test("the native dialogs only ever decrease", async () => {
   assert.ok(total <= 6, `a native dialog was added: ${where.join(", ")}`);
 });
 
+test("a class naming a token that does not exist only ever decreases", async () => {
+  /*
+    `surface-container-highest` is not defined anywhere. The alias scale stops at
+    `-high`, so every one of these emits no CSS at all and the surface it dresses
+    paints nothing — not a wrong colour, an absent one. Nothing catches it: the
+    build is green, the typechecker cannot see inside a string, and on a
+    near-black page an unpainted panel looks like a deliberately flat one.
+
+    Two were on the member dashboard (a course preview panel and a progress
+    track) and phase 7 fixed them. Five survive, in screens later phases own.
+
+    Found by reading globals.css for the token rather than by looking at a page,
+    which is the only way this class of defect is ever found early.
+    See `00 - Shared/Cross-Project Lessons.md` lesson 47.
+  */
+  const css = await read("src/app/globals.css");
+  assert.doesNotMatch(css, /--color-surface-container-highest:/, "if this is ever defined, delete this ratchet");
+
+  const { total, where } = await countAcross(/\bsurface-container-highest\b/g);
+  assert.ok(total <= 5, `a class naming an undefined token was added; found ${total} in: ${where.join(", ")}`);
+});
+
+test("pure white fills only ever decrease", async () => {
+  /*
+    Monolith replaced 371 uses of `text-white` because pure white on near-black
+    is 20.4:1 and reads as glare. A pure white *fill* is the same decision from
+    the other side, and `text-white`'s hard zero never covered it.
+
+    8 when phase 7 started; the member dashboard's mentorship button was one of
+    them and was the only full-strength `bg-white` — the rest are low-opacity
+    hover washes (`bg-white/[0.04]`), which are a different, milder problem.
+  */
+  const { total, where } = await countAcross(/\bbg-white\b/g);
+  assert.ok(total <= 7, `a pure white fill was added; found ${total} in: ${where.join(", ")}`);
+});
+
 test("the deprecated glow only ever decreases", async () => {
   const { total, where } = await countAcross(/\bemerald-glow\b/g);
   /*
@@ -304,21 +348,21 @@ test("the deprecated glow only ever decreases", async () => {
     nothing visually — which is exactly why an unmeasured one survives: it is
     invisible in review and invisible in the browser.
 
-    16 when Monolith landed, 13 at the end of phase 5 (the checkout CTA was
-    three of them). The remaining ones are the dashboard, learning-path, events
+    16 when Monolith landed, 13 after phase 5 (the checkout CTA was three of
+    them), 8 after phase 7 deleted the dead legacy screens that carried five. The remaining ones are the dashboard, learning-path, events
     and mentorship screens, which later phases own. The utility is deleted with
     the alias block when this reaches zero.
   */
-  assert.ok(total <= 13, `emerald-glow grew to ${total}: ${where.join(", ")}`);
+  assert.ok(total <= 8, `emerald-glow grew to ${total}: ${where.join(", ")}`);
 });
 
 test("pill controls only ever decrease", async () => {
   const { total } = await countAcross(/\brounded-full\b/g);
-  // 216 at the end of phase 5, down from the 234 recorded after P2a: phase 4b
+  // 189 after phase 7, down from 216 at phase 5 and 234 after P2a: phase 4b
   // took the landing and legal pages, and phase 5 took the checkout CTA, the
   // deletion-recovery buttons and the two deleted subscription screens.
   // rounded-full is legitimate for avatars, presence dots and unread badges;
   // every other use is a pill button, chip or input left over from the
   // previous design system.
-  assert.ok(total <= 216, `pill controls grew to ${total}; buttons and inputs are 4px`);
+  assert.ok(total <= 189, `pill controls grew to ${total}; buttons and inputs are 4px`);
 });

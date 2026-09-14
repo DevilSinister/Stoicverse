@@ -100,8 +100,8 @@
     "semantic_hash": "a95c9862d39d3dbc660edeb2b81f5200"
   },
   "src/components/screens/AskStoicScreens.tsx": {
-    "mtime": 1789349951.2718606,
-    "ast_hash": "0e592c82331b4133173122f78a007aa6",
+    "mtime": 1789358229.95066,
+    "ast_hash": "cbc6a549188e21f9d667394ade0fe324",
     "semantic_hash": ""
   },
   "src/components/ui/button.tsx": {
@@ -405,8 +405,8 @@
     "semantic_hash": ""
   },
   "src/components/dashboard/DashboardView.tsx": {
-    "mtime": 1789283881.106541,
-    "ast_hash": "2ade97f44e06b1df326032ce4712e4ad",
+    "mtime": 1789358221.946421,
+    "ast_hash": "656e432318f9ab2712244d45081e187e",
     "semantic_hash": ""
   },
   "src/lib/supabase/access.ts": {
@@ -695,8 +695,8 @@
     "semantic_hash": "5046eb25bf91c8c15350d7e8fcc20bbd"
   },
   "tests/influencer-inline-controls.contract.mjs": {
-    "mtime": 1789332619.7286649,
-    "ast_hash": "77dff150ce363055463619990e8e2104",
+    "mtime": 1789358437.1363597,
+    "ast_hash": "69c4884e5455f21823669f9675232d16",
     "semantic_hash": ""
   },
   "src/app/creator/community/page.tsx": {
@@ -970,8 +970,8 @@
     "semantic_hash": ""
   },
   "src/components/dashboard/TerminalDashboard.tsx": {
-    "mtime": 1789283881.1075401,
-    "ast_hash": "a4402d85e08f7a54c49de26a9aa5f67f",
+    "mtime": 1789358025.636962,
+    "ast_hash": "969ea0791e967370d64b3ce3329f5a3f",
     "semantic_hash": ""
   },
   "src/components/screens/LandingScreen.tsx": {
@@ -2555,8 +2555,8 @@
     "semantic_hash": ""
   },
   "tests/design-tokens.contract.mjs": {
-    "mtime": 1789351392.2107842,
-    "ast_hash": "a18ccb93f32fd3d6fe662881e04d1cbf",
+    "mtime": 1789358461.0826879,
+    "ast_hash": "2ab34a86fadd1860bce0b257b7d6c331",
     "semantic_hash": ""
   },
   "tests/overlay.contract.mjs": {

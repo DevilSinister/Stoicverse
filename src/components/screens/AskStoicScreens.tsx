@@ -1,27 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Check, Crown, Gauge, Image as ImageIcon, Lock, LogIn, MessageSquare, MoreVertical, Play, Plus, Send, Shield, Video } from "lucide-react";
+import { Crown, Image as ImageIcon, MessageSquare, MoreVertical, Plus, Send } from "lucide-react";
 import { AppShell as SharedAppShell } from "@/components/layout/AppShell";
 import { withRouteBase } from "@/lib/navigation/paths";
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(" ");
-
-function ButtonLink({ href, children, variant = "primary" }: { href: string; children: React.ReactNode; variant?: "primary" | "outline" }) {
-  return (
-    <Link
-      href={href}
-      className={cx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 font-label-md text-label-md transition focus-ring",
-        variant === "primary"
-          ? "bg-primary-container text-on-primary-fixed hover:bg-opacity-95 hover:brightness-105 active:scale-[0.98] duration-150 emerald-glow"
-          : "border border-surgical-steel text-on-surface hover:border-primary-container hover:text-primary-container"
-      )}
-    >
-      {children}
-    </Link>
-  );
-}
 
 function IconButton({ children, label, onClick }: { children: React.ReactNode; label: string; onClick?: () => void }) {
   return (
@@ -71,72 +55,6 @@ function AppShell({ active, title, isMaster = false, memberName, platformRole, c
     >
       {children}
     </SharedAppShell>
-  );
-}
-
-export function DashboardScreen() {
-  return (
-    <AppShell active="Dashboard" title="Welcome back, Practitioner">
-      <main className="relative grid gap-4 p-4 md:grid-cols-12 md:p-8">
-        <div className="pointer-events-none absolute inset-0 opacity-15 [background-image:linear-gradient(var(--color-border-hairline)_1px,transparent_1px),linear-gradient(90deg,var(--color-border-hairline)_1px,transparent_1px)] [background-size:64px_64px]" />
-        <div className="relative space-y-4 md:col-span-8">
-          <Panel title="Training Vector" action={<Gauge size={16} />}>
-            <div className="p-6">
-              <p className="font-label-sm text-label-sm text-primary-container">Current Tier</p>
-              <h2 className="mt-2 font-headline text-xl font-bold text-text-strong">The Disciplined Mind - Level II</h2>
-              <div className="mt-8 flex justify-between font-label text-xs text-fog-muted">
-                <span>Module 04 / 12</span>
-                <span className="text-primary-container font-semibold">33%</span>
-              </div>
-              <div className="mt-2 h-2 bg-surface-container-high rounded-full overflow-hidden border border-surgical-steel">
-                <div className="h-full w-1/3 bg-primary-container rounded-full" />
-              </div>
-            </div>
-          </Panel>
-          <Panel title="Active Lesson" action={<Play size={16} />}>
-            <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <span className="border border-surgical-steel bg-surface-container-high px-2 py-0.5 rounded font-label text-[10px] text-fog-muted">TRACTATUS 4.1</span>
-                <h3 className="mt-4 font-headline text-lg font-bold text-text-strong">Perception: The Objective View</h3>
-                <p className="mt-2 max-w-xl font-body text-sm text-on-surface-variant">Strip away value judgments from immediate impressions and analyze the core geometry of the event.</p>
-              </div>
-              <ButtonLink href="/courses/lesson/perception-objective-view">
-                Resume
-                <ArrowRight size={16} />
-              </ButtonLink>
-            </div>
-          </Panel>
-          <div className="grid gap-4 md:grid-cols-2">
-            <Metric label="Lessons completed" value="11 / 32" />
-            <Metric label="Community rank" value="Level II" />
-          </div>
-        </div>
-        <div className="relative space-y-4 md:col-span-4">
-          <Panel title="Chronos">
-            <div className="p-6">
-              <span className="border border-primary-container/30 bg-primary-container/10 px-2 py-0.5 rounded font-label text-[10px] text-primary-container">UPCOMING LIVE</span>
-              <h3 className="mt-4 font-headline text-lg font-bold text-text-strong">Amor Fati: Monthly Workshop</h3>
-              <div className="mt-8 border-t border-surgical-steel pt-4">
-                <p className="font-label-sm text-label-sm uppercase text-fog-muted">T-minus</p>
-                <div className="mt-2 flex justify-between font-label text-base text-primary-container font-bold">
-                  <span>02d</span>
-                  <span>14h</span>
-                  <span>35m</span>
-                </div>
-              </div>
-            </div>
-          </Panel>
-          <Panel title="Comms / general ethics">
-            <div className="p-4">
-              <p className="font-label text-xs text-primary-container font-semibold">@marcus_a</p>
-              <blockquote className="mt-3 border-l-2 border-primary-container/50 pl-3 font-body text-sm text-on-surface-variant italic">
-                The dichotomy of control in modern workspaces needs fewer slogans and more systems.
-              </blockquote>
-            </div>
-          </Panel>
-        </div>
-      </main>
-    </AppShell>
   );
 }
 
@@ -259,93 +177,6 @@ export function FeedScreen({
   );
 }
 
-export function EventsScreen({ isMaster = false }: { isMaster?: boolean }) {
-  const events = [
-    ["Amor Fati Workshop", "Advanced", "Live in 2d 14h", "Zoom revealed"],
-    ["Morning Reflection Room", "Basic", "Tomorrow 08:00", "Join available"],
-    ["Investment Briefing", "Master", "Friday 19:00", "Locked"]
-  ];
-
-  return (
-    <AppShell active="Events" title="Events Directory" isMaster={isMaster}>
-      <main className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <p className="font-label-sm text-label-sm uppercase tracking-[0.16em] text-primary-container">Live schedule</p>
-            <h2 className="mt-2 font-headline text-2xl font-bold text-text-strong md:text-3xl">Upcoming sessions and gated rooms</h2>
-          </div>
-          <ButtonLink href="/channels" variant="outline">
-            <Plus size={16} />
-            Create Event
-          </ButtonLink>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {events.map(([title, tier, time, status]) => (
-            <Panel key={title} title={tier}>
-              <div className="p-5 flex flex-col justify-between min-h-[160px]">
-                <div>
-                  <h3 className="font-headline text-lg font-bold text-text-strong">{title}</h3>
-                  <p className="mt-2 font-body text-sm text-on-surface-variant leading-relaxed">Tier-gated event card with Zoom visibility based on earned access.</p>
-                </div>
-                <div className="mt-6 flex items-center justify-between border-t border-surgical-steel pt-4">
-                  <span className="font-label text-xs text-primary-container font-semibold">{time}</span>
-                  <span className="font-label text-xs text-fog-muted uppercase">{status}</span>
-                </div>
-              </div>
-            </Panel>
-          ))}
-        </div>
-      </main>
-    </AppShell>
-  );
-}
-
-export function LessonScreen() {
-  return (
-    <AppShell active="Courses" title="Video Lesson Player">
-      <main className="grid gap-6 p-4 lg:grid-cols-[1fr_22rem] md:p-8 max-w-7xl mx-auto">
-        <section className="space-y-4">
-          <div className="aspect-video border border-surgical-steel bg-surface-container-low rounded-lg overflow-hidden flex flex-col items-center justify-center gap-4 text-primary-container">
-            <Video size={56} strokeWidth={1.2} />
-            <span className="font-label text-xs uppercase tracking-wider text-fog-muted">Google Drive embed loads after server tier check</span>
-          </div>
-          <Panel title="Perception / Lesson 04">
-            <div className="p-6">
-              <h2 className="font-headline text-xl font-bold text-text-strong">The Objective View</h2>
-              <p className="mt-3 font-body text-sm text-on-surface-variant leading-relaxed">
-                A disciplined pass through impression, judgment, action, and review. Progress is tracked by watch-time threshold.
-              </p>
-              <div className="mt-6 flex justify-between font-label text-xs text-fog-muted">
-                <span>Watch progress</span>
-                <span className="text-primary-container font-semibold">68%</span>
-              </div>
-              <div className="mt-2 h-2 bg-surface-container-high rounded-full overflow-hidden border border-surgical-steel">
-                <div className="h-full w-[68%] bg-primary-container rounded-full" />
-              </div>
-            </div>
-          </Panel>
-        </section>
-        <Panel title="Tier sequence">
-          <div className="divide-y divide-surgical-steel">
-            {["Opening frame", "What is in control", "What is not in control", "Objective view", "Reserve clause"].map((lesson, i) => (
-              <div key={lesson} className="flex items-center justify-between p-4 font-body text-sm hover:bg-surface-container-high/50 transition">
-                <span className="text-on-surface">{lesson}</span>
-                {i < 3 ? (
-                  <Check size={16} className="text-primary-container" />
-                ) : i === 3 ? (
-                  <Play size={16} className="text-primary-container animate-pulse" />
-                ) : (
-                  <Lock size={16} className="text-fog-muted" />
-                )}
-              </div>
-            ))}
-          </div>
-        </Panel>
-      </main>
-    </AppShell>
-  );
-}
-
 export function AdminScreen() {
   return (
     <AppShell active="Dashboard" title="Super Admin Dashboard">
@@ -371,87 +202,5 @@ export function AdminScreen() {
         </Panel>
       </main>
     </AppShell>
-  );
-}
-
-export function AuthScreen({ mode }: { mode: "login" | "signup" }) {
-  const isSignup = mode === "signup";
-  return (
-    <main className="grid min-h-screen lg:grid-cols-[1fr_30rem] bg-surface-container-lowest">
-      <section className="hidden border-r border-surgical-steel p-12 lg:flex lg:flex-col lg:justify-between relative overflow-hidden bg-surface-container-low">
-        <div className="absolute inset-0 opacity-10 [background-image:linear-gradient(var(--color-border-hairline)_1px,transparent_1px),linear-gradient(90deg,var(--color-border-hairline)_1px,transparent_1px)] [background-size:60px_60px]" />
-        <div className="relative z-10">
-          <Link href="/" className="font-headline text-2xl font-bold text-primary-container tracking-wider">
-            Stoicverse
-          </Link>
-        </div>
-        <div className="relative z-10 my-auto max-w-2xl border-l-2 border-primary-container pl-8 py-6">
-          <h1 className="font-headline text-3xl font-extrabold text-text-strong leading-tight md:text-4xl">
-            Enter the operating surface for disciplined study.
-          </h1>
-          <p className="mt-6 font-body text-base text-on-surface-variant leading-relaxed">
-            Membership unlocks community channels, tier-one lessons, and the path toward Master access.
-          </p>
-        </div>
-        <div className="relative z-10 font-label text-xs text-fog-muted tracking-[0.2em] uppercase">
-          system_entry // secure_access_portal
-        </div>
-      </section>
-
-      <section className="relative flex items-center justify-center p-6 md:p-12 overflow-hidden bg-surface">
-        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(var(--color-border-hairline)_1px,transparent_1px),linear-gradient(90deg,var(--color-border-hairline)_1px,transparent_1px)] [background-size:60px_60px]" />
-        <div className="relative z-10 w-full max-w-md border-t-2 border-t-primary-container border-x border-b border-surgical-steel bg-monolith-surface p-8 md:p-10 rounded-lg shadow-xl hover:shadow-primary-container/5 transition-all">
-          <div className="mb-8 flex items-center gap-3 text-primary-container">
-            {isSignup ? <Shield size={24} className="animate-pulse" /> : <LogIn size={24} />}
-            <h1 className="font-headline text-xl font-bold tracking-wide">{isSignup ? "Sign up" : "Log in"}</h1>
-          </div>
-          <div className="space-y-5">
-            {isSignup && <Field label="Full name" placeholder="Marcus North" />}
-            <Field label="Email" placeholder="you@example.com" />
-            <Field label="Password" placeholder="Minimum 8 characters" type="password" />
-          </div>
-          <button className="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary-container font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all duration-300" type="button">
-            {isSignup ? "Create account" : "Enter platform"}
-            <ArrowRight size={16} />
-          </button>
-          <p className="mt-6 text-center font-body text-sm text-fog-muted">
-            {isSignup ? "Already registered?" : "Need access?"}{" "}
-            <Link href={isSignup ? "/login" : "/signup"} className="text-primary-container hover:underline font-semibold">
-              {isSignup ? "Log in" : "Sign up"}
-            </Link>
-          </p>
-        </div>
-      </section>
-    </main>
-  );
-}
-
-function Field({ label, placeholder, type = "text" }: { label: string; placeholder: string; type?: string }) {
-  return (
-    <label className="block group">
-      <span className="font-label-sm text-label-sm uppercase tracking-[0.14em] text-fog-muted group-focus-within:text-primary-container transition-colors">
-        {label}
-      </span>
-      <input
-        type={type}
-        placeholder={placeholder}
-        className="mt-2 min-h-12 w-full rounded border border-surgical-steel bg-surface-container-lowest px-5 text-on-surface outline-none placeholder:text-fog-muted focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all hover:border-primary-container/70"
-      />
-    </label>
-  );
-}
-
-export function CommunitySelectionScreen() {
-  return (
-    <main className="min-h-screen p-4 md:p-8 bg-surface">
-      <div className="mx-auto max-w-xl border border-surgical-steel bg-monolith-surface p-8 rounded-lg">
-        <Link href="/" className="font-headline text-lg font-bold text-primary-container">Stoicverse</Link>
-        <h1 className="mt-10 font-headline text-2xl font-bold text-text-strong md:text-3xl">Join Stoicverse.</h1>
-        <p className="mt-4 font-body text-sm text-on-surface-variant leading-relaxed">One membership unlocks the Stoicverse community, curriculum, events, and progression path.</p>
-        <div className="mt-8">
-          <ButtonLink href="/checkout">Continue to checkout</ButtonLink>
-        </div>
-      </div>
-    </main>
   );
 }
