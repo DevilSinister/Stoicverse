@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "src/app/courses/lesson/[id]/page.tsx": {
-    "mtime": 1789283880.969222,
-    "ast_hash": "f2f96b7938ecd8d841f89f827d0a8b4b",
+    "mtime": 1789360126.0796502,
+    "ast_hash": "ae9471c04d45549da851e73bb32be6ac",
     "semantic_hash": ""
   },
   "src/app/dashboard/page.tsx": {
@@ -105,7 +105,7 @@
     "semantic_hash": ""
   },
   "src/components/ui/button.tsx": {
-    "mtime": 1789283066.6507547,
+    "mtime": 1789360510.3602462,
     "ast_hash": "e0c0cb8ea8ce3009678b9798dcb63002",
     "semantic_hash": ""
   },
@@ -470,8 +470,8 @@
     "semantic_hash": ""
   },
   "src/components/courses/LearningPathView.tsx": {
-    "mtime": 1789283881.0614328,
-    "ast_hash": "f1f8239375c6ab925966f7516a2e3737",
+    "mtime": 1789360570.0493462,
+    "ast_hash": "964e9d04f7153d4ad68fb4680ed7e6df",
     "semantic_hash": ""
   },
   "src/components/layout/AppShell.tsx": {
@@ -630,9 +630,9 @@
     "semantic_hash": ""
   },
   "src/components/courses/LessonPlayer.tsx": {
-    "mtime": 1785069973.765263,
-    "ast_hash": "8e726228d3d5586e36e30d9615ac14d6",
-    "semantic_hash": "8e726228d3d5586e36e30d9615ac14d6"
+    "mtime": 1789360105.6573353,
+    "ast_hash": "57959dc8a2d39100b9c6274001e76aa3",
+    "semantic_hash": ""
   },
   "src/components/events/EventsView.tsx": {
     "mtime": 1789283881.1085436,
@@ -935,18 +935,18 @@
     "semantic_hash": ""
   },
   "src/components/courses/CourseVideoPlayer.tsx": {
-    "mtime": 1789283881.0591204,
-    "ast_hash": "c464be0e726585c86ed65c8656ae48d3",
+    "mtime": 1789360086.7590568,
+    "ast_hash": "199b8184242105df61985786bc54c29c",
     "semantic_hash": ""
   },
   "src/components/courses/LearningPathCatalog.tsx": {
-    "mtime": 1789283881.0591204,
-    "ast_hash": "6ccde73d85a8eabdb4b3e87a11b3431d",
+    "mtime": 1789360570.0513444,
+    "ast_hash": "38898b6162b8ae58bd789c99421eab23",
     "semantic_hash": ""
   },
   "src/components/courses/LessonWorkspacePlayer.tsx": {
-    "mtime": 1789283881.0634863,
-    "ast_hash": "a4e7696a822f0a264be71ca5a9dd61b2",
+    "mtime": 1789360570.0503469,
+    "ast_hash": "712022cde427ebceea1c3203d0986b41",
     "semantic_hash": ""
   },
   "src/components/creator/CreatorCourseManagerV2.tsx": {
@@ -970,8 +970,8 @@
     "semantic_hash": ""
   },
   "src/components/dashboard/TerminalDashboard.tsx": {
-    "mtime": 1789358025.636962,
-    "ast_hash": "969ea0791e967370d64b3ce3329f5a3f",
+    "mtime": 1789360548.111687,
+    "ast_hash": "9b8633065b7b6f594e990d064ae7c426",
     "semantic_hash": ""
   },
   "src/components/screens/LandingScreen.tsx": {
@@ -2555,8 +2555,8 @@
     "semantic_hash": ""
   },
   "tests/design-tokens.contract.mjs": {
-    "mtime": 1789358461.0826879,
-    "ast_hash": "2ab34a86fadd1860bce0b257b7d6c331",
+    "mtime": 1789360254.8172517,
+    "ast_hash": "b10dd6cd8f0d0cd6c0b5a9707092ee68",
     "semantic_hash": ""
   },
   "tests/overlay.contract.mjs": {

@@ -280,13 +280,16 @@ test("the hand-rolled overlays only ever decrease", async () => {
   const outside = files.filter((f) => !f.startsWith("src/components/ui/"));
   let count = 0;
   for (const file of outside) {
-    if ((await read(file)).includes("fixed inset-0")) count += 1;
+    // Comments stripped: a file that moves its dialog onto the primitive says
+    // in its docblock what it replaced, and that prose is not an overlay.
+    if (stripComments(await read(file)).includes("fixed inset-0")) count += 1;
   }
+  // 9 after phase 8 moved the course-enrollment dialog onto the primitive;
   // 10 at the end of P3. The three that were left in /channels are gone:
   // ForwardDialog and SearchOverlay moved onto the primitive and QuickSwitcher
   // was deleted into SearchOverlay. MessageMenu and MobilePane still match on
   // prose rather than markup. The rest belong to the creator phases.
-  assert.ok(count <= 10, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
+  assert.ok(count <= 9, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
 });
 
 test("arbitrary z-index only ever decreases", async () => {
@@ -322,8 +325,13 @@ test("a class naming a token that does not exist only ever decreases", async () 
   const css = await read("src/app/globals.css");
   assert.doesNotMatch(css, /--color-surface-container-highest:/, "if this is ever defined, delete this ratchet");
 
-  const { total, where } = await countAcross(/\bsurface-container-highest\b/g);
-  assert.ok(total <= 5, `a class naming an undefined token was added; found ${total} in: ${where.join(", ")}`);
+  /*
+    Comments stripped, for the same reason `text-white` strips them: a file that
+    removes this class names it in the docblock explaining why, and phase 8
+    turned this ratchet red over its own prose on the first run. Code only.
+  */
+  const { total, where } = await countAcross(/\bsurface-container-highest\b/g, { strip: true });
+  assert.ok(total <= 4, `a class naming an undefined token was added; found ${total} in: ${where.join(", ")}`);
 });
 
 test("pure white fills only ever decrease", async () => {
@@ -353,7 +361,7 @@ test("the deprecated glow only ever decreases", async () => {
     and mentorship screens, which later phases own. The utility is deleted with
     the alias block when this reaches zero.
   */
-  assert.ok(total <= 8, `emerald-glow grew to ${total}: ${where.join(", ")}`);
+  assert.ok(total <= 7, `emerald-glow grew to ${total}: ${where.join(", ")}`);
 });
 
 test("pill controls only ever decrease", async () => {
@@ -364,5 +372,5 @@ test("pill controls only ever decrease", async () => {
   // rounded-full is legitimate for avatars, presence dots and unread badges;
   // every other use is a pill button, chip or input left over from the
   // previous design system.
-  assert.ok(total <= 189, `pill controls grew to ${total}; buttons and inputs are 4px`);
+  assert.ok(total <= 169, `pill controls grew to ${total}; buttons and inputs are 4px`);
 });

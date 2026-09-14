@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, CheckCircle2, Clock3, Play, Sparkles, TrendingUp } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { withRouteBase } from "@/lib/navigation/paths";
 import type { DashboardData } from "./DashboardView";
 
@@ -105,10 +105,10 @@ export function TerminalDashboard({ data, routeBase = "" }: { data: DashboardDat
                   {data.activeLesson.remainingMinutes} min remaining
                 </p>
               )}
-              <Button render={<Link href={courseHref(data.activeLesson?.id)} />} className="mt-7 w-fit">
+              <Link href={courseHref(data.activeLesson?.id)} className={buttonVariants({ className: "mt-7 w-fit" })}>
                 <Play size={14} fill="currentColor" />
                 {data.activeLesson ? "Resume course" : "Browse courses"}
-              </Button>
+              </Link>
             </div>
             <CoursePreview
               progress={data.activeLesson?.progress ?? 0}
@@ -133,10 +133,13 @@ export function TerminalDashboard({ data, routeBase = "" }: { data: DashboardDat
                     {eventDate(data.upcomingEvent.starts_at)}
                   </p>
                 </div>
-                <Button variant="outline" render={<Link href={withRouteBase(routeBase, "/events")} />} className="mt-7">
+                <Link
+                  href={withRouteBase(routeBase, "/events")}
+                  className={buttonVariants({ variant: "outline", className: "mt-7" })}
+                >
                   <CalendarDays size={15} />
                   View event
-                </Button>
+                </Link>
               </>
             ) : (
               <>
@@ -146,10 +149,13 @@ export function TerminalDashboard({ data, routeBase = "" }: { data: DashboardDat
                     Visit the events directory as new live sessions are published.
                   </p>
                 </div>
-                <Button variant="outline" render={<Link href={withRouteBase(routeBase, "/events")} />} className="mt-7">
+                <Link
+                  href={withRouteBase(routeBase, "/events")}
+                  className={buttonVariants({ variant: "outline", className: "mt-7" })}
+                >
                   Browse calendar
                   <ArrowRight size={14} />
-                </Button>
+                </Link>
               </>
             )}
           </section>
@@ -160,10 +166,10 @@ export function TerminalDashboard({ data, routeBase = "" }: { data: DashboardDat
                 <h2 className="text-title-sm font-medium text-text-strong">Your courses</h2>
                 <p className="mt-1 text-content-sm text-text-muted">Enrolled courses and saved progress.</p>
               </div>
-              <Button variant="outline" render={<Link href={courseHref()} />}>
+              <Link href={courseHref()} className={buttonVariants({ variant: "outline" })}>
                 All courses
                 <ArrowRight size={14} />
-              </Button>
+              </Link>
             </div>
             <div className="divide-y divide-border-hairline border-t border-border-hairline">
               {data.enrolledCourses.slice(0, 3).map((course) => (
@@ -186,9 +192,12 @@ export function TerminalDashboard({ data, routeBase = "" }: { data: DashboardDat
             <p className="relative mt-3 max-w-sm text-content-sm text-text-default">
               Accelerate your practice with personalised guidance and direct access to a Stoic mentor.
             </p>
-            <Button render={<Link href={withRouteBase(routeBase, "/mentorship")} />} className="relative mt-6">
+            <Link
+              href={withRouteBase(routeBase, "/mentorship")}
+              className={buttonVariants({ className: "relative mt-6" })}
+            >
               Explore mentorship
-            </Button>
+            </Link>
           </section>
         </div>
       </main>
