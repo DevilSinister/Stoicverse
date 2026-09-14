@@ -1515,8 +1515,8 @@
     "semantic_hash": ""
   },
   "src/app/api/dev/login/route.ts": {
-    "mtime": 1789354879.8504174,
-    "ast_hash": "cac140bd94cafa03a6b563d9fb51f68d",
+    "mtime": 1789357109.5500154,
+    "ast_hash": "1d8cabeec707d80e150c4c494b76f7d4",
     "semantic_hash": ""
   },
   "src/components/auth/DevLoginPanel.tsx": {
@@ -1740,8 +1740,8 @@
     "semantic_hash": ""
   },
   "src/lib/dev/login-bypass.ts": {
-    "mtime": 1789354830.2223141,
-    "ast_hash": "84fb77b2ce1d7462f2c733320e4e606e",
+    "mtime": 1789357087.9854648,
+    "ast_hash": "7ec54766d50d8e23f2012db551a14bd4",
     "semantic_hash": ""
   },
   "tests/community-permissions.test.mjs": {
@@ -1755,8 +1755,8 @@
     "semantic_hash": ""
   },
   "tests/dev-login.contract.mjs": {
-    "mtime": 1789354906.7486768,
-    "ast_hash": "a41f8997a94c54520b9677f9e3de73a6",
+    "mtime": 1789357122.171699,
+    "ast_hash": "767e75a1d05dd4fed1d3212d6900ba72",
     "semantic_hash": ""
   },
   "tests/fixtures/permission-resolution.json": {

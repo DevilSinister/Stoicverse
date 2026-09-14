@@ -125,6 +125,39 @@ async function seedPersona(persona: DevPersona) {
     if (membership.error) throw new Error(`Could not activate the ${persona} membership: ${membership.error.message}`);
   }
 
+  /*
+    The deletion persona arrives with an open request, because that is the only
+    way to see the screen that renders one.
+
+    `requestAccountDeletion` verifies the account password before it writes this
+    row, and a seeded persona's password is a `crypto.randomUUID()` thrown away
+    at creation - so `/account/deletion-pending` could not be opened by signing
+    in as anybody. It was redesigned in phase 5 and never rendered once.
+
+    Two details the table forces, and both are easy to get wrong:
+
+    - `account_deletion_requests_active_user_idx` is unique per user over
+      `pending | processing | failed`, so a second sign-in would collide with
+      the row the first one left. Existing rows are cleared first, which also
+      resets a request the tester cancelled on the screen itself - pressing
+      Cancel is the point of the screen, and the persona has to survive it.
+    - `check (scheduled_at >= created_at + interval '29 days')`. Thirty days is
+      what the real action uses, so the same constant is used here rather than
+      an arbitrary future date that might drift under the check.
+  */
+  if (persona === "deleting") {
+    const cleared = await admin.from("account_deletion_requests").delete().eq("user_id", userId);
+    if (cleared.error) throw new Error(`Could not clear the previous deletion request: ${cleared.error.message}`);
+
+    const requested = await admin.from("account_deletion_requests").insert({
+      user_id: userId,
+      requested_role: platformRole,
+      status: "pending",
+      scheduled_at: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+    });
+    if (requested.error) throw new Error(`Could not schedule the deletion request: ${requested.error.message}`);
+  }
+
   return { tokenHash: link.data.properties.hashed_token };
 }
 
@@ -151,7 +184,13 @@ export async function POST(request: NextRequest) {
   // The prospect cannot open /channels - no membership - and `proxy.ts` would
   // bounce them to /checkout anyway. Landing there directly says so honestly.
   const destination = new URL(
-    persona === "creator" ? "/creator" : persona === "prospect" ? "/checkout" : "/channels",
+    persona === "creator"
+      ? "/creator"
+      : persona === "prospect"
+        ? "/checkout"
+        : persona === "deleting"
+          ? "/account/deletion-pending"
+          : "/channels",
     request.url,
   );
   const response = NextResponse.redirect(destination, 303);

@@ -17,7 +17,7 @@ import "server-only";
  * indistinguishable from a route that does not exist.
  */
 
-export const DEV_PERSONAS = ["creator", "moderator", "member", "prospect"] as const;
+export const DEV_PERSONAS = ["creator", "moderator", "member", "prospect", "deleting"] as const;
 export type DevPersona = (typeof DEV_PERSONAS)[number];
 
 export const DEV_PERSONA_LABELS: Record<DevPersona, { label: string; detail: string }> = {
@@ -36,6 +36,16 @@ export const DEV_PERSONA_LABELS: Record<DevPersona, { label: string; detail: str
     either having been rendered once. This is the account that opens them.
   */
   prospect: { label: "Prospect", detail: "Signed in with no membership — sees checkout." },
+  /*
+    A member who has asked to be deleted.
+
+    `/account/deletion-pending` is the only screen in the product that cannot be
+    reached by signing in as somebody: opening it requires an `account_deletion_
+    requests` row, and the form that creates one demands the account password,
+    which every seeded persona discards at creation. So the screen was rewritten
+    in phase 5 and never once rendered. This account arrives with the row.
+  */
+  deleting: { label: "Deletion pending", detail: "A member whose account is scheduled for deletion." },
 };
 
 export function isDevPersona(value: unknown): value is DevPersona {
@@ -47,6 +57,7 @@ export const DEV_PERSONA_EMAIL: Record<DevPersona, string> = {
   moderator: "dev-moderator@stoicverse.local",
   member: "dev-member@stoicverse.local",
   prospect: "dev-prospect@stoicverse.local",
+  deleting: "dev-deleting@stoicverse.local",
 };
 
 const MIN_SECRET_LENGTH = 16;
