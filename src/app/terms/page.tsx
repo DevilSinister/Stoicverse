@@ -23,11 +23,26 @@ const SECTIONS: LegalSection[] = [
     ),
   },
   {
+    /*
+      This clause described a product that does not exist.
+
+      It said fees were "billed on a recurring basis" and that you could "cancel
+      your subscription at any time". There is no subscription: checkout creates
+      a Stripe session in `mode: "payment"`, a one-time charge, and the webhook
+      extends the membership by the term that was bought. Nothing renews, so
+      there is nothing to cancel — and a member reading the old text would
+      reasonably expect both a future charge and a cancel control, neither of
+      which the product has.
+
+      Rewritten to describe what actually happens. If recurring billing is built
+      later, this clause changes with it and the `updated` date moves again.
+    */
     heading: "Membership and cancellations",
     body: (
       <p>
-        Membership fees are billed on a recurring basis. You may cancel your subscription at any time, and you will
-        maintain access to our materials until the end of your billing cycle.
+        Membership is a one-time payment for the term you choose at checkout, and it does not renew automatically. Your
+        access continues until the end of that term; to continue afterwards, you purchase a new term. Because nothing
+        recurs, there is no subscription to cancel and no further charge will be made without another purchase.
       </p>
     ),
   },
@@ -37,7 +52,9 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Terms of service"
-      updated="11 July 2026"
+      // Moved because the billing clause changed, not because the file was
+      // touched. A policy page's date states when the policy last changed.
+      updated="14 September 2026"
       intro={
         <p>
           Welcome to Stoicverse. By accessing or using our platform, you agree to comply with and be bound by the

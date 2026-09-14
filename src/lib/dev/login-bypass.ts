@@ -17,7 +17,7 @@ import "server-only";
  * indistinguishable from a route that does not exist.
  */
 
-export const DEV_PERSONAS = ["creator", "moderator", "member"] as const;
+export const DEV_PERSONAS = ["creator", "moderator", "member", "prospect"] as const;
 export type DevPersona = (typeof DEV_PERSONAS)[number];
 
 export const DEV_PERSONA_LABELS: Record<DevPersona, { label: string; detail: string }> = {
@@ -26,6 +26,16 @@ export const DEV_PERSONA_LABELS: Record<DevPersona, { label: string; detail: str
   creator: { label: "Creator", detail: "The account that already owns the community." },
   moderator: { label: "Moderator", detail: "A member with the Moderator role." },
   member: { label: "Member", detail: "An active tier-1 subscriber." },
+  /*
+    Signed in, and has never paid.
+
+    Added because every other persona holds an active membership, which put a
+    whole class of screen out of reach for browser QA: `proxy.ts` sends anyone
+    with a membership away from `/checkout`, and `/checkout/success` could only
+    ever be seen in its already-granted state. Phase 5 shipped both without
+    either having been rendered once. This is the account that opens them.
+  */
+  prospect: { label: "Prospect", detail: "Signed in with no membership — sees checkout." },
 };
 
 export function isDevPersona(value: unknown): value is DevPersona {
@@ -36,6 +46,7 @@ export const DEV_PERSONA_EMAIL: Record<DevPersona, string> = {
   creator: "dev-creator@stoicverse.local",
   moderator: "dev-moderator@stoicverse.local",
   member: "dev-member@stoicverse.local",
+  prospect: "dev-prospect@stoicverse.local",
 };
 
 const MIN_SECRET_LENGTH = 16;

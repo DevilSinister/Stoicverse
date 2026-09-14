@@ -1,3 +1,10 @@
+// Reads STRIPE_SECRET_KEY, so being pulled into a client bundle must be a build
+// error rather than a leak. `server-only` is not in package.json and does not
+// resolve from bare Node - Next aliases it to its own compiled copy
+// (`next/dist/build/create-compiler-aliases.js`), which is why this both works
+// and looks missing. `lib/analytics/server.ts` has imported it all along.
+import "server-only";
+
 import type { Purchase } from "@/lib/checkout/plans";
 
 /**

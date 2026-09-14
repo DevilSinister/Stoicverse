@@ -4,8 +4,31 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent a
 import { useRouter } from "next/navigation";
 import { Bell, CalendarDays, CheckCheck, ChevronRight, GraduationCap, LoaderCircle, Megaphone, MessageSquareText, RefreshCw, ShieldCheck } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { notificationView, safeNotificationHref, type NotificationItem, type NotificationView } from "@/lib/notifications/model";
 import { createClient } from "@/lib/supabase/client";
+
+/**
+ * The notification inbox, for both roles.
+ *
+ * Monolith, phase 6. What it replaces was the last screen in the product still
+ * speaking the pre-Monolith language end to end — pill tabs on an accent fill,
+ * `text-3xl font-semibold`, circular icon chips, and the alias tokens
+ * throughout.
+ *
+ * **One of those was not a style problem.** The inactive tabs carried
+ * `hover:text-accent-contrast` over a `surface-container-high` hover fill.
+ * `--accent-contrast` is the near-black that goes *on* the lime accent, so
+ * hovering an unselected tab painted its label black on dark grey and the word
+ * disappeared under the cursor. Nothing about that is visible in the source;
+ * the class name reads like a contrast colour, and it is — for the opposite
+ * background. See `00 - Shared/Cross-Project Lessons.md` lesson 47.
+ *
+ * **The active tab is a rule, not a fill.** Monolith draws structure with
+ * hairlines and reserves the accent for state, which is the same 2px marker
+ * idiom the rail uses for its active destination.
+ */
 
 type FeedResponse = {
   notifications?: NotificationItem[];
@@ -48,6 +71,22 @@ function timeAgo(value: string) {
   const hours = Math.round(minutes / 60);
   if (Math.abs(hours) < 24) return relativeTime.format(hours, "hour");
   return relativeTime.format(Math.round(hours / 24), "day");
+}
+
+function FeedPlaceholder() {
+  return (
+    <div className="divide-y divide-border-hairline" aria-label="Loading notifications">
+      {[0, 1, 2, 3].map((row) => (
+        <div key={row} className="flex gap-4 py-5">
+          <Skeleton className="size-10 shrink-0 rounded-md" />
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-4 w-2/5" />
+            <Skeleton className="h-3 w-4/5" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function NotificationCenter({
@@ -185,62 +224,180 @@ export function NotificationCenter({
   }, [items]);
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
-      <header className="flex flex-col gap-6 border-b border-surgical-steel pb-7 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+    <main className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+      <header className="flex flex-col gap-5 border-b border-border-hairline pb-7 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-2xl">
           {/* Was hard-coded "Member inbox", which is the wrong words on the
               creator's own notifications page - the one this screen serves
               since the rail stopped sending them to a route they cannot open. */}
-          <p className="text-xs font-semibold text-primary-container">
+          <p className="font-mono text-mono-xs tracking-widest text-text-faint uppercase">
             {basePath.startsWith("/creator") ? "Creator inbox" : "Member inbox"}
           </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.025em] text-text-strong sm:text-4xl">Notifications</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-on-surface-variant">Event, course, community, and account updates collected in one calm queue.</p>
+          <h1 className="mt-3 text-title-lg font-medium text-text-strong">Notifications</h1>
+          <p className="mt-3 text-content-base text-text-default">
+            Event, course, community, and account updates collected in one calm queue.
+          </p>
         </div>
-        <button type="button" onClick={markAllRead} disabled={unreadCount === 0 || loading} className="focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-surgical-steel px-4 text-sm font-semibold text-on-surface transition hover:border-primary-container hover:text-primary-container disabled:cursor-not-allowed disabled:opacity-45">
-          <CheckCheck size={17} /> Mark all read
-        </button>
+        <Button variant="outline" onClick={markAllRead} disabled={unreadCount === 0 || loading}>
+          <CheckCheck size={16} /> Mark all read
+        </Button>
       </header>
 
-      <div className="flex items-center justify-between gap-4 border-b border-surgical-steel py-4">
-        <div className="flex gap-1" role="tablist" aria-label="Notification views">
-          {views.map((tab) => (
-            <button ref={(element) => { tabButtons.current[tab.id] = element; }} key={tab.id} id={`notification-tab-${tab.id}`} type="button" role="tab" aria-selected={view === tab.id} aria-controls="notification-feed-panel" tabIndex={view === tab.id ? 0 : -1} onKeyDown={(event) => moveTabFocus(event, tab.id)} onClick={() => selectView(tab.id)} className={`focus-ring min-h-10 rounded-full px-4 text-sm font-semibold transition ${view === tab.id ? "bg-primary-container text-on-primary-fixed" : "text-on-surface-variant hover:bg-surface-container-high hover:text-accent-contrast"}`}>
-              {tab.label}{tab.id === "unread" && unreadCount > 0 ? ` ${unreadCount}` : ""}
-            </button>
-          ))}
+      <div className="flex items-center justify-between gap-4 border-b border-border-hairline">
+        <div className="flex" role="tablist" aria-label="Notification views">
+          {views.map((tab) => {
+            const selected = view === tab.id;
+            return (
+              <button
+                ref={(element) => { tabButtons.current[tab.id] = element; }}
+                key={tab.id}
+                id={`notification-tab-${tab.id}`}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                aria-controls="notification-feed-panel"
+                tabIndex={selected ? 0 : -1}
+                onKeyDown={(event) => moveTabFocus(event, tab.id)}
+                onClick={() => selectView(tab.id)}
+                /*
+                  `hover:text-text-strong`, not `hover:text-accent-contrast`.
+                  The latter is the near-black that goes on the lime accent, and
+                  over this hover fill it painted the label black on dark grey -
+                  the tab label vanished under the cursor.
+                */
+                className={`focus-ring relative inline-flex min-h-11 items-center gap-2 px-4 text-content-sm transition-colors ${
+                  selected ? "text-text-strong" : "text-text-muted hover:text-text-strong"
+                }`}
+              >
+                {tab.label}
+                {tab.id === "unread" && unreadCount > 0 && (
+                  <span className="rounded-md bg-surface-raised px-1.5 font-mono text-mono-xs text-text-default">
+                    {unreadCount}
+                  </span>
+                )}
+                {/* The rail's marker idiom: a 2px rule, not a pill fill. */}
+                {selected && <span aria-hidden className="absolute inset-x-2 -bottom-px h-0.5 bg-primary" />}
+              </button>
+            );
+          })}
         </div>
-        <button type="button" onClick={() => void reload()} aria-label="Refresh notifications" className="focus-ring grid size-10 place-items-center rounded-full text-fog-muted transition hover:bg-surface-container-high hover:text-text-strong">
+        <Button
+          variant="ghost"
+          size="icon-chrome"
+          onClick={() => void reload()}
+          aria-label="Refresh notifications"
+        >
           <RefreshCw size={16} />
-        </button>
+        </Button>
       </div>
 
-      {error && items.length > 0 && <div role="alert" className="mt-5 flex items-center justify-between gap-4 border border-error/35 bg-error/10 px-4 py-3 text-sm text-error"><span>{error}</span><button type="button" onClick={() => void reload()} className="font-semibold underline underline-offset-4">Retry</button></div>}
-
-      <div id="notification-feed-panel" role="tabpanel" aria-labelledby={`notification-tab-${view}`} tabIndex={0}>
-      {loading ? (
-        <div className="divide-y divide-surgical-steel" aria-label="Loading notifications">
-          {[0, 1, 2, 3].map((item) => <div key={item} className="flex gap-4 py-6"><div className="size-10 animate-pulse rounded-full bg-surface-container-high"/><div className="flex-1 space-y-3"><div className="h-4 w-2/5 animate-pulse bg-surface-container-high"/><div className="h-3 w-4/5 animate-pulse bg-surface-container-high"/></div></div>)}
-        </div>
-      ) : error ? (
-        <section role="alert" className="grid min-h-72 place-items-center border-b border-surgical-steel text-center">
-          <div className="max-w-sm py-12"><RefreshCw className="mx-auto text-error" size={28}/><h2 className="mt-4 text-lg font-semibold text-text-strong">Notifications are unavailable</h2><p className="mt-2 text-sm leading-6 text-fog-muted">{error}</p><button type="button" onClick={() => void reload()} className="focus-ring mt-5 min-h-11 rounded-full border border-surgical-steel px-5 text-sm font-semibold text-on-surface transition hover:border-primary-container hover:text-primary-container">Try again</button></div>
-        </section>
-      ) : items.length === 0 ? (
-        <section className="grid min-h-72 place-items-center border-b border-surgical-steel text-center">
-          <div className="max-w-sm py-12"><Bell className="mx-auto text-primary-container" size={28}/><h2 className="mt-4 text-lg font-semibold text-text-strong">{view === "unread" ? "Nothing needs your attention" : view === "mentions" ? "No mentions yet" : "You are all caught up"}</h2><p className="mt-2 text-sm leading-6 text-fog-muted">New updates will appear here as activity happens across Stoicverse.</p></div>
-        </section>
-      ) : (
-        <div>
-          {["Today", "Yesterday", "Earlier"].map((label) => {
-            const group = grouped.get(label);
-            if (!group?.length) return null;
-            return <section key={label} aria-labelledby={`notification-group-${label.toLowerCase()}`} className="border-b border-surgical-steel py-7"><h2 id={`notification-group-${label.toLowerCase()}`} className="mb-2 text-xs font-semibold text-fog-muted">{label}</h2><div className="divide-y divide-surgical-steel">{group.map((item) => { const Icon = iconFor(item.type); return <button key={item.id} type="button" onClick={() => void openNotification(item)} className="focus-ring group flex w-full items-start gap-4 rounded-lg px-2 py-5 text-left transition hover:bg-surface-container-low"><span className={`grid size-10 shrink-0 place-items-center rounded-full border ${item.is_read ? "border-surgical-steel bg-surface-container-low text-fog-muted" : "border-primary-container/50 bg-primary-container/10 text-primary-container"}`}><Icon size={18}/></span><span className="min-w-0 flex-1"><span className="flex items-start justify-between gap-3"><span className={`text-sm leading-5 ${item.is_read ? "font-medium text-on-surface" : "font-semibold text-text-strong"}`}>{item.title}</span><span className="shrink-0 text-xs text-fog-muted">{timeAgo(item.created_at)}</span></span>{item.body && <span className="mt-1.5 block max-w-3xl text-sm leading-6 text-on-surface-variant">{item.body}</span>}</span><ChevronRight size={17} className="mt-3 shrink-0 text-fog-muted transition group-hover:translate-x-0.5 group-hover:text-primary-container"/></button>; })}</div></section>;
-          })}
+      {error && items.length > 0 && (
+        <div
+          role="alert"
+          className="mt-5 flex items-center justify-between gap-4 rounded-lg border border-status-danger/40 bg-status-danger/10 px-4 py-3 text-content-sm text-status-danger"
+        >
+          <span>{error}</span>
+          <button type="button" onClick={() => void reload()} className="focus-ring font-medium underline underline-offset-4">
+            Retry
+          </button>
         </div>
       )}
 
-      {nextCursor && !loading && <div className="flex justify-center py-8"><button type="button" onClick={() => void loadOlder()} disabled={loadingOlder} className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-surgical-steel px-5 text-sm font-semibold text-on-surface transition hover:border-primary-container hover:text-primary-container disabled:opacity-50">{loadingOlder && <LoaderCircle size={16} className="animate-spin"/>}Load older</button></div>}
+      <div id="notification-feed-panel" role="tabpanel" aria-labelledby={`notification-tab-${view}`} tabIndex={0}>
+        {loading ? (
+          <FeedPlaceholder />
+        ) : error ? (
+          <section role="alert" className="grid min-h-72 place-items-center border-b border-border-hairline text-center">
+            <div className="max-w-sm py-12">
+              <RefreshCw className="mx-auto text-status-danger" size={26} />
+              <h2 className="mt-4 text-title-sm font-medium text-text-strong">Notifications are unavailable</h2>
+              <p className="mt-2 text-content-sm text-text-muted">{error}</p>
+              <Button variant="outline" className="mt-5" onClick={() => void reload()}>
+                Try again
+              </Button>
+            </div>
+          </section>
+        ) : items.length === 0 ? (
+          <section className="grid min-h-72 place-items-center border-b border-border-hairline text-center">
+            <div className="max-w-sm py-12">
+              <Bell className="mx-auto text-primary" size={26} />
+              <h2 className="mt-4 text-title-sm font-medium text-text-strong">
+                {view === "unread" ? "Nothing needs your attention" : view === "mentions" ? "No mentions yet" : "You are all caught up"}
+              </h2>
+              <p className="mt-2 text-content-sm text-text-muted">
+                New updates will appear here as activity happens across Stoicverse.
+              </p>
+            </div>
+          </section>
+        ) : (
+          <div>
+            {["Today", "Yesterday", "Earlier"].map((label) => {
+              const group = grouped.get(label);
+              if (!group?.length) return null;
+              return (
+                <section
+                  key={label}
+                  aria-labelledby={`notification-group-${label.toLowerCase()}`}
+                  className="border-b border-border-hairline py-6"
+                >
+                  <h2
+                    id={`notification-group-${label.toLowerCase()}`}
+                    className="mb-2 font-mono text-mono-xs tracking-widest text-text-faint uppercase"
+                  >
+                    {label}
+                  </h2>
+                  <div className="divide-y divide-border-hairline">
+                    {group.map((item) => {
+                      const Icon = iconFor(item.type);
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => void openNotification(item)}
+                          className="focus-ring group flex w-full items-start gap-4 rounded-lg px-2 py-4 text-left transition-colors hover:bg-surface-panel"
+                        >
+                          <span
+                            className={`grid size-10 shrink-0 place-items-center rounded-md border ${
+                              item.is_read
+                                ? "border-border-hairline bg-surface-panel text-text-muted"
+                                : "border-primary/40 bg-accent-soft text-primary"
+                            }`}
+                          >
+                            <Icon size={18} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="flex items-start justify-between gap-3">
+                              <span className={`text-content-sm ${item.is_read ? "text-text-default" : "font-medium text-text-strong"}`}>
+                                {item.title}
+                              </span>
+                              <span className="shrink-0 font-mono text-mono-xs text-text-faint">{timeAgo(item.created_at)}</span>
+                            </span>
+                            {item.body && (
+                              <span className="mt-1.5 block max-w-3xl text-content-sm text-text-muted">{item.body}</span>
+                            )}
+                          </span>
+                          <ChevronRight
+                            size={16}
+                            className="mt-2 shrink-0 text-text-faint transition-transform group-hover:translate-x-0.5"
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        )}
+
+        {nextCursor && !loading && (
+          <div className="flex justify-center py-8">
+            <Button variant="outline" onClick={() => void loadOlder()} disabled={loadingOlder}>
+              {loadingOlder && <LoaderCircle size={16} className="animate-spin" />}
+              Load older
+            </Button>
+          </div>
+        )}
       </div>
     </main>
   );

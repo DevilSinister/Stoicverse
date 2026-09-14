@@ -88,7 +88,15 @@ test("settings actions validate identity, avatars, sessions, deletion, and acces
   assert.match(shell, /<PopoverTrigger/, "the bell is its trigger, so focus returns to the bell");
   assert.match(shell, /placement="sheet-left"/, "the drawer is the overlay primitive");
   assert.doesNotMatch(shell, /"Tab"/, "no hand-rolled Tab cycle survives in the chrome");
-  assert.match(center, /tabIndex=\{view === tab\.id \? 0 : -1\}/);
+  /*
+    Roving tabindex: exactly one tab is in the tab order, and it is the selected
+    one. Phase 6 hoisted the condition into a `selected` const, so this is
+    pinned as its two halves rather than as one literal spelling - the
+    behaviour is what matters, and a single `tabIndex={0}` on every tab must
+    still fail it.
+  */
+  assert.match(center, /const selected = view === tab\.id;/);
+  assert.match(center, /tabIndex=\{selected \? 0 : -1\}/);
   assert.match(center, /ArrowLeft/);
   assert.match(center, /role="tabpanel"/);
   assert.match(styles, /prefers-reduced-motion: reduce[\s\S]*animation-duration: 0\.01ms/);

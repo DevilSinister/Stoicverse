@@ -95,7 +95,23 @@ async function seedPersona(persona: DevPersona) {
     .eq("id", userId);
   if (profile.error) throw new Error(`Could not set the ${persona} profile: ${profile.error.message}`);
 
-  if (persona !== "creator") {
+  /*
+    The prospect is the persona that has not paid, and that is its whole point.
+
+    Every other seeded account carries an active membership, which is why the
+    pre-purchase half of the product could not be opened at all: `proxy.ts`
+    redirects anyone holding a membership away from `/checkout`, and
+    `/checkout/success` could only be caught in its already-granted state.
+
+    Any membership row is *removed* rather than merely not written. This account
+    is seeded repeatedly across sessions, and a prospect that silently stops
+    being one is worse than no persona at all - the screen it exists to reach
+    would quietly redirect again, which is the failure it was added to end.
+  */
+  if (persona === "prospect") {
+    const cleared = await admin.from("memberships").delete().eq("user_id", userId);
+    if (cleared.error) throw new Error(`Could not clear the prospect membership: ${cleared.error.message}`);
+  } else if (persona !== "creator") {
     const now = new Date();
     const membership = await admin.from("memberships").upsert(
       {
@@ -132,7 +148,12 @@ export async function POST(request: NextRequest) {
     return new NextResponse(message, { status: 500 });
   }
 
-  const destination = new URL(persona === "creator" ? "/creator" : "/channels", request.url);
+  // The prospect cannot open /channels - no membership - and `proxy.ts` would
+  // bounce them to /checkout anyway. Landing there directly says so honestly.
+  const destination = new URL(
+    persona === "creator" ? "/creator" : persona === "prospect" ? "/checkout" : "/channels",
+    request.url,
+  );
   const response = NextResponse.redirect(destination, 303);
   const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {

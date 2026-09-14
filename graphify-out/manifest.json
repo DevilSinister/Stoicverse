@@ -395,8 +395,8 @@
     "semantic_hash": ""
   },
   "src/app/terms/page.tsx": {
-    "mtime": 1789330609.6391194,
-    "ast_hash": "fb83c23201f6ba7269d46adf9d05a37a",
+    "mtime": 1789354942.540074,
+    "ast_hash": "6bdac77b17c6a6e029d9ac058efba620",
     "semantic_hash": ""
   },
   "src/components/auth/AuthForm.tsx": {
@@ -1130,8 +1130,8 @@
     "semantic_hash": ""
   },
   "src/components/notifications/NotificationCenter.tsx": {
-    "mtime": 1789332750.722526,
-    "ast_hash": "4e4c4f9d16ab3189ae3d8ef5d9bf442d",
+    "mtime": 1789354780.5930736,
+    "ast_hash": "d94450580bbe96a43c683afa620c9e40",
     "semantic_hash": ""
   },
   "src/components/settings/AccountSettingsWorkspace.tsx": {
@@ -1170,8 +1170,8 @@
     "semantic_hash": ""
   },
   "tests/member-notifications-settings.contract.mjs": {
-    "mtime": 1789287434.7303627,
-    "ast_hash": "ec086d3913f8f513b472ff81a8011a3b",
+    "mtime": 1789355045.9321375,
+    "ast_hash": "78cc14f021a5e06d75979c50983faaa0",
     "semantic_hash": ""
   },
   "tests/open-courses-and-cosmetic-roles.contract.mjs": {
@@ -1515,8 +1515,8 @@
     "semantic_hash": ""
   },
   "src/app/api/dev/login/route.ts": {
-    "mtime": 1789275078.2197337,
-    "ast_hash": "fdea1789e87b1d81acfdf389c696bc2b",
+    "mtime": 1789354879.8504174,
+    "ast_hash": "cac140bd94cafa03a6b563d9fb51f68d",
     "semantic_hash": ""
   },
   "src/components/auth/DevLoginPanel.tsx": {
@@ -1740,8 +1740,8 @@
     "semantic_hash": ""
   },
   "src/lib/dev/login-bypass.ts": {
-    "mtime": 1789275078.4982371,
-    "ast_hash": "35fe0038b17bf0d741ac6eac851808cb",
+    "mtime": 1789354830.2223141,
+    "ast_hash": "84fb77b2ce1d7462f2c733320e4e606e",
     "semantic_hash": ""
   },
   "tests/community-permissions.test.mjs": {
@@ -1755,8 +1755,8 @@
     "semantic_hash": ""
   },
   "tests/dev-login.contract.mjs": {
-    "mtime": 1789275078.5813632,
-    "ast_hash": "cf12d4d94a2bdfa92e49f6e2e363f306",
+    "mtime": 1789354906.7486768,
+    "ast_hash": "a41f8997a94c54520b9677f9e3de73a6",
     "semantic_hash": ""
   },
   "tests/fixtures/permission-resolution.json": {
@@ -2655,8 +2655,8 @@
     "semantic_hash": ""
   },
   "src/lib/stripe/prices.ts": {
-    "mtime": 1789349444.7521133,
-    "ast_hash": "c5a5398f122802b9a7320094cdefb7ae",
+    "mtime": 1789354957.567955,
+    "ast_hash": "a2c977aeae8f63e217f777b21a3d834c",
     "semantic_hash": ""
   },
   "tests/checkout.contract.mjs": {
