@@ -101,12 +101,12 @@ export default function MentorshipView({
                     href={bookingUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary-container px-4 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider transition hover:brightness-105 active:scale-[0.98] emerald-glow"
+                    className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-4 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider transition hover:brightness-105 active:scale-[0.98] emerald-glow"
                   >
                     <Calendar size={16} />
                     Book Private Session
                     <ExternalLink size={14} className="ml-1" />
-                  </a> : <span className="flex min-h-11 w-full items-center justify-center rounded-full border border-surgical-steel px-4 font-label-md text-label-md text-fog-muted">Booking link pending</span>}
+                  </a> : <span className="flex min-h-11 w-full items-center justify-center rounded-lg border border-surgical-steel px-4 font-label-md text-label-md text-fog-muted">Booking link pending</span>}
                 </div>
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function MentorshipView({
           <div className="space-y-10">
             {/* Hero pitch */}
             <div className="text-center space-y-4 max-w-3xl mx-auto">
-              <span className="inline-flex items-center gap-1.5 border border-primary-container/20 bg-primary-container/10 px-3 py-1 rounded-full font-label text-[10px] text-primary-container uppercase tracking-wider font-semibold">
+              <span className="inline-flex items-center gap-1.5 border border-primary-container/20 bg-primary-container/10 px-3 py-1 rounded-md font-label text-[10px] text-primary-container uppercase tracking-wider font-semibold">
                 <Sparkles size={12} />
                 Now Open For Enrollment
               </span>
@@ -141,7 +141,7 @@ export default function MentorshipView({
             {/* Benefits Grid */}
             <div className="grid gap-6 md:grid-cols-3">
               <div className="border border-surgical-steel bg-surface-container-low p-6 rounded-lg space-y-3">
-                <div className="size-10 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container mb-2">
+                <div className="size-10 rounded-md bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container mb-2">
                   <BookOpen size={20} />
                 </div>
                 <h3 className="font-headline text-base font-bold text-text-strong">1-on-1 Daily Log Review</h3>
@@ -151,7 +151,7 @@ export default function MentorshipView({
               </div>
 
               <div className="border border-surgical-steel bg-surface-container-low p-6 rounded-lg space-y-3">
-                <div className="size-10 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container mb-2">
+                <div className="size-10 rounded-md bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container mb-2">
                   <Video size={20} />
                 </div>
                 <h3 className="font-headline text-base font-bold text-text-strong">Bi-Weekly Private Calls</h3>
@@ -161,7 +161,7 @@ export default function MentorshipView({
               </div>
 
               <div className="border border-surgical-steel bg-surface-container-low p-6 rounded-lg space-y-3">
-                <div className="size-10 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container mb-2">
+                <div className="size-10 rounded-md bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-container mb-2">
                   <MessageSquare size={20} />
                 </div>
                 <h3 className="font-headline text-base font-bold text-text-strong">Custom Study Roadmap</h3>
@@ -185,7 +185,7 @@ export default function MentorshipView({
 
               <Link
                 href="/checkout?product=mentorship"
-                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition duration-200 shadow-md emerald-glow"
+                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider hover:brightness-105 active:scale-[0.98] transition duration-200 shadow-md emerald-glow"
               >
                 Enroll in Mentorship
                 <ChevronRight size={16} />

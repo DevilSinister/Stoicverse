@@ -138,7 +138,7 @@ function Reactions({
               onChanged();
             }}
             aria-pressed={reaction.mine}
-            className={`focus-ring flex min-h-7 items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors disabled:opacity-50 ${
+            className={`focus-ring flex min-h-7 items-center gap-1 rounded-lg border px-2 py-0.5 text-xs transition-colors disabled:opacity-50 ${
               reaction.mine
                 ? "border-primary-container bg-primary-container/15 text-on-surface"
                 : "border-surgical-steel text-fog-muted hover:bg-surface-container-low"

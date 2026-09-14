@@ -74,7 +74,7 @@ export function StructureEditor(props: StructureEditorProps) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="focus-ring grid size-10 shrink-0 place-items-center rounded-full text-fog-muted transition hover:bg-surface-container-high hover:text-text-strong"
+            className="focus-ring grid size-10 shrink-0 place-items-center rounded-lg text-fog-muted transition hover:bg-surface-container-high hover:text-text-strong"
           >
             <X size={18} />
           </button>

@@ -181,7 +181,7 @@ export function CreatorEventsView({
           <button 
             type="button" 
             onClick={() => { setEditing(null); setCreating(true); }} 
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition cursor-pointer"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition cursor-pointer"
           >
             <Plus size={16} /> 
             Create Event
@@ -212,14 +212,14 @@ export function CreatorEventsView({
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex items-center gap-2 rounded-full px-4 py-2 font-label text-xs uppercase tracking-wider transition cursor-pointer ${
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 font-label text-xs uppercase tracking-wider transition cursor-pointer ${
                   activeTab === tab 
                     ? "bg-primary-container text-on-primary-fixed font-bold emerald-glow border border-primary-container" 
                     : "border border-transparent bg-transparent text-on-surface-variant hover:border-surgical-steel hover:text-accent-contrast"
                 }`}
               >
                 <span>{label}</span>
-                <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+                <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${
                   activeTab === tab ? "bg-black/20 text-text-strong" : "bg-surface-container-high text-fog-muted"
                 }`}>
                   {count}
@@ -302,7 +302,7 @@ export function CreatorEventsView({
               {(activeTab === "all" || activeTab === "drafts" || activeTab === "scheduled") && (
                 <button
                   onClick={() => { setEditing(null); setCreating(true); }}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-surgical-steel px-4 py-2 font-label text-xs uppercase tracking-wider text-text-strong hover:border-primary-container transition cursor-pointer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg border border-surgical-steel px-4 py-2 font-label text-xs uppercase tracking-wider text-text-strong hover:border-primary-container transition cursor-pointer"
                 >
                   <Plus size={14} /> Create Event
                 </button>
@@ -376,7 +376,7 @@ function StatusBadge({ status }: { status: CreatorEventRecord["status"] }) {
     cancelled: "Cancelled",
   };
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold font-label ${styles[status]}`}>
+    <span className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-xs font-semibold font-label ${styles[status]}`}>
       {labels[status]}
     </span>
   );
@@ -388,7 +388,7 @@ function AccessTierBadge({ tier }: { tier: number }) {
     ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
     : "bg-primary-container/10 text-primary-container border border-primary-container/20";
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold font-label uppercase tracking-wider ${styles}`}>
+    <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-[10px] font-semibold font-label uppercase tracking-wider ${styles}`}>
       {label}
     </span>
   );
@@ -402,9 +402,9 @@ function RsvpProgress({ enrolled, qualified }: { enrolled: number; qualified: nu
         <span>{enrolled} / {qualified} Enrolled</span>
         <span className="text-text-strong font-medium">{rate}%</span>
       </div>
-      <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700/50">
+      <div className="h-1 w-full bg-slate-800 rounded-sm overflow-hidden border border-slate-700/50">
         <div 
-          className="h-full bg-primary-container rounded-full" 
+          className="h-full bg-primary-container rounded-sm" 
           style={{ width: `${Math.min(rate, 100)}%` }} 
         />
       </div>
@@ -680,7 +680,7 @@ function EventEditor({
               name="intent"
               value={event?.publishedAt ? "update" : "publish"}
               disabled={pending} 
-              className="min-h-10 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition disabled:opacity-60 cursor-pointer"
+              className="min-h-10 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition disabled:opacity-60 cursor-pointer"
             >
               {pending ? "Saving…" : event?.publishedAt ? "Save Changes" : "Publish Event"}
             </button>
@@ -848,7 +848,7 @@ function EventDetails({
               {/* Button 1: Edit Event */}
               <button 
                 onClick={onEdit} 
-                className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-primary-container px-5 font-label text-xs font-semibold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition cursor-pointer"
+                className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-lg bg-primary-container px-5 font-label text-xs font-semibold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition cursor-pointer"
               >
                 <Edit3 size={14} />
                 Edit Event

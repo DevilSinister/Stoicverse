@@ -13,7 +13,7 @@ function IconButton({ children, label, onClick }: { children: React.ReactNode; l
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="grid size-10 place-items-center rounded-full border border-surgical-steel text-on-surface-variant transition hover:border-primary-container hover:text-primary-container focus-ring"
+      className="grid size-10 place-items-center rounded-lg border border-surgical-steel text-on-surface-variant transition hover:border-primary-container hover:text-primary-container focus-ring"
     >
       {children}
     </button>
@@ -91,7 +91,7 @@ export function FeedScreen({
         <aside aria-label="Channel selector" className="border-b border-surgical-steel bg-surface-container-low p-4 md:border-b-0 md:border-r">
           <p className="mb-3 px-3 font-label text-[10px] uppercase tracking-[0.16em] text-fog-muted">Channel selector</p>
           {canManageChannels && (
-            <button className="mb-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary-container px-4 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider transition hover:brightness-105 active:scale-[0.98]">
+            <button className="mb-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-4 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider transition hover:brightness-105 active:scale-[0.98]">
               <Plus size={16} />
               New Channel
             </button>

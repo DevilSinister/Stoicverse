@@ -364,13 +364,20 @@ test("the deprecated glow only ever decreases", async () => {
   assert.ok(total <= 7, `emerald-glow grew to ${total}: ${where.join(", ")}`);
 });
 
-test("pill controls only ever decrease", async () => {
-  const { total } = await countAcross(/\brounded-full\b/g);
-  // 189 after phase 7, down from 216 at phase 5 and 234 after P2a: phase 4b
-  // took the landing and legal pages, and phase 5 took the checkout CTA, the
-  // deletion-recovery buttons and the two deleted subscription screens.
-  // rounded-full is legitimate for avatars, presence dots and unread badges;
-  // every other use is a pill button, chip or input left over from the
-  // previous design system.
-  assert.ok(total <= 169, `pill controls grew to ${total}; buttons and inputs are 4px`);
+test("pill shapes are confined to the places a circle means something", async () => {
+  const { total, where } = await countAcross(/\brounded-full\b/g, { strip: true });
+  /*
+    234 after P2a, 189 after phase 7, 169 after phase 8 - and 43 now, because the
+    shape was fixed across the whole product in one pass rather than one screen at
+    a time. Monolith is boxy: buttons, inputs, selects and chips are 4px and the
+    progress bars are 2px.
+
+    What is left is not residue. rounded-full is correct for avatars and their
+    fallbacks, presence and recording dots, unread count badges, skeleton circles,
+    waveform bars, and the form controls whose shape carries meaning - a switch
+    that is not a capsule reads as a checkbox, and a radio that is not a circle
+    reads as one too. So this is a ceiling on a legitimate population, not a
+    migration counter: a new pill button pushes it over.
+  */
+  assert.ok(total <= 43, `pill controls grew to ${total}; buttons, inputs and chips are 4px: ${where.join(", ")}`);
 });

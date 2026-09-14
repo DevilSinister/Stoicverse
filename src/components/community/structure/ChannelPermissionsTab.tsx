@@ -413,7 +413,7 @@ function ViewAsRolePreview({
                 .map((key) => (
                   <li
                     key={key}
-                    className="rounded-full border border-surgical-steel px-2.5 py-0.5 text-[11px] text-on-surface-variant"
+                    className="rounded-md border border-surgical-steel px-2.5 py-0.5 text-[11px] text-on-surface-variant"
                   >
                     {PERMISSION_CATALOG[key].label}
                   </li>

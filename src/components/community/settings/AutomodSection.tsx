@@ -191,7 +191,7 @@ export function AutomodSection({
                   <div className="min-w-0 flex-1">
                     <p className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-semibold text-on-surface">{rule.name}</span>
-                      <span className="rounded-full border border-surgical-steel px-2 py-0.5 text-[11px] text-fog-muted">
+                      <span className="rounded-md border border-surgical-steel px-2 py-0.5 text-[11px] text-fog-muted">
                         {AUTOMOD_KIND_LABELS[rule.kind].label}
                       </span>
                       {enabled ? null : <span className="text-[11px] text-fog-muted">Off</span>}

@@ -275,7 +275,7 @@ function EventList({
               >
                 <div className="space-y-4 w-full">
                   <div className="flex justify-between items-center text-xs font-label">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
                       isCancelled 
                         ? "border-red-500/30 bg-red-500/10 text-red-400"
                         : "border-surgical-steel bg-surface-container-high text-fog-muted"
@@ -289,7 +289,7 @@ function EventList({
                           <span className="relative inline-flex h-2 w-2 rounded-full bg-primary-container" />
                         </span>
                       )}
-                      <span className={`text-[10px] font-extrabold tracking-widest uppercase px-2.5 py-0.5 rounded-full border ${
+                      <span className={`text-[10px] font-extrabold tracking-widest uppercase px-2.5 py-0.5 rounded-md border ${
                         isCancelled
                           ? "border-red-500/30 bg-red-500/10 text-red-400"
                           : isLive
@@ -324,20 +324,20 @@ function EventList({
 
                   <div className="shrink-0">
                     {isCancelled ? (
-                      <span className="text-red-400 border border-red-500/20 bg-red-500/5 py-1 px-3 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                      <span className="text-red-400 border border-red-500/20 bg-red-500/5 py-1 px-3 rounded-md text-[10px] font-extrabold uppercase tracking-wider">
                         Cancelled
                       </span>
                     ) : isConcluded ? (
-                      <span className="text-fog-muted/60 border border-surgical-steel bg-surface-container-high/30 py-1 px-3 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                      <span className="text-fog-muted/60 border border-surgical-steel bg-surface-container-high/30 py-1 px-3 rounded-md text-[10px] font-extrabold uppercase tracking-wider">
                         Concluded
                       </span>
                     ) : !permitted ? (
-                      <div className="flex items-center gap-1 text-fog-muted bg-surface-container-high/65 border border-surgical-steel/80 py-1 px-3 rounded-full text-[10px] font-semibold uppercase tracking-wider">
+                      <div className="flex items-center gap-1 text-fog-muted bg-surface-container-high/65 border border-surgical-steel/80 py-1 px-3 rounded-md text-[10px] font-semibold uppercase tracking-wider">
                         <Lock size={11} className="text-red-400/80 shrink-0" />
                         <span>{label(event.minTier)} Only</span>
                       </div>
                     ) : event.enrolled ? (
-                      <span className="flex items-center gap-1 text-primary-container bg-primary-container/5 border border-primary-container/20 py-1 px-3 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                      <span className="flex items-center gap-1 text-primary-container bg-primary-container/5 border border-primary-container/20 py-1 px-3 rounded-md text-[10px] font-bold uppercase tracking-wider">
                         <CheckCircle size={11} className="shrink-0" />
                         Enrolled
                       </span>
@@ -349,7 +349,7 @@ function EventList({
                           e.stopPropagation();
                           onEnroll(event.id);
                         }}
-                        className="rounded-full bg-primary-container text-on-primary-fixed hover:brightness-110 active:scale-[0.96] transition-all py-1.5 px-4 text-[10px] uppercase tracking-wider font-bold emerald-glow disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        className="rounded-lg bg-primary-container text-on-primary-fixed hover:brightness-110 active:scale-[0.96] transition-all py-1.5 px-4 text-[10px] uppercase tracking-wider font-bold emerald-glow disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
                         {pending ? "..." : "Enroll"}
                       </button>
@@ -443,7 +443,7 @@ function MemberEventDetails({
           <button
             ref={close}
             onClick={onClose}
-            className="text-fog-muted hover:text-text-strong p-1 rounded-full hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-primary-container"
+            className="text-fog-muted hover:text-text-strong p-1 rounded-lg hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-primary-container"
             aria-label="Close dialog"
           >
             <X size={20} />
@@ -505,14 +505,14 @@ function MemberEventDetails({
               <button
                 disabled={pending || !enrollmentAvailable}
                 onClick={() => onEnroll(event.id)}
-                className="w-full rounded-full bg-primary-container hover:brightness-110 active:scale-[0.98] transition-all duration-200 p-3.5 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider font-semibold shadow-md emerald-glow cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-lg bg-primary-container hover:brightness-110 active:scale-[0.98] transition-all duration-200 p-3.5 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider font-semibold shadow-md emerald-glow cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {pending ? "Enrolling..." : "Enroll in session"}
               </button>
             ) : isLive ? (
               <button
                 onClick={join}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-primary-container hover:brightness-110 active:scale-[0.98] transition-all duration-200 p-3.5 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider font-semibold shadow-md emerald-glow cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container hover:brightness-110 active:scale-[0.98] transition-all duration-200 p-3.5 font-label-md text-label-md text-on-primary-fixed uppercase tracking-wider font-semibold shadow-md emerald-glow cursor-pointer"
               >
                 <Video size={16} className="animate-pulse" />
                 Join Zoom room

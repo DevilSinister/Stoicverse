@@ -51,7 +51,7 @@ const toLocalDatetimeLocal = (value: string | null) => {
   return localDate.toISOString().slice(0, 16);
 };
 
-const inputClass = "w-full h-11 px-5 rounded-full border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong placeholder-fog-muted outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all";
+const inputClass = "w-full h-11 px-5 rounded-lg border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong placeholder-fog-muted outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all";
 const textareaClass = "w-full px-5 py-3 rounded-2xl border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong placeholder-fog-muted outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all resize-none";
 
 /* ================= CUSTOM SELECT POP-OVER COMPONENT ================= */
@@ -75,7 +75,7 @@ function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-11 px-5 rounded-full border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong flex items-center justify-between hover:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container transition-all cursor-pointer select-none"
+        className="w-full h-11 px-5 rounded-lg border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong flex items-center justify-between hover:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container transition-all cursor-pointer select-none"
       >
         <span>{selectedOption?.label}</span>
         <ChevronDown size={15} className={`text-fog-muted transition-transform duration-200 shrink-0 ${isOpen ? "rotate-180" : ""}`} />
@@ -282,7 +282,7 @@ export function CreatorCourseManagerV2({
                   setModalError(null);
                   setActiveModal('create-course');
                 }}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer shadow-md"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer shadow-md"
               >
                 <Plus size={16} /> Create Course
               </button>
@@ -298,7 +298,7 @@ export function CreatorCourseManagerV2({
                     setModalError(null);
                     setActiveModal('create-course');
                   }}
-                  className="mt-6 inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-primary-container px-5 font-label text-xs font-bold uppercase tracking-wider text-primary-container hover:bg-primary-container/10 active:scale-[0.98] transition-all cursor-pointer"
+                  className="mt-6 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-primary-container px-5 font-label text-xs font-bold uppercase tracking-wider text-primary-container hover:bg-primary-container/10 active:scale-[0.98] transition-all cursor-pointer"
                 >
                   <Plus size={14} /> Add First Course
                 </button>
@@ -314,7 +314,7 @@ export function CreatorCourseManagerV2({
                     <div className="space-y-4">
                       {/* Top Badges Row */}
                       <div className="flex items-center justify-between">
-                        <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full font-label text-[10px] uppercase font-bold border border-primary-container/30 bg-primary-container/10 text-primary-container">
+                        <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-md font-label text-[10px] uppercase font-bold border border-primary-container/30 bg-primary-container/10 text-primary-container">
                           Open Access
                         </span>
                         <div className="flex gap-2">
@@ -368,11 +368,11 @@ export function CreatorCourseManagerV2({
                 {/* Meta details row */}
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center justify-center px-3 py-1 rounded-full font-label text-xs uppercase font-bold border border-primary-container/30 bg-primary-container/10 text-primary-container">
+                    <span className="inline-flex items-center justify-center px-3 py-1 rounded-md font-label text-xs uppercase font-bold border border-primary-container/30 bg-primary-container/10 text-primary-container">
                       Open to All Members
                     </span>
                     {selectedCourse.completion_tier && (
-                      <span className="inline-flex items-center justify-center px-3 py-1 rounded-full font-label text-xs uppercase font-bold border border-surgical-steel bg-surface-container-high text-fog-muted">
+                      <span className="inline-flex items-center justify-center px-3 py-1 rounded-md font-label text-xs uppercase font-bold border border-surgical-steel bg-surface-container-high text-fog-muted">
                         Achievement: Tier 0{selectedCourse.completion_tier}
                       </span>
                     )}
@@ -389,7 +389,7 @@ export function CreatorCourseManagerV2({
                     <button 
                       disabled={pending}
                       onClick={() => handleFinishCourse(selectedCourse.id)}
-                      className="inline-flex min-h-10 items-center justify-center rounded-full bg-primary-container px-5 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-50 transition-all cursor-pointer shadow-sm"
+                      className="inline-flex min-h-10 items-center justify-center rounded-lg bg-primary-container px-5 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-50 transition-all cursor-pointer shadow-sm"
                     >
                       {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Finish Course"}
                     </button>
@@ -411,7 +411,7 @@ export function CreatorCourseManagerV2({
                       setModalError(null);
                       setActiveModal('edit-course');
                     }}
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-surgical-steel bg-surface-container-low/20 px-5 font-label text-xs font-bold uppercase tracking-wider text-text-strong hover:border-primary-container hover:text-primary-container transition-colors cursor-pointer"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-surgical-steel bg-surface-container-low/20 px-5 font-label text-xs font-bold uppercase tracking-wider text-text-strong hover:border-primary-container hover:text-primary-container transition-colors cursor-pointer"
                   >
                     <Edit size={14} /> Edit Course Details
                   </button>
@@ -420,7 +420,7 @@ export function CreatorCourseManagerV2({
                       setModalError(null);
                       setActiveModal('add-video');
                     }}
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-primary-container bg-primary-container/10 px-5 font-label text-xs font-bold uppercase tracking-wider text-primary-container hover:bg-primary-container hover:text-on-primary-fixed transition-all cursor-pointer"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-primary-container bg-primary-container/10 px-5 font-label text-xs font-bold uppercase tracking-wider text-primary-container hover:bg-primary-container hover:text-on-primary-fixed transition-all cursor-pointer"
                   >
                     <Plus size={14} /> Add Video
                   </button>
@@ -488,7 +488,7 @@ export function CreatorCourseManagerV2({
                           setEditingVideo(video);
                           setActiveModal('edit-video');
                         }}
-                        className="self-end sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-surgical-steel text-xs font-bold text-fog-muted hover:text-text-strong hover:border-primary-container transition-colors cursor-pointer shrink-0"
+                        className="self-end sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surgical-steel text-xs font-bold text-fog-muted hover:text-text-strong hover:border-primary-container transition-colors cursor-pointer shrink-0"
                       >
                         <Edit size={12} /> Edit Video
                       </button>
@@ -505,7 +505,7 @@ export function CreatorCourseManagerV2({
                           setModalError(null);
                           setActiveModal('add-video');
                         }}
-                        className="mt-4 inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-primary-container px-4 font-label text-xs font-bold uppercase tracking-wider text-primary-container hover:bg-primary-container/10 active:scale-[0.98] transition-all cursor-pointer"
+                        className="mt-4 inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-primary-container px-4 font-label text-xs font-bold uppercase tracking-wider text-primary-container hover:bg-primary-container/10 active:scale-[0.98] transition-all cursor-pointer"
                       >
                         <Plus size={12} /> Add First Video
                       </button>
@@ -652,7 +652,7 @@ function CourseCreateForm({
         <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
           Cancel
         </button>
-        <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
+        <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
           {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Create Course"}
         </button>
       </div>
@@ -704,7 +704,7 @@ function CourseEditForm({
           <button 
             disabled={pending}
             onClick={() => onDelete(course.id)}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-red-500/25 border border-red-500/50 hover:bg-red-500/40 text-red-300 px-6 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-red-500/25 border border-red-500/50 hover:bg-red-500/40 text-red-300 px-6 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
           >
             {pending ? <LoaderCircle size={14} className="animate-spin" /> : <><Trash2 size={14} /> Confirm Delete</>}
           </button>
@@ -760,7 +760,7 @@ function CourseEditForm({
         <button 
           type="button"
           onClick={() => setShowDeleteConfirm(true)}
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-red-500/30 hover:border-red-500 text-red-400 px-5 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-red-500/30 hover:border-red-500 text-red-400 px-5 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
         >
           <Trash2 size={14} /> Delete Course
         </button>
@@ -769,7 +769,7 @@ function CourseEditForm({
           <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
             Cancel
           </button>
-          <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
+          <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
             {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Save Changes"}
           </button>
         </div>
@@ -877,7 +877,7 @@ function VideoAddForm({
         <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
           Cancel
         </button>
-        <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
+        <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
           {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Add Video"}
         </button>
       </div>
@@ -928,7 +928,7 @@ function VideoEditForm({
           <button 
             disabled={pending}
             onClick={() => onDelete(video.id)}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-red-500/25 border border-red-500/50 hover:bg-red-500/40 text-red-300 px-6 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-red-500/25 border border-red-500/50 hover:bg-red-500/40 text-red-300 px-6 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
           >
             {pending ? <LoaderCircle size={14} className="animate-spin" /> : <><Trash2 size={14} /> Confirm Delete</>}
           </button>
@@ -992,7 +992,7 @@ function VideoEditForm({
         <button 
           type="button"
           onClick={() => setShowDeleteConfirm(true)}
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-red-500/30 hover:border-red-500 text-red-400 px-5 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-red-500/30 hover:border-red-500 text-red-400 px-5 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
         >
           <Trash2 size={14} /> Delete Video
         </button>
@@ -1001,7 +1001,7 @@ function VideoEditForm({
           <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
             Cancel
           </button>
-          <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
+          <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
             {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Save Changes"}
           </button>
         </div>

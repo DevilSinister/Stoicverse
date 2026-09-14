@@ -23,14 +23,14 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row gap-4">
             <Link 
               href="/signup" 
-              className="bg-[var(--color-primary-container)] text-[var(--color-on-primary-fixed)] font-label-md text-label-md rounded-full px-6 py-3 hover:bg-[var(--color-primary)] transition-colors focus-ring flex items-center justify-center gap-2"
+              className="bg-[var(--color-primary-container)] text-[var(--color-on-primary-fixed)] font-label-md text-label-md rounded-lg px-6 py-3 hover:bg-[var(--color-primary)] transition-colors focus-ring flex items-center justify-center gap-2"
             >
               Join the Discipline
               <ArrowRight size={16} strokeWidth={1} />
             </Link>
             <Link 
               href="#curriculum"
-              className="bg-transparent text-[var(--color-on-surface)] border border-[var(--color-surgical-steel)] font-label-md text-label-md rounded-full px-6 py-3 hover:bg-[var(--color-surface-container-high)] transition-colors focus-ring flex items-center justify-center gap-2"
+              className="bg-transparent text-[var(--color-on-surface)] border border-[var(--color-surgical-steel)] font-label-md text-label-md rounded-lg px-6 py-3 hover:bg-[var(--color-surface-container-high)] transition-colors focus-ring flex items-center justify-center gap-2"
             >
               Explore Curriculum
             </Link>

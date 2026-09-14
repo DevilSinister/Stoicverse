@@ -322,7 +322,7 @@ function PermissionToggleRow({
         <span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-text-strong">
           {meta.label}
           {meta.escalating && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-error/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-error">
+            <span className="inline-flex items-center gap-1 rounded-md border border-error/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-error">
               <AlertTriangle size={11} aria-hidden="true" />
               Escalating
             </span>

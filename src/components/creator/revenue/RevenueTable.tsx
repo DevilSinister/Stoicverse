@@ -6,7 +6,7 @@ import { csvText } from '@/lib/analytics/model';
 
 export type RevenueColumn = { label: string; numeric?: boolean; format?: (value: number) => string };
 export type RevenueRow = { id: string; values: (string | number | null)[]; references?: string[]; detail?: ReactNode };
-const control = 'focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-surgical-steel px-4 text-sm font-semibold text-on-surface transition hover:border-primary-container disabled:opacity-40';
+const control = 'focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-on-surface transition hover:border-primary-container disabled:opacity-40';
 
 export function RevenueTable({ title, columns, rows, filename, referenceLabels = ['Record ID'] }: { title: string; columns: RevenueColumn[]; rows: RevenueRow[]; filename: string; referenceLabels?: string[] }) {
   const [sort, setSort] = useState<{ index: number; ascending: boolean } | null>(null);

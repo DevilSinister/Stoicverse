@@ -185,7 +185,7 @@ export function VoicePlayer({
         type="button"
         onClick={toggle}
         aria-label={playing ? `Pause ${label}` : `Play ${label}`}
-        className="focus-ring hit-target relative flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-container text-monolith-surface"
+        className="focus-ring hit-target relative flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface"
       >
         {playing ? <Pause size={13} aria-hidden="true" /> : <Play size={13} aria-hidden="true" />}
       </button>

@@ -105,7 +105,7 @@ export function SettingsOverlayShell({
               <div className="absolute right-4 top-4 flex flex-col items-center gap-1 sm:right-8 sm:top-8">
                 <DialogPrimitive.Close
                   aria-label="Close settings"
-                  className="focus-ring flex size-11 items-center justify-center rounded-full border border-surgical-steel text-on-surface-variant transition hover:border-fog-muted hover:text-text-strong"
+                  className="focus-ring flex size-11 items-center justify-center rounded-lg border border-surgical-steel text-on-surface-variant transition hover:border-fog-muted hover:text-text-strong"
                 >
                   <X size={20} aria-hidden="true" />
                 </DialogPrimitive.Close>

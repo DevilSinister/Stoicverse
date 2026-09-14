@@ -184,7 +184,7 @@ function PremiumDateFilter({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-monolith-surface border border-surgical-steel rounded-full text-text-strong text-xs font-medium hover:border-primary-container transition-colors duration-200 cursor-pointer"
+        className="flex items-center gap-2 px-4 py-2 bg-monolith-surface border border-surgical-steel rounded-lg text-text-strong text-xs font-medium hover:border-primary-container transition-colors duration-200 cursor-pointer"
       >
         <Calendar size={14} className="text-primary-container" />
         <span>{getDisplayLabel(value, customRange)}</span>
@@ -265,7 +265,7 @@ function PremiumDateFilter({
                     type="button"
                     disabled={!tempStart || !tempEnd}
                     onClick={applyCustomRange}
-                    className="px-3 py-1 bg-primary-container text-on-primary-fixed text-[10px] font-bold rounded-full disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    className="px-3 py-1 bg-primary-container text-on-primary-fixed text-[10px] font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     Apply
                   </button>
@@ -337,7 +337,7 @@ export function CreatorOverviewView({ memberName, notifications, turnoverMetrics
           <h2 className="font-sans text-2xl font-semibold text-text-strong">Overview</h2>
           <p className="mt-1 font-body text-sm text-fog-muted">Monitor growth, revenue, and the work that needs your attention today.</p>
         </div>
-        <Link href="/creator/members/turnover" className="focus-ring inline-flex min-h-11 items-center gap-3 rounded-full border border-surgical-steel px-5 text-sm font-semibold text-text-strong transition hover:border-primary-container hover:text-primary-container"><span className="font-mono tabular-nums">{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(turnoverMetrics.turnoverThisWeek)}</span><span className="text-fog-muted">this week</span></Link>
+        <Link href="/creator/members/turnover" className="focus-ring inline-flex min-h-11 items-center gap-3 rounded-lg border border-surgical-steel px-5 text-sm font-semibold text-text-strong transition hover:border-primary-container hover:text-primary-container"><span className="font-mono tabular-nums">{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(turnoverMetrics.turnoverThisWeek)}</span><span className="text-fog-muted">this week</span></Link>
       </div>
 
       {error ? (

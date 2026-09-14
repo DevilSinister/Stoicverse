@@ -24,7 +24,7 @@ export default function Pricing() {
               Daily morning briefs
             </li>
           </ul>
-          <button className="w-full bg-transparent text-[var(--color-on-surface)] border border-[var(--color-surgical-steel)] font-label-md text-label-md rounded-full px-4 py-3 hover:bg-[var(--color-surface-container-high)] transition-colors focus-ring">
+          <button className="w-full bg-transparent text-[var(--color-on-surface)] border border-[var(--color-surgical-steel)] font-label-md text-label-md rounded-lg px-4 py-3 hover:bg-[var(--color-surface-container-high)] transition-colors focus-ring">
             Initialize Standard
           </button>
         </div>
