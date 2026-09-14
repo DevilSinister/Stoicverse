@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { NextResponse } from "next/server";
 
+import { membershipTermMonths } from "@/lib/checkout/plans";
 import { sendTransactionalEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -10,7 +11,7 @@ export const runtime = "nodejs";
 type StripeEvent = {
   id: string;
   type: string;
-  data: { object: { id: string; payment_intent?: string | null; payment_status?: string; amount_total?: number | null; currency?: string | null; customer_details?: { email?: string | null }; metadata?: { user_id?: string; product_type?: string } } };
+  data: { object: { id: string; payment_intent?: string | null; payment_status?: string; amount_total?: number | null; currency?: string | null; customer_details?: { email?: string | null }; metadata?: { user_id?: string; product_type?: string; plan?: string } } };
 };
 
 function verifiedEvent(payload: string, signature: string | null, secret: string) {
@@ -62,8 +63,16 @@ export async function POST(request: Request) {
         if (existingMembershipError) throw existingMembershipError;
         const currentExpiry = existingMembership?.expires_at ? new Date(existingMembership.expires_at) : now;
         const renewalStart = currentExpiry > now ? currentExpiry : now;
+        /*
+          The term comes from the plan that was sold, not from a literal.
+
+          This was `+ 1` unconditionally, which is the reason an annual plan
+          could not honestly be offered: the screen would have advertised twelve
+          months and the grant would have been one. A session with no `plan` in
+          its metadata predates the choice and is correctly read as monthly.
+        */
         const expiresAt = new Date(renewalStart);
-        expiresAt.setUTCMonth(expiresAt.getUTCMonth() + 1);
+        expiresAt.setUTCMonth(expiresAt.getUTCMonth() + membershipTermMonths(session.metadata?.plan));
         const { error } = await admin.from("memberships").upsert({ user_id: userId, status: "active", access_source: "stripe", stripe_payment_intent: paymentIntent, amount_paid: amount, joined_at: existingMembership?.joined_at ?? now.toISOString(), expires_at: expiresAt.toISOString() }, { onConflict: "user_id" });
         if (error) throw error;
       } else {

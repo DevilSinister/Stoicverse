@@ -485,8 +485,8 @@
     "semantic_hash": ""
   },
   "src/components/layout/AppShell.tsx": {
-    "mtime": 1789325741.8925862,
-    "ast_hash": "883a1c466df8627311a647aea10a18ee",
+    "mtime": 1789332619.725801,
+    "ast_hash": "1a90c3fd5cf68e4dbdf0af485e2b5624",
     "semantic_hash": ""
   },
   "stitch_screens/ask_stoic___checkout_desktop.html": {
@@ -705,8 +705,8 @@
     "semantic_hash": "5046eb25bf91c8c15350d7e8fcc20bbd"
   },
   "tests/influencer-inline-controls.contract.mjs": {
-    "mtime": 1789275078.592691,
-    "ast_hash": "74ff39ec52585a6490d087b59e16d909",
+    "mtime": 1789332619.7286649,
+    "ast_hash": "77dff150ce363055463619990e8e2104",
     "semantic_hash": ""
   },
   "src/app/creator/community/page.tsx": {
@@ -860,9 +860,9 @@
     "semantic_hash": ""
   },
   "src/app/creator/notifications/page.tsx": {
-    "mtime": 1785069973.740688,
-    "ast_hash": "ee4b13492bf0f7681b8b149005acec65",
-    "semantic_hash": "ee4b13492bf0f7681b8b149005acec65"
+    "mtime": 1789332619.723842,
+    "ast_hash": "671afeef1fca16d25c4f47ed9e2ae40e",
+    "semantic_hash": ""
   },
   "src/app/creator/revenue/page.tsx": {
     "mtime": 1789275078.3292568,
@@ -925,8 +925,8 @@
     "semantic_hash": ""
   },
   "src/app/dashboard/notifications/page.tsx": {
-    "mtime": 1789275078.3604262,
-    "ast_hash": "dac3e03d54408a8a9d4d946c85cdda91",
+    "mtime": 1789332619.7244487,
+    "ast_hash": "834f8630d792d90d6ba26a866d13aa43",
     "semantic_hash": ""
   },
   "src/app/dashboard/settings/page.tsx": {
@@ -1140,8 +1140,8 @@
     "semantic_hash": ""
   },
   "src/components/notifications/NotificationCenter.tsx": {
-    "mtime": 1789283881.1231241,
-    "ast_hash": "fc19a2c39ed164a4eb4918bd22c2a5d9",
+    "mtime": 1789332750.722526,
+    "ast_hash": "4e4c4f9d16ab3189ae3d8ef5d9bf442d",
     "semantic_hash": ""
   },
   "src/components/settings/AccountSettingsWorkspace.tsx": {
@@ -2400,8 +2400,8 @@
     "semantic_hash": ""
   },
   "src/lib/navigation/rail.ts": {
-    "mtime": 1789275078.5002482,
-    "ast_hash": "fdaf5e9d909f01194edb0b986c9d01ea",
+    "mtime": 1789332619.72756,
+    "ast_hash": "a4744396879c09b55e9dbd2b537d614c",
     "semantic_hash": ""
   },
   "src/lib/navigation/use-community-branding.ts": {
@@ -2580,8 +2580,8 @@
     "semantic_hash": ""
   },
   "tests/app-chrome.contract.mjs": {
-    "mtime": 1789327988.9662335,
-    "ast_hash": "527fb00f80a59ace1e51a4e71852daf6",
+    "mtime": 1789332619.72756,
+    "ast_hash": "ef8134684964eeebb06c7d869169cf9f",
     "semantic_hash": ""
   },
   "src/app/auth/reset/confirm/page.tsx": {

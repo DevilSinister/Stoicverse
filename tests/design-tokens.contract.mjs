@@ -168,6 +168,51 @@ test("src/components/ui carries no literal colour and no arbitrary z-index", asy
   }
 });
 
+test("cn keeps a text colour that a Monolith size follows", async () => {
+  /*
+    `text-*` is two class groups — font size and text colour — and
+    tailwind-merge tells them apart using its own default scale. Every Monolith
+    size is absent from that scale, so each was read as a colour and deleted the
+    colour before it.
+
+    `ui/button.tsx` composes variant before size, so the default variant merged
+    down to `bg-primary … text-content-base`: a lime fill whose label inherited
+    the body's light grey, about 1.5:1. It was live on every filled Button and
+    invisible in the source, because the class is right there in the string.
+
+    Found in the browser on /checkout/success in phase 5.
+  */
+  const { cn, MONOLITH_FONT_SIZES } = await import("../src/lib/utils.ts");
+
+  assert.match(
+    cn("bg-primary text-primary-foreground h-12 px-5 text-content-base", "mt-7 w-full"),
+    /text-primary-foreground/,
+    "the button variant's label colour was merged away",
+  );
+  // The size still wins over another size, which is the behaviour being kept.
+  assert.match(cn("text-content-sm", "text-content-lg"), /text-content-lg/);
+  assert.doesNotMatch(cn("text-content-sm", "text-content-lg"), /text-content-sm/);
+  // And a real colour still overrides a real colour.
+  assert.match(cn("text-text-muted", "text-text-strong"), /text-text-strong/);
+  assert.doesNotMatch(cn("text-text-muted", "text-text-strong"), /text-text-muted/);
+
+  /*
+    A size declared in globals.css and missing from that list is this bug again,
+    silently, on whichever button next uses it.
+  */
+  const css = await read("src/app/globals.css");
+  const dark = css.slice(css.indexOf(".dark {"), css.indexOf("\n}", css.indexOf(".dark {")));
+  const themed = css.replace(dark, "");
+  const declared = [
+    ...new Set(
+      [...themed.matchAll(/^\s*--text-([a-z0-9-]+):/gm)]
+        .map((match) => match[1])
+        .filter((name) => !name.includes("--")),
+    ),
+  ].sort();
+  assert.deepEqual([...MONOLITH_FONT_SIZES].sort(), declared, "the type scale and cn's copy of it have drifted");
+});
+
 test("hand-rolled focus traps only ever decrease", async () => {
   /*
     This assertion used to match /key === "Tab"/ and claim a hard zero. It was
@@ -251,10 +296,29 @@ test("the native dialogs only ever decrease", async () => {
   assert.ok(total <= 6, `a native dialog was added: ${where.join(", ")}`);
 });
 
+test("the deprecated glow only ever decreases", async () => {
+  const { total, where } = await countAcross(/\bemerald-glow\b/g);
+  /*
+    Monolith has no coloured glows. The utility still exists in globals.css and
+    resolves to the ordinary raised shadow, so removing a call site changes
+    nothing visually — which is exactly why an unmeasured one survives: it is
+    invisible in review and invisible in the browser.
+
+    16 when Monolith landed, 13 at the end of phase 5 (the checkout CTA was
+    three of them). The remaining ones are the dashboard, learning-path, events
+    and mentorship screens, which later phases own. The utility is deleted with
+    the alias block when this reaches zero.
+  */
+  assert.ok(total <= 13, `emerald-glow grew to ${total}: ${where.join(", ")}`);
+});
+
 test("pill controls only ever decrease", async () => {
   const { total } = await countAcross(/\brounded-full\b/g);
-  // 234 after P2a flattened the rail pills and both headers. rounded-full is
-  // legitimate for avatars, presence dots and unread badges; every other use is
-  // a pill button, chip or input left over from the previous design system.
-  assert.ok(total <= 234, `pill controls grew to ${total}; buttons and inputs are 4px`);
+  // 216 at the end of phase 5, down from the 234 recorded after P2a: phase 4b
+  // took the landing and legal pages, and phase 5 took the checkout CTA, the
+  // deletion-recovery buttons and the two deleted subscription screens.
+  // rounded-full is legitimate for avatars, presence dots and unread badges;
+  // every other use is a pill button, chip or input left over from the
+  // previous design system.
+  assert.ok(total <= 216, `pill controls grew to ${total}; buttons and inputs are 4px`);
 });

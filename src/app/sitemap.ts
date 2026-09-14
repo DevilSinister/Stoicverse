@@ -1,5 +1,15 @@
 import { MetadataRoute } from 'next'
 
+/*
+  Only pages a signed-out visitor can actually read.
+
+  `/subscription` was listed here at priority 0.8 while sitting behind
+  `requireActiveMembership` — so the one pricing URL advertised to search
+  engines redirected every visitor who followed it, including the crawler. The
+  route is gone; membership terms are on `/` under `#membership` and the
+  purchase itself is `/checkout`, which is signed-in by design and does not
+  belong in a sitemap.
+*/
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://askstoic.com'
   return [
@@ -8,12 +18,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 1,
-    },
-    {
-      url: `${baseUrl}/subscription`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
     },
     {
       url: `${baseUrl}/login`,

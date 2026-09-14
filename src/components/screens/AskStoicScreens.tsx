@@ -74,32 +74,6 @@ function AppShell({ active, title, isMaster = false, memberName, platformRole, c
   );
 }
 
-function PricingCard({ title, price, body, featured }: { title: string; price: string; body: string; featured?: boolean }) {
-  return (
-    <article className={cx("border bg-monolith-surface p-6 md:p-8 rounded-lg", featured ? "border-primary-container" : "border-surgical-steel")}>
-      <div className="flex items-start justify-between gap-4">
-        <h3 className="font-label-md text-label-md uppercase tracking-[0.12em] text-fog-muted">{title}</h3>
-        {featured && <span className="bg-primary-container px-2 py-0.5 rounded font-label-sm text-label-sm text-on-primary-fixed uppercase tracking-wider">Priority</span>}
-      </div>
-      <div className="mt-5 font-headline text-3xl md:text-4xl font-extrabold text-text-strong">
-        {price}
-        <span className="ml-2 font-body text-sm text-on-surface-variant">/month</span>
-      </div>
-      <p className="mt-4 max-w-xl font-body text-sm text-on-surface-variant leading-relaxed">{body}</p>
-      <div className="mt-8 flex flex-col gap-4 border-t border-surgical-steel pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 font-body text-xs text-fog-muted">
-          <Check size={16} className="text-primary-container" />
-          Cancel before your next renewal
-        </div>
-        <ButtonLink href={featured ? "/subscription/commitment" : "/checkout"} variant={featured ? "primary" : "outline"}>
-          Continue
-          <ArrowRight size={16} />
-        </ButtonLink>
-      </div>
-    </article>
-  );
-}
-
 export function DashboardScreen() {
   return (
     <AppShell active="Dashboard" title="Welcome back, Practitioner">
@@ -475,46 +449,6 @@ export function CommunitySelectionScreen() {
         <h1 className="mt-10 font-headline text-2xl font-bold text-text-strong md:text-3xl">Join Stoicverse.</h1>
         <p className="mt-4 font-body text-sm text-on-surface-variant leading-relaxed">One membership unlocks the Stoicverse community, curriculum, events, and progression path.</p>
         <div className="mt-8">
-          <ButtonLink href="/checkout">Continue to checkout</ButtonLink>
-        </div>
-      </div>
-    </main>
-  );
-}
-
-export function SubscriptionScreen() {
-  return (
-    <main className="min-h-screen p-4 md:p-8 bg-surface">
-      <div className="mx-auto max-w-5xl">
-        <Link href="/" className="font-headline text-lg font-bold text-primary-container">Stoicverse</Link>
-        <h1 className="mt-10 font-headline text-3xl font-extrabold text-text-strong leading-tight md:text-4xl">Subscription cadence.</h1>
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <PricingCard title="Monthly" price="$10" body="Maintain access to community surfaces, lessons, events, and tier progression." />
-          <PricingCard title="Annual Commitment" price="$100" body="Commit for a full year and keep the learning system active without monthly interruption." featured />
-        </div>
-      </div>
-    </main>
-  );
-}
-
-export function CommitmentScreen() {
-  return (
-    <main className="min-h-screen p-4 md:p-8 bg-surface">
-      <div className="mx-auto max-w-4xl border border-surgical-steel bg-monolith-surface p-6 md:p-10 rounded-lg">
-        <Link href="/" className="font-headline text-lg font-bold text-primary-container">Stoicverse</Link>
-        <h1 className="mt-10 font-headline text-3xl font-extrabold text-text-strong leading-tight md:text-4xl">Confirm the commitment.</h1>
-        <p className="mt-6 font-body text-base text-on-surface-variant leading-relaxed">
-          This screen clarifies what membership does and does not unlock before payment: community access, ordered lessons, events, and progression tracking. Mentorship remains a separate purchase.
-        </p>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {["One community membership", "Tier 1 unlocked after payment", "Locked channels hidden until earned", "Mentorship purchase remains optional"].map((item) => (
-            <div key={item} className="flex items-center gap-3 border border-surgical-steel bg-surface-container-low p-4 rounded">
-              <Check size={16} className="text-primary-container shrink-0" />
-              <span className="font-body text-sm text-on-surface">{item}</span>
-            </div>
-          ))}
-        </div>
-        <div className="mt-8 border-t border-surgical-steel pt-6">
           <ButtonLink href="/checkout">Continue to checkout</ButtonLink>
         </div>
       </div>
