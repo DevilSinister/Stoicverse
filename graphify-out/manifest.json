@@ -1545,8 +1545,8 @@
     "semantic_hash": ""
   },
   "src/components/community/settings/RolesSection.tsx": {
-    "mtime": 1789284000.5387485,
-    "ast_hash": "fe06a11ec9366e88176ebdb64319707c",
+    "mtime": 1789492492.1834612,
+    "ast_hash": "b98a0cd0b8a2a8a62c34e1be59ac41be",
     "semantic_hash": ""
   },
   "src/components/community/settings/SettingsOverlayShell.tsx": {
@@ -1800,13 +1800,13 @@
     "semantic_hash": ""
   },
   "src/components/community/settings/roles/RoleEditor.tsx": {
-    "mtime": 1789283881.0492227,
-    "ast_hash": "873b940ec774845eeaa0d7caa22601b4",
+    "mtime": 1789492376.853212,
+    "ast_hash": "f1a0a98e0c86677f2483cb1cd2710219",
     "semantic_hash": ""
   },
   "src/components/community/settings/roles/RoleFields.tsx": {
-    "mtime": 1789362207.0655582,
-    "ast_hash": "43623401ce67eb6124ec8e156981fc2d",
+    "mtime": 1789492250.945696,
+    "ast_hash": "edf2df996ab22e701f3b530b1cfe8e99",
     "semantic_hash": ""
   },
   "src/lib/community-settings/role-model.ts": {
@@ -1860,8 +1860,8 @@
     "semantic_hash": ""
   },
   "src/components/community/settings/ModerationQueueSections.tsx": {
-    "mtime": 1789489974.5269895,
-    "ast_hash": "f77493b47b1c50346dd9a0a3dc1ae2b7",
+    "mtime": 1789491914.6471708,
+    "ast_hash": "1b90d0973a714b62d78c2fd07c805b0d",
     "semantic_hash": ""
   },
   "src/lib/community-settings/moderation.ts": {
@@ -1890,13 +1890,13 @@
     "semantic_hash": ""
   },
   "src/components/community/settings/AutomodSection.tsx": {
-    "mtime": 1789489974.525481,
-    "ast_hash": "7fc194aca5c0b2f158d64d8a27b50f48",
+    "mtime": 1789491997.9327078,
+    "ast_hash": "35cf98f50f5488cd84dca31899e09a9c",
     "semantic_hash": ""
   },
   "src/components/community/settings/automod/RuleEditor.tsx": {
-    "mtime": 1789489974.5318394,
-    "ast_hash": "ceed224c37342fe472805a2cd419cbff",
+    "mtime": 1789492164.1042428,
+    "ast_hash": "9ef9f0c344160ed4a86dffb17dc36d71",
     "semantic_hash": ""
   },
   "src/lib/community-settings/automod.ts": {
@@ -2300,8 +2300,8 @@
     "semantic_hash": ""
   },
   "src/components/community/settings/SafetySection.tsx": {
-    "mtime": 1789275078.3992672,
-    "ast_hash": "8716bb5c4fb1929fb6a8c47e3c7987d2",
+    "mtime": 1789491842.9433646,
+    "ast_hash": "759e0415caacb33f10358ccb9d448408",
     "semantic_hash": ""
   },
   "supabase/migrations/20260912160000_community_safety_gates.sql": {
@@ -2550,8 +2550,8 @@
     "semantic_hash": ""
   },
   "tests/design-tokens.contract.mjs": {
-    "mtime": 1789489974.5344675,
-    "ast_hash": "49f780e0d626b9e844755cfecaef5d34",
+    "mtime": 1789492760.2877872,
+    "ast_hash": "574118b093401885dfd65d4886578d6f",
     "semantic_hash": ""
   },
   "tests/overlay.contract.mjs": {
