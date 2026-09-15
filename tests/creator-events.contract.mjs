@@ -10,9 +10,9 @@ test("creator events use lifecycle actions and do not send event email", () => {
   assert.match(actions, /saveCreatorEvent/);
   assert.match(actions, /cancelEvent/);
   assert.match(actions, /publishEvent/);
-  assert.match(creator, /Save Draft/);
-  assert.match(creator, /Publish Event/);
-  assert.match(creator, /RSVP Metrics/);
+  assert.match(creator, /Save draft/i);
+  assert.match(creator, /Publish event/i);
+  assert.match(creator, /RSVP metrics/i);
   assert.doesNotMatch(actions, /sendTransactionalEmail/);
 });
 
@@ -26,7 +26,7 @@ test("member event details stay separate from creator attendee metrics", () => {
   assert.match(member, /Event details/i);
   assert.match(member, /Masters/);
   assert.doesNotMatch(member, /MEMBERS ENROLLED/);
-  assert.match(creator, /Members Registered/);
+  assert.match(creator, /Members registered/i);
   assert.match(creator, /qualifiedAudienceCount/);
 });
 

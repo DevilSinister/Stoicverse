@@ -66,8 +66,8 @@ test("member screens are clean while creator screens own the management controls
   assert.match(creatorLearning, /Create Course/);
   assert.match(creatorLearning, /Add Video/);
   assert.match(creatorLearning, /Finish Course/);
-  assert.match(creatorEvents, /Create Event/);
-  assert.match(creatorEvents, /Publish (Room )?Link/);
+  assert.match(creatorEvents, /Create event/i);
+  assert.match(creatorEvents, /Publish (room )?link/i);
 });
 
 test("member and creator route trees expose separate navigation and guards", () => {
