@@ -253,7 +253,10 @@ function MentorshipOffer({ price, cadence }: { price: string | null; cadence: st
         ))}
       </section>
 
-      <section className="mx-auto max-w-xl space-y-5 rounded-lg border border-border-hairline border-t-2 border-t-primary bg-surface-panel p-6 text-center">
+      {/* An accent-tinted hairline all the way round, not a 2px cap on top: at
+          a 4px radius the corner shows the step from 2px to 1px. Same emphasis
+          phase 8 gives an in-progress course card. */}
+      <section className="mx-auto max-w-xl space-y-5 rounded-lg border border-primary/40 bg-surface-panel p-6 text-center">
         <div>
           <h2 className="text-title-md font-medium text-text-strong">Private guidance cohort</h2>
           <p className="mt-2 text-content-sm text-text-muted">One-to-one mentorship with a Master Stoic.</p>
