@@ -238,7 +238,7 @@ test("buttonVariants resolves its own conflicts, like the component does", async
   assert.doesNotMatch(source, /export \{[^}]*buttonStyles/, "the raw cva stays private, or callers reintroduce the conflict");
 });
 
-test("hand-rolled focus traps only ever decrease", async () => {
+test("nothing traps focus by hand", async () => {
   /*
     This assertion used to match /key === "Tab"/ and claim a hard zero. It was
     wrong, and passing for the wrong reason: AppShell's notification panel wrote
@@ -246,12 +246,30 @@ test("hand-rolled focus traps only ever decrease", async () => {
     time and the test could not see it. Two traps existed, not one.
 
     Widened to the bare token, which catches both spellings, and demoted to a
-    ratchet because MemberModalShell still carries the other one. Base UI's
-    Dialog owns trap, restore, scroll lock and Escape; P8 retires the last copy
-    onto it, and the number goes to zero then rather than being asserted now.
+    ratchet while `MemberModalShell` still carried the second one.
+
+    **It is a hard zero again as of phase 11b**, honestly this time: that shell
+    is `ui/overlay` now, and Base UI's Dialog owns trap, restore, scroll lock
+    and Escape. A ratchet at 1 would say "one is acceptable", and none is.
   */
-  const { total, where } = await countAcross(/"Tab"/g);
-  assert.ok(total <= 1, `a hand-rolled Tab trap was added; found ${total} in: ${where.join(", ")}`);
+  const { total, where } = await countAcross(/"Tab"/g, { strip: true });
+  assert.equal(total, 0, `focus is being trapped by hand in: ${where.join(", ")}`);
+});
+
+test("no screen writes unescaped markup of its own", async () => {
+  /*
+    Two screens shipped a hidden element whose only job was to inject an HTML
+    comment describing the design intent - "THESIS…", "OWN-WORLD…", and a
+    "shape seed" - into every render, through the one React API that exists to
+    bypass escaping. Account settings carried one until phase 10 and the member
+    registry until 11b, which makes it a pattern rather than an accident:
+    whatever produced these screens emitted the brief alongside the markup.
+
+    `lib/markdown/render.tsx` is the renderer and does not use this API either,
+    so the correct number is zero rather than a ratchet with an exception.
+  */
+  const { total, where } = await countAcross(/dangerouslySetInnerHTML/g, { strip: true });
+  assert.equal(total, 0, `unescaped markup is being written in: ${where.join(", ")}`);
 });
 
 test("every hit-target sits on a positioned element", async () => {
@@ -309,7 +327,7 @@ test("the hand-rolled overlays only ever decrease", async () => {
   // 6 after phase 9 moved the event-details dialog onto the primitive. The six
   // that remain are the creator and community-settings surfaces, which phases
   // 11 and 12 own, plus MemberModalShell's Tab trap, which phase 14 retires.
-  assert.ok(count <= 6, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
+  assert.ok(count <= 4, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
 });
 
 test("arbitrary z-index only ever decreases", async () => {
@@ -372,7 +390,7 @@ test("pure white fills only ever decrease", async () => {
     hover washes (`bg-white/[0.04]`), which are a different, milder problem.
   */
   const { total, where } = await countAcross(/\bbg-white\b/g);
-  assert.ok(total <= 7, `a pure white fill was added; found ${total} in: ${where.join(", ")}`);
+  assert.ok(total <= 3, `a pure white fill was added; found ${total} in: ${where.join(", ")}`);
 });
 
 test("the deprecated glow only ever decreases", async () => {
