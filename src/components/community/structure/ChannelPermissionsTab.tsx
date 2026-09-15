@@ -16,6 +16,7 @@ import {
 } from "@/lib/community-settings/permissions";
 import type { CommunityRole } from "@/lib/community-settings/role-model";
 import type { ChannelOverride } from "@/lib/community-settings/structure";
+import type { Notify } from "@/components/ui/toast";
 
 type Grid = Record<string, OverrideState>;
 
@@ -56,7 +57,7 @@ export function ChannelPermissionsTab({
   roles: CommunityRole[];
   overrides: ChannelOverride[];
   canSave: boolean;
-  onNotice: (value: string) => void;
+  onNotice: Notify;
 }) {
   const targetId = target === "channel" ? channel?.id : category?.id;
   const synced = target === "channel" ? (channel?.permissionsSynced ?? true) : false;
@@ -108,17 +109,20 @@ export function ChannelPermissionsTab({
         targetId,
         rows.map((row) => ({ roleId: row.roleId, grid: row.grid as Record<string, string> })),
       );
-      onNotice(result.error ?? "Channel permissions saved.");
+      if (result.error) onNotice(result.error, "error");
+      else onNotice("Channel permissions saved.", "success");
     });
 
   const toggleSync = (next: boolean) =>
     startTransition(async () => {
       if (!channel) return;
       const result = await setChannelPermissionSync(channel.id, next);
-      onNotice(
-        result.error ??
-          (next ? "This channel follows its category again." : "This channel now has its own permissions."),
-      );
+      if (result.error) onNotice(result.error, "error");
+      else
+        onNotice(
+          next ? "This channel follows its category again." : "This channel now has its own permissions.",
+          "success",
+        );
     });
 
   return (
@@ -439,7 +443,7 @@ export function SlowModeField({
   channelId: string;
   seconds: number;
   disabled: boolean;
-  onNotice: (value: string) => void;
+  onNotice: Notify;
 }) {
   const [value, setValue] = useState(seconds);
   const [pending, startTransition] = useTransition();
@@ -449,7 +453,8 @@ export function SlowModeField({
     setValue(next);
     startTransition(async () => {
       const result = await setChannelSlowMode(channelId, next);
-      onNotice(result.error ?? `Slow mode set to ${formatSlowMode(next)}.`);
+      if (result.error) onNotice(result.error, "error");
+      else onNotice(`Slow mode set to ${formatSlowMode(next)}.`, "success");
     });
   };
 

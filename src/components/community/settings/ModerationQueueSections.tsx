@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { banMember, bulkDeleteMessages, resolveReport, unbanMember } from "@/app/community/moderation-actions";
 import { REPORT_REASON_LABELS, SANCTION_LIMITS, type ReportStatus } from "@/lib/community-settings/model";
 import type { BanRow, ReportRow } from "@/lib/community-settings/moderation";
+import type { Notify } from "@/components/ui/toast";
 
 /**
  * The reports queue.
@@ -25,7 +26,7 @@ export function ReportsSection({
   status: ReportStatus;
   canModerate: boolean;
   canBan: boolean;
-  onNotice: (value: string) => void;
+  onNotice: Notify;
 }) {
   const [handled, setHandled] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
@@ -34,14 +35,14 @@ export function ReportsSection({
 
   const finish = (reportId: string, message: string) => {
     setHandled((current) => new Set(current).add(reportId));
-    onNotice(message);
+    onNotice(message, "success");
   };
 
   const dismiss = (report: ReportRow) =>
     startTransition(async () => {
       const result = await resolveReport(report.id, "dismissed");
       if (result.error) {
-        onNotice(result.error);
+        onNotice(result.error, "error");
         return;
       }
       finish(report.id, "Report dismissed.");
@@ -51,12 +52,12 @@ export function ReportsSection({
     startTransition(async () => {
       const removal = await bulkDeleteMessages([report.postId], `Reported as ${report.reasonKind}`);
       if (removal.error) {
-        onNotice(removal.error);
+        onNotice(removal.error, "error");
         return;
       }
       const result = await resolveReport(report.id, "resolved", "Message deleted");
       if (result.error) {
-        onNotice(result.error);
+        onNotice(result.error, "error");
         return;
       }
       finish(report.id, "Message deleted and report resolved.");
@@ -65,17 +66,17 @@ export function ReportsSection({
   const banAndResolve = (report: ReportRow) =>
     startTransition(async () => {
       if (!report.postAuthorId) {
-        onNotice("That message has no author to ban.");
+        onNotice("That message has no author to ban.", "error");
         return;
       }
       const ban = await banMember(report.postAuthorId, `Reported as ${report.reasonKind}`);
       if (ban.error) {
-        onNotice(ban.error);
+        onNotice(ban.error, "error");
         return;
       }
       const result = await resolveReport(report.id, "resolved", "Author banned", ban.caseId);
       if (result.error) {
-        onNotice(result.error);
+        onNotice(result.error, "error");
         return;
       }
       finish(report.id, "Member banned and report resolved.");
@@ -177,7 +178,7 @@ export function BansSection({
 }: {
   bans: BanRow[];
   canBan: boolean;
-  onNotice: (value: string) => void;
+  onNotice: Notify;
 }) {
   const [lifted, setLifted] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
@@ -188,11 +189,11 @@ export function BansSection({
     startTransition(async () => {
       const result = await unbanMember(ban.memberId);
       if (result.error) {
-        onNotice(result.error);
+        onNotice(result.error, "error");
         return;
       }
       setLifted((current) => new Set(current).add(ban.caseId));
-      onNotice(`${ban.memberName} can take part again.`);
+      onNotice(`${ban.memberName} can take part again.`, "success");
     });
 
   return (

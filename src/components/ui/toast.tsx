@@ -26,6 +26,14 @@ import { AlertCircle, Check, X } from "lucide-react";
 
 export type ToastTone = "error" | "success";
 
+/**
+ * The shape every caller passes around. Named because settings sections hand
+ * this down as an `onNotice` prop through three levels of component, and a
+ * prop typed `(message: string) => void` silently drops the tone - which is
+ * how a failure comes to be announced with a green tick.
+ */
+export type Notify = (message: string, tone?: ToastTone) => void;
+
 type Toast = { id: number; message: string; tone: ToastTone };
 
 /** Long enough to read twice; failures get longer, because they need acting on. */
@@ -43,7 +51,7 @@ const ToastContext = createContext<((message: string, tone?: ToastTone) => void)
  * dropping the message — a swallowed error report is worse than a crash in
  * development, and the provider is mounted at the root layout.
  */
-export function useToast(): (message: string, tone?: ToastTone) => void {
+export function useToast(): Notify {
   const notify = useContext(ToastContext);
   if (!notify) throw new Error("useToast requires a <ToastProvider> above it.");
   return notify;

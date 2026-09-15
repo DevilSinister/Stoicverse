@@ -8,6 +8,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import { AppShell } from "@/components/layout/AppShell";
 import { RevenueTable, type RevenueColumn } from "@/components/creator/revenue/RevenueTable";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { nativeSelectClass } from "@/components/ui/select";
 import { defaultRevenueFilters, parseRevenueFilters, type RevenueFilters, type RevenueReport } from "@/lib/revenue/model";
 
 /**
@@ -34,9 +35,6 @@ const TABS = [
 type Tab = (typeof TABS)[number]["id"];
 
 /** The one control the system has no primitive for. Tokens, not aliases. */
-const SELECT_CLASS =
-  "focus-ring h-11 w-full rounded-lg border border-border-hairline bg-surface-sunken px-3 text-content-sm text-text-default disabled:opacity-50";
-
 const decimal = (value: number) =>
   new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 
@@ -227,7 +225,7 @@ export function CreatorRevenueView({
             <div className="min-w-44 flex-1">
               <Field label="Reporting period">
                 <select
-                  className={SELECT_CLASS}
+                  className={nativeSelectClass}
                   value={preset}
                   onChange={(event) => {
                     if (!event.target.value) return;
@@ -247,7 +245,7 @@ export function CreatorRevenueView({
 
             <Field label="From">
               <input
-                className={SELECT_CLASS}
+                className={nativeSelectClass}
                 type="date"
                 required
                 value={draft.start}
@@ -257,7 +255,7 @@ export function CreatorRevenueView({
 
             <Field label="Through">
               <input
-                className={SELECT_CLASS}
+                className={nativeSelectClass}
                 type="date"
                 required
                 value={draft.end}
@@ -287,7 +285,7 @@ export function CreatorRevenueView({
               <div className="grid gap-4 sm:grid-cols-3">
                 <Field label="Member name or exact ID">
                   <input
-                    className={SELECT_CLASS}
+                    className={nativeSelectClass}
                     type="search"
                     maxLength={100}
                     placeholder="Search members"
@@ -298,7 +296,7 @@ export function CreatorRevenueView({
 
                 <Field label="Current tier">
                   <select
-                    className={SELECT_CLASS}
+                    className={nativeSelectClass}
                     value={draft.tier}
                     onChange={(event) => setDraft({ ...draft, tier: event.target.value })}
                   >
@@ -313,7 +311,7 @@ export function CreatorRevenueView({
 
                 <Field label="Current membership">
                   <select
-                    className={SELECT_CLASS}
+                    className={nativeSelectClass}
                     value={draft.membership}
                     onChange={(event) => setDraft({ ...draft, membership: event.target.value })}
                   >
@@ -336,7 +334,7 @@ export function CreatorRevenueView({
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   <Field label="Currency">
                     <select
-                      className={SELECT_CLASS}
+                      className={nativeSelectClass}
                       value={draft.currency}
                       onChange={(event) => setDraft({ ...draft, currency: event.target.value })}
                     >
@@ -350,7 +348,7 @@ export function CreatorRevenueView({
 
                   <Field label="Product">
                     <select
-                      className={SELECT_CLASS}
+                      className={nativeSelectClass}
                       value={draft.product}
                       onChange={(event) => setDraft({ ...draft, product: event.target.value })}
                     >
@@ -362,7 +360,7 @@ export function CreatorRevenueView({
 
                   <Field label="Payment status">
                     <select
-                      className={SELECT_CLASS}
+                      className={nativeSelectClass}
                       value={draft.status}
                       onChange={(event) => setDraft({ ...draft, status: event.target.value })}
                     >
@@ -377,7 +375,7 @@ export function CreatorRevenueView({
 
                   <Field label="Payment source">
                     <select
-                      className={SELECT_CLASS}
+                      className={nativeSelectClass}
                       value={draft.source}
                       onChange={(event) => setDraft({ ...draft, source: event.target.value })}
                     >
@@ -858,7 +856,7 @@ function Transactions({
         <div className="mb-5 grid items-end gap-4 sm:grid-cols-[minmax(220px,1fr)_auto]">
           <Field label="Find a transaction">
             <input
-              className={SELECT_CLASS}
+              className={nativeSelectClass}
               type="search"
               placeholder="Member name or transaction ID"
               value={search}

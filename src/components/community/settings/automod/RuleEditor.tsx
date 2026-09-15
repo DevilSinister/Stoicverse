@@ -16,6 +16,7 @@ import {
   type AutomodPreset,
   type AutomodRule,
 } from "@/lib/community-settings/automod";
+import type { Notify } from "@/components/ui/toast";
 
 const label = "block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted";
 const field =
@@ -49,7 +50,7 @@ export function RuleEditor({
   channels: { id: string; name: string }[];
   canSave: boolean;
   onClose: () => void;
-  onNotice: (message: string) => void;
+  onNotice: Notify;
 }) {
   const [draft, setDraft] = useState<RuleDraft>(rule);
   const [keywordText, setKeywordText] = useState(rule.keywords.join("\n"));
@@ -115,7 +116,7 @@ export function RuleEditor({
           return;
         }
       }
-      onNotice(`Saved "${draft.name}".`);
+      onNotice(`Saved "${draft.name}".`, "success");
       onClose();
     });
 

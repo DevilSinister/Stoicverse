@@ -15,6 +15,7 @@ import {
   type AutomodPreset,
 } from "@/lib/community-settings/automod";
 import type { AutomodAlertRow, AutomodRuleRow } from "@/lib/community-settings/governance";
+import type { Notify } from "@/components/ui/toast";
 
 function draftFor(kind: AutomodKind): RuleDraft {
   return {
@@ -60,7 +61,7 @@ export function AutomodSection({
   roles: { id: string; name: string }[];
   channels: { id: string; name: string }[];
   canSave: boolean;
-  onNotice: (message: string) => void;
+  onNotice: Notify;
 }) {
   const [editing, setEditing] = useState<RuleDraft | null>(null);
   const [creating, setCreating] = useState(false);
@@ -90,7 +91,7 @@ export function AutomodSection({
         setError(result.error);
         return;
       }
-      onNotice(`Deleted "${rule.name}".`);
+      onNotice(`Deleted "${rule.name}".`, "success");
     });
   };
 

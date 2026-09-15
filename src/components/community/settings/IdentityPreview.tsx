@@ -6,7 +6,13 @@ import Image from "next/image";
  * What a member sees, rendered from the values currently in the form.
  *
  * Identity is one of only two sections with anything visual to preview, so this
- * is not a permanent third column — it sits beside this section alone.
+ * is not a permanent third column - it sits beside this section alone.
+ *
+ * Monolith, phase 12a. The card stays on `surface-canvas` rather than moving up
+ * to `surface-panel` with the product's other cards, and that is deliberate:
+ * this is a picture of a *page*, and a member's page background is the canvas.
+ * Painting it as a panel would show the creator their community one depth step
+ * lighter than anybody will ever see it.
  */
 export function IdentityPreview({
   name,
@@ -31,9 +37,9 @@ export function IdentityPreview({
     // repaint the whole app while the creator is still deciding.
     <div
       style={{ ["--preview-accent" as string]: accentColor }}
-      className="rounded-xl border border-surgical-steel bg-surface p-4"
+      className="rounded-xl border border-border-hairline bg-surface-canvas p-4"
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-fog-muted">Members see</p>
+      <p className="terminal-label">Members see</p>
 
       <div className="mt-3 flex items-center gap-3">
         {logoUrl ? (
@@ -48,35 +54,36 @@ export function IdentityPreview({
         ) : (
           <span
             aria-hidden="true"
-            className="grid size-10 shrink-0 place-items-center rounded-lg text-sm font-bold text-on-primary-fixed"
+            // Near-black on the chosen accent. Safe because the field beside
+            // this one refuses any hex under 3:1 against the near-black page,
+            // which no colour that is itself near-black can clear.
+            className="grid size-10 shrink-0 place-items-center rounded-lg text-content-sm font-semibold text-accent-contrast"
             style={{ background: "var(--preview-accent)" }}
           >
             {name.trim().slice(0, 1).toUpperCase() || "S"}
           </span>
         )}
         <div className="min-w-0">
-          <p className="truncate font-headline text-base font-bold text-text-strong">{name || "Your community"}</p>
-          {tagline && <p className="truncate text-xs leading-5 text-on-surface-variant">{tagline}</p>}
+          <p className="truncate text-title-sm font-medium text-text-strong">{name || "Your community"}</p>
+          {tagline && <p className="truncate text-chrome-base text-text-muted">{tagline}</p>}
         </div>
       </div>
 
       {showWelcome && welcomeMessage && (
-        <div className="mt-4 rounded-lg border border-surgical-steel bg-surface-container-low p-3">
-          <p className="whitespace-pre-wrap text-sm leading-6 text-on-surface">{welcomeMessage}</p>
+        <div className="mt-4 rounded-lg border border-border-hairline bg-surface-panel p-3">
+          <p className="whitespace-pre-wrap text-content-sm text-text-default">{welcomeMessage}</p>
         </div>
       )}
 
       {rules && (
         <div className="mt-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-fog-muted">Rules</p>
-          <p className="mt-1 max-h-40 overflow-y-auto whitespace-pre-wrap text-sm leading-6 text-on-surface-variant">
-            {rules}
-          </p>
+          <p className="terminal-label">Rules</p>
+          <p className="mt-1 max-h-40 overflow-y-auto whitespace-pre-wrap text-content-sm text-text-muted">{rules}</p>
         </div>
       )}
 
       {!welcomeMessage && !rules && (
-        <p className="mt-4 text-xs leading-5 text-fog-muted">
+        <p className="mt-4 text-chrome-base text-text-muted">
           No welcome message or rules yet. Members see just the name and mark above.
         </p>
       )}

@@ -314,27 +314,52 @@ test("the hand-rolled overlays only ever decrease", async () => {
   const files = await sourceFiles();
   const outside = files.filter((f) => !f.startsWith("src/components/ui/"));
   let count = 0;
+  const where = [];
   for (const file of outside) {
     // Comments stripped: a file that moves its dialog onto the primitive says
     // in its docblock what it replaced, and that prose is not an overlay.
-    if (stripComments(await read(file)).includes("fixed inset-0")) count += 1;
+    const source = stripComments(await read(file));
+    if (!source.includes("fixed inset-0")) continue;
+    // `fixed inset-0` is how a full-viewport layer is positioned, which a
+    // *correct* overlay also does - Base UI's own Backdrop is placed exactly
+    // that way. What makes one hand-rolled is owning the scrim with no library
+    // above it to supply focus, Escape, scroll lock and inertness. Matching the
+    // class alone put `SettingsOverlayShell` in this count while it was already
+    // a Base UI dialog, which is the shape of assertion lesson 53 warns about:
+    // it pinned the syntax rather than the guarantee, so the number could never
+    // reach zero however much was fixed.
+    const owned = /@base-ui\/react\/dialog|@\/components\/ui\/(overlay|dialog|sheet|alert-dialog|confirm-dialog|mobile-pane)/.test(
+      source,
+    );
+    if (owned) continue;
+    count += 1;
+    where.push(file);
   }
   // 9 after phase 8 moved the course-enrollment dialog onto the primitive;
   // 10 at the end of P3. The three that were left in /channels are gone:
   // ForwardDialog and SearchOverlay moved onto the primitive and QuickSwitcher
   // was deleted into SearchOverlay. MessageMenu and MobilePane still match on
   // prose rather than markup. The rest belong to the creator phases.
-  // 6 after phase 9 moved the event-details dialog onto the primitive. The six
-  // that remain are the creator and community-settings surfaces, which phases
-  // 11 and 12 own, plus MemberModalShell's Tab trap, which phase 14 retires.
-  assert.ok(count <= 2, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
+  // 6 after phase 9 moved the event-details dialog onto the primitive. 2 after
+  // phase 11c. 1 after phase 12a narrowed this to overlays that own their own
+  // scrim: `SettingsOverlayShell` had been counted for its Base UI Backdrop.
+  // The one that remains is `StructureEditor`, which phase 12c owns.
+  assert.ok(count <= 1, `hand-rolled overlays grew to ${count}: ${where.join(", ")}; the primitive is ui/overlay.tsx`);
 });
 
 test("arbitrary z-index only ever decreases", async () => {
-  const { total, where } = await countAcross(/\bz-\[\d+\]/g);
-  // 11 after P2a: the notification panel's z-[60] went away with the panel,
-  // because a portalled popover has no ancestor left to out-rank.
-  assert.ok(total <= 11, `arbitrary z-index grew to ${total}: ${where.join(", ")}`);
+  // Stripped, and the number moved a long way when it was. This ratchet read
+  // raw source until phase 12a, and **seven of the nine sites it was reporting
+  // were prose** - every file that had already moved onto the z-scale names the
+  // `z-[80]` or `z-[60]` it replaced, in the docblock explaining why. The
+  // assertion was counting the sentences describing its own successes, so the
+  // figure it defended had almost nothing to do with the code. Lesson 89, in
+  // the family of ratchet that lesson was written about: `stripComments` was
+  // added for the absence assertions and never carried to the counting ones.
+  const { total, where } = await countAcross(/\bz-\[\d+\]/g, { strip: true });
+  // 11 after P2a, as measured raw. 2 is the first honest reading: `EmojiPicker`
+  // and `StructureEditor`, both phase 12c.
+  assert.ok(total <= 2, `arbitrary z-index grew to ${total}: ${where.join(", ")}`);
 });
 
 test("the native dialogs only ever decrease", async () => {

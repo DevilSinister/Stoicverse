@@ -186,7 +186,22 @@ function SelectScrollDownButton({
   )
 }
 
+/*
+  The class for a plain `<select>`.
+
+  `ui/select` above is the Base UI listbox and has no call site in the product:
+  nineteen filter controls are native `<select>` elements on purpose, because
+  converting them onto an unexercised primitive is a behaviour change rather
+  than a repaint. What they did instead was each grow their own copy of this
+  string - two in the creator workspace that had already drifted apart by a
+  `disabled:` variant - so the one thing that was genuinely shared was the one
+  thing not shared.
+*/
+const nativeSelectClass =
+  "focus-ring h-11 w-full rounded-lg border border-border-hairline bg-surface-sunken px-3 text-content-sm text-text-default disabled:opacity-50"
+
 export {
+  nativeSelectClass,
   Select,
   SelectContent,
   SelectGroup,

@@ -9,6 +9,7 @@ import { useStructureOrder } from "@/components/community/structure/useStructure
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
 import type { CommunityRole } from "@/lib/community-settings/role-model";
 import type { ChannelOverride } from "@/lib/community-settings/structure";
+import type { Notify } from "@/components/ui/toast";
 
 type StructureEditorProps = {
   categories: CommunityCategory[];
@@ -16,7 +17,7 @@ type StructureEditorProps = {
   /** Empty where the caller has no permissions data; the Permissions tab then hides. */
   roles?: CommunityRole[];
   overrides?: ChannelOverride[];
-  onNotice: (value: string) => void;
+  onNotice: Notify;
 } & ({ variant: "modal"; onClose: () => void } | { variant: "inline"; onClose?: never });
 
 /**
@@ -98,7 +99,7 @@ function StructurePanes({
   channels: CommunityChannel[];
   roles: CommunityRole[];
   overrides: ChannelOverride[];
-  onNotice: (value: string) => void;
+  onNotice: Notify;
 }) {
   const { categories, channels, status, announcement, moveCategory, moveChannel, retry } = useStructureOrder(
     serverCategories,

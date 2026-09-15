@@ -21,6 +21,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { nativeSelectClass } from "@/components/ui/select";
 import { csvText, defaultFilters, parseFilters, type AnalyticsFilters, type AnalyticsReport } from "@/lib/analytics/model";
 
 /**
@@ -65,9 +66,6 @@ const delta = (current: number, previous: number) =>
     : `${current >= previous ? "+" : ""}${number(((current - previous) / previous) * 100)}% vs previous period`;
 
 /** The one control the system has no primitive for. Tokens, not aliases. */
-const SELECT_CLASS =
-  "focus-ring h-11 w-full rounded-lg border border-border-hairline bg-surface-sunken px-3 text-content-sm text-text-default";
-
 const ROWS_PER_PAGE = 10;
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -306,7 +304,7 @@ function Trend({ report }: { report: AnalyticsReport }) {
       description="Completed weeks. The same member filters apply to every point."
       action={
         <select
-          className={`${SELECT_CLASS} w-auto`}
+          className={`${nativeSelectClass} w-auto`}
           aria-label="Trend metric"
           value={metric}
           onChange={(event) => setMetric(event.target.value as typeof metric)}
@@ -489,7 +487,7 @@ export function CreatorAnalyticsView({
             <div className="min-w-44 flex-1">
               <Field label="Reporting period">
                 <select
-                  className={SELECT_CLASS}
+                  className={nativeSelectClass}
                   aria-label="Period preset"
                   value=""
                   onChange={(event) => {
@@ -509,7 +507,7 @@ export function CreatorAnalyticsView({
 
             <Field label="From · Monday">
               <input
-                className={SELECT_CLASS}
+                className={nativeSelectClass}
                 type="date"
                 value={draft.start}
                 onChange={(event) => setDraft({ ...draft, start: event.target.value })}
@@ -519,7 +517,7 @@ export function CreatorAnalyticsView({
 
             <Field label="To · Sunday">
               <input
-                className={SELECT_CLASS}
+                className={nativeSelectClass}
                 type="date"
                 value={draft.end}
                 onChange={(event) => setDraft({ ...draft, end: event.target.value })}
@@ -551,7 +549,7 @@ export function CreatorAnalyticsView({
             >
               <Field label="Member name or exact ID">
                 <input
-                  className={SELECT_CLASS}
+                  className={nativeSelectClass}
                   type="search"
                   maxLength={100}
                   value={draft.q}
@@ -562,7 +560,7 @@ export function CreatorAnalyticsView({
 
               <Field label="Current tier">
                 <select
-                  className={SELECT_CLASS}
+                  className={nativeSelectClass}
                   value={draft.tier}
                   onChange={(event) => setDraft({ ...draft, tier: event.target.value })}
                 >
@@ -577,7 +575,7 @@ export function CreatorAnalyticsView({
 
               <Field label="Current membership status">
                 <select
-                  className={SELECT_CLASS}
+                  className={nativeSelectClass}
                   value={draft.status}
                   onChange={(event) => setDraft({ ...draft, status: event.target.value })}
                 >
@@ -592,7 +590,7 @@ export function CreatorAnalyticsView({
 
               <Field label="Access source">
                 <select
-                  className={SELECT_CLASS}
+                  className={nativeSelectClass}
                   value={draft.source}
                   onChange={(event) => setDraft({ ...draft, source: event.target.value })}
                 >
@@ -866,7 +864,7 @@ function Trading({ report }: { report: AnalyticsReport }) {
       >
         <div className="mb-5 flex flex-wrap gap-4">
           <Field label="Entry coverage">
-            <select className={`${SELECT_CLASS} w-auto`} value={entry} onChange={(event) => setEntry(event.target.value)}>
+            <select className={`${nativeSelectClass} w-auto`} value={entry} onChange={(event) => setEntry(event.target.value)}>
               <option value="all">All members</option>
               <option value="recorded">Has recorded entries</option>
               <option value="missing">No entries in period</option>
@@ -874,7 +872,7 @@ function Trading({ report }: { report: AnalyticsReport }) {
           </Field>
           <Field label="Minimum period turnover · USD">
             <input
-              className={SELECT_CLASS}
+              className={nativeSelectClass}
               type="number"
               min="0"
               step="0.01"
@@ -944,7 +942,7 @@ function Courses({ report }: { report: AnalyticsReport }) {
         <div className="mb-5 flex flex-wrap gap-4">
           <Field label="Course">
             <select
-              className={`${SELECT_CLASS} w-auto`}
+              className={`${nativeSelectClass} w-auto`}
               value={course}
               onChange={(event) => setCourse(event.target.value)}
             >
@@ -958,7 +956,7 @@ function Courses({ report }: { report: AnalyticsReport }) {
           </Field>
           <Field label="Course status">
             <select
-              className={`${SELECT_CLASS} w-auto`}
+              className={`${nativeSelectClass} w-auto`}
               value={status}
               onChange={(event) => setStatus(event.target.value)}
             >
@@ -1018,7 +1016,7 @@ function Courses({ report }: { report: AnalyticsReport }) {
         <div className="mb-5 max-w-sm">
           <Field label="Search learners">
             <input
-              className={SELECT_CLASS}
+              className={nativeSelectClass}
               type="search"
               value={search}
               placeholder="Learner name"
@@ -1096,7 +1094,7 @@ function Events({ report }: { report: AnalyticsReport }) {
         <div className="mb-5 grid gap-4 sm:grid-cols-3">
           <Field label="Find an event">
             <input
-              className={SELECT_CLASS}
+              className={nativeSelectClass}
               type="search"
               placeholder="Event title"
               value={search}
@@ -1104,7 +1102,7 @@ function Events({ report }: { report: AnalyticsReport }) {
             />
           </Field>
           <Field label="Host">
-            <select className={SELECT_CLASS} value={host} onChange={(event) => setHost(event.target.value)}>
+            <select className={nativeSelectClass} value={host} onChange={(event) => setHost(event.target.value)}>
               <option value="">All hosts</option>
               {[...new Set(report.events.map((event) => event.host_name))].sort().map((name) => (
                 <option key={name}>{name}</option>
@@ -1112,7 +1110,7 @@ function Events({ report }: { report: AnalyticsReport }) {
             </select>
           </Field>
           <Field label="Event status">
-            <select className={SELECT_CLASS} value={status} onChange={(event) => setStatus(event.target.value)}>
+            <select className={nativeSelectClass} value={status} onChange={(event) => setStatus(event.target.value)}>
               <option value="">All published events</option>
               {["upcoming", "live", "completed"].map((value) => (
                 <option key={value} value={value}>

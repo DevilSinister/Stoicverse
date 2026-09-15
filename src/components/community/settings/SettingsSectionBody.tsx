@@ -8,7 +8,7 @@ import { EmojiSection } from "@/components/community/settings/EmojiSection";
 import { SafetySection } from "@/components/community/settings/SafetySection";
 import { BansSection, ReportsSection } from "@/components/community/settings/ModerationQueueSections";
 import { RolesSection } from "@/components/community/settings/RolesSection";
-import { useSettingsNotice } from "@/components/community/settings/SettingsNoticeProvider";
+import { useToast } from "@/components/ui/toast";
 import type { SettingsWorkspace } from "@/lib/community-settings/workspace";
 
 /**
@@ -16,9 +16,20 @@ import type { SettingsWorkspace } from "@/lib/community-settings/workspace";
  * renders exactly this, so the page and the overlay cannot drift apart.
  * A section whose data did not load renders nothing rather than a control
  * with no policy behind it.
+ *
+ * `notice` is the product's toast, not a second one. This subtree used to be
+ * wrapped in a `SettingsNoticeProvider` that owned its own live region, its own
+ * timer and its own fixed panel at `z-[90]` - a complete parallel copy of
+ * `ui/toast`, which is mounted in the root layout above it. Both existed
+ * because each was written by whoever needed it, which is the shape
+ * `00 - Shared/Cross-Project Lessons.md` lesson 70 describes.
+ *
+ * The one that survives distinguishes a failure from a success; the one that
+ * went did not, and every `onNotice(result.error ?? "Saved.")` below it
+ * announced both in the same neutral panel.
  */
 export function SettingsSectionBody({ workspace }: { workspace: SettingsWorkspace }) {
-  const notice = useSettingsNotice();
+  const notice = useToast();
   const { query, data, degraded } = workspace;
   const canSave = degraded.length === 0;
   const permissions = new Set(workspace.viewer.permissions);
@@ -30,7 +41,7 @@ export function SettingsSectionBody({ workspace }: { workspace: SettingsWorkspac
       ) : null;
     case "channels":
       return data.structure ? (
-        <div className="overflow-hidden rounded-xl border border-surgical-steel bg-surface-container-low">
+        <div className="overflow-hidden rounded-xl border border-border-hairline bg-surface-panel">
           <StructureEditor
             variant="inline"
             categories={data.structure.categories}

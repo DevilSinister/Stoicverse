@@ -9,6 +9,13 @@ import { SETTINGS_GROUPS, type SettingsSection, type SettingsSectionId } from "@
  * The grouped section list shared by the settings page and the overlay. Both
  * receive the same `visibleSections()` output, so they cannot disagree about
  * what a viewer may open.
+ *
+ * Monolith, phase 12a. The group heading was `terminal-label` *plus* a
+ * hand-written copy of everything `terminal-label` already does - the mono
+ * family, 11px, uppercase, the tracking and the muted colour, all restated in
+ * four more classes. Two of those four then disagreed with it
+ * (`tracking-wider` is 0.05em against the utility's 0.12em), so the class that
+ * looked redundant was quietly overriding the one that was not.
  */
 export function SettingsRail({
   sections,
@@ -31,8 +38,8 @@ export function SettingsRail({
   return (
     <nav aria-label="Settings sections" className={variant === "overlay" ? "px-2 py-4" : undefined}>
       {groups.map((group) => (
-        <div key={group.id} className="mb-4 last:mb-0">
-          <p className="terminal-label px-3 pb-1 text-[11px] uppercase tracking-wider text-fog-muted">{group.label}</p>
+        <div key={group.id} className="mb-content-gap last:mb-0">
+          <p className="terminal-label px-3 pb-1">{group.label}</p>
           <ul className="space-y-0.5">
             {group.sections.map((section) => {
               const Icon = SECTION_ICONS[section.id];
@@ -45,13 +52,13 @@ export function SettingsRail({
                     scroll={false}
                     aria-current={isCurrent ? "page" : undefined}
                     onClick={() => onNavigate?.(section.id)}
-                    className={`focus-ring flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${
+                    className={`focus-ring flex min-h-11 items-center gap-2 rounded-lg px-3 text-content-sm font-medium transition-colors ${
                       isCurrent
-                        ? "bg-surface-container-high text-text-strong"
-                        : "text-on-surface-variant hover:bg-surface-container-high/50 hover:text-text-strong"
+                        ? "bg-surface-raised text-text-strong"
+                        : "text-text-muted hover:bg-surface-raised/50 hover:text-text-strong"
                     }`}
                   >
-                    <Icon size={15} aria-hidden="true" className="shrink-0 text-fog-muted" />
+                    <Icon size={15} aria-hidden="true" className="shrink-0 text-text-faint" />
                     {section.label}
                   </Link>
                 </li>

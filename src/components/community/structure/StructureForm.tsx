@@ -15,6 +15,7 @@ import { ChannelPermissionsTab, SlowModeField } from "@/components/community/str
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
 import type { CommunityRole } from "@/lib/community-settings/role-model";
 import type { ChannelOverride } from "@/lib/community-settings/structure";
+import type { Notify } from "@/components/ui/toast";
 
 /** Create or edit one category or channel. Every write goes through the creator channel actions. */
 export function StructureForm({
@@ -36,7 +37,7 @@ export function StructureForm({
   /** Empty until the phase-3 migration is applied, which hides the tab entirely. */
   roles?: CommunityRole[];
   overrides?: ChannelOverride[];
-  onNotice: (value: string) => void;
+  onNotice: Notify;
   onDeleted?: () => void;
 }) {
   const subject = kind === "category" ? category : channel;
@@ -57,27 +58,28 @@ export function StructureForm({
     startTransition(async () => {
       const result = kind === "category" ? await saveCategory(data) : await saveChannel(data);
       if (result.error) {
-        onNotice(result.error);
+        onNotice(result.error, "error");
         return;
       }
-      onNotice(`${kind === "category" ? "Category" : "Channel"} saved.`);
+      onNotice(`${kind === "category" ? "Category" : "Channel"} saved.`, "success");
       if (isNew) setName("");
     });
 
   const setArchived = (archived: boolean) =>
     startTransition(async () => {
       const result = await setCommunityStructureArchived(kind, subject!.id, archived);
-      onNotice(result.error ?? `${kind === "category" ? "Category" : "Channel"} ${archived ? "archived" : "restored"}.`);
+      if (result.error) onNotice(result.error, "error");
+      else onNotice(`${kind === "category" ? "Category" : "Channel"} ${archived ? "archived" : "restored"}.`, "success");
     });
 
   const destroy = () =>
     startTransition(async () => {
       const result = await deleteCommunityStructure(kind, subject!.id);
       if (result.error) {
-        onNotice(result.error);
+        onNotice(result.error, "error");
         return;
       }
-      onNotice(`${kind === "category" ? "Category" : "Channel"} deleted.`);
+      onNotice(`${kind === "category" ? "Category" : "Channel"} deleted.`, "success");
       onDeleted?.();
     });
 
