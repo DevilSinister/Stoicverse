@@ -221,6 +221,23 @@ test("cn keeps a text colour that a Monolith size follows", async () => {
   assert.deepEqual([...MONOLITH_FONT_SIZES].sort(), declared, "the type scale and cn's copy of it have drifted");
 });
 
+test("buttonVariants resolves its own conflicts, like the component does", async () => {
+  /*
+    The base layer sets `border-transparent` and the outline variant sets
+    `border-border-strong`. cva concatenates, Tailwind resolves the conflict by
+    stylesheet order rather than attribute order, and transparent wins - so
+    eleven outline buttons and link-buttons rendered with no border until the
+    export was routed through `cn`. `<Button>` was never affected, which is
+    exactly what made it invisible: the two call styles disagreed.
+
+    Asserted on the wiring rather than on a colour, because the failure is that
+    a conflict survives, not that one particular class lost.
+  */
+  const source = stripComments(await read("src/components/ui/button.tsx"));
+  assert.match(source, /function buttonVariants\([^)]*\)\s*\{\s*return cn\(/, "buttonVariants must merge, not concatenate");
+  assert.doesNotMatch(source, /export \{[^}]*buttonStyles/, "the raw cva stays private, or callers reintroduce the conflict");
+});
+
 test("hand-rolled focus traps only ever decrease", async () => {
   /*
     This assertion used to match /key === "Tab"/ and claim a hard zero. It was

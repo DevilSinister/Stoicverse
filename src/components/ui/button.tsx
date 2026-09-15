@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
   through the token layer, so the class name here is unchanged and the shape is not.
 */
 
-const buttonVariants = cva(
+const buttonStyles = cva(
   "group/button relative inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
@@ -57,16 +57,39 @@ const buttonVariants = cva(
   },
 )
 
+/*
+  Merged, not concatenated - and this is not a style preference.
+
+  The base layer sets `border border-transparent` so every button reserves the
+  border box; the `outline` variant then sets `border-border-strong`. cva
+  concatenates them, so the class attribute carries both, and Tailwind resolves
+  a conflict by stylesheet order rather than by attribute order: transparent
+  wins, in either order, measured. `<Button>` never showed this because it
+  passed its classes through `cn` - twMerge drops the earlier border colour.
+  Every *direct* `buttonVariants(...)` call did not, so **eleven outline buttons
+  and link-buttons across the product had no border at all**, on a design whose
+  whole elevation story is the hairline.
+
+  Routing the export through `cn` makes the two call styles produce the same
+  thing, which is the only reason anyone would expect them to be swappable.
+  Same family as `00 - Shared/Cross-Project Lessons.md` lesson 85: a Tailwind
+  conflict that is silent in the source, green in the build, and only visible
+  on the rendered page.
+*/
+function buttonVariants(...args: Parameters<typeof buttonStyles>) {
+  return cn(buttonStyles(...args))
+}
+
 function Button({
   className,
   variant = "default",
   size = "default",
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props & VariantProps<typeof buttonStyles>) {
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={buttonVariants({ variant, size, className })}
       {...props}
     />
   )
