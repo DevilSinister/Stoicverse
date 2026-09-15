@@ -289,7 +289,10 @@ test("the hand-rolled overlays only ever decrease", async () => {
   // ForwardDialog and SearchOverlay moved onto the primitive and QuickSwitcher
   // was deleted into SearchOverlay. MessageMenu and MobilePane still match on
   // prose rather than markup. The rest belong to the creator phases.
-  assert.ok(count <= 9, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
+  // 6 after phase 9 moved the event-details dialog onto the primitive. The six
+  // that remain are the creator and community-settings surfaces, which phases
+  // 11 and 12 own, plus MemberModalShell's Tab trap, which phase 14 retires.
+  assert.ok(count <= 6, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
 });
 
 test("arbitrary z-index only ever decreases", async () => {
@@ -300,11 +303,15 @@ test("arbitrary z-index only ever decreases", async () => {
 });
 
 test("the native dialogs only ever decrease", async () => {
-  const { total, where } = await countAcross(/window\.(confirm|alert|prompt)\b/g);
-  // 6 at the end of phase 1: the unsaved-event guards in CreatorEventsView and
-  // the room errors in EventsView. Both are P12, and ui/confirm-dialog.tsx and
-  // the toast provider are what replace them.
-  assert.ok(total <= 6, `a native dialog was added: ${where.join(", ")}`);
+  // Stripped, like the other counting ratchets: `ui/confirm-dialog.tsx` and
+  // `ui/overlay.tsx` both name `window.confirm` in the docblock explaining what
+  // they replaced, and EventsView names `window.alert` for the same reason.
+  // Three of the six this used to report were prose. See lesson 89.
+  const { total, where } = await countAcross(/window\.(confirm|alert|prompt)\b/g, { strip: true });
+  // 6 at the end of phase 1, of which 3 were comments. Phase 9 moved the two
+  // event-room errors in EventsView onto the toast provider, leaving the two
+  // unsaved-event guards in CreatorEventsView, which phase 11 owns.
+  assert.ok(total <= 2, `a native dialog was added: ${where.join(", ")}`);
 });
 
 test("a class naming a token that does not exist only ever decreases", async () => {
@@ -316,7 +323,10 @@ test("a class naming a token that does not exist only ever decreases", async () 
     near-black page an unpainted panel looks like a deliberately flat one.
 
     Two were on the member dashboard (a course preview panel and a progress
-    track) and phase 7 fixed them. Five survive, in screens later phases own.
+    track) and phase 7 fixed them. Three survive, in screens later phases own:
+    a course detail panel, an automod section, and one more on the dashboard.
+    Phase 9 removed none of them — the ceiling was one higher than the code,
+    because it was last set from a count that still included prose.
 
     Found by reading globals.css for the token rather than by looking at a page,
     which is the only way this class of defect is ever found early.
@@ -331,7 +341,7 @@ test("a class naming a token that does not exist only ever decreases", async () 
     turned this ratchet red over its own prose on the first run. Code only.
   */
   const { total, where } = await countAcross(/\bsurface-container-highest\b/g, { strip: true });
-  assert.ok(total <= 4, `a class naming an undefined token was added; found ${total} in: ${where.join(", ")}`);
+  assert.ok(total <= 3, `a class naming an undefined token was added; found ${total} in: ${where.join(", ")}`);
 });
 
 test("pure white fills only ever decrease", async () => {
@@ -349,7 +359,10 @@ test("pure white fills only ever decrease", async () => {
 });
 
 test("the deprecated glow only ever decreases", async () => {
-  const { total, where } = await countAcross(/\bemerald-glow\b/g);
+  // Stripped, for the reason lesson 89 records: a file that removes the glow
+  // names it in the docblock saying so, and two of the eight this reported
+  // after phase 8 were that prose rather than a shadow.
+  const { total, where } = await countAcross(/\bemerald-glow\b/g, { strip: true });
   /*
     Monolith has no coloured glows. The utility still exists in globals.css and
     resolves to the ordinary raised shadow, so removing a call site changes
@@ -361,7 +374,7 @@ test("the deprecated glow only ever decreases", async () => {
     and mentorship screens, which later phases own. The utility is deleted with
     the alias block when this reaches zero.
   */
-  assert.ok(total <= 7, `emerald-glow grew to ${total}: ${where.join(", ")}`);
+  assert.ok(total <= 1, `emerald-glow grew to ${total}: ${where.join(", ")}`);
 });
 
 test("pill shapes are confined to the places a circle means something", async () => {
@@ -379,5 +392,5 @@ test("pill shapes are confined to the places a circle means something", async ()
     reads as one too. So this is a ceiling on a legitimate population, not a
     migration counter: a new pill button pushes it over.
   */
-  assert.ok(total <= 43, `pill controls grew to ${total}; buttons, inputs and chips are 4px: ${where.join(", ")}`);
+  assert.ok(total <= 42, `pill controls grew to ${total}; buttons, inputs and chips are 4px: ${where.join(", ")}`);
 });

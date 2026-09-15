@@ -19,7 +19,11 @@ test("creator events use lifecycle actions and do not send event email", () => {
 test("member event details stay separate from creator attendee metrics", () => {
   const member = read("src/components/events/EventsView.tsx");
   const creator = read("src/components/creator/CreatorEventsView.tsx");
-  assert.match(member, /Event Details/);
+  // Case-insensitive on purpose: the promise is that the member view names the
+  // event's own details, not that the label is title-cased. Monolith phase 9
+  // sentence-cased it, and an assertion pinned to the casing failed on a screen
+  // that still keeps every promise this test exists to make.
+  assert.match(member, /Event details/i);
   assert.match(member, /Masters/);
   assert.doesNotMatch(member, /MEMBERS ENROLLED/);
   assert.match(creator, /Members Registered/);
