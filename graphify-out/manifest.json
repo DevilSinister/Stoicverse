@@ -695,8 +695,8 @@
     "semantic_hash": "5046eb25bf91c8c15350d7e8fcc20bbd"
   },
   "tests/influencer-inline-controls.contract.mjs": {
-    "mtime": 1789358437.1363597,
-    "ast_hash": "69c4884e5455f21823669f9675232d16",
+    "mtime": 1789484074.1448002,
+    "ast_hash": "a188313d3907784abe265e20c4546ac1",
     "semantic_hash": ""
   },
   "src/app/creator/community/page.tsx": {
@@ -950,13 +950,13 @@
     "semantic_hash": ""
   },
   "src/components/creator/CreatorCourseManagerV2.tsx": {
-    "mtime": 1789362207.0758624,
-    "ast_hash": "39270fb05a493e85ebc9eca9129df0e4",
+    "mtime": 1789483985.3918228,
+    "ast_hash": "c17c9b616c93ded1208edb5600494103",
     "semantic_hash": ""
   },
   "src/components/creator/CreatorEventsView.tsx": {
-    "mtime": 1789362207.0782144,
-    "ast_hash": "24ac2977e41d4c4301bb665326fa046a",
+    "mtime": 1789483527.490357,
+    "ast_hash": "0129766a6f3a148607f3a5665fb88e33",
     "semantic_hash": ""
   },
   "src/components/creator/CreatorOverviewView.tsx": {
@@ -1060,8 +1060,8 @@
     "semantic_hash": ""
   },
   "tests/creator-events.contract.mjs": {
-    "mtime": 1789453926.4688885,
-    "ast_hash": "c6144254edf976baf76d2e0ecb19233e",
+    "mtime": 1789483624.3370883,
+    "ast_hash": "aa88f1b5c8b9bb9fa1c2199601245339",
     "semantic_hash": ""
   },
   "tests/creator-overview.contract.mjs": {
@@ -1175,8 +1175,8 @@
     "semantic_hash": ""
   },
   "tests/open-courses-and-cosmetic-roles.contract.mjs": {
-    "mtime": 1789275078.6036851,
-    "ast_hash": "cb04592f6af429fb09b4fcd794fbb370",
+    "mtime": 1789484095.7235548,
+    "ast_hash": "2dfa8f18d083ab5bdf0ec94b43059ad6",
     "semantic_hash": ""
   },
   "supabase/migrations/20260714000000_event_cancellation_timestamp.sql": {
@@ -2555,8 +2555,8 @@
     "semantic_hash": ""
   },
   "tests/design-tokens.contract.mjs": {
-    "mtime": 1789477619.957937,
-    "ast_hash": "76f8c2c1b86054b72c47b3f742aa9dea",
+    "mtime": 1789484172.183827,
+    "ast_hash": "217598c7e261bbaa2f16fa7e8a3e97fe",
     "semantic_hash": ""
   },
   "tests/overlay.contract.mjs": {
