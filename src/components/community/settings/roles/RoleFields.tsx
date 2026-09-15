@@ -1,9 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { AlertTriangle, Loader2, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { EmojiPicker } from "@/components/community/emoji/EmojiPicker";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { useToast } from "@/components/ui/toast";
 import { contrastRatio, formatContrast, isHexColor } from "@/lib/community-settings/model";
 import {
   canGrant,
@@ -39,7 +43,7 @@ export function RoleColorField({
 
   return (
     <fieldset disabled={disabled}>
-      <legend className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">Role colour</legend>
+      <legend className="terminal-label block">Role colour</legend>
 
       <div className="mt-2 flex flex-wrap gap-2">
         {ROLE_SWATCHES.map((swatch) => {
@@ -50,11 +54,11 @@ export function RoleColorField({
               type="button"
               onClick={() => onChange(swatch.hex)}
               aria-pressed={selected}
-              className={`focus-ring inline-flex size-11 items-center justify-center rounded-lg border transition ${
-                selected ? "border-primary-container" : "border-surgical-steel"
+              className={`focus-ring inline-flex size-11 items-center justify-center rounded-lg border transition-colors ${
+                selected ? "border-primary" : "border-border-hairline"
               }`}
             >
-              <span aria-hidden="true" className="size-5 rounded" style={{ background: swatch.hex }} />
+              <span aria-hidden="true" className="size-5 rounded-md" style={{ background: swatch.hex }} />
               <span className="sr-only">{swatch.name}</span>
             </button>
           );
@@ -62,16 +66,16 @@ export function RoleColorField({
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-2 text-sm text-on-surface-variant">
+        <label className="flex items-center gap-2 text-content-sm text-text-muted">
           <span>Custom</span>
           <input
             type="color"
             value={isHexColor(value) ? value : "#94A3B8"}
             onChange={(event) => onChange(event.target.value.toUpperCase())}
-            className="focus-ring h-11 w-16 cursor-pointer rounded-lg border border-surgical-steel bg-surface-container-lowest p-1"
+            className="focus-ring h-11 w-16 cursor-pointer rounded-lg border border-border-hairline bg-surface-sunken p-1"
           />
         </label>
-        <p className={`text-xs leading-5 ${usable ? "text-fog-muted" : "text-error"}`}>
+        <p className={`text-chrome-base ${usable ? "text-text-muted" : "text-status-danger"}`}>
           {formatContrast(ratio ?? 1)} against the member list
           {usable ? "" : ` — a role name needs at least ${MIN_ROLE_CONTRAST}:1 to stay readable.`}
         </p>
@@ -83,6 +87,13 @@ export function RoleColorField({
 /**
  * Emoji or an uploaded image, never both — the database CHECK refuses the pair,
  * so the interface refuses it first by clearing whichever one is being replaced.
+ *
+ * Monolith, phase 12b. The icon was a bare `<img>`, which is one of the two
+ * eslint warnings this screen carried; it is `next/image` with `unoptimized`,
+ * the same treatment `IdentityPreview` gives the community logo, because the
+ * source is a storage URL rather than a bundled asset. The upload failures are
+ * toasts: they are the outcome of an action, and rendering them under the row
+ * pushed the emoji picker down by a line as they came and went.
  */
 export function RoleIconField({
   emoji,
@@ -97,19 +108,18 @@ export function RoleIconField({
   onChange: (next: { emoji: string | null; path: string | null; url: string | null }) => void;
   disabled?: boolean;
 }) {
+  const notify = useToast();
   const [picking, setPicking] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const upload = async (file: File) => {
-    setError(null);
     if (file.size > ROLE_LIMITS.iconBytes) {
-      setError("A role icon must be 256 KB or smaller.");
+      notify("A role icon must be 256 KB or smaller.", "error");
       return;
     }
     if (!(ROLE_LIMITS.iconTypes as readonly string[]).includes(file.type)) {
-      setError("A role icon must be a PNG, WebP or GIF.");
+      notify("A role icon must be a PNG, WebP or GIF.", "error");
       return;
     }
 
@@ -120,7 +130,7 @@ export function RoleIconField({
     setUploading(false);
 
     if (uploadError) {
-      setError("That icon could not be uploaded.");
+      notify("That icon could not be uploaded.", "error");
       return;
     }
     onChange({
@@ -132,47 +142,40 @@ export function RoleIconField({
 
   return (
     <fieldset disabled={disabled}>
-      <legend className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">Role icon</legend>
+      <legend className="terminal-label block">Role icon</legend>
 
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <span
           aria-hidden="true"
-          className="inline-flex size-11 items-center justify-center overflow-hidden rounded-lg border border-surgical-steel bg-surface-container-lowest text-lg"
+          className="inline-flex size-11 items-center justify-center overflow-hidden rounded-lg border border-border-hairline bg-surface-sunken text-content-lg"
         >
-          {emoji ? emoji : url ? <img src={url} alt="" className="size-full object-contain" /> : "—"}
+          {emoji ? (
+            emoji
+          ) : url ? (
+            <Image src={url} alt="" width={44} height={44} unoptimized className="size-full object-contain" />
+          ) : (
+            "—"
+          )}
         </span>
 
-        <button
-          type="button"
-          onClick={() => setPicking((open) => !open)}
-          aria-expanded={picking}
-          className="focus-ring inline-flex min-h-11 items-center rounded-lg border border-surgical-steel px-4 text-sm text-on-surface-variant transition hover:bg-surface-container-high/50"
-        >
+        <Button type="button" variant="outline" onClick={() => setPicking((open) => !open)} aria-expanded={picking}>
           Choose emoji
-        </button>
+        </Button>
 
-        <button
-          type="button"
-          onClick={() => fileInput.current?.click()}
-          className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm text-on-surface-variant transition hover:bg-surface-container-high/50"
-        >
+        <Button type="button" variant="outline" onClick={() => fileInput.current?.click()}>
           {uploading ? (
             <Loader2 size={14} aria-hidden="true" className="animate-spin" />
           ) : (
             <Upload size={14} aria-hidden="true" />
           )}
           Upload image
-        </button>
+        </Button>
 
         {(emoji || path) && (
-          <button
-            type="button"
-            onClick={() => onChange({ emoji: null, path: null, url: null })}
-            className="focus-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-3 text-sm text-fog-muted transition hover:text-text-strong"
-          >
+          <Button type="button" variant="ghost" onClick={() => onChange({ emoji: null, path: null, url: null })}>
             <X size={14} aria-hidden="true" />
             Remove
-          </button>
+          </Button>
         )}
 
         <input
@@ -204,14 +207,9 @@ export function RoleIconField({
         </div>
       )}
 
-      <p className="mt-2 text-xs leading-5 text-fog-muted">
+      <p className="mt-2 text-chrome-base text-text-muted">
         PNG, WebP or GIF up to 256 KB. An emoji and an image cannot both be set.
       </p>
-      {error && (
-        <p role="alert" className="mt-2 text-sm leading-6 text-error">
-          {error}
-        </p>
-      )}
     </fieldset>
   );
 }
@@ -223,6 +221,11 @@ export function RoleIconField({
  * attached, rather than hidden: knowing the permission exists and that you
  * cannot pass it on is the honest state. `community_role_save` refuses the
  * same thing, so this is legibility, not enforcement.
+ *
+ * These stay native inputs. They carry `name="permissions"` with the key as the
+ * value and are read back with `getAll`, so they are the one control set on
+ * this screen with a real form contract - and a repaint is not where that gets
+ * re-tested against a primitive with no call sites.
  */
 export function RolePermissionGrid({
   permissions,
@@ -253,9 +256,7 @@ export function RolePermissionGrid({
 
         return (
           <fieldset key={group.id} disabled={disabled} className="space-y-2">
-            <legend className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">
-              {group.label}
-            </legend>
+            <legend className="terminal-label mb-2 block">{group.label}</legend>
             {keys.map((key) => (
               <PermissionToggleRow
                 key={key}
@@ -270,8 +271,11 @@ export function RolePermissionGrid({
       })}
 
       {!appliesToEveryone && (
-        <fieldset disabled={disabled} className="rounded-lg border border-error/40 bg-error/10 p-3">
-          <legend className="px-1 text-xs font-semibold uppercase tracking-[0.12em] text-error">Danger</legend>
+        <fieldset
+          disabled={disabled}
+          className="rounded-lg border border-status-danger/40 bg-status-danger/10 p-chrome-x"
+        >
+          <legend className="terminal-label px-1 text-status-danger">Danger</legend>
           <PermissionToggleRow
             permissionKey="administrator"
             checked={held.has("administrator")}
@@ -305,9 +309,9 @@ function PermissionToggleRow({
 
   return (
     <label
-      className={`flex items-start gap-3 rounded-lg p-3 transition ${
-        bare ? "" : "border border-surgical-steel has-[:checked]:border-primary-container"
-      } ${locked ? "opacity-50" : "cursor-pointer"} has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary-container`}
+      className={`flex items-start gap-3 rounded-lg p-chrome-x transition-colors ${
+        bare ? "" : "border border-border-hairline has-[:checked]:border-primary"
+      } ${locked ? "opacity-50" : "cursor-pointer"} has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary`}
     >
       <input
         type="checkbox"
@@ -319,18 +323,20 @@ function PermissionToggleRow({
         className="mt-0.5 size-4 shrink-0 accent-primary"
       />
       <span className="min-w-0">
-        <span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-text-strong">
+        <span className="flex flex-wrap items-center gap-2 text-content-sm font-medium text-text-strong">
           {meta.label}
           {meta.escalating && (
-            <span className="inline-flex items-center gap-1 rounded-md border border-error/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-error">
+            <StatusBadge tone="danger" className="gap-1">
               <AlertTriangle size={11} aria-hidden="true" />
               Escalating
-            </span>
+            </StatusBadge>
           )}
         </span>
-        <span className="mt-0.5 block text-xs leading-5 text-fog-muted">{meta.detail}</span>
+        <span className="mt-0.5 block text-chrome-base text-text-muted">{meta.detail}</span>
         {locked && (
-          <span className="mt-1 block text-xs leading-5 text-error">You do not hold this permission yourself.</span>
+          <span className="mt-1 block text-chrome-base text-status-danger">
+            You do not hold this permission yourself.
+          </span>
         )}
       </span>
     </label>

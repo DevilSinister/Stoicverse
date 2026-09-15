@@ -20,7 +20,14 @@ const read = async (path) =>
 
 // Assertions about what the code *does* must not match what a comment *says*.
 // The overlay docblock explains the z-[81] ladder it replaced; that is prose.
-const stripComments = (source) => source.replace(/\/\*[\s\S]*?\*\//g, "");
+//
+// Line comments count too, and for three phases they did not. This stripped
+// only `/* */`, so `TerminalDashboard`'s `// surface-sunken, not
+// surface-container-highest - that class is not defined` was being counted as a
+// use of the class it exists to warn against. A whole-line `//` is matched
+// rather than every `//`, because a URL inside a string literal is not a
+// comment. Lesson 89, in the helper written to satisfy lesson 89.
+const stripComments = (source) => source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^[ \t]*\/\/.*$/gm, "");
 
 async function sourceFiles(dir = "src") {
   const out = [];
@@ -401,7 +408,12 @@ test("a class naming a token that does not exist only ever decreases", async () 
     turned this ratchet red over its own prose on the first run. Code only.
   */
   const { total, where } = await countAcross(/\bsurface-container-highest\b/g, { strip: true });
-  assert.ok(total <= 3, `a class naming an undefined token was added; found ${total} in: ${where.join(", ")}`);
+  // 2 after phase 12b took the AutoMod kind menu's hover fill. That one was the
+  // worst of the three: the menu it dressed had no Escape and no outside-press
+  // either, so the only state that could have told you the thing was hoverable
+  // was the state that emitted no CSS. The two survivors are the course detail
+  // panel and `TerminalDashboard`, which phase 13b owns.
+  assert.ok(total <= 2, `a class naming an undefined token was added; found ${total} in: ${where.join(", ")}`);
 });
 
 test("pure white fills only ever decrease", async () => {
@@ -413,9 +425,15 @@ test("pure white fills only ever decrease", async () => {
     8 when phase 7 started; the member dashboard's mentorship button was one of
     them and was the only full-strength `bg-white` — the rest are low-opacity
     hover washes (`bg-white/[0.04]`), which are a different, milder problem.
+
+    Stripped and re-based at 1 in phase 12b. The ceiling of 3 was set from a raw
+    reading that included the prose of the files explaining the removal; the one
+    real site left is `ui/slider.tsx`'s thumb, where a white fill on a track is
+    the control's own affordance rather than a leftover. If that changes, this
+    becomes a hard zero.
   */
-  const { total, where } = await countAcross(/\bbg-white\b/g);
-  assert.ok(total <= 3, `a pure white fill was added; found ${total} in: ${where.join(", ")}`);
+  const { total, where } = await countAcross(/\bbg-white\b/g, { strip: true });
+  assert.ok(total <= 1, `a pure white fill was added; found ${total} in: ${where.join(", ")}`);
 });
 
 test("the deprecated glow only ever decreases", async () => {

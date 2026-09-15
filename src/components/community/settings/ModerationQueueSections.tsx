@@ -4,6 +4,8 @@ import { Loader2, ShieldOff, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
 import { banMember, bulkDeleteMessages, resolveReport, unbanMember } from "@/app/community/moderation-actions";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { REPORT_REASON_LABELS, SANCTION_LIMITS, type ReportStatus } from "@/lib/community-settings/model";
 import type { BanRow, ReportRow } from "@/lib/community-settings/moderation";
 import type { Notify } from "@/components/ui/toast";
@@ -14,6 +16,15 @@ import type { Notify } from "@/components/ui/toast";
  * Every button resolves the report in the same action that acts on the
  * message, because a moderator who deletes a message and then has to remember
  * to close the report leaves a queue full of work already done.
+ *
+ * Monolith, phase 12b. Beyond the palette: **one transition's `pending` was
+ * being read by every row.** `useTransition` returns a single flag for the
+ * whole component, and both lists spread it across their entire list - so
+ * dismissing one report put a spinner on every other report's action bar, and
+ * in Bans, where the flag replaced the button's *label*, lifting one ban blanked
+ * the words "Lift ban" on every row at once. The transition still disables all
+ * of them, which is right: two sanctions in flight at once is not something to
+ * offer. What is wrong is claiming they are all working. `acting` names the row.
  */
 export function ReportsSection({
   reports,
@@ -29,6 +40,7 @@ export function ReportsSection({
   onNotice: Notify;
 }) {
   const [handled, setHandled] = useState<Set<string>>(new Set());
+  const [acting, setActing] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const visible = reports.filter((report) => !handled.has(report.id));
@@ -38,75 +50,97 @@ export function ReportsSection({
     onNotice(message, "success");
   };
 
-  const dismiss = (report: ReportRow) =>
+  const dismiss = (report: ReportRow) => {
+    setActing(report.id);
     startTransition(async () => {
       const result = await resolveReport(report.id, "dismissed");
+      setActing(null);
       if (result.error) {
         onNotice(result.error, "error");
         return;
       }
       finish(report.id, "Report dismissed.");
     });
+  };
 
-  const deleteAndResolve = (report: ReportRow) =>
+  const deleteAndResolve = (report: ReportRow) => {
+    setActing(report.id);
     startTransition(async () => {
       const removal = await bulkDeleteMessages([report.postId], `Reported as ${report.reasonKind}`);
       if (removal.error) {
+        setActing(null);
         onNotice(removal.error, "error");
         return;
       }
       const result = await resolveReport(report.id, "resolved", "Message deleted");
+      setActing(null);
       if (result.error) {
         onNotice(result.error, "error");
         return;
       }
       finish(report.id, "Message deleted and report resolved.");
     });
+  };
 
-  const banAndResolve = (report: ReportRow) =>
+  const banAndResolve = (report: ReportRow) => {
+    const authorId = report.postAuthorId;
+    if (!authorId) {
+      onNotice("That message has no author to ban.", "error");
+      return;
+    }
+    setActing(report.id);
     startTransition(async () => {
-      if (!report.postAuthorId) {
-        onNotice("That message has no author to ban.", "error");
-        return;
-      }
-      const ban = await banMember(report.postAuthorId, `Reported as ${report.reasonKind}`);
+      const ban = await banMember(authorId, `Reported as ${report.reasonKind}`);
       if (ban.error) {
+        setActing(null);
         onNotice(ban.error, "error");
         return;
       }
       const result = await resolveReport(report.id, "resolved", "Author banned", ban.caseId);
+      setActing(null);
       if (result.error) {
         onNotice(result.error, "error");
         return;
       }
       finish(report.id, "Member banned and report resolved.");
     });
+  };
 
   if (!canModerate) {
     return (
-      <p className="rounded-xl border border-surgical-steel p-6 text-sm leading-6 text-on-surface-variant">
-        You do not have permission to read reports.
-      </p>
+      <div className="rounded-xl border border-border-hairline">
+        <EmptyState
+          title="You cannot read reports"
+          description="Reading the reports queue needs the Moderate members permission."
+        />
+      </div>
     );
   }
 
   if (!visible.length) {
     return (
-      <p className="rounded-xl border border-surgical-steel p-6 text-sm leading-6 text-on-surface-variant">
-        {status === "open" ? "Nothing is waiting. Reported messages land here." : "No reports have been closed yet."}
-      </p>
+      <div className="rounded-xl border border-border-hairline">
+        <EmptyState
+          title={status === "open" ? "Nothing is waiting" : "No reports have been closed yet"}
+          description={
+            status === "open"
+              ? "Reported messages land here, with the message as it was and who reported it."
+              : "Reports you dismiss or resolve will be listed here."
+          }
+        />
+      </div>
     );
   }
 
   return (
     <ul className="space-y-3">
       {visible.map((report) => (
-        <li key={report.id} className="rounded-xl border border-surgical-steel p-4">
+        <li key={report.id} className="rounded-xl border border-border-hairline p-4">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className="text-sm font-semibold text-text-strong">
+            <p className="text-content-sm font-medium text-text-strong">
               {REPORT_REASON_LABELS[report.reasonKind] ?? report.reasonKind}
             </p>
-            <p className="text-xs text-fog-muted">
+            <p className="text-chrome-base text-text-muted">
               #{report.channelName} · reported by {report.reporterName}
             </p>
           </div>
@@ -114,48 +148,31 @@ export function ReportsSection({
           {/* The fill is the separator. This sits inside a card that already has
               its own border, so a rule down one edge would be a third boundary
               doing what the first two already do. */}
-          <blockquote className="mt-3 rounded-lg bg-surface-container-low p-3">
-            <p className="text-xs font-semibold text-on-surface-variant">{report.postAuthorName}</p>
-            <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-on-surface">
+          <blockquote className="mt-3 rounded-lg bg-surface-panel p-chrome-x">
+            <p className="text-chrome-base font-medium text-text-muted">{report.postAuthorName}</p>
+            <p className="mt-1 whitespace-pre-wrap break-words text-content-sm text-text-default">
               {report.postBody || "(no text)"}
             </p>
           </blockquote>
 
-          {report.details && (
-            <p className="mt-2 text-xs leading-5 text-fog-muted">What they added: {report.details}</p>
-          )}
+          {report.details && <p className="mt-2 text-chrome-base text-text-muted">What they added: {report.details}</p>}
 
           {status === "open" && (
-            <div className="mt-3 flex flex-wrap gap-2 border-t border-surgical-steel pt-3">
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => dismiss(report)}
-                className="focus-ring inline-flex min-h-11 items-center rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-high/50 disabled:opacity-40"
-              >
+            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-hairline pt-3">
+              <Button type="button" variant="outline" disabled={pending} onClick={() => dismiss(report)}>
                 Dismiss
-              </button>
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => deleteAndResolve(report)}
-                className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-high/50 disabled:opacity-40"
-              >
+              </Button>
+              <Button type="button" variant="outline" disabled={pending} onClick={() => deleteAndResolve(report)}>
                 <Trash2 size={14} aria-hidden="true" />
                 Delete message
-              </button>
+              </Button>
               {canBan && report.postAuthorId && (
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => banAndResolve(report)}
-                  className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-error/40 px-4 text-sm font-semibold text-error transition hover:bg-error/10 disabled:opacity-40"
-                >
+                <Button type="button" variant="destructive" disabled={pending} onClick={() => banAndResolve(report)}>
                   <ShieldOff size={14} aria-hidden="true" />
                   Ban author
-                </button>
+                </Button>
               )}
-              {pending && <Loader2 size={15} aria-hidden="true" className="animate-spin self-center text-fog-muted" />}
+              {acting === report.id && <Loader2 size={15} aria-hidden="true" className="animate-spin text-text-muted" />}
             </div>
           )}
         </li>
@@ -171,23 +188,18 @@ export function ReportsSection({
  * "barred from the community" and "subscription ended" is invisible from a list
  * of names and is the thing most likely to be assumed wrongly.
  */
-export function BansSection({
-  bans,
-  canBan,
-  onNotice,
-}: {
-  bans: BanRow[];
-  canBan: boolean;
-  onNotice: Notify;
-}) {
+export function BansSection({ bans, canBan, onNotice }: { bans: BanRow[]; canBan: boolean; onNotice: Notify }) {
   const [lifted, setLifted] = useState<Set<string>>(new Set());
+  const [acting, setActing] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const visible = bans.filter((ban) => !lifted.has(ban.caseId));
 
-  const lift = (ban: BanRow) =>
+  const lift = (ban: BanRow) => {
+    setActing(ban.caseId);
     startTransition(async () => {
       const result = await unbanMember(ban.memberId);
+      setActing(null);
       if (result.error) {
         onNotice(result.error, "error");
         return;
@@ -195,46 +207,46 @@ export function BansSection({
       setLifted((current) => new Set(current).add(ban.caseId));
       onNotice(`${ban.memberName} can take part again.`, "success");
     });
+  };
 
   return (
     <div className="space-y-4">
-      <p className="rounded-xl border border-surgical-steel bg-surface-container-low p-4 text-sm leading-6 text-on-surface">
+      <p className="rounded-xl border border-border-hairline bg-surface-panel p-4 text-content-sm text-text-default">
         A ban keeps someone out of the community. It does not end their subscription and does not touch their courses
         or events — suspending an account is a separate action in Members.
       </p>
 
       {!visible.length ? (
-        <p className="rounded-xl border border-surgical-steel p-6 text-sm leading-6 text-on-surface-variant">
-          Nobody is banned.
-        </p>
+        <div className="rounded-xl border border-border-hairline">
+          <EmptyState
+            title="Nobody is banned"
+            description="Bans made from a report or from the member list appear here until they are lifted."
+          />
+        </div>
       ) : (
-        <ul className="divide-y divide-surgical-steel rounded-xl border border-surgical-steel">
+        <ul className="divide-y divide-border-hairline rounded-xl border border-border-hairline">
           {visible.map((ban) => (
             <li key={ban.caseId} className="flex flex-wrap items-start justify-between gap-3 p-4">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-text-strong">
-                  {ban.memberName} <span className="font-normal text-fog-muted">· case {ban.caseNumber}</span>
+                <p className="text-content-sm font-medium text-text-strong">
+                  {ban.memberName} <span className="font-normal text-text-muted">· case {ban.caseNumber}</span>
                 </p>
-                <p className="mt-0.5 text-xs leading-5 text-fog-muted">
+                <p className="mt-0.5 text-chrome-base text-text-muted">
                   {ban.reason ?? "No reason recorded"} — by {ban.actorName}
                 </p>
               </div>
               {canBan && (
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => lift(ban)}
-                  className="focus-ring inline-flex min-h-11 shrink-0 items-center rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-high/50 disabled:opacity-40"
-                >
-                  {pending ? <Loader2 size={14} aria-hidden="true" className="animate-spin" /> : "Lift ban"}
-                </button>
+                <Button type="button" variant="outline" disabled={pending} onClick={() => lift(ban)} className="shrink-0">
+                  {acting === ban.caseId && <Loader2 size={14} aria-hidden="true" className="animate-spin" />}
+                  Lift ban
+                </Button>
               )}
             </li>
           ))}
         </ul>
       )}
 
-      <p className="text-xs leading-5 text-fog-muted">
+      <p className="text-chrome-base text-text-muted">
         Reasons are limited to {SANCTION_LIMITS.reason.max} characters and are shown to the member.
       </p>
     </div>

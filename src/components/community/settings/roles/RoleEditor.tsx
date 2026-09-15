@@ -5,6 +5,9 @@ import { useCallback, useEffect, useId, useRef, useState, useTransition } from "
 
 import { saveRole, setRoleMembers } from "@/app/creator/settings/actions";
 import { RoleColorField, RoleIconField, RolePermissionGrid } from "@/components/community/settings/roles/RoleFields";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 import {
   newlyEscalating,
   PERMISSION_CATALOG,
@@ -28,6 +31,12 @@ const TABS: { id: Tab; label: string }[] = [
  * Nothing here is optimistic. Every control writes a permission, and an
  * optimistic toggle on `ban_members` would be a lie about a security-relevant
  * write that the database may still refuse on hierarchy grounds.
+ *
+ * Monolith, phase 12b. The save and membership outcomes are toasts. That
+ * matters more here than on the other settings screens: the escalating-grant
+ * confirmation sits directly above the Save button, so a failed save used to
+ * insert a line of red between the box somebody had just typed a role name into
+ * and the button they were reaching for.
  */
 export function RoleEditor({
   role,
@@ -51,20 +60,20 @@ export function RoleEditor({
   return (
     <section className="min-w-0">
       <header className="min-w-0">
-        <h2 className="flex items-center gap-2 font-headline text-lg font-bold text-text-strong">
+        <h2 className="flex items-center gap-2 text-title-md font-medium text-text-strong">
           {role.iconEmoji && <span aria-hidden="true">{role.iconEmoji}</span>}
           <span className="truncate" style={{ color: role.color }}>
             {role.name}
           </span>
         </h2>
-        <p className="mt-0.5 text-xs leading-5 text-fog-muted">
+        <p className="mt-0.5 text-chrome-base text-text-muted">
           Effective for {role.memberCount} {role.memberCount === 1 ? "member" : "members"}.
         </p>
       </header>
 
       {(isTier || isModeratorRole) && (
-        <p className="mt-3 flex items-start gap-2 rounded-lg border border-surgical-steel bg-surface-container-low p-3 text-xs leading-5 text-on-surface-variant">
-          <Lock size={14} aria-hidden="true" className="mt-0.5 shrink-0 text-fog-muted" />
+        <p className="mt-3 flex items-start gap-2 rounded-lg border border-border-hairline bg-surface-panel p-chrome-x text-chrome-base text-text-muted">
+          <Lock size={14} aria-hidden="true" className="mt-0.5 shrink-0 text-text-faint" />
           <span>
             {isTier
               ? "This role follows a member's paid tier. It is granted and removed automatically, and nobody can be added to it by hand."
@@ -73,7 +82,7 @@ export function RoleEditor({
         </p>
       )}
 
-      <div role="tablist" aria-label="Role settings" className="mt-4 flex gap-1 border-b border-surgical-steel">
+      <div role="tablist" aria-label="Role settings" className="mt-4 flex gap-1 border-b border-border-hairline">
         {TABS.filter((entry) => entry.id !== "members" || !isEveryone).map((entry) => (
           <button
             key={entry.id}
@@ -83,10 +92,8 @@ export function RoleEditor({
             aria-selected={tab === entry.id}
             aria-controls={`role-panel-${entry.id}`}
             onClick={() => setTab(entry.id)}
-            className={`focus-ring -mb-px min-h-11 rounded-t-lg px-4 text-sm font-semibold transition ${
-              tab === entry.id
-                ? "border-b-2 border-primary-container text-text-strong"
-                : "text-on-surface-variant hover:text-text-strong"
+            className={`focus-ring -mb-px min-h-11 rounded-t-lg px-4 text-content-sm font-medium transition-colors ${
+              tab === entry.id ? "border-b-2 border-primary text-text-strong" : "text-text-muted hover:text-text-strong"
             }`}
           >
             {entry.label}
@@ -128,6 +135,7 @@ function RoleForm({
   canSave: boolean;
   tab: "display" | "permissions";
 }) {
+  const notify = useToast();
   const isEveryone = role.systemKey === "everyone";
   const [name, setName] = useState(role.name);
   const [color, setColor] = useState(role.color);
@@ -136,7 +144,6 @@ function RoleForm({
   const [icon, setIcon] = useState({ emoji: role.iconEmoji, path: role.iconPath, url: iconUrl });
   const [permissions, setPermissions] = useState<PermissionKey[]>(role.permissions);
   const [confirmation, setConfirmation] = useState("");
-  const [feedback, setFeedback] = useState<{ tone: "error" | "success"; message: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const confirmId = useId();
 
@@ -162,16 +169,16 @@ function RoleForm({
     startTransition(async () => {
       const result = await saveRole(data);
       if (result.error) {
-        setFeedback({ tone: "error", message: result.error });
+        notify(result.error, "error");
         return;
       }
       setConfirmation("");
-      setFeedback({
-        tone: "success",
-        message: `Saved. This applies to ${role.memberCount} ${
+      notify(
+        `Saved. This applies to ${role.memberCount} ${
           role.memberCount === 1 ? "member" : "members"
         } on their next page load.`,
-      });
+        "success",
+      );
     });
 
   return (
@@ -191,8 +198,8 @@ function RoleForm({
         {tab === "display" ? (
           <>
             <label className="block">
-              <span className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">Role name</span>
-              <input
+              <span className="terminal-label block">Role name</span>
+              <Input
                 name="name"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
@@ -201,10 +208,10 @@ function RoleForm({
                 required
                 readOnly={isEveryone}
                 aria-describedby={isEveryone ? `${confirmId}-everyone` : undefined}
-                className="focus-ring mt-2 h-12 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none read-only:opacity-60 sm:text-sm"
+                className="mt-2 read-only:opacity-60"
               />
               {isEveryone && (
-                <span id={`${confirmId}-everyone`} className="mt-1 block text-xs leading-5 text-fog-muted">
+                <span id={`${confirmId}-everyone`} className="mt-1 block text-chrome-base text-text-muted">
                   @everyone is the baseline every member holds. Its name and grouping are fixed.
                 </span>
               )}
@@ -247,8 +254,8 @@ function RoleForm({
       </div>
 
       {escalating.length > 0 && (
-        <div className="rounded-lg border border-error/40 bg-error/10 p-3">
-          <p className="flex items-start gap-2 text-sm leading-6 text-error">
+        <div className="rounded-lg border border-status-danger/40 bg-status-danger/10 p-chrome-x">
+          <p className="flex items-start gap-2 text-content-sm text-status-danger">
             <ShieldAlert size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
             <span>
               You are granting {escalating.map((key) => PERMISSION_CATALOG[key].label).join(" and ")} to{" "}
@@ -259,36 +266,23 @@ function RoleForm({
           <label htmlFor={confirmId} className="sr-only">
             Type the role name to confirm
           </label>
-          <input
+          <Input
             id={confirmId}
             value={confirmation}
             onChange={(event) => setConfirmation(event.target.value)}
             autoComplete="off"
-            className="focus-ring mt-3 h-11 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none"
+            className="mt-3 max-w-xs"
           />
         </div>
       )}
 
-      {feedback && (
-        <p
-          role={feedback.tone === "error" ? "alert" : "status"}
-          className={`text-sm leading-6 ${feedback.tone === "error" ? "text-error" : "text-primary-container"}`}
-        >
-          {feedback.message}
-        </p>
-      )}
-
-      <div className="flex flex-wrap items-center gap-3 border-t border-surgical-steel pt-4">
-        <button
-          type="submit"
-          disabled={locked || !dirty || !confirmed || pending}
-          className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary-container px-5 text-sm font-semibold text-on-primary-fixed transition hover:brightness-110 disabled:opacity-40"
-        >
+      <div className="flex flex-wrap items-center gap-3 border-t border-border-hairline pt-4">
+        <Button type="submit" disabled={locked || !dirty || !confirmed || pending}>
           {pending && <Loader2 size={15} aria-hidden="true" className="animate-spin" />}
           Save role
-        </button>
+        </Button>
         {!editable && (
-          <span className="text-xs leading-5 text-fog-muted">
+          <span className="text-chrome-base text-text-muted">
             This role sits at or above your own, so you cannot change it.
           </span>
         )}
@@ -311,7 +305,7 @@ function ToggleRow({
   detail: string;
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surgical-steel p-3 transition has-[:checked]:border-primary-container has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary-container">
+    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border-hairline p-chrome-x transition-colors has-[:checked]:border-primary has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary">
       <input
         type="checkbox"
         name={name}
@@ -320,8 +314,8 @@ function ToggleRow({
         className="mt-0.5 size-4 shrink-0 accent-primary"
       />
       <span className="min-w-0">
-        <span className="block text-sm font-semibold text-text-strong">{label}</span>
-        <span className="mt-0.5 block text-xs leading-5 text-fog-muted">{detail}</span>
+        <span className="block text-content-sm font-medium text-text-strong">{label}</span>
+        <span className="mt-0.5 block text-chrome-base text-text-muted">{detail}</span>
       </span>
     </label>
   );
@@ -339,11 +333,11 @@ type MemberRow = { id: string; fullName: string; source: string };
  * batched into one call, for the same reason in reverse.
  */
 function MembersTab({ role, editable }: { role: CommunityRole; editable: boolean }) {
+  const notify = useToast();
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [notice, setNotice] = useState<{ tone: "error" | "success"; message: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const searchId = useId();
   const latestQuery = useRef(0);
@@ -358,7 +352,7 @@ function MembersTab({ role, editable }: { role: CommunityRole; editable: boolean
     });
     setLoading(false);
     if (error) {
-      setNotice({ tone: "error", message: "The members of this role could not be read." });
+      notify("The members of this role could not be read.", "error");
       return;
     }
     setMembers(
@@ -368,7 +362,7 @@ function MembersTab({ role, editable }: { role: CommunityRole; editable: boolean
         source: row.source,
       })),
     );
-  }, [role.id]);
+  }, [role.id, notify]);
 
   useEffect(() => {
     // Deferred by a zero timer, the pattern NotificationCenter uses: calling the
@@ -397,10 +391,10 @@ function MembersTab({ role, editable }: { role: CommunityRole; editable: boolean
     startTransition(async () => {
       const result = await setRoleMembers(role.id, changes);
       if (result.error) {
-        setNotice({ tone: "error", message: result.error });
+        notify(result.error, "error");
         return;
       }
-      setNotice({ tone: "success", message: "Membership updated." });
+      notify("Membership updated.", "success");
       await refresh();
     });
 
@@ -410,16 +404,16 @@ function MembersTab({ role, editable }: { role: CommunityRole; editable: boolean
     <div className="space-y-4">
       {editable && (
         <div>
-          <label htmlFor={searchId} className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">
+          <label htmlFor={searchId} className="terminal-label block">
             Add a member
           </label>
-          <input
+          <Input
             id={searchId}
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search by name"
-            className="focus-ring mt-2 h-12 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-text-strong outline-none sm:text-sm"
+            className="mt-2"
           />
           <ul className="mt-2 space-y-1">
             {candidates
@@ -431,9 +425,9 @@ function MembersTab({ role, editable }: { role: CommunityRole; editable: boolean
                     type="button"
                     disabled={pending}
                     onClick={() => commit({ add: [candidate.id] })}
-                    className="focus-ring flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-on-surface-variant transition hover:bg-surface-container-high/50 disabled:opacity-40"
+                    className="focus-ring flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-content-sm text-text-muted transition-colors hover:bg-surface-raised disabled:opacity-40"
                   >
-                    <UserPlus size={14} aria-hidden="true" className="shrink-0 text-primary-container" />
+                    <UserPlus size={14} aria-hidden="true" className="shrink-0 text-primary" />
                     <span className="truncate">{candidate.full_name}</span>
                   </button>
                 </li>
@@ -443,31 +437,31 @@ function MembersTab({ role, editable }: { role: CommunityRole; editable: boolean
       )}
 
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">
-          Holding this role ({members.length})
-        </h3>
+        <h3 className="terminal-label block">Holding this role ({members.length})</h3>
         {loading ? (
-          <p className="mt-2 text-sm leading-6 text-fog-muted">Loading…</p>
+          <p className="mt-2 text-content-sm text-text-muted">Loading…</p>
         ) : members.length === 0 ? (
-          <p className="mt-2 text-sm leading-6 text-fog-muted">Nobody holds this role yet.</p>
+          <p className="mt-2 text-content-sm text-text-muted">Nobody holds this role yet.</p>
         ) : (
-          <ul className="mt-2 divide-y divide-surgical-steel">
+          <ul className="mt-2 divide-y divide-border-hairline">
             {members.map((member) => (
               <li key={member.id} className="flex min-h-11 items-center justify-between gap-3 py-2">
-                <span className="min-w-0 truncate text-sm text-text-strong">{member.fullName}</span>
+                <span className="min-w-0 truncate text-content-sm text-text-strong">{member.fullName}</span>
                 {member.source === "system" ? (
-                  <span className="shrink-0 text-xs text-fog-muted">Automatic</span>
+                  <span className="shrink-0 text-chrome-base text-text-muted">Automatic</span>
                 ) : (
                   editable && (
-                    <button
+                    <Button
                       type="button"
+                      variant="destructive"
+                      size="chrome"
                       disabled={pending}
                       onClick={() => commit({ remove: [member.id] })}
-                      className="focus-ring inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg px-3 text-xs font-semibold text-error transition hover:bg-error/10 disabled:opacity-40"
+                      className="shrink-0"
                     >
                       <UserMinus size={13} aria-hidden="true" />
                       Remove
-                    </button>
+                    </Button>
                   )
                 )}
               </li>
@@ -475,15 +469,6 @@ function MembersTab({ role, editable }: { role: CommunityRole; editable: boolean
           </ul>
         )}
       </div>
-
-      {notice && (
-        <p
-          role={notice.tone === "error" ? "alert" : "status"}
-          className={`text-sm leading-6 ${notice.tone === "error" ? "text-error" : "text-primary-container"}`}
-        >
-          {notice.message}
-        </p>
-      )}
     </div>
   );
 }
