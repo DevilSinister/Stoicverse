@@ -1,135 +1,155 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { 
-  addCourseVideo, 
-  createCourse, 
-  finishCourse, 
-  updateCourse, 
-  updateCourseVideo, 
-  reorderCourseVideos,
-  deleteCourse,
-  deleteCourseVideo,
-  type ActionResult 
-} from "@/app/courses/actions";
-import { AppShell } from "@/components/layout/AppShell";
-import { 
-  ArrowLeft, Plus, Edit, Clock, Video,
-  X, AlertCircle, LoaderCircle, CheckCircle,
-  GripVertical, ChevronDown, Trash2, AlertTriangle
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Edit,
+  GripVertical,
+  LoaderCircle,
+  Plus,
+  Trash2,
+  Video,
 } from "lucide-react";
 
-type ManagedVideo = { 
-  id: string; 
-  course_id: string; 
-  title: string; 
-  description: string | null; 
-  duration_seconds: number; 
-  sort_order: number; 
-  is_optional: boolean; 
-  release_at: string | null; 
+import {
+  addCourseVideo,
+  createCourse,
+  deleteCourse,
+  deleteCourseVideo,
+  finishCourse,
+  reorderCourseVideos,
+  updateCourse,
+  updateCourseVideo,
+  type ActionResult,
+} from "@/app/courses/actions";
+import { AppShell } from "@/components/layout/AppShell";
+import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Overlay,
+  OverlayBody,
+  OverlayContent,
+  OverlayFooter,
+  OverlayHeader,
+  OverlayTitle,
+} from "@/components/ui/overlay";
+import { StatusBadge, type StatusTone } from "@/components/ui/status-badge";
+import { Textarea } from "@/components/ui/textarea";
+
+/**
+ * The course studio. Monolith, phase 11c — the last screen in the phase.
+ *
+ * **`CustomSelect` was a listbox no keyboard could operate.** A button, an
+ * absolutely positioned list of buttons, a `fixed inset-0 z-40` click-catcher
+ * behind it: no `role`, no arrow keys, no Escape, no typeahead. And because it
+ * is not a form control, every value it held needed a hidden input shadowing
+ * it. They are native `<select>` elements now, named directly, so three hidden
+ * inputs and their mirror state went with them — the select *is* the value the
+ * action reads.
+ *
+ * It also carried `hover:text-accent-contrast`, so each option went near-black
+ * on a dark panel under the pointer. Ninth sighting of that family.
+ *
+ * **Four `Modal`s and two inline delete panels.** The shell was another
+ * `fixed inset-0 z-50` with `onMouseDown` dismissal; the delete flows replaced
+ * the whole form with a confirmation and rebuilt it afterwards, so cancelling a
+ * delete lost every unsaved edit in the form behind it. Both are
+ * `ui/confirm-dialog` stacked over the editor now, which is non-destructive.
+ *
+ * **Thirteen stock colour call sites**: red for errors and deletes, emerald and
+ * amber for publish state, purple and blue for finished state. The status pairs
+ * are `ui/status-badge` tones.
+ *
+ * Left alone deliberately: **video reordering is still drag-and-drop only.**
+ * Giving it a keyboard path is a feature with its own decisions — where focus
+ * goes, what announces the move — not part of a repaint. Recorded rather than
+ * half-built.
+ */
+
+type ManagedVideo = {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string | null;
+  duration_seconds: number;
+  sort_order: number;
+  is_optional: boolean;
+  release_at: string | null;
   has_secure_asset: boolean;
 };
 
-export type ManagedCourse = { 
-  id: string; 
-  title: string; 
-  description: string | null; 
-  completion_tier: number | null; 
-  status: string; 
-  is_finished: boolean; 
-  finished_at: string | null; 
-  videos: ManagedVideo[]; 
+export type ManagedCourse = {
+  id: string;
+  title: string;
+  description: string | null;
+  completion_tier: number | null;
+  status: string;
+  is_finished: boolean;
+  finished_at: string | null;
+  videos: ManagedVideo[];
 };
+
+type ModalKind = "create-course" | "edit-course" | "add-video" | "edit-video" | null;
 
 const toLocalDatetimeLocal = (value: string | null) => {
   if (!value) return "";
   const date = new Date(value);
-  if (isNaN(date.getTime())) return "";
-  const offset = date.getTimezoneOffset() * 60000;
-  const localDate = new Date(date.getTime() - offset);
-  return localDate.toISOString().slice(0, 16);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 };
 
-const inputClass = "w-full h-11 px-5 rounded-lg border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong placeholder-fog-muted outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all";
-const textareaClass = "w-full px-5 py-3 rounded-2xl border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong placeholder-fog-muted outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all resize-none";
+const SELECT_CLASS =
+  "focus-ring h-11 w-full rounded-lg border border-border-hairline bg-surface-sunken px-3 text-content-sm text-text-default";
 
-/* ================= CUSTOM SELECT POP-OVER COMPONENT ================= */
-function CustomSelect({
-  label,
-  value,
-  onChange,
-  options
-}: {
-  label: string;
-  value: string | number;
-  onChange: (val: string | number) => void;
-  options: { value: string | number; label: string }[];
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectedOption = options.find(o => o.value === value) || options[0];
+const publishTone = (status: string): StatusTone => (status === "published" ? "ok" : "warn");
 
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="relative space-y-1">
-      <span className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">{label}</span>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-11 px-5 rounded-lg border border-surgical-steel bg-surface-container-low/40 text-sm text-text-strong flex items-center justify-between hover:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container transition-all cursor-pointer select-none"
-      >
-        <span>{selectedOption?.label}</span>
-        <ChevronDown size={15} className={`text-fog-muted transition-transform duration-200 shrink-0 ${isOpen ? "rotate-180" : ""}`} />
-      </button>
-
-      {isOpen && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 mt-2 w-full z-50 rounded-2xl border border-surgical-steel bg-surface-raised shadow-2xl overflow-hidden py-1 divide-y divide-surgical-steel/20">
-            {options.map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  onChange(opt.value);
-                  setIsOpen(false);
-                }}
-                className={`w-full text-left px-5 py-3 text-xs uppercase tracking-wider font-label transition-colors cursor-pointer hover:bg-primary-container/10 hover:text-accent-contrast ${value === opt.value ? "text-primary-container font-semibold bg-primary-container/5" : "text-fog-muted"}`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+    <label className="block space-y-1.5">
+      <span className="terminal-label text-text-faint">{label}</span>
+      {children}
+    </label>
   );
 }
 
-export function CreatorCourseManagerV2({ 
-  courses, 
-  memberName, 
-  currentTier, 
-  isMaster 
-}: { 
-  courses: ManagedCourse[]; 
-  memberName: string; 
-  currentTier: number; 
-  isMaster: boolean; 
+function FormError({ message }: { message: string | null }) {
+  if (!message) return null;
+  return (
+    <p
+      role="alert"
+      className="flex items-center gap-2 rounded-lg border border-status-danger/40 bg-status-danger/10 p-3 text-content-sm text-status-danger"
+    >
+      <AlertCircle size={15} className="shrink-0" />
+      {message}
+    </p>
+  );
+}
+
+export function CreatorCourseManagerV2({
+  courses,
+  memberName,
+  currentTier,
+  isMaster,
+}: {
+  courses: ManagedCourse[];
+  memberName: string;
+  currentTier: number;
+  isMaster: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  
-  // Drag and Drop ordering state
   const [videoList, setVideoList] = useState<ManagedVideo[]>([]);
   const [draggedVideoId, setDraggedVideoId] = useState<string | null>(null);
-
-  // Modal states
-  const [activeModal, setActiveModal] = useState<'create-course' | 'edit-course' | 'add-video' | 'edit-video' | null>(null);
+  const [activeModal, setActiveModal] = useState<ModalKind>(null);
   const [editingVideo, setEditingVideo] = useState<ManagedVideo | null>(null);
 
-  const selectedCourse = courses.find(c => c.id === selectedCourseId);
+  const selectedCourse = courses.find((course) => course.id === selectedCourseId);
 
   const openCourse = (course: ManagedCourse) => {
     setSelectedCourseId(course.id);
@@ -142,335 +162,251 @@ export function CreatorCourseManagerV2({
     setDraggedVideoId(null);
   };
 
-  const runFormAction = (
-    action: (data: FormData) => Promise<ActionResult>, 
-    onSuccess?: () => void
-  ) => {
-    return (data: FormData) => {
+  const closeModal = () => {
+    setActiveModal(null);
+    setEditingVideo(null);
+    setModalError(null);
+  };
+
+  const openModal = (kind: ModalKind) => {
+    setModalError(null);
+    setActiveModal(kind);
+  };
+
+  const runFormAction =
+    (action: (data: FormData) => Promise<ActionResult>, onSuccess?: () => void) => (data: FormData) => {
       setModalError(null);
       startTransition(async () => {
-        const res = await action(data);
-        if (res.error) {
-          setModalError(res.error);
-        } else {
-          setMessage("Saved successfully.");
-          setActiveModal(null);
-          setEditingVideo(null);
-          if (onSuccess) onSuccess();
+        const result = await action(data);
+        if (result.error) {
+          setModalError(result.error);
+          return;
         }
-      });
-    };
-  };
-
-  const handleFinishCourse = (courseId: string) => {
-    setMessage(null);
-    startTransition(async () => {
-      const res = await finishCourse(courseId);
-      if (res.error) {
-        setMessage(res.error);
-      } else {
-        setMessage("Course finalized and published.");
-      }
-    });
-  };
-
-  const handleDeleteCourse = (courseId: string) => {
-    setModalError(null);
-    startTransition(async () => {
-      const res = await deleteCourse(courseId);
-      if (res.error) {
-        setModalError(res.error);
-      } else {
-        setMessage("Course deleted successfully.");
-        setActiveModal(null);
-        closeCourse();
-      }
-    });
-  };
-
-  const handleDeleteVideo = (videoId: string) => {
-    setModalError(null);
-    startTransition(async () => {
-      const res = await deleteCourseVideo(videoId);
-      if (res.error) {
-        setModalError(res.error);
-      } else {
-        setMessage("Video deleted successfully.");
+        setMessage("Saved successfully.");
         setActiveModal(null);
         setEditingVideo(null);
-      }
-    });
-  };
+        onSuccess?.();
+      });
+    };
 
-  // Drag and Drop handlers
-  const handleDragStart = (e: React.DragEvent, videoId: string) => {
-    setDraggedVideoId(videoId);
-    e.dataTransfer.setData("text/plain", videoId);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  };
-
-  const saveVideoOrder = (nextList: ManagedVideo[]) => {
+  const handleFinishCourse = (courseId: string) =>
     startTransition(async () => {
-      const res = await reorderCourseVideos(nextList.map((video) => video.id));
-      if (res.error) {
-        setMessage(res.error);
-      } else {
-        setMessage("Video order updated successfully.");
-      }
+      setMessage(null);
+      const result = await finishCourse(courseId);
+      setMessage(result.error ?? "Course finalized and published.");
     });
-  };
 
-  const handleDrop = (e: React.DragEvent, targetVideoId: string) => {
-    e.preventDefault();
+  const handleDeleteCourse = (courseId: string) =>
+    startTransition(async () => {
+      setModalError(null);
+      const result = await deleteCourse(courseId);
+      if (result.error) {
+        setModalError(result.error);
+        return;
+      }
+      setMessage("Course deleted successfully.");
+      closeModal();
+      closeCourse();
+    });
+
+  const handleDeleteVideo = (videoId: string) =>
+    startTransition(async () => {
+      setModalError(null);
+      const result = await deleteCourseVideo(videoId);
+      if (result.error) {
+        setModalError(result.error);
+        return;
+      }
+      setMessage("Video deleted successfully.");
+      closeModal();
+    });
+
+  const saveVideoOrder = (nextList: ManagedVideo[]) =>
+    startTransition(async () => {
+      const result = await reorderCourseVideos(nextList.map((video) => video.id));
+      setMessage(result.error ?? "Video order updated successfully.");
+    });
+
+  const handleDrop = (dropEvent: React.DragEvent, targetVideoId: string) => {
+    dropEvent.preventDefault();
     if (pending) return;
-    const sourceVideoId = e.dataTransfer.getData("text/plain") || draggedVideoId;
+
+    const sourceVideoId = dropEvent.dataTransfer.getData("text/plain") || draggedVideoId;
     setDraggedVideoId(null);
     if (!sourceVideoId || sourceVideoId === targetVideoId) return;
+
     const sourceIndex = videoList.findIndex((video) => video.id === sourceVideoId);
     const targetIndex = videoList.findIndex((video) => video.id === targetVideoId);
     if (sourceIndex < 0 || targetIndex < 0) return;
+
     const nextList = [...videoList];
-    const [source] = nextList.splice(sourceIndex, 1);
-    nextList.splice(targetIndex, 0, source);
+    const [moved] = nextList.splice(sourceIndex, 1);
+    nextList.splice(targetIndex, 0, moved);
     setVideoList(nextList);
     saveVideoOrder(nextList);
   };
 
   return (
-    <AppShell 
-      active="Learning" 
-      title="Course studio" 
-      memberName={memberName} 
-      platformRole="influencer" 
-      currentTier={currentTier} 
-      isMaster={isMaster} 
+    <AppShell
+      active="Learning"
+      title="Course studio"
+      memberName={memberName}
+      platformRole="influencer"
+      currentTier={currentTier}
+      isMaster={isMaster}
       routeBase="/creator"
     >
-      <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 md:px-8">
-        
-        {/* Banner Messages */}
+      <main className="mx-auto w-full max-w-[1280px] space-y-8 px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
         {message && (
-          <div role="status" className="flex items-center justify-between gap-4 border border-primary-container/20 bg-primary-container/10 p-4 rounded-xl text-sm text-accent-contrast animate-fade-in-up">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="text-primary-container shrink-0" size={16} />
-              <span>{message}</span>
-            </div>
-            <button className="text-xs font-label uppercase text-fog-muted hover:text-text-strong transition-colors cursor-pointer" onClick={() => setMessage(null)}>
+          <div
+            role="status"
+            className="flex items-center justify-between gap-4 rounded-lg border border-primary/30 bg-accent-soft p-4 text-content-sm text-text-default"
+          >
+            <span className="flex items-center gap-2">
+              <CheckCircle className="shrink-0 text-primary" size={16} />
+              {message}
+            </span>
+            <Button variant="ghost" size="chrome" onClick={() => setMessage(null)}>
               Dismiss
-            </button>
+            </Button>
           </div>
         )}
 
         {!selectedCourseId ? (
-          /* ================= CATALOG / TILES VIEW ================= */
           <div className="space-y-8">
-            <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b border-surgical-steel pb-6">
+            <header className="flex flex-col gap-4 border-b border-border-hairline pb-7 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="font-label text-xs uppercase tracking-[.16em] text-primary-container">Influencer curriculum</p>
-                <h1 className="mt-2 font-sans text-3xl font-extrabold text-text-strong tracking-tight">Create and release courses</h1>
-                <p className="mt-2 text-sm text-fog-muted max-w-2xl">
+                <p className="terminal-label text-text-faint">Influencer curriculum</p>
+                <h1 className="mt-3 text-title-lg font-medium text-text-strong">Create and release courses</h1>
+                <p className="mt-3 max-w-2xl text-content-base text-text-default">
                   Configure access, release videos over time, and publish finished courses to the member curriculum.
                 </p>
               </div>
-              <button 
-                onClick={() => {
-                  setModalError(null);
-                  setActiveModal('create-course');
-                }}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer shadow-md"
-              >
-                <Plus size={16} /> Create Course
-              </button>
+              <Button onClick={() => openModal("create-course")}>
+                <Plus size={15} />
+                Create course
+              </Button>
             </header>
 
             {courses.length === 0 ? (
-              <div className="text-center py-20 border border-dashed border-surgical-steel rounded-2xl bg-surface-container-low/5">
-                <Video size={48} className="mx-auto text-fog-muted mb-4 opacity-40" />
-                <h2 className="font-sans text-lg font-bold text-text-strong">No courses created yet</h2>
-                <p className="text-sm text-fog-muted mt-1 max-w-md mx-auto">Get started by creating your first open-access member course.</p>
-                <button 
-                  onClick={() => {
-                    setModalError(null);
-                    setActiveModal('create-course');
-                  }}
-                  className="mt-6 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-primary-container px-5 font-label text-xs font-bold uppercase tracking-wider text-primary-container hover:bg-primary-container/10 active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  <Plus size={14} /> Add First Course
-                </button>
+              <div className="rounded-lg border border-dashed border-border-hairline py-20 text-center">
+                <Video size={40} className="mx-auto mb-4 text-text-faint" />
+                <h2 className="text-title-sm font-medium text-text-strong">No courses created yet</h2>
+                <p className="mx-auto mt-2 max-w-md text-content-sm text-text-muted">
+                  Get started by creating your first open-access member course.
+                </p>
+                <Button variant="outline" className="mt-6" onClick={() => openModal("create-course")}>
+                  <Plus size={14} />
+                  Add first course
+                </Button>
               </div>
             ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {courses.map(course => (
-                  <article 
-                    key={course.id} 
-                    onClick={() => openCourse(course)}
-                    className="group relative flex flex-col justify-between p-6 rounded-2xl border border-surgical-steel bg-monolith-surface hover:border-primary-container/40 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-lg"
-                  >
-                    <div className="space-y-4">
-                      {/* Top Badges Row */}
-                      <div className="flex items-center justify-between">
-                        <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-md font-label text-[10px] uppercase font-bold border border-primary-container/30 bg-primary-container/10 text-primary-container">
-                          Open Access
-                        </span>
-                        <div className="flex gap-2">
-                          <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded font-label text-[9px] uppercase font-bold ${course.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
-                            {course.status}
-                          </span>
-                          <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded font-label text-[9px] uppercase font-bold ${course.is_finished ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
-                            {course.is_finished ? "Finished" : "Draft"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Course Title and Description */}
-                      <div className="space-y-2">
-                        <h2 className="font-sans text-xl font-bold text-text-strong group-hover:text-primary-container transition-colors line-clamp-1">
-                          {course.title}
-                        </h2>
-                        <p className="font-body text-xs text-fog-muted line-clamp-3 leading-relaxed">
-                          {course.description || "No description provided."}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Footer Row */}
-                    <div className="mt-6 pt-4 border-t border-surgical-steel/40 flex items-center justify-between text-xs text-fog-muted font-label">
-                      <span className="flex items-center gap-1.5">
-                        <Video size={13} className="text-primary-container" />
-                        {course.videos.length} {course.videos.length === 1 ? "Video" : "Videos"}
-                      </span>
-                      <span>All members</span>
-                    </div>
-                  </article>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {courses.map((course) => (
+                  <CourseCard key={course.id} course={course} onOpen={() => openCourse(course)} />
                 ))}
               </div>
             )}
           </div>
         ) : (
-          /* ================= DETAILED COURSE VIEW ================= */
           selectedCourse && (
-            <div className="space-y-8 animate-fade-in-up">
-              {/* Back Link */}
-              <button 
-                onClick={closeCourse}
-                className="inline-flex items-center gap-2 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer"
-              >
-                <ArrowLeft size={14} /> Back to Courses
-              </button>
+            <div className="space-y-8">
+              <Button variant="ghost" size="chrome" onClick={closeCourse}>
+                <ArrowLeft size={14} />
+                Back to courses
+              </Button>
 
-              {/* Course Detail Card */}
-              <article className="rounded-2xl border border-surgical-steel bg-monolith-surface p-6 md:p-8 space-y-6">
-                {/* Meta details row */}
+              <article className="space-y-6 rounded-lg border border-border-hairline bg-surface-panel p-6">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center justify-center px-3 py-1 rounded-md font-label text-xs uppercase font-bold border border-primary-container/30 bg-primary-container/10 text-primary-container">
-                      Open to All Members
-                    </span>
+                    <StatusBadge tone="accent">Open to all members</StatusBadge>
                     {selectedCourse.completion_tier && (
-                      <span className="inline-flex items-center justify-center px-3 py-1 rounded-md font-label text-xs uppercase font-bold border border-surgical-steel bg-surface-container-high text-fog-muted">
-                        Achievement: Tier 0{selectedCourse.completion_tier}
-                      </span>
+                      <StatusBadge tone="neutral">Achievement: Tier {selectedCourse.completion_tier}</StatusBadge>
                     )}
-                    <span className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded font-label text-xs uppercase font-bold ${selectedCourse.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
+                    <StatusBadge tone={publishTone(selectedCourse.status)} className="capitalize">
                       {selectedCourse.status}
-                    </span>
-                    <span className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded font-label text-xs uppercase font-bold ${selectedCourse.is_finished ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
-                      {selectedCourse.is_finished ? "Finished & Locked" : "In Production"}
-                    </span>
+                    </StatusBadge>
+                    <StatusBadge tone={selectedCourse.is_finished ? "neutral" : "warn"}>
+                      {selectedCourse.is_finished ? "Finished and locked" : "In production"}
+                    </StatusBadge>
                   </div>
 
-                  {/* Finish Course Action */}
                   {!selectedCourse.is_finished && (
-                    <button 
-                      disabled={pending}
-                      onClick={() => handleFinishCourse(selectedCourse.id)}
-                      className="inline-flex min-h-10 items-center justify-center rounded-lg bg-primary-container px-5 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-50 transition-all cursor-pointer shadow-sm"
-                    >
-                      {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Finish Course"}
-                    </button>
+                    <Button disabled={pending} onClick={() => handleFinishCourse(selectedCourse.id)}>
+                      {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Finish course"}
+                    </Button>
                   )}
                 </div>
 
-                {/* Course Main Details */}
-                <div className="space-y-4">
-                  <h1 className="font-sans text-3xl font-extrabold text-text-strong tracking-tight">{selectedCourse.title}</h1>
-                  <p className="font-body text-base text-on-surface-variant leading-relaxed max-w-3xl">
+                <div className="space-y-3">
+                  <h1 className="text-title-lg font-medium text-text-strong">{selectedCourse.title}</h1>
+                  <p className="max-w-3xl text-content-base text-text-default">
                     {selectedCourse.description || "No description provided."}
                   </p>
                 </div>
 
-                {/* Action Rules Row */}
-                <div className="pt-6 border-t border-surgical-steel/40 flex flex-wrap gap-3">
-                  <button 
-                    onClick={() => {
-                      setModalError(null);
-                      setActiveModal('edit-course');
-                    }}
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-surgical-steel bg-surface-container-low/20 px-5 font-label text-xs font-bold uppercase tracking-wider text-text-strong hover:border-primary-container hover:text-primary-container transition-colors cursor-pointer"
-                  >
-                    <Edit size={14} /> Edit Course Details
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setModalError(null);
-                      setActiveModal('add-video');
-                    }}
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-primary-container bg-primary-container/10 px-5 font-label text-xs font-bold uppercase tracking-wider text-primary-container hover:bg-primary-container hover:text-on-primary-fixed transition-all cursor-pointer"
-                  >
-                    <Plus size={14} /> Add Video
-                  </button>
+                <div className="flex flex-wrap gap-3 border-t border-border-hairline pt-6">
+                  <Button variant="outline" onClick={() => openModal("edit-course")}>
+                    <Edit size={14} />
+                    Edit course details
+                  </Button>
+                  <Button variant="outline" onClick={() => openModal("add-video")}>
+                    <Plus size={14} />
+                    Add video
+                  </Button>
                 </div>
               </article>
 
-              {/* Videos List Section */}
               <section className="space-y-4">
-                <div className="flex items-center justify-between border-b border-surgical-steel/60 pb-3">
+                <div className="flex items-center justify-between border-b border-border-hairline pb-3">
                   <div>
-                    <h2 className="font-sans text-lg font-bold text-text-strong uppercase tracking-wider flex items-center gap-2">
-                      <Video size={18} className="text-primary-container" />
+                    <h2 className="flex items-center gap-2 text-title-sm font-medium text-text-strong">
+                      <Video size={17} className="text-primary" />
                       Videos ({selectedCourse.videos.length})
                     </h2>
                     {selectedCourse.videos.length > 1 && (
-                      <p className="text-xs text-fog-muted mt-1">Drag the grab handle <GripVertical className="inline" size={12} /> to reorder videos.</p>
+                      <p className="mt-1 text-content-sm text-text-muted">Drag the grab handle to reorder videos.</p>
                     )}
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  {videoList.map((video, idx) => (
-                    <div 
+                  {videoList.map((video, index) => (
+                    <div
                       key={video.id}
                       draggable={!pending}
-                      onDragStart={(e) => handleDragStart(e, video.id)}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, video.id)}
+                      onDragStart={(dragEvent) => {
+                        setDraggedVideoId(video.id);
+                        dragEvent.dataTransfer.setData("text/plain", video.id);
+                        dragEvent.dataTransfer.effectAllowed = "move";
+                      }}
+                      onDragOver={(dragEvent) => {
+                        dragEvent.preventDefault();
+                        dragEvent.dataTransfer.dropEffect = "move";
+                      }}
+                      onDrop={(dropEvent) => handleDrop(dropEvent, video.id)}
                       onDragEnd={() => setDraggedVideoId(null)}
-                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-surgical-steel bg-monolith-surface transition-all duration-150 shadow-sm ${draggedVideoId === video.id ? "opacity-40 border-primary-container/50 bg-surface-raised" : "hover:border-primary-container/30"}`}
+                      className={`flex flex-col justify-between gap-4 rounded-lg border p-4 transition-colors sm:flex-row sm:items-center ${
+                        draggedVideoId === video.id
+                          ? "border-primary/50 bg-surface-raised opacity-40"
+                          : "border-border-hairline bg-surface-panel"
+                      }`}
                     >
-                      <div className="flex items-start gap-3 min-w-0">
-                        {/* Drag Handle */}
-                        <div className="cursor-grab active:cursor-grabbing text-fog-muted hover:text-text-strong p-1 rounded transition-colors shrink-0">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <span className="shrink-0 cursor-grab p-1 text-text-faint active:cursor-grabbing">
                           <GripVertical size={16} />
-                        </div>
-                        
-                        <span className="font-mono text-sm text-fog-muted pt-0.5 shrink-0">{String(idx + 1).padStart(2, '0')}</span>
-                        
-                        <div className="space-y-1 min-w-0">
-                          <h4 className="font-sans text-base font-bold text-text-strong flex flex-wrap items-center gap-2 truncate">
+                        </span>
+                        <span className="shrink-0 pt-0.5 font-mono text-content-sm text-text-faint tabular-nums">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+
+                        <div className="min-w-0 space-y-1">
+                          <h3 className="flex flex-wrap items-center gap-2 text-content-base font-medium text-text-strong">
                             {video.title}
-                            {video.is_optional && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded border border-surgical-steel bg-surface-container-low text-[9px] font-bold uppercase tracking-wider text-fog-muted shrink-0">
-                                Optional
-                              </span>
-                            )}
-                          </h4>
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-fog-muted">
-                            <span className="flex items-center gap-1 shrink-0">
+                            {video.is_optional && <StatusBadge tone="neutral">Optional</StatusBadge>}
+                          </h3>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-mono-xs text-text-muted tabular-nums">
+                            <span className="flex shrink-0 items-center gap-1">
                               <Clock size={12} />
                               {Math.round(video.duration_seconds / 60)} min ({video.duration_seconds}s)
                             </span>
@@ -479,36 +415,40 @@ export function CreatorCourseManagerV2({
                               <span className="truncate">Releases: {new Date(video.release_at).toLocaleString()}</span>
                             )}
                           </div>
-                          {!video.has_secure_asset && <p className="mt-2 text-xs font-medium text-amber-300">Drive link missing — edit this video and paste its Google Drive link to restore playback.</p>}
+                          {!video.has_secure_asset && (
+                            <p className="mt-2 text-content-sm text-status-warn">
+                              Drive link missing — edit this video and paste its Google Drive link to restore playback.
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <button 
+
+                      <Button
+                        variant="outline"
+                        size="chrome"
+                        className="self-end sm:self-center"
                         onClick={() => {
-                          setModalError(null);
                           setEditingVideo(video);
-                          setActiveModal('edit-video');
+                          openModal("edit-video");
                         }}
-                        className="self-end sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surgical-steel text-xs font-bold text-fog-muted hover:text-text-strong hover:border-primary-container transition-colors cursor-pointer shrink-0"
                       >
-                        <Edit size={12} /> Edit Video
-                      </button>
+                        <Edit size={12} />
+                        Edit video
+                      </Button>
                     </div>
                   ))}
 
                   {videoList.length === 0 && (
-                    <div className="text-center py-16 border border-dashed border-surgical-steel rounded-xl bg-surface-container-low/5">
-                      <Video size={36} className="mx-auto text-fog-muted mb-3 opacity-40" />
-                      <p className="text-sm font-semibold text-text-strong">No videos added to this course</p>
-                      <p className="text-xs text-fog-muted mt-1 max-w-xs mx-auto">Build out this course curriculum by uploading Google Drive videos.</p>
-                      <button 
-                        onClick={() => {
-                          setModalError(null);
-                          setActiveModal('add-video');
-                        }}
-                        className="mt-4 inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-primary-container px-4 font-label text-xs font-bold uppercase tracking-wider text-primary-container hover:bg-primary-container/10 active:scale-[0.98] transition-all cursor-pointer"
-                      >
-                        <Plus size={12} /> Add First Video
-                      </button>
+                    <div className="rounded-lg border border-dashed border-border-hairline py-16 text-center">
+                      <Video size={32} className="mx-auto mb-3 text-text-faint" />
+                      <p className="text-content-base font-medium text-text-strong">No videos added to this course</p>
+                      <p className="mx-auto mt-1 max-w-xs text-content-sm text-text-muted">
+                        Build out this course curriculum by uploading Google Drive videos.
+                      </p>
+                      <Button variant="outline" className="mt-4" onClick={() => openModal("add-video")}>
+                        <Plus size={12} />
+                        Add first video
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -516,158 +456,240 @@ export function CreatorCourseManagerV2({
             </div>
           )
         )}
-      </div>
+      </main>
 
-      {/* ================= MODAL WINDOWS ================= */}
-
-      {/* 1. Create Course Modal */}
-      {activeModal === 'create-course' && (
-        <Modal title="Create Course" onClose={() => setActiveModal(null)}>
-          <CourseCreateForm 
+      {activeModal === "create-course" && (
+        <StudioModal title="Create course" onClose={closeModal}>
+          <CourseCreateForm
             action={runFormAction(createCourse)}
             pending={pending}
             modalError={modalError}
-            onClose={() => setActiveModal(null)}
+            onClose={closeModal}
           />
-        </Modal>
+        </StudioModal>
       )}
 
-      {/* 2. Edit Course Modal */}
-      {activeModal === 'edit-course' && selectedCourse && (
-        <Modal title="Edit Course Details" onClose={() => setActiveModal(null)}>
-          <CourseEditForm 
+      {activeModal === "edit-course" && selectedCourse && (
+        <StudioModal title="Edit course details" onClose={closeModal}>
+          <CourseEditForm
             course={selectedCourse}
             action={runFormAction(updateCourse)}
             pending={pending}
             modalError={modalError}
-            onClose={() => setActiveModal(null)}
+            onClose={closeModal}
             onDelete={handleDeleteCourse}
           />
-        </Modal>
+        </StudioModal>
       )}
 
-      {/* 3. Add Video Modal */}
-      {activeModal === 'add-video' && selectedCourse && (
-        <Modal title={`Add Video to: ${selectedCourse.title}`} onClose={() => setActiveModal(null)}>
-          <VideoAddForm 
+      {activeModal === "add-video" && selectedCourse && (
+        <StudioModal title={`Add video to ${selectedCourse.title}`} onClose={closeModal}>
+          <VideoAddForm
             courseId={selectedCourse.id}
             action={runFormAction(addCourseVideo)}
             pending={pending}
             modalError={modalError}
-            onClose={() => setActiveModal(null)}
+            onClose={closeModal}
           />
-        </Modal>
+        </StudioModal>
       )}
 
-      {/* 4. Edit Video Modal */}
-      {activeModal === 'edit-video' && editingVideo && (
-        <Modal title="Edit Video Details" onClose={() => setActiveModal(null)}>
-          <VideoEditForm 
+      {activeModal === "edit-video" && editingVideo && (
+        <StudioModal title="Edit video details" onClose={closeModal}>
+          <VideoEditForm
             video={editingVideo}
             action={runFormAction(updateCourseVideo)}
             pending={pending}
             modalError={modalError}
-            onClose={() => setActiveModal(null)}
+            onClose={closeModal}
             onDelete={handleDeleteVideo}
           />
-        </Modal>
+        </StudioModal>
       )}
     </AppShell>
   );
 }
 
-/* ================= MODAL SHELL COMPONENT ================= */
-function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
+function CourseCard({ course, onOpen }: { course: ManagedCourse; onOpen: () => void }) {
   return (
-    <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-50 grid place-items-center bg-scrim backdrop-blur-sm p-4 animate-in fade-in duration-200" onMouseDown={onClose}>
-      <div className="max-h-[90vh] w-full max-w-xl overflow-auto border border-surgical-steel bg-monolith-surface p-6 rounded-lg shadow-2xl animate-in zoom-in-95 duration-200" onMouseDown={(event) => event.stopPropagation()}>
-        <div className="mb-6 flex items-center justify-between border-b border-surgical-steel pb-4">
-          <h2 className="font-sans text-lg font-bold text-text-strong">{title}</h2>
-          <button onClick={onClose} className="p-1 text-on-surface-variant hover:text-primary-container transition cursor-pointer" aria-label="Close">
-            <X size={20} />
-          </button>
+    <article className="relative flex flex-col justify-between rounded-lg border border-border-hairline bg-surface-panel p-5 transition-colors hover:border-border-strong">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-2">
+          <StatusBadge tone="accent">Open access</StatusBadge>
+          <div className="flex gap-2">
+            <StatusBadge tone={publishTone(course.status)} className="capitalize">
+              {course.status}
+            </StatusBadge>
+            <StatusBadge tone={course.is_finished ? "neutral" : "warn"}>
+              {course.is_finished ? "Finished" : "Draft"}
+            </StatusBadge>
+          </div>
         </div>
-        {children}
+
+        <div className="space-y-2">
+          <h2 className="line-clamp-1 text-title-sm font-medium text-text-strong">
+            {/* Stretched over the card, so the keyboard reaches what the mouse
+                always could. This was an `<article onClick>`. */}
+            <button type="button" onClick={onOpen} className="focus-ring text-left after:absolute after:inset-0">
+              {course.title}
+            </button>
+          </h2>
+          <p className="line-clamp-3 text-content-sm text-text-muted">
+            {course.description || "No description provided."}
+          </p>
+        </div>
       </div>
-    </div>
+
+      <div className="mt-6 flex items-center justify-between border-t border-border-hairline pt-4 text-content-sm text-text-muted">
+        <span className="flex items-center gap-1.5">
+          <Video size={13} className="text-primary" />
+          {course.videos.length} {course.videos.length === 1 ? "video" : "videos"}
+        </span>
+        <span>All members</span>
+      </div>
+    </article>
   );
 }
 
-/* ================= COURSE CREATE FORM SUB-COMPONENT ================= */
+function StudioModal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
+  return (
+    <Overlay
+      open
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+    >
+      <OverlayContent size="lg" className="sm:max-h-[90svh]">
+        <OverlayHeader>
+          <OverlayTitle>{title}</OverlayTitle>
+        </OverlayHeader>
+        {children}
+      </OverlayContent>
+    </Overlay>
+  );
+}
+
+function TierSelect({ name, defaultValue }: { name: string; defaultValue: number }) {
+  return (
+    <Field label="Completion achievement">
+      <select name={name} defaultValue={defaultValue} className={SELECT_CLASS}>
+        {[1, 2, 3, 4, 5].map((tier) => (
+          <option key={tier} value={tier}>
+            Award Tier {tier}
+          </option>
+        ))}
+      </select>
+    </Field>
+  );
+}
+
+function PublishStateSelect({
+  name,
+  defaultValue,
+  includeArchived = false,
+}: {
+  name: string;
+  defaultValue: string;
+  includeArchived?: boolean;
+}) {
+  return (
+    <Field label="Publish state">
+      <select name={name} defaultValue={defaultValue} className={SELECT_CLASS}>
+        <option value="draft">Draft</option>
+        <option value="published">Published</option>
+        {includeArchived && <option value="archived">Archived</option>}
+      </select>
+    </Field>
+  );
+}
+
+/**
+ * `isOptional` reaches the action as a checkbox would — `"on"` or nothing — so
+ * these option values are those strings rather than a boolean this component
+ * then has to translate through a hidden input.
+ */
+function RequirementSelect({ defaultValue }: { defaultValue: boolean }) {
+  return (
+    <Field label="Requirement">
+      <select name="isOptional" defaultValue={defaultValue ? "on" : ""} className={SELECT_CLASS}>
+        <option value="">Required</option>
+        <option value="on">Optional</option>
+      </select>
+    </Field>
+  );
+}
+
+function FormFooter({
+  pending,
+  onClose,
+  submitLabel,
+  onDelete,
+  deleteLabel,
+}: {
+  pending: boolean;
+  onClose: () => void;
+  submitLabel: string;
+  onDelete?: () => void;
+  deleteLabel?: string;
+}) {
+  return (
+    <OverlayFooter className={onDelete ? "sm:justify-between" : undefined}>
+      {onDelete && (
+        <Button type="button" variant="destructive" onClick={onDelete}>
+          <Trash2 size={14} />
+          {deleteLabel}
+        </Button>
+      )}
+      <div className="flex justify-end gap-3">
+        <Button type="button" variant="ghost" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={pending}>
+          {pending ? <LoaderCircle size={14} className="animate-spin" /> : submitLabel}
+        </Button>
+      </div>
+    </OverlayFooter>
+  );
+}
+
 function CourseCreateForm({
   action,
   pending,
   modalError,
-  onClose
+  onClose,
 }: {
   action: (data: FormData) => void;
   pending: boolean;
   modalError: string | null;
   onClose: () => void;
 }) {
-  const [rewardTier, setRewardTier] = useState<number>(2);
-  const [status, setStatus] = useState<string>("draft");
-
   return (
-    <form action={action} className="space-y-4">
-      {modalError && (
-        <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3.5 text-sm text-red-400">
-          <AlertCircle size={16} className="shrink-0" />
-          <span>{modalError}</span>
+    <form action={action} className="flex min-h-0 flex-1 flex-col">
+      <OverlayBody className="space-y-4">
+        <FormError message={modalError} />
+        <Field label="Title">
+          <Input name="title" placeholder="e.g. Introduction to Stoic ethics" required />
+        </Field>
+        <Field label="Description">
+          <Textarea name="description" rows={4} placeholder="Summarise course milestones and learnings…" />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <TierSelect name="rewardTier" defaultValue={2} />
+          <PublishStateSelect name="status" defaultValue="draft" />
         </div>
-      )}
-      
-      <input type="hidden" name="rewardTier" value={rewardTier} />
-      <input type="hidden" name="status" value={status} />
-
-      <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Title</label>
-        <input className={inputClass} name="title" placeholder="e.g. Introduction to Stoic Ethics" required />
-      </div>
-
-      <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Description</label>
-        <textarea className={`${textareaClass} h-28`} name="description" placeholder="Summarize course milestones and learnings..." />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <CustomSelect 
-          label="Completion Achievement"
-          value={rewardTier}
-          onChange={(val) => setRewardTier(Number(val))}
-          options={[1, 2, 3, 4, 5].map(t => ({ value: t, label: `Award Tier 0${t}` }))}
-        />
-        <CustomSelect 
-          label="Publish State"
-          value={status}
-          onChange={(val) => setStatus(String(val))}
-          options={[
-            { value: "draft", label: "Draft" },
-            { value: "published", label: "Published" }
-          ]}
-        />
-      </div>
-
-      <div className="pt-4 flex items-center justify-end gap-3 border-t border-surgical-steel">
-        <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
-          Cancel
-        </button>
-        <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
-          {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Create Course"}
-        </button>
-      </div>
+      </OverlayBody>
+      <FormFooter pending={pending} onClose={onClose} submitLabel="Create course" />
     </form>
   );
 }
 
-/* ================= COURSE EDIT FORM SUB-COMPONENT ================= */
 function CourseEditForm({
   course,
   action,
   pending,
   modalError,
   onClose,
-  onDelete
+  onDelete,
 }: {
   course: ManagedCourse;
   action: (data: FormData) => void;
@@ -676,115 +698,62 @@ function CourseEditForm({
   onClose: () => void;
   onDelete: (id: string) => void;
 }) {
-  const [rewardTier, setRewardTier] = useState<number>(course.completion_tier || 2);
-  const [status, setStatus] = useState<string>(course.status);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  if (showDeleteConfirm) {
-    return (
-      <div className="space-y-6 py-4 animate-fade-in">
-        <div className="flex items-start gap-4 p-4 border border-red-500/20 bg-red-500/10 rounded-2xl">
-          <AlertTriangle className="text-red-400 shrink-0 mt-0.5" size={20} />
-          <div className="space-y-1">
-            <h4 className="font-sans font-bold text-text-strong text-base">Delete course: {course.title}?</h4>
-            <p className="text-sm text-red-200">
-              This will permanently delete the course, its video settings, and related curriculum records.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-surgical-steel">
-          <button 
-            type="button" 
-            onClick={() => setShowDeleteConfirm(false)}
-            className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button 
-            disabled={pending}
-            onClick={() => onDelete(course.id)}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-red-500/25 border border-red-500/50 hover:bg-red-500/40 text-red-300 px-6 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-          >
-            {pending ? <LoaderCircle size={14} className="animate-spin" /> : <><Trash2 size={14} /> Confirm Delete</>}
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   return (
-    <form action={action} className="space-y-4">
-      {modalError && (
-        <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3.5 text-sm text-red-400">
-          <AlertCircle size={16} className="shrink-0" />
-          <span>{modalError}</span>
-        </div>
-      )}
-      
-      <input type="hidden" name="courseId" value={course.id} />
-      <input type="hidden" name="rewardTier" value={rewardTier} />
-      <input type="hidden" name="status" value={status} />
-
-      <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Title</label>
-        <input className={inputClass} name="title" defaultValue={course.title} required />
-      </div>
-
-      <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Description</label>
-        <textarea className={`${textareaClass} h-28`} name="description" defaultValue={course.description ?? ""} placeholder="Summarize course milestones and learnings..." />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <CustomSelect 
-          label="Completion Achievement"
-          value={rewardTier}
-          onChange={(val) => setRewardTier(Number(val))}
-          options={[1, 2, 3, 4, 5].map(t => ({ value: t, label: `Award Tier 0${t}` }))}
+    <>
+      <form action={action} className="flex min-h-0 flex-1 flex-col">
+        <OverlayBody className="space-y-4">
+          <FormError message={modalError} />
+          <input type="hidden" name="courseId" value={course.id} />
+          <Field label="Title">
+            <Input name="title" defaultValue={course.title} required />
+          </Field>
+          <Field label="Description">
+            <Textarea
+              name="description"
+              rows={4}
+              defaultValue={course.description ?? ""}
+              placeholder="Summarise course milestones and learnings…"
+            />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TierSelect name="rewardTier" defaultValue={course.completion_tier || 2} />
+            <PublishStateSelect name="status" defaultValue={course.status} includeArchived />
+          </div>
+        </OverlayBody>
+        <FormFooter
+          pending={pending}
+          onClose={onClose}
+          submitLabel="Save changes"
+          onDelete={() => setConfirmingDelete(true)}
+          deleteLabel="Delete course"
         />
-        <CustomSelect 
-          label="Publish State"
-          value={status}
-          onChange={(val) => setStatus(String(val))}
-          options={[
-            { value: "draft", label: "Draft" },
-            { value: "published", label: "Published" },
-            { value: "archived", label: "Archived" }
-          ]}
-        />
-      </div>
+      </form>
 
-      <div className="pt-6 border-t border-surgical-steel flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Delete Trigger */}
-        <button 
-          type="button"
-          onClick={() => setShowDeleteConfirm(true)}
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-red-500/30 hover:border-red-500 text-red-400 px-5 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-        >
-          <Trash2 size={14} /> Delete Course
-        </button>
-
-        <div className="flex items-center justify-end gap-3">
-          <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
-            Cancel
-          </button>
-          <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
-            {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Save Changes"}
-          </button>
-        </div>
-      </div>
-    </form>
+      {/* Stacked over the editor rather than replacing it: cancelling a delete
+          used to rebuild the form and lose every unsaved edit behind it. */}
+      <ConfirmDialog
+        open={confirmingDelete}
+        onOpenChange={setConfirmingDelete}
+        title={`Delete ${course.title}?`}
+        description="This permanently deletes the course, its video settings, and related curriculum records."
+        confirmLabel="Delete course"
+        cancelLabel="Keep course"
+        tone="danger"
+        busy={pending}
+        onConfirm={() => onDelete(course.id)}
+      />
+    </>
   );
 }
 
-/* ================= VIDEO ADD FORM SUB-COMPONENT ================= */
 function VideoAddForm({
   courseId,
   action,
   pending,
   modalError,
-  onClose
+  onClose,
 }: {
   courseId: string;
   action: (data: FormData) => void;
@@ -792,107 +761,55 @@ function VideoAddForm({
   modalError: string | null;
   onClose: () => void;
 }) {
-  const [isOptional, setIsOptional] = useState<string>("false");
-  const [title, setTitle] = useState("");
-  const [videoFileId, setVideoFileId] = useState("");
-  const [releaseAt, setReleaseAt] = useState("");
-  const [description, setDescription] = useState("");
-
   return (
-    <form action={action} className="space-y-4">
-      {modalError && (
-        <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3.5 text-sm text-red-400">
-          <AlertCircle size={16} className="shrink-0" />
-          <span>{modalError}</span>
-        </div>
-      )}
-      
-      <input type="hidden" name="courseId" value={courseId} />
-      <input type="hidden" name="isOptional" value={isOptional === "true" ? "on" : ""} />
+    <form action={action} className="flex min-h-0 flex-1 flex-col">
+      <OverlayBody className="space-y-4">
+        <FormError message={modalError} />
+        <input type="hidden" name="courseId" value={courseId} />
 
-      <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Video Title</label>
-        <input
-          className={inputClass}
-          name="title"
-          placeholder="e.g. Session 1: The Dichotomy of Control"
-          required
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-        />
-      </div>
+        <Field label="Video title">
+          <Input name="title" placeholder="e.g. Session 1: the dichotomy of control" required />
+        </Field>
 
-      <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Google Drive Link or File ID</label>
-        <input
-          className={inputClass}
-          name="videoFileId"
-          placeholder="Paste a Google Drive share link or file ID"
-          required
-          value={videoFileId}
-          onChange={(event) => setVideoFileId(event.target.value)}
-        />
-      </div>
+        <Field label="Google Drive link or file ID">
+          <Input name="videoFileId" placeholder="Paste a Google Drive share link or file ID" required />
+        </Field>
 
-      <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Description (Optional)</label>
-        <textarea
-          className={`${textareaClass} h-24`}
-          name="description"
-          placeholder="Add context for what members should focus on in this video..."
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-        />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1">
-          <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Duration in Seconds</label>
-          <input className={inputClass} type="number" min="1" name="durationSeconds" placeholder="Only needed if Drive cannot detect it" />
-          <p className="text-xs leading-5 text-fog-muted">Drive duration is detected automatically when available.</p>
-        </div>
-        <CustomSelect 
-          label="Requirement"
-          value={isOptional}
-          onChange={(val) => setIsOptional(String(val))}
-          options={[
-            { value: "false", label: "Required" },
-            { value: "true", label: "Optional" }
-          ]}
-        />
-
-        <div className="space-y-1">
-          <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Release At (Optional)</label>
-          <input
-            className={inputClass}
-            type="datetime-local"
-            name="releaseAt"
-            value={releaseAt}
-            onChange={(event) => setReleaseAt(event.target.value)}
+        <Field label="Description (optional)">
+          <Textarea
+            name="description"
+            rows={3}
+            placeholder="Add context for what members should focus on in this video…"
           />
-        </div>
-      </div>
+        </Field>
 
-      <div className="pt-4 flex items-center justify-end gap-3 border-t border-surgical-steel">
-        <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
-          Cancel
-        </button>
-        <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
-          {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Add Video"}
-        </button>
-      </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Field label="Duration in seconds">
+              <Input type="number" min="1" name="durationSeconds" placeholder="Only needed if Drive cannot detect it" />
+            </Field>
+            <p className="mt-1 text-content-sm text-text-muted">
+              Drive duration is detected automatically when available.
+            </p>
+          </div>
+          <RequirementSelect defaultValue={false} />
+          <Field label="Release at (optional)">
+            <Input type="datetime-local" name="releaseAt" />
+          </Field>
+        </div>
+      </OverlayBody>
+      <FormFooter pending={pending} onClose={onClose} submitLabel="Add video" />
     </form>
   );
 }
 
-/* ================= VIDEO EDIT FORM SUB-COMPONENT ================= */
 function VideoEditForm({
   video,
   action,
   pending,
   modalError,
   onClose,
-  onDelete
+  onDelete,
 }: {
   video: ManagedVideo;
   action: (data: FormData) => void;
@@ -901,111 +818,68 @@ function VideoEditForm({
   onClose: () => void;
   onDelete: (id: string) => void;
 }) {
-  const [isOptional, setIsOptional] = useState<string>(video.is_optional ? "true" : "false");
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  if (showDeleteConfirm) {
-    return (
-      <div className="space-y-6 py-4 animate-fade-in">
-        <div className="flex items-start gap-4 p-4 border border-red-500/20 bg-red-500/10 rounded-2xl">
-          <AlertTriangle className="text-red-400 shrink-0 mt-0.5" size={20} />
-          <div className="space-y-1">
-            <h4 className="font-sans font-bold text-text-strong text-base">Delete video: {video.title}?</h4>
-            <p className="text-sm text-red-200">
-              This will permanently delete the video and its secure access logs from the database.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-surgical-steel">
-          <button 
-            type="button" 
-            onClick={() => setShowDeleteConfirm(false)}
-            className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button 
-            disabled={pending}
-            onClick={() => onDelete(video.id)}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-red-500/25 border border-red-500/50 hover:bg-red-500/40 text-red-300 px-6 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-          >
-            {pending ? <LoaderCircle size={14} className="animate-spin" /> : <><Trash2 size={14} /> Confirm Delete</>}
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   return (
-    <form action={action} className="space-y-4">
-      {modalError && (
-        <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3.5 text-sm text-red-400">
-          <AlertCircle size={16} className="shrink-0" />
-          <span>{modalError}</span>
-        </div>
-      )}
-      
-      <input type="hidden" name="videoId" value={video.id} />
-      <input type="hidden" name="isOptional" value={isOptional === "true" ? "on" : ""} />
+    <>
+      <form action={action} className="flex min-h-0 flex-1 flex-col">
+        <OverlayBody className="space-y-4">
+          <FormError message={modalError} />
+          <input type="hidden" name="videoId" value={video.id} />
 
-      <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Video Title</label>
-        <input className={inputClass} name="title" defaultValue={video.title} required />
-      </div>
+          <Field label="Video title">
+            <Input name="title" defaultValue={video.title} required />
+          </Field>
 
-      <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Google Drive Link {video.has_secure_asset ? "(Replace Optional)" : "(Required to Repair)"}</label>
-        <input className={inputClass} name="videoFileId" placeholder="Paste a Google Drive share link or file ID" required={!video.has_secure_asset} />
-        <p className="text-xs leading-5 text-fog-muted">When supplied, Stoicverse securely replaces the source and reads the real duration from Drive.</p>
-      </div>
+          <div>
+            <Field
+              label={`Google Drive link ${video.has_secure_asset ? "(replacing is optional)" : "(required to repair)"}`}
+            >
+              <Input
+                name="videoFileId"
+                placeholder="Paste a Google Drive share link or file ID"
+                required={!video.has_secure_asset}
+              />
+            </Field>
+            <p className="mt-1 text-content-sm text-text-muted">
+              When supplied, Stoicverse securely replaces the source and reads the real duration from Drive.
+            </p>
+          </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="space-y-1">
-          <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Duration (seconds)</label>
-          <input className={inputClass} type="number" min="1" name="durationSeconds" defaultValue={video.duration_seconds} required />
-        </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label="Duration (seconds)">
+              <Input type="number" min="1" name="durationSeconds" defaultValue={video.duration_seconds} required />
+            </Field>
+            <Field label="Sort order">
+              <Input type="number" min="0" name="sortOrder" defaultValue={video.sort_order} required />
+            </Field>
+            <RequirementSelect defaultValue={video.is_optional} />
+          </div>
 
-        <div className="space-y-1">
-          <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Sort Order</label>
-          <input className={inputClass} type="number" min="0" name="sortOrder" defaultValue={video.sort_order} required />
-        </div>
-
-        <CustomSelect 
-          label="Requirement"
-          value={isOptional}
-          onChange={(val) => setIsOptional(String(val))}
-          options={[
-            { value: "false", label: "Required" },
-            { value: "true", label: "Optional" }
-          ]}
+          <Field label="Release at (optional)">
+            <Input type="datetime-local" name="releaseAt" defaultValue={toLocalDatetimeLocal(video.release_at)} />
+          </Field>
+        </OverlayBody>
+        <FormFooter
+          pending={pending}
+          onClose={onClose}
+          submitLabel="Save changes"
+          onDelete={() => setConfirmingDelete(true)}
+          deleteLabel="Delete video"
         />
-      </div>
+      </form>
 
-      <div className="space-y-1">
-        <label className="block text-xs font-bold font-label uppercase tracking-wider text-fog-muted">Release At (Optional)</label>
-        <input className={inputClass} type="datetime-local" name="releaseAt" defaultValue={toLocalDatetimeLocal(video.release_at)} />
-      </div>
-
-      <div className="pt-6 border-t border-surgical-steel flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Delete Trigger */}
-        <button 
-          type="button"
-          onClick={() => setShowDeleteConfirm(true)}
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-red-500/30 hover:border-red-500 text-red-400 px-5 font-label text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-        >
-          <Trash2 size={14} /> Delete Video
-        </button>
-
-        <div className="flex items-center justify-end gap-3">
-          <button type="button" onClick={onClose} className="min-h-10 px-4 font-label text-xs font-bold uppercase tracking-wider text-fog-muted hover:text-text-strong transition-colors cursor-pointer">
-            Cancel
-          </button>
-          <button disabled={pending} type="submit" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 disabled:opacity-60 transition-all cursor-pointer">
-            {pending ? <LoaderCircle size={14} className="animate-spin" /> : "Save Changes"}
-          </button>
-        </div>
-      </div>
-    </form>
+      <ConfirmDialog
+        open={confirmingDelete}
+        onOpenChange={setConfirmingDelete}
+        title={`Delete ${video.title}?`}
+        description="This permanently deletes the video and its secure access logs from the database."
+        confirmLabel="Delete video"
+        cancelLabel="Keep video"
+        tone="danger"
+        busy={pending}
+        onConfirm={() => onDelete(video.id)}
+      />
+    </>
   );
 }

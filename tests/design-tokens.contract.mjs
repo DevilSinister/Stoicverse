@@ -327,7 +327,7 @@ test("the hand-rolled overlays only ever decrease", async () => {
   // 6 after phase 9 moved the event-details dialog onto the primitive. The six
   // that remain are the creator and community-settings surfaces, which phases
   // 11 and 12 own, plus MemberModalShell's Tab trap, which phase 14 retires.
-  assert.ok(count <= 4, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
+  assert.ok(count <= 2, `hand-rolled overlays grew to ${count}; the primitive is ui/overlay.tsx`);
 });
 
 test("arbitrary z-index only ever decreases", async () => {
@@ -346,7 +346,7 @@ test("the native dialogs only ever decrease", async () => {
   // 6 at the end of phase 1, of which 3 were comments. Phase 9 moved the two
   // event-room errors in EventsView onto the toast provider, leaving the two
   // unsaved-event guards in CreatorEventsView, which phase 11 owns.
-  assert.ok(total <= 2, `a native dialog was added: ${where.join(", ")}`);
+  assert.equal(total, 0, `a native dialog was added: ${where.join(", ")}`);
 });
 
 test("a class naming a token that does not exist only ever decreases", async () => {
@@ -409,7 +409,7 @@ test("the deprecated glow only ever decreases", async () => {
     and mentorship screens, which later phases own. The utility is deleted with
     the alias block when this reaches zero.
   */
-  assert.ok(total <= 1, `emerald-glow grew to ${total}: ${where.join(", ")}`);
+  assert.equal(total, 0, `emerald-glow came back in: ${where.join(", ")}`);
 });
 
 test("pill shapes are confined to the places a circle means something", async () => {

@@ -63,9 +63,9 @@ test("member screens are clean while creator screens own the management controls
   assert.doesNotMatch(memberLearning, /Add lesson/);
   assert.doesNotMatch(memberEvents, /Create event/);
   assert.doesNotMatch(memberEvents, /Publish Zoom link/);
-  assert.match(creatorLearning, /Create Course/);
-  assert.match(creatorLearning, /Add Video/);
-  assert.match(creatorLearning, /Finish Course/);
+  assert.match(creatorLearning, /Create course/i);
+  assert.match(creatorLearning, /Add video/i);
+  assert.match(creatorLearning, /Finish course/i);
   assert.match(creatorEvents, /Create event/i);
   assert.match(creatorEvents, /Publish (room )?link/i);
 });
