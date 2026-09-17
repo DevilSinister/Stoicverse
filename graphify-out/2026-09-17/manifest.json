@@ -1250,8 +1250,8 @@
     "semantic_hash": ""
   },
   "src/components/creator/CreatorAnalyticsView.tsx": {
-    "mtime": 1789664795.5180182,
-    "ast_hash": "e35bc0207a85da8060ee1617de89d90d",
+    "mtime": 1789489974.5344675,
+    "ast_hash": "9f62992303a356cd7b63c944a5a09e01",
     "semantic_hash": ""
   },
   "src/components/creator/CreatorRevenueView.tsx": {
@@ -1405,23 +1405,23 @@
     "semantic_hash": ""
   },
   "src/components/community/structure/AccessFields.tsx": {
-    "mtime": 1789664795.50808,
-    "ast_hash": "a41f0e0643566c72cd969b573bb558b5",
+    "mtime": 1789283881.052796,
+    "ast_hash": "f6b1c556a744653812e69c719f38fed1",
     "semantic_hash": ""
   },
   "src/components/community/structure/StructureEditor.tsx": {
-    "mtime": 1789664795.5136616,
-    "ast_hash": "4683a1f191258d478bf500476ffbe1d8",
+    "mtime": 1789489974.5334136,
+    "ast_hash": "6a767854fd46e90d6bbc1a034113255f",
     "semantic_hash": ""
   },
   "src/components/community/structure/StructureForm.tsx": {
-    "mtime": 1789665641.7882977,
-    "ast_hash": "a9a88049e2e289bde914c8575545010d",
+    "mtime": 1789489974.5334136,
+    "ast_hash": "4ee2db489c0b6da1f0183751ebd147b9",
     "semantic_hash": ""
   },
   "src/components/community/structure/StructureList.tsx": {
-    "mtime": 1789664795.5168228,
-    "ast_hash": "884f7eb8f13fda8a101ae5b65881714e",
+    "mtime": 1789283881.0570383,
+    "ast_hash": "e404774023082c2a60411625c9320412",
     "semantic_hash": ""
   },
   "src/lib/community-settings/structure.ts": {
@@ -1695,8 +1695,8 @@
     "semantic_hash": ""
   },
   "src/components/ui/tabs.tsx": {
-    "mtime": 1789665624.9090147,
-    "ast_hash": "e1534c5e7cced9ea956c6daca60038cc",
+    "mtime": 1789283110.0322824,
+    "ast_hash": "920e372659d2d3e46b5cd3ae41a9a888",
     "semantic_hash": ""
   },
   "src/components/ui/textarea.tsx": {
@@ -1760,8 +1760,8 @@
     "semantic_hash": ""
   },
   "src/components/community/emoji/EmojiPicker.tsx": {
-    "mtime": 1789664993.533926,
-    "ast_hash": "88051b23b60f845da61616a3a5306949",
+    "mtime": 1789283881.0306237,
+    "ast_hash": "0e0a7d3655f6f15736070c8b2d0b018d",
     "semantic_hash": ""
   },
   "src/components/community/emoji/emoji-index.ts": {
@@ -1835,8 +1835,8 @@
     "semantic_hash": ""
   },
   "src/components/community/structure/ChannelPermissionsTab.tsx": {
-    "mtime": 1789664795.5126455,
-    "ast_hash": "39663d37b4b899f66869aa39090627b7",
+    "mtime": 1789489974.5318394,
+    "ast_hash": "fbc33a27abccb1f569cae586d3466909",
     "semantic_hash": ""
   },
   "supabase/migrations/20260912020000_community_channel_permissions.sql": {
@@ -2015,8 +2015,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/Composer.tsx": {
-    "mtime": 1789665005.142625,
-    "ast_hash": "c0c0e3e2f513a57d947ad45eb2ce3724",
+    "mtime": 1789321131.218037,
+    "ast_hash": "fc2d8bd0e68c126227d8c5b8e83a5782",
     "semantic_hash": ""
   },
   "src/lib/channels/grouping.ts": {
@@ -2065,8 +2065,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/MessageMenu.tsx": {
-    "mtime": 1789665014.674642,
-    "ast_hash": "ce8c3b6e7ced9413d9c92bdc7977eb3b",
+    "mtime": 1789322109.064886,
+    "ast_hash": "d552432416ec9b18f56233bd71aee5cd",
     "semantic_hash": ""
   },
   "src/components/channels/ThreadPanel.tsx": {
@@ -2300,8 +2300,8 @@
     "semantic_hash": ""
   },
   "src/components/community/settings/SafetySection.tsx": {
-    "mtime": 1789664795.50808,
-    "ast_hash": "28fe33fc9703814855c07ec93ea1cfb9",
+    "mtime": 1789491842.9433646,
+    "ast_hash": "759e0415caacb33f10358ccb9d448408",
     "semantic_hash": ""
   },
   "supabase/migrations/20260912160000_community_safety_gates.sql": {
@@ -2325,8 +2325,8 @@
     "semantic_hash": ""
   },
   "src/components/community/settings/EmojiSection.tsx": {
-    "mtime": 1789664795.5060449,
-    "ast_hash": "d9795105d29f3fd592efbf79666f4945",
+    "mtime": 1789275078.3972285,
+    "ast_hash": "cca55ec0b62850ce6e123257c3ad14cd",
     "semantic_hash": ""
   },
   "src/lib/community/emojis.ts": {
@@ -2550,8 +2550,8 @@
     "semantic_hash": ""
   },
   "tests/design-tokens.contract.mjs": {
-    "mtime": 1789664795.5230336,
-    "ast_hash": "431876a0c3e80f367ef73eb85281ec3d",
+    "mtime": 1789492760.2877872,
+    "ast_hash": "574118b093401885dfd65d4886578d6f",
     "semantic_hash": ""
   },
   "tests/overlay.contract.mjs": {
