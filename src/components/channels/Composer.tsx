@@ -426,7 +426,6 @@ export function Composer({
                     : emojiToken({ id: selection.id, name: selection.name }),
                 );
               }}
-              onClose={() => setEmojiOpen(false)}
             />
           </PopoverContent>
         </Popover>

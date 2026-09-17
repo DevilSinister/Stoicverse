@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronLeft, X } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft } from "lucide-react";
 
 import { StructureForm } from "@/components/community/structure/StructureForm";
 import { StructureList, type StructureSelection } from "@/components/community/structure/StructureList";
 import { useStructureOrder } from "@/components/community/structure/useStructureOrder";
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
+import { Button } from "@/components/ui/button";
+import { Overlay, OverlayContent, OverlayDescription, OverlayHeader, OverlayTitle } from "@/components/ui/overlay";
 import type { CommunityRole } from "@/lib/community-settings/role-model";
 import type { ChannelOverride } from "@/lib/community-settings/structure";
 import type { Notify } from "@/components/ui/toast";
@@ -23,24 +25,29 @@ type StructureEditorProps = {
 /**
  * The single home for category and channel editing.
  *
- * `/creator/settings` and `/creator/channels` render it as a modal from the
- * sidebar; `/creator/settings` renders the same panes inline. Only the chrome
- * differs — two copies of this editor would drift the moment either surface
- * gained a field.
+ * `/creator/settings` renders the panes inline; the modal variant is the same
+ * panes inside a dialog. Only the chrome differs — two copies of this editor
+ * would drift the moment either surface gained a field.
+ *
+ * Monolith, phase 12c. This file held **the last hand-rolled overlay in the
+ * product**, and it carried the whole set of defects that primitive exists to
+ * remove: a `fixed inset-0` layer at `z-[70]`, a `<button>` painted as the
+ * scrim, an Escape listener bound to `window` by hand, and no focus trap, no
+ * focus restore, no scroll lock and no portal — so it rendered in-tree and had
+ * to out-rank whatever ancestor it happened to sit inside, which is what the
+ * arbitrary z-index was for. It is `ui/overlay` now, and every one of those
+ * comes from Base UI.
+ *
+ * **The modal variant has no caller today.** A grep of `src` finds only
+ * `variant="inline"`, in `SettingsSectionBody`. It was therefore repainted
+ * unseen, which is the situation `00 - Shared/Cross-Project Lessons.md` lesson
+ * 86 is about: a surface nobody can reach says whatever it was last told to
+ * say. What is claimed here is that it is built from the same primitive as
+ * every other dialog in the product — not that it was watched opening.
  */
 export function StructureEditor(props: StructureEditorProps) {
   const { categories, channels, roles = [], overrides = [], onNotice } = props;
-  const modal = props.variant === "modal";
   const onClose = props.variant === "modal" ? props.onClose : undefined;
-
-  useEffect(() => {
-    if (!onClose) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   const panes = (
     <StructurePanes
@@ -52,38 +59,23 @@ export function StructureEditor(props: StructureEditorProps) {
     />
   );
 
-  if (!modal) return panes;
+  if (props.variant === "inline") return panes;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Manage channel structure"
-      className="fixed inset-0 z-[70] sm:grid sm:place-items-center sm:p-4"
+    <Overlay
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose?.();
+      }}
     >
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-scrim" />
-
-      <div className="relative flex h-full w-full flex-col overflow-hidden border-surgical-steel bg-surface-container-low sm:h-[min(44rem,90vh)] sm:max-w-4xl sm:rounded-xl sm:border">
-        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-surgical-steel px-4 py-3 sm:px-6 sm:py-4">
-          <div className="min-w-0">
-            <h2 className="text-base font-semibold text-text-strong sm:text-lg">Channel structure</h2>
-            <p className="mt-0.5 text-xs leading-5 text-fog-muted">
-              Name, group, and gate every channel members can open.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="focus-ring grid size-10 shrink-0 place-items-center rounded-lg text-fog-muted transition hover:bg-surface-container-high hover:text-text-strong"
-          >
-            <X size={18} />
-          </button>
-        </header>
-
+      <OverlayContent size="full" aria-label="Manage channel structure" className="h-[92svh] sm:h-[min(44rem,85svh)]">
+        <OverlayHeader>
+          <OverlayTitle>Channel structure</OverlayTitle>
+          <OverlayDescription>Name, group, and gate every channel members can open.</OverlayDescription>
+        </OverlayHeader>
         {panes}
-      </div>
-    </div>
+      </OverlayContent>
+    </Overlay>
   );
 }
 
@@ -118,7 +110,7 @@ function StructurePanes({
   return (
     <div className="flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[16rem_minmax(0,1fr)]">
       <div
-        className={`flex min-h-0 flex-col border-surgical-steel md:flex md:border-r ${
+        className={`flex min-h-0 flex-col border-border-hairline md:flex md:border-r ${
           showEditorOnMobile ? "hidden md:flex" : "flex-1"
         }`}
       >
@@ -132,34 +124,36 @@ function StructurePanes({
           className="min-h-0 flex-1 overflow-y-auto p-2"
         />
 
-        <div className="shrink-0 border-t border-surgical-steel px-3 py-2">
+        <div className="shrink-0 border-t border-border-hairline px-3 py-2">
           {/* One polite region carries both the move announcement and the save
               result. A second region would interleave with it unpredictably. */}
-          <p role="status" aria-live="polite" className="min-h-5 text-xs leading-5 text-fog-muted">
+          <p role="status" aria-live="polite" className="min-h-5 text-chrome-base text-text-muted">
             <span className="sr-only">{announcement}</span>
             {status === "saving" && "Saving order…"}
             {status === "saved" && "Order saved."}
           </p>
           {status === "failed" && (
-            <p role="alert" className="flex items-center gap-2 text-xs leading-5 text-error">
+            <p role="alert" className="flex items-center gap-2 text-chrome-base text-status-danger">
               Order not saved.
-              <button type="button" onClick={retry} className="focus-ring min-h-9 rounded font-semibold underline">
+              <Button type="button" variant="link" size="sm" onClick={retry} className="text-status-danger">
                 Retry
-              </button>
+              </Button>
             </p>
           )}
         </div>
       </div>
 
       <div className={`min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 ${showEditorOnMobile ? "" : "hidden md:block"}`}>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="chrome"
           onClick={() => setSelection({ kind: "new-category" })}
-          className="focus-ring mb-4 inline-flex min-h-9 items-center gap-1.5 rounded-lg text-sm font-semibold text-fog-muted transition hover:text-text-strong md:hidden"
+          className="mb-4 md:hidden"
         >
           <ChevronLeft size={15} aria-hidden="true" />
           All categories
-        </button>
+        </Button>
 
         {selection.kind === "new-category" && <StructureForm key="new-category" kind="category" onNotice={onNotice} />}
         {selectedCategory && (

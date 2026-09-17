@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { nativeSelectClass } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import { SAFETY_LIMITS, VERIFICATION_LEVELS, type CommunitySafety } from "@/lib/community-settings/model";
+import { cn } from "@/lib/utils";
 
 /**
  * Who may post, how soon, and what happens when many people join at once.
@@ -186,7 +187,7 @@ export function SafetySection({
             name="rulesChannelId"
             value={values.rulesChannelId ?? ""}
             onChange={(event) => set("rulesChannelId", event.target.value === "" ? null : event.target.value)}
-            className={`${nativeSelectClass} mt-2`}
+            className={cn(nativeSelectClass, "mt-2")}
           >
             <option value="">No channel chosen</option>
             {rulesChannels.map((channel) => (

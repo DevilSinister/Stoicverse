@@ -68,11 +68,32 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   )
 }
 
+/*
+  `[&[inert]]:hidden` is not decoration - without it this primitive paints every
+  panel at once.
+
+  Base UI hides a deselected panel with the `hidden` attribute, and it writes
+  that from `mounted`, which only becomes false once `useOpenChangeComplete`
+  reports the close finished. Measured on this panel there is no transition at
+  all - `getAnimations()` returns `[]` - and the completion never arrives, so
+  `hidden` is never written and the deselected panel keeps its box on the page.
+  Selecting "Permissions" left the entire Overview form stacked above the grid.
+
+  `inert` is written straight from `open` in the same render, so it tracks
+  selection exactly and is right the instant the tab changes. It also already
+  carries the meaning: an inert panel is one nobody is looking at. If a future
+  Base UI does write `hidden`, this costs nothing.
+
+  Found on this primitive's first call site in the product - the channel
+  settings tabs, phase 12c - which is exactly the risk phase 12b's
+  SafetySection docblock names about moving a control onto an unexercised
+  primitive.
+*/
 function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
   return (
     <TabsPrimitive.Panel
       data-slot="tabs-content"
-      className={cn("flex-1 text-content-sm outline-none", className)}
+      className={cn("flex-1 text-content-sm outline-none [&[inert]]:hidden", className)}
       {...props}
     />
   )

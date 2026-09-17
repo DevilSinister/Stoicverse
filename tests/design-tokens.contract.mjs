@@ -317,7 +317,7 @@ test("isTypingTarget stays identical in its two homes", async () => {
 
 /* ---------------------------------------------------------------- ratchets */
 
-test("the hand-rolled overlays only ever decrease", async () => {
+test("every overlay in the product is the primitive", async () => {
   const files = await sourceFiles();
   const outside = files.filter((f) => !f.startsWith("src/components/ui/"));
   let count = 0;
@@ -350,11 +350,16 @@ test("the hand-rolled overlays only ever decrease", async () => {
   // 6 after phase 9 moved the event-details dialog onto the primitive. 2 after
   // phase 11c. 1 after phase 12a narrowed this to overlays that own their own
   // scrim: `SettingsOverlayShell` had been counted for its Base UI Backdrop.
-  // The one that remains is `StructureEditor`, which phase 12c owns.
-  assert.ok(count <= 1, `hand-rolled overlays grew to ${count}: ${where.join(", ")}; the primitive is ui/overlay.tsx`);
+  //
+  // 0 after phase 12c moved `StructureEditor` - the last one - onto
+  // `ui/overlay`. This stops being a ratchet and becomes an absolute: there is
+  // nothing left to migrate, so a number that may only fall says nothing and
+  // the correct next value is the one it already has. Lesson 92. A new
+  // hand-rolled scrim fails this now, and the message names the file.
+  assert.equal(count, 0, `a hand-rolled overlay was added in ${where.join(", ")}; the primitive is ui/overlay.tsx`);
 });
 
-test("arbitrary z-index only ever decreases", async () => {
+test("layering is the named z-scale, with no arbitrary values left", async () => {
   // Stripped, and the number moved a long way when it was. This ratchet read
   // raw source until phase 12a, and **seven of the nine sites it was reporting
   // were prose** - every file that had already moved onto the z-scale names the
@@ -364,9 +369,13 @@ test("arbitrary z-index only ever decreases", async () => {
   // the family of ratchet that lesson was written about: `stripComments` was
   // added for the absence assertions and never carried to the counting ones.
   const { total, where } = await countAcross(/\bz-\[\d+\]/g, { strip: true });
-  // 11 after P2a, as measured raw. 2 is the first honest reading: `EmojiPicker`
-  // and `StructureEditor`, both phase 12c.
-  assert.ok(total <= 2, `arbitrary z-index grew to ${total}: ${where.join(", ")}`);
+  // 11 after P2a, as measured raw. 2 was the first honest reading: `EmojiPicker`
+  // and `StructureEditor`, both phase 12c. 0 once that phase took them - the
+  // picker's tone menu became a portalled popover and the structure modal became
+  // `ui/overlay`, and neither needs to out-rank an ancestor any more. Every
+  // remaining match in the tree is a docblock naming the number it replaced,
+  // which is exactly what `strip` is here to discount.
+  assert.equal(total, 0, `an arbitrary z-index was added in ${where.join(", ")}; the scale is in globals.css`);
 });
 
 test("the native dialogs only ever decrease", async () => {

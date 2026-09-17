@@ -273,7 +273,6 @@ export function MessageMenu({
                     );
                   });
                 }}
-                onClose={() => setEmojiOpen(false)}
               />
             </PopoverContent>
           </Popover>

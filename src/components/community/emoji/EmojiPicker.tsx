@@ -34,6 +34,7 @@ import {
   type FrecencyRecord,
   type SkinTone,
 } from "@/components/community/emoji/emoji-index";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { QUICK_REACTIONS } from "@/lib/community/constants";
 
 /**
@@ -44,6 +45,35 @@ import { QUICK_REACTIONS } from "@/lib/community/constants";
  *
  * The dataset is fetched from the bundle on first open (`import()` of the
  * emojibase JSON), never from a CDN — the content security policy forbids one.
+ *
+ * Monolith, phase 12c. Three things beyond the palette.
+ *
+ * **The skin-tone menu was the AutoMod kind menu again.** An `absolute z-10`
+ * list under an `aria-expanded` button: no Escape, no outside-press, no focus
+ * moved into it and none returned. Phase 12b found and fixed that exact shape
+ * one directory across; this is `ui/popover` now for the same reasons.
+ *
+ * **Escape closed the picker and left the tone menu behind.** The root handler
+ * took every Escape, stopped it and called `onClose`, and all three callers
+ * passed one — so with the tone menu open, the key closed the *outer* surface
+ * and the inner one survived it, portalled to `<body>` with nothing under it.
+ * Base UI already does nested dismissal correctly, innermost first, and a
+ * hand-written guard that out-ranks it is `00 - Shared/Cross-Project
+ * Lessons.md` lesson 1c almost word for word. So `onClose` now means what its
+ * own docstring always said — *the parent owns open state* — and only the one
+ * caller that renders this picker bare, the role icon field, passes it. The
+ * two popover callers let the library close them.
+ *
+ * **The search field was the same colour as the picker behind it.** Its fill
+ * was `surface-container-low` and the picker's was `monolith-surface`, and both
+ * aliases resolve to `--surface-panel` — the field was distinguishable only by
+ * its hairline. Inputs are `surface-sunken` in this system, which is the whole
+ * point of having a depth below the panel.
+ *
+ * The 36px glyph cells are deliberate and unchanged: nine columns at 44px do
+ * not fit a 360px picker, and `COLUMNS` is load-bearing for both the keyboard
+ * grid and the placeholder heights. It is a real gap on touch and it is
+ * recorded as one rather than half-fixed here.
  */
 
 export type CustomEmojiOption = { id: string; name: string; url: string };
@@ -315,7 +345,7 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
         onClick={() => choose(entry)}
         onMouseEnter={show(next)}
         onFocus={show(next)}
-        className="focus-ring grid size-9 place-items-center rounded-lg text-[22px] leading-none transition hover:bg-surface-container-high"
+        className="focus-ring grid size-9 place-items-center rounded-lg text-[22px] leading-none transition hover:bg-surface-raised"
       >
         {glyph}
       </button>
@@ -333,7 +363,7 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
         onClick={() => onSelect({ kind: "custom", id: emoji.id, name: emoji.name })}
         onMouseEnter={show(next)}
         onFocus={show(next)}
-        className="focus-ring grid size-9 place-items-center rounded-lg transition hover:bg-surface-container-high"
+        className="focus-ring grid size-9 place-items-center rounded-lg transition hover:bg-surface-raised"
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- storage URL, sized by the button */}
         <img src={emoji.url} alt="" className="size-6 object-contain" loading="lazy" />
@@ -344,7 +374,7 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
   const heading = (id: string, label: string) => (
     <h3
       id={id}
-      className="terminal-label sticky top-0 z-[1] bg-monolith-surface px-1 py-1.5 text-[11px] uppercase tracking-wider text-fog-muted"
+      className="terminal-label sticky top-0 z-sticky bg-surface-panel px-1 py-1.5"
     >
       {label}
     </h3>
@@ -358,19 +388,22 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
 
   return (
     <div
-      role="dialog"
+      role="group"
       aria-label={mode === "react" ? "Add a reaction" : "Insert an emoji"}
       onKeyDown={(event) => {
-        if (event.key === "Escape") {
+        // Only the caller that renders this bare passes `onClose`. Inside a
+        // popover there is nothing to do: the library closes itself on Escape,
+        // and it closes the tone menu first when that one is open.
+        if (event.key === "Escape" && onClose) {
           event.stopPropagation();
-          onClose?.();
+          onClose();
         }
       }}
-      className={`flex h-[26rem] w-[min(22.5rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-surgical-steel bg-monolith-surface text-on-surface shadow-[0_18px_48px_-24px_rgba(0,0,0,0.9)] ${className ?? ""}`}
+      className={`flex h-[26rem] w-[min(22.5rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-border-hairline bg-surface-panel text-text-default shadow-xl ${className ?? ""}`}
     >
-      <div className="flex items-center gap-2 border-b border-surgical-steel p-2">
+      <div className="flex items-center gap-2 border-b border-border-hairline p-2">
         <label className="relative flex min-w-0 flex-1 items-center">
-          <Search size={14} aria-hidden="true" className="pointer-events-none absolute left-2.5 text-fog-muted" />
+          <Search size={14} aria-hidden="true" className="pointer-events-none absolute left-2.5 text-text-muted" />
           <input
             ref={searchRef}
             type="search"
@@ -378,36 +411,27 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
             onChange={(event) => setQuery(event.target.value)}
             placeholder={mode === "react" ? "Find the perfect reaction" : "Find the perfect emoji"}
             aria-label="Search emoji"
-            className="focus-ring h-9 w-full rounded-lg border border-surgical-steel bg-surface-container-low pl-8 pr-2 text-base text-on-surface placeholder:text-fog-muted sm:text-sm"
+            className="focus-ring h-9 w-full rounded-lg border border-border-hairline bg-surface-sunken pl-8 pr-2 text-base text-text-default placeholder:text-text-muted sm:text-sm"
           />
         </label>
-        <div className="relative">
-          <button
-            type="button"
+        <Popover open={toneOpen} onOpenChange={setToneOpen}>
+          <PopoverTrigger
             aria-label={`Skin tone: ${tone === 0 ? "default" : `tone ${tone}`}`}
-            aria-expanded={toneOpen}
-            aria-haspopup="listbox"
-            onClick={() => setToneOpen((open) => !open)}
-            className="focus-ring grid size-9 place-items-center rounded-lg text-xl hover:bg-surface-container-high"
+            className="focus-ring relative grid size-9 place-items-center rounded-lg text-xl hover:bg-surface-raised aria-expanded:bg-surface-raised"
           >
             {SKIN_TONE_SAMPLES[tone]}
-          </button>
-          {toneOpen && (
-            <ul
-              role="listbox"
-              aria-label="Skin tone"
-              className="absolute right-0 top-full z-10 mt-1 flex gap-0.5 rounded-lg border border-surgical-steel bg-monolith-surface p-1 shadow-lg"
-            >
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-auto gap-0 p-1">
+            <ul aria-label="Skin tone" className="flex gap-0.5">
               {SKIN_TONE_SAMPLES.map((sample, value) => (
                 <li key={sample}>
                   <button
                     type="button"
-                    role="option"
-                    aria-selected={tone === value}
+                    aria-pressed={tone === value}
                     aria-label={value === 0 ? "Default tone" : `Tone ${value}`}
                     onClick={() => chooseTone(value as SkinTone)}
-                    className={`focus-ring grid size-9 place-items-center rounded-lg text-xl hover:bg-surface-container-high ${
-                      tone === value ? "bg-surface-container-high" : ""
+                    className={`focus-ring grid size-9 place-items-center rounded-lg text-xl hover:bg-surface-raised ${
+                      tone === value ? "bg-surface-raised" : ""
                     }`}
                   >
                     {sample}
@@ -415,14 +439,14 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
                 </li>
               ))}
             </ul>
-          )}
-        </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="flex min-h-0 flex-1">
         <nav
           aria-label="Emoji categories"
-          className="flex w-11 shrink-0 flex-col items-center gap-0.5 border-r border-surgical-steel py-2"
+          className="flex w-11 shrink-0 flex-col items-center gap-0.5 border-r border-border-hairline py-2"
         >
           {railGroups.map((group) => {
             const Icon = group.id === FREQUENT_GROUP ? Clock : group.id === CUSTOM_GROUP ? Sparkles : GROUP_ICONS[group.key];
@@ -437,8 +461,8 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
                 onClick={() => jumpTo(group.id)}
                 className={`focus-ring grid size-9 place-items-center rounded-lg transition ${
                   isActive
-                    ? "bg-surface-container-high text-text-strong"
-                    : "text-fog-muted hover:bg-surface-container-high/60 hover:text-text-strong"
+                    ? "bg-surface-raised text-text-strong"
+                    : "text-text-muted hover:bg-surface-raised/60 hover:text-text-strong"
                 }`}
               >
                 <Icon size={18} aria-hidden="true" />
@@ -449,7 +473,7 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
 
         <div ref={scrollerRef} onScroll={onScroll} onKeyDown={onGridKeyDown} className="min-w-0 flex-1 overflow-y-auto px-2 py-1">
           {failed && (
-            <div className="p-4 text-sm text-on-surface-variant" role="alert">
+            <div className="p-4 text-content-sm text-text-default" role="alert">
               Emoji could not be loaded.
               <button
                 type="button"
@@ -457,7 +481,7 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
                   setFailed(false);
                   setAttempt((count) => count + 1);
                 }}
-                className="focus-ring ml-2 rounded px-1 font-semibold text-primary-container"
+                className="focus-ring ml-2 rounded px-1 font-medium text-primary underline-offset-4 hover:underline"
               >
                 Try again
               </button>
@@ -467,7 +491,7 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
           {!index && !failed && (
             <div aria-busy="true" aria-label="Loading emoji" className="grid grid-cols-9 gap-1 p-1">
               {Array.from({ length: 63 }, (_, i) => (
-                <div key={i} className="size-9 animate-pulse rounded-lg bg-surface-container-high/50" />
+                <div key={i} className="size-9 animate-pulse rounded-lg bg-surface-raised/50" />
               ))}
             </div>
           )}
@@ -475,7 +499,7 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
           {index && results && (
             <section aria-label="Search results">
               {results.length === 0 ? (
-                <p className="p-4 text-sm text-on-surface-variant">No emoji match that.</p>
+                <p className="p-4 text-content-sm text-text-default">No emoji match that.</p>
               ) : (
                 <div className="grid grid-cols-9 gap-0.5">{results.map(renderGlyphButton)}</div>
               )}
@@ -528,17 +552,19 @@ export function EmojiPicker({ mode, customEmojis = [], onSelect, onClose, autoFo
         </div>
       </div>
 
-      <div className="flex h-12 items-center gap-3 border-t border-surgical-steel px-3" aria-live="polite">
+      <div className="flex h-12 items-center gap-3 border-t border-border-hairline px-3" aria-live="polite">
         {preview ? (
           <>
             {preview.glyph && <span className="text-2xl leading-none">{preview.glyph}</span>}
-            <span className="truncate text-sm font-semibold text-on-surface">
+            <span className="truncate text-content-sm font-medium text-text-strong">
               {preview.shortcode ? `:${preview.shortcode}:` : preview.label}
             </span>
-            {preview.shortcode && <span className="truncate font-label text-xs text-fog-muted">{preview.label}</span>}
+            {preview.shortcode && (
+              <span className="truncate font-mono text-mono-xs text-text-muted">{preview.label}</span>
+            )}
           </>
         ) : (
-          <span className="text-sm text-fog-muted">{mode === "react" ? "Pick a reaction" : "Pick an emoji"}</span>
+          <span className="text-content-sm text-text-muted">{mode === "react" ? "Pick a reaction" : "Pick an emoji"}</span>
         )}
       </div>
     </div>

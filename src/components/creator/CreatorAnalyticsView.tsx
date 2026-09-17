@@ -23,6 +23,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { nativeSelectClass } from "@/components/ui/select";
 import { csvText, defaultFilters, parseFilters, type AnalyticsFilters, type AnalyticsReport } from "@/lib/analytics/model";
+import { cn } from "@/lib/utils";
 
 /**
  * Community analytics. Monolith, phase 11a.
@@ -304,7 +305,7 @@ function Trend({ report }: { report: AnalyticsReport }) {
       description="Completed weeks. The same member filters apply to every point."
       action={
         <select
-          className={`${nativeSelectClass} w-auto`}
+          className={cn(nativeSelectClass, "w-auto")}
           aria-label="Trend metric"
           value={metric}
           onChange={(event) => setMetric(event.target.value as typeof metric)}
@@ -864,7 +865,7 @@ function Trading({ report }: { report: AnalyticsReport }) {
       >
         <div className="mb-5 flex flex-wrap gap-4">
           <Field label="Entry coverage">
-            <select className={`${nativeSelectClass} w-auto`} value={entry} onChange={(event) => setEntry(event.target.value)}>
+            <select className={cn(nativeSelectClass, "w-auto")} value={entry} onChange={(event) => setEntry(event.target.value)}>
               <option value="all">All members</option>
               <option value="recorded">Has recorded entries</option>
               <option value="missing">No entries in period</option>
@@ -942,7 +943,7 @@ function Courses({ report }: { report: AnalyticsReport }) {
         <div className="mb-5 flex flex-wrap gap-4">
           <Field label="Course">
             <select
-              className={`${nativeSelectClass} w-auto`}
+              className={cn(nativeSelectClass, "w-auto")}
               value={course}
               onChange={(event) => setCourse(event.target.value)}
             >
@@ -956,7 +957,7 @@ function Courses({ report }: { report: AnalyticsReport }) {
           </Field>
           <Field label="Course status">
             <select
-              className={`${nativeSelectClass} w-auto`}
+              className={cn(nativeSelectClass, "w-auto")}
               value={status}
               onChange={(event) => setStatus(event.target.value)}
             >
