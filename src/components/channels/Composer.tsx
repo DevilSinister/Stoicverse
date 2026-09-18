@@ -329,15 +329,15 @@ export function Composer({
     have replaced py-3's 12px with 0 on every device without an inset.
   */
   return (
-    <div className="border-t border-surgical-steel px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+    <div className="border-t border-border-hairline px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
       {replyTo ? (
-        <p className="mb-2 flex items-center gap-2 rounded-lg bg-surface-container-low px-3 py-1.5 text-xs text-fog-muted">
+        <p className="mb-2 flex items-center gap-2 rounded-lg bg-surface-panel px-3 py-1.5 text-chrome-sm text-text-muted">
           <span className="truncate">{`Replying to ${replyTo.authorName}`}</span>
           <button
             type="button"
             onClick={onClearReply}
             aria-label="Cancel reply"
-            className="focus-ring hit-target relative ml-auto rounded p-0.5 hover:text-on-surface"
+            className="focus-ring hit-target relative ml-auto rounded-md p-0.5 hover:text-text-strong"
           >
             <X size={12} aria-hidden="true" />
           </button>
@@ -349,14 +349,14 @@ export function Composer({
           {attachments.map((attachment) => (
             <li
               key={attachment.path}
-              className="flex items-center gap-2 rounded-lg border border-surgical-steel px-2 py-1 text-xs text-on-surface-variant"
+              className="flex items-center gap-2 rounded-md border border-border-hairline px-2 py-1 text-chrome-sm text-text-default"
             >
               <span className="max-w-40 truncate">{attachment.name}</span>
               <button
                 type="button"
                 onClick={() => setAttachments((current) => current.filter((entry) => entry.path !== attachment.path))}
                 aria-label={`Remove ${attachment.name}`}
-                className="focus-ring hit-target relative rounded p-0.5 hover:text-on-surface"
+                className="focus-ring hit-target relative rounded-md p-0.5 hover:text-text-strong"
               >
                 <X size={12} aria-hidden="true" />
               </button>
@@ -365,11 +365,25 @@ export function Composer({
         </ul>
       ) : null}
 
+      {/*
+        The box is the control, so the box takes the focus indicator.
+
+        The textarea inside carries `outline-none` - correct, because a ring
+        drawn around the text area alone would sit *inside* a bordered box -
+        but nothing replaced it, so **the primary input of the whole page had
+        no visible focus state at all**: tabbing to it changed nothing on
+        screen. `has-[:focus-visible]:border-primary` moves the accent onto the
+        box's own hairline, which is the shape `ui/input-group` already uses
+        and the same answer the inline message editor needed in 13a.
+
+        4px, not 6. Inputs are `rounded-lg` in this system; `rounded-xl` was
+        the one control on the page still rounded like the old one.
+      */}
       <div
         className={
           recorderActive
             ? "flex items-center gap-2"
-            : "flex items-end gap-2 rounded-xl border border-surgical-steel bg-surface-container-lowest px-3 py-2"
+            : "flex items-end gap-2 rounded-lg border border-border-hairline bg-surface-sunken px-3 py-2 transition-colors has-[:focus-visible]:border-primary"
         }
       >
         {/*
@@ -387,7 +401,7 @@ export function Composer({
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               aria-label="Attach a file"
-              className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-fog-muted hover:text-on-surface disabled:opacity-50"
+              className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-text-muted hover:text-text-strong disabled:opacity-50"
             >
               {uploading ? (
                 <Loader2 size={16} className="animate-spin" aria-hidden="true" />
@@ -407,7 +421,7 @@ export function Composer({
         <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
           <PopoverTrigger
             aria-label="Insert an emoji"
-            className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-text-muted hover:text-text-strong"
           >
             <Smile size={16} aria-hidden="true" />
           </PopoverTrigger>
@@ -468,7 +482,7 @@ export function Composer({
           rows={1}
           placeholder={label}
           aria-label={label}
-          className="max-h-40 min-h-6 flex-1 resize-none bg-transparent text-sm leading-6 text-on-surface outline-none placeholder:text-fog-muted"
+          className="max-h-40 min-h-6 flex-1 resize-none bg-transparent text-content-sm text-text-default outline-none placeholder:text-text-muted"
         />
 
         </>
@@ -498,7 +512,7 @@ export function Composer({
             onClick={() => void send()}
             disabled={!canSend}
             aria-label="Send"
-            className="focus-ring hit-target relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface disabled:opacity-40"
+            className="focus-ring hit-target relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-40"
           >
             {sending ? (
               <Loader2 size={16} className="animate-spin" aria-hidden="true" />
@@ -515,7 +529,7 @@ export function Composer({
         moment of failure. Failures themselves are toasts.
       */}
       {body.length >= MESSAGE_COUNTER_FROM ? (
-        <span className={`mt-1 block text-[11px] ${tooLong ? "text-error" : "text-fog-muted"}`}>
+        <span className={`mt-1 block font-mono text-mono-xs ${tooLong ? "text-status-danger" : "text-text-muted"}`}>
           {`${body.length.toLocaleString("en-US")} / ${MESSAGE_MAX_CHARS.toLocaleString("en-US")}`}
         </span>
       ) : null}

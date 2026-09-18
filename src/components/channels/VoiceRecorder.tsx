@@ -302,7 +302,7 @@ export function VoiceRecorder({
   if (state === "recording" || state === "paused") {
     const paused = state === "paused";
     return (
-      <div className="flex w-full items-center gap-2 rounded-lg border border-surgical-steel bg-surface-container-lowest px-2 py-1.5">
+      <div className="flex w-full items-center gap-2 rounded-lg border border-border-hairline bg-surface-sunken px-2 py-1.5">
         {/*
           Delete first, the way WhatsApp puts it: the control you reach for
           when you have changed your mind mid-sentence should not be the one
@@ -312,15 +312,15 @@ export function VoiceRecorder({
           type="button"
           onClick={cancel}
           aria-label="Delete this recording"
-          className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-fog-muted hover:text-error"
+          className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-text-muted hover:text-status-danger"
         >
           <Trash2 size={16} aria-hidden="true" />
         </button>
 
-        <span className="flex shrink-0 items-center gap-1.5 text-[11px] tabular-nums text-error" role="status">
-          <span aria-hidden="true" className={`size-2 rounded-full bg-error ${paused ? "" : "animate-pulse"}`} />
+        <span className="flex shrink-0 items-center gap-1.5 font-mono text-mono-xs text-status-danger" role="status">
+          <span aria-hidden="true" className={`size-2 rounded-full bg-status-danger ${paused ? "" : "animate-pulse"}`} />
           {clock(elapsed)}
-          {paused ? <span className="text-fog-muted">paused</span> : null}
+          {paused ? <span className="text-text-muted">paused</span> : null}
         </span>
 
         {/*
@@ -337,7 +337,7 @@ export function VoiceRecorder({
           type="button"
           onClick={() => (paused ? resume() : pause())}
           aria-label={paused ? "Resume recording" : "Pause recording"}
-          className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-on-surface-variant hover:text-on-surface"
+          className="focus-ring hit-target relative shrink-0 rounded-lg p-1.5 text-text-default hover:text-text-strong"
         >
           {paused ? <Play size={16} aria-hidden="true" /> : <Pause size={16} aria-hidden="true" />}
         </button>
@@ -346,7 +346,7 @@ export function VoiceRecorder({
           type="button"
           onClick={finish}
           aria-label="Send this voice note"
-          className="focus-ring hit-target relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface"
+          className="focus-ring hit-target relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground"
         >
           <SendHorizontal size={16} aria-hidden="true" />
         </button>
@@ -365,7 +365,7 @@ export function VoiceRecorder({
       onClick={() => void start()}
       disabled={disabled}
       aria-label="Record a voice note"
-      className="focus-ring hit-target relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-monolith-surface disabled:opacity-40"
+      className="focus-ring hit-target relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-40"
     >
       <Mic size={16} aria-hidden="true" />
     </button>

@@ -345,6 +345,22 @@ what was intended. A section describing an unshipped intention is worse than no 
 - Header controls are 36px painted at an 8px gap - a 44px pitch, which is the box `hit-target`
   draws.
 
+### Composing and acting (phase 13b)
+
+- A composite input takes its focus indicator on the box: the composer's textarea keeps
+  `outline-none` and the row around it carries `has-[:focus-visible]:border-primary`, the shape
+  `ui/input-group` uses. A ring drawn inside a bordered box reads as a mistake; no ring at all,
+  which is what was there, is a control with no focus state.
+- The message hover bar is `surface-raised`, one step above the `surface-panel` of the row it
+  floats over. Two elements at the same depth separated by a hairline is not elevation.
+- The bar's buttons carry **no** `hit-target`, and that is deliberate. Four 26px controls two
+  pixels apart cannot each own 44px - the boxes overlap by 16px and the click goes to whichever
+  paints later. Dropping the expanded area is correct only where touch has another route: this bar
+  is hover-revealed, so a phone never sees it, and its context menu opens on a 500ms long press.
+  Where there is no second route, grow the control until the pitch reaches 44 instead.
+- Timers, durations and counters are `font-mono text-mono-xs`. `tabular-nums` beside a monospace
+  face is redundant and has gone.
+
 ---
 
 ## A note on contract tests and copy

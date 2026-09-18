@@ -109,11 +109,25 @@ export function ThreadPanel({
   return (
     <aside
       aria-label={`Thread: ${named}`}
-      className="flex min-h-0 w-full flex-col border-l border-surgical-steel bg-surface-container-lowest lg:w-96"
+      className="flex min-h-0 w-full flex-col border-l border-border-hairline bg-surface-sunken lg:w-96"
     >
-      <header className="flex items-center gap-2 border-b border-surgical-steel px-3 py-3">
-        <MessagesSquare size={16} aria-hidden="true" className="shrink-0 text-fog-muted" />
-        <h2 className="truncate text-sm font-semibold text-on-surface">{named}</h2>
+      {/*
+        36px controls at the chrome gap - a 44px pitch, matching the channel
+        header. At 26px these four overlapped by 10px a pair, which is the
+        defect 13a measured on the header beside this one.
+
+        The notch inset is added to the height, as it is on the channel header,
+        because below `lg` this panel *is* the top of the screen: it is `w-full`
+        there, so it covers the conversation rather than sitting beside it. That
+        is also the reason for the entry in `Known Defects and Debt` - the
+        column it covers is squeezed to 0px rather than unmounted, so its
+        composer and its message controls stay in the tab order behind a panel
+        nobody can see past. The fix is this panel becoming a `MobilePaneDrawer`
+        below `lg`, which needs a media hook this repository does not have yet.
+      */}
+      <header className="flex h-[calc(var(--spacing-chrome-bar)+env(safe-area-inset-top))] shrink-0 items-center gap-chrome-gap border-b border-border-hairline px-chrome-x pt-[env(safe-area-inset-top)]">
+        <MessagesSquare size={16} aria-hidden="true" className="shrink-0 text-text-muted" />
+        <h2 className="truncate text-chrome-base font-medium text-text-strong">{named}</h2>
 
         {permissions.canManageThreads ? (
           <>
@@ -121,25 +135,25 @@ export function ThreadPanel({
               type="button"
               onClick={() => void setThreadState(threadId, { locked: true })}
               aria-label="Lock this thread"
-              className="focus-ring hit-target relative ml-auto rounded p-1.5 text-fog-muted hover:text-on-surface"
+              className="focus-ring hit-target relative ml-auto rounded-lg p-2.5 text-text-muted hover:text-text-strong"
             >
-              <Lock size={14} aria-hidden="true" />
+              <Lock size={16} aria-hidden="true" />
             </button>
             <button
               type="button"
               onClick={() => void setThreadState(threadId, { locked: false })}
               aria-label="Unlock this thread"
-              className="focus-ring hit-target relative rounded p-1.5 text-fog-muted hover:text-on-surface"
+              className="focus-ring hit-target relative rounded-lg p-2.5 text-text-muted hover:text-text-strong"
             >
-              <LockOpen size={14} aria-hidden="true" />
+              <LockOpen size={16} aria-hidden="true" />
             </button>
             <button
               type="button"
               onClick={() => void setThreadState(threadId, { archived: true }).then(onClose)}
               aria-label="Archive this thread"
-              className="focus-ring hit-target relative rounded p-1.5 text-fog-muted hover:text-on-surface"
+              className="focus-ring hit-target relative rounded-lg p-2.5 text-text-muted hover:text-text-strong"
             >
-              <Archive size={14} aria-hidden="true" />
+              <Archive size={16} aria-hidden="true" />
             </button>
           </>
         ) : null}
@@ -148,41 +162,41 @@ export function ThreadPanel({
           type="button"
           onClick={onClose}
           aria-label="Close thread"
-          className={`focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface ${
+          className={`focus-ring hit-target relative rounded-lg p-2.5 text-text-muted hover:text-text-strong ${
             permissions.canManageThreads ? "" : "ml-auto"
           }`}
         >
-          <X size={14} aria-hidden="true" />
+          <X size={16} aria-hidden="true" />
         </button>
       </header>
 
       <ol ref={paneRef} className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
-        {loading ? <li className="py-6 text-center text-xs text-fog-muted">Loading the thread…</li> : null}
+        {loading ? <li className="py-6 text-center text-chrome-sm text-text-muted">Loading the thread…</li> : null}
         {error ? (
-          <li role="alert" className="py-6 text-center text-xs text-status-danger">
+          <li role="alert" className="py-6 text-center text-chrome-sm text-status-danger">
             {error}
           </li>
         ) : null}
         {!loading && !error && rows.length === 0 ? (
-          <li className="py-6 text-center text-xs text-fog-muted">Nothing in this thread yet.</li>
+          <li className="py-6 text-center text-chrome-sm text-text-muted">Nothing in this thread yet.</li>
         ) : null}
 
         {rows.map((message) => (
-          <li key={message.id} className="border-b border-surgical-steel/40 py-2 last:border-0">
+          <li key={message.id} className="border-b border-border-hairline/40 py-2 last:border-0">
             <p className="flex items-baseline gap-2">
               <span
-                className="text-xs font-semibold text-on-surface"
+                className="text-chrome-sm font-medium text-text-strong"
                 style={message.authorColor ? { color: message.authorColor } : undefined}
               >
                 {message.authorName}
               </span>
-              <time dateTime={message.createdAt} className="text-[10px] text-fog-muted">
+              <time dateTime={message.createdAt} className="font-mono text-mono-xs text-text-muted">
                 {new Date(message.createdAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
               </time>
             </p>
-            <div className="text-sm leading-6 text-on-surface-variant">
+            <div className="text-content-sm text-text-default">
               <MarkdownBody body={message.body} resolvers={resolvers} />
-              {message.editedAt ? <span className="ml-1 text-[10px] text-fog-muted">(edited)</span> : null}
+              {message.editedAt ? <span className="ml-1 text-chrome-xs text-text-muted">(edited)</span> : null}
             </div>
             {message.attachments.length > 0 ? (
               <ul className="mt-1 space-y-1">
@@ -199,7 +213,7 @@ export function ThreadPanel({
                           <img
                             src={href}
                             alt=""
-                            className="max-h-48 max-w-full rounded-lg border border-surgical-steel object-cover"
+                            className="max-h-48 max-w-full rounded-lg border border-border-hairline object-cover"
                           />
                         </a>
                       </li>
@@ -211,7 +225,7 @@ export function ThreadPanel({
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="focus-ring text-xs text-primary-container underline underline-offset-2"
+                        className="focus-ring text-chrome-sm text-primary underline underline-offset-2"
                       >
                         {attachment.path.split("/").pop()}
                       </a>
@@ -241,7 +255,7 @@ export function ThreadPanel({
           onAttachmentUrl={(path, url) => setUrls((current) => new Map(current).set(path, url))}
         />
       ) : (
-        <p role="status" className="border-t border-surgical-steel px-3 py-3 text-center text-xs text-fog-muted">
+        <p role="status" className="border-t border-border-hairline px-chrome-x py-3 text-center text-content-sm text-text-muted">
           {viewer ? "You cannot reply in threads here." : "Sign in to reply."}
         </p>
       )}

@@ -31,7 +31,7 @@ export function WaveformBars({
             key={index}
             style={{ height: `${height}%` }}
             className={`w-full flex-1 rounded-full transition-[height] duration-100 ${
-              played ? "bg-primary-container" : "bg-surgical-steel"
+              played ? "bg-primary" : "bg-border-hairline"
             }`}
           />
         );
