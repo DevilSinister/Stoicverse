@@ -239,9 +239,16 @@ owns portalling, scroll lock, focus trap, focus restore and Escape. Do not hand-
 
 - **Focus is the shared `.focus-ring` only** — 2px accent at 2px offset, on `:focus-visible`.
   Do not hand-roll focus styles.
-- **Touch targets are ≥44×44.** Dense chrome achieves this without growing visually: a 32px
-  control ships an expanded hit area (`before:absolute before:-inset-1.5`). This belongs in the
-  component, never in call sites.
+- **Touch targets are ≥44×44.** Dense chrome achieves this without growing visually: the
+  `hit-target` utility centres a `::before` of `max(100%, 44px)` on the control, so a 26px icon
+  button still takes a full 44px box. This belongs in the component, never in call sites.
+  (It was documented here as `inset: -6px`, which is what it used to be and would give that
+  button 38px; the utility in `globals.css` is the rule.)
+- **A hit box wider than the pitch is an ambiguous target, not a bigger one.** Four 28px
+  controls at an 8px gap are a 36px pitch under a 44px box, so each pair overlaps by 8px and a
+  tap near a midpoint lands on whichever sibling paints later. Size the control so the pitch
+  reaches 44: at an 8px chrome gap that is a 36px control. Measured on the channel header,
+  phase 13a.
 - **Temporary surfaces trap Tab, close on Escape, and restore focus to their trigger.** Because
   every overlay is the shared primitive, this is free — which is why hand-rolling one is banned
   rather than discouraged.
@@ -318,6 +325,25 @@ phase by phase.
 
 **Each screen phase writes its own section here as it lands**, describing what shipped rather than
 what was intended. A section describing an unshipped intention is worse than no section.
+
+### The channel spine (phase 13a)
+
+`/channels` mounts no `AppShell`, which is why it drifted furthest from the system.
+
+- The page is `surface-canvas`. It had been an alias onto `--surface-panel`, so the conversation
+  was card-coloured and the rail, the channel column and the composer were wells cut into a card.
+  Depth reads correctly only when the page is the middle of the three.
+- Both headers are `h-chrome-bar`. The safe-area inset is added to the height rather than
+  replacing the padding, so the bar is 48px of content wherever it is drawn.
+- The channel list has three signals, not three weights of one: `text-muted` at rest,
+  `text-strong` for unread, `bg-accent-soft` for the open channel. That leaves `surface-panel`
+  free to be the hover fill, which is what the rail already uses it for.
+- A message row lifts to `surface-panel` on hover. Darkening to the sunken well reads as disabled
+  once the page is the canvas.
+- Chrome ramp throughout, except the message body, which is `text-content-sm`. Timestamps and
+  counts are JetBrains Mono. This is the mixed surface named under "Density", said in tokens.
+- Header controls are 36px painted at an 8px gap - a 44px pitch, which is the box `hit-target`
+  draws.
 
 ---
 

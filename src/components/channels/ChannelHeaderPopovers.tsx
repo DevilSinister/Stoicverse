@@ -114,9 +114,15 @@ export function PinsPopover({
         onOpenChange(next);
       }}
     >
+      {/*
+        36px painted, which with the header's 8px gap is a 44px pitch - exactly
+        the box `hit-target` draws. At 28px the four header controls' hit areas
+        overlapped by 8px each and a tap near a midpoint went to the wrong one.
+        Phase 13a, measured on a phone viewport; the rest of this file is 13b.
+      */}
       <PopoverTrigger
         aria-label="Pinned messages"
-        className="focus-ring hit-target relative rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+        className="focus-ring hit-target relative rounded-lg p-2.5 text-fog-muted hover:text-on-surface"
       >
         <Pin size={16} aria-hidden="true" />
       </PopoverTrigger>
@@ -198,7 +204,7 @@ export function ThreadListPopover({
         onOpenChange(next);
       }}
     >
-      <PopoverTrigger aria-label="Threads" className="focus-ring hit-target relative rounded-lg p-1.5 text-fog-muted hover:text-on-surface">
+      <PopoverTrigger aria-label="Threads" className="focus-ring hit-target relative rounded-lg p-2.5 text-fog-muted hover:text-on-surface">
         <MessagesSquare size={16} aria-hidden="true" />
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">

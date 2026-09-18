@@ -122,13 +122,41 @@ test("the dynamic channel path is revalidated with its type argument", async () 
 });
 
 test("every colour token the channel UI uses is actually defined", async () => {
-  // A Tailwind class naming a token that does not exist produces no CSS and no
-  // error: `bg-surface-container-highest` rendered a spoiler with transparent
-  // text on a transparent background, so hidden content simply vanished. The
-  // typechecker cannot see inside a string, and the build does not care, so
-  // nothing but a human eye caught it. This is that eye.
+  /*
+    A Tailwind class naming a token that does not exist produces no CSS and no
+    error: `bg-surface-container-highest` rendered a spoiler with transparent
+    text on a transparent background, so hidden content simply vanished. The
+    typechecker cannot see inside a string, and the build does not care, so
+    nothing but a human eye caught it. This is that eye.
+
+    **And it had never once looked.** Until phase 13a the matching regex began
+    and ended with a literal backspace, 0x08, where a word boundary was meant -
+    the Windows heredoc that wrote this file collapsed the escape into the
+    character it names. No source file contains a backspace, so the loop body
+    never ran, the offender list was always empty, and the assertion passed on
+    every commit from the day it was written. It was reading `text-amber-300` in
+    `ChannelView` the whole time and had nothing to say.
+    `00 - Shared/Cross-Project Lessons.md` lesson 1a is exactly this shape and
+    lesson 46 is the cause; what follows from both is how `structural` is built
+    below - from the stylesheet, so it cannot quietly stop covering anything.
+  */
   const css = await read("src/app/globals.css");
   const defined = new Set([...css.matchAll(/--color-([a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+
+  /*
+    The type scale, read from the stylesheet rather than listed here.
+
+    `text-chrome-sm` and `text-content-base` share the prefix a colour uses and
+    are sizes, so a filter that does not know them reports every one as an
+    undefined colour - which is how an assertion this loud gets switched off
+    again a week after it is switched on. Reading `--text-*` out of globals.css
+    means a size added there is understood here without anybody remembering to
+    come back, which is the wiring `design-tokens.contract.mjs` already uses for
+    cn's copy of the same scale.
+  */
+  const sizes = new Set(
+    [...css.matchAll(/^\s*--text-([a-z0-9-]+):/gm)].map((match) => match[1]).filter((name) => !name.includes("--")),
+  );
 
   const files = [
     "src/lib/markdown/render.tsx",
@@ -142,22 +170,97 @@ test("every colour token the channel UI uses is actually defined", async () => {
     "src/components/channels/MemberList.tsx",
   ];
 
-  // Utilities that share a prefix with a colour but never take one.
+  /*
+    Utilities that share a prefix with a colour but never take one: border
+    sides and styles, text alignment and wrapping, background position and
+    repeat. A closed list, deliberately - widen it with a `.*` and this
+    assertion goes back to proving nothing, which is the state it spent its
+    whole life in.
+  */
   const structural =
-    /^(?:t|r|b|l|x|y|s|e|solid|dashed|dotted|double|hidden|none|current|transparent|inherit|white|black|\[.*\]|(?:t|r|b|l|x|y|s|e)-\d+|\d.*)$/;
+    /^(?:t|r|b|l|x|y|s|e|solid|dashed|dotted|double|hidden|none|current|transparent|inherit|white|black|left|right|center|justify|start|end|top|bottom|middle|wrap|nowrap|balance|pretty|clip|ellipsis|cover|contain|repeat|fixed|local|scroll|\[.*\]|(?:t|r|b|l|x|y|s|e)-\d+|\d.*)$/;
 
   const offenders = [];
+  let examined = 0;
   for (const file of files) {
     const source = await readCode(file);
-    for (const [, token] of source.matchAll(/(?:text|bg|border|ring|fill|stroke|decoration|outline)-([a-z][a-z0-9-]*)(?:\/\d+)?/g)) {
-      if (structural.test(token)) continue;
-      // Tailwind's own palette is always available.
+    for (const [, token] of source.matchAll(/\b(?:text|bg|border|ring|fill|stroke|decoration|outline)-([a-z][a-z0-9-]*)(?:\/\d+)?\b/g)) {
+      examined += 1;
+      if (structural.test(token) || sizes.has(token)) continue;
+      /*
+        Tailwind's own palette, bare. A *shade* is not exempt and must not be:
+        `text-amber-300` is how the reconnect badge spent four phases off the
+        palette, and catching it is the first thing this assertion did once it
+        could see anything at all.
+      */
       if (/^(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)$/.test(token)) continue;
+      /*
+        Tailwind's own type scale. `globals.css` adds the Monolith sizes without
+        writing `--text-*: initial`, so `text-sm` still emits real CSS and is
+        not the failure this assertion is about - it is merely off-system, which
+        the ratchet below counts and the remaining channel phases remove.
+      */
+      if (/^(?:xs|sm|base|lg|xl)$/.test(token)) continue;
       if (!defined.has(token)) offenders.push(`${file}: ${token}`);
     }
   }
 
+  /*
+    The assertion that the assertion runs.
+
+    An empty offender list is the passing result and was also the result of a
+    regex that matched nothing, and those two are indistinguishable from the
+    outside - which is why nobody noticed for four phases. Nine files of dense
+    Tailwind yield several hundred prefixed tokens; a number anywhere near zero
+    means the matcher is broken, not that the code is clean.
+  */
+  assert.ok(examined > 200, `the matcher found only ${examined} tokens across ${files.length} files; it is broken, not satisfied`);
+
   assert.deepEqual(offenders, [], `undefined colour tokens: ${offenders.join(", ")}`);
+});
+
+test("the channel surface only ever loses Tailwind's own type scale", async () => {
+  /*
+    `text-sm` is 14px of Tailwind's default ramp and `text-content-sm` is 14px
+    of Monolith's. They render almost identically, which is why a screen can sit
+    on the wrong one for four phases without anybody seeing it, and why a count
+    is the only thing that finds them: the chrome ramp is 11/12/13 and the
+    content ramp is 14/15/17, so a header written in `text-sm` is a header one
+    step too large in a language whose whole argument is density.
+
+    39 when phase 13a measured it, over six files. `ChannelsShell`, `ChannelView`
+    and `SearchOverlay` are at zero and stay there; the rest belong to 13b - the
+    composer, the message menu, the thread panel and the header popovers - and
+    13c, the member column. Comments stripped, because a file that removes the
+    class explains why in the docblock that mentions it (lesson 89).
+  */
+  const files = [
+    "src/lib/markdown/render.tsx",
+    "src/components/channels/ChannelsShell.tsx",
+    "src/components/channels/ChannelView.tsx",
+    "src/components/channels/Composer.tsx",
+    "src/components/channels/MessageMenu.tsx",
+    "src/components/channels/ThreadPanel.tsx",
+    "src/components/channels/ChannelHeaderPopovers.tsx",
+    "src/components/channels/SearchOverlay.tsx",
+    "src/components/channels/MemberList.tsx",
+  ];
+
+  let total = 0;
+  const where = [];
+  for (const file of files) {
+    const hits = (await readCode(file)).match(/\btext-(?:xs|sm|base|lg|xl)\b/g) ?? [];
+    if (hits.length > 0) where.push(`${file} (${hits.length})`);
+    total += hits.length;
+  }
+
+  assert.ok(total <= 39, `the default type scale grew to ${total}; Monolith's ramps are chrome-* and content-*: ${where.join(", ")}`);
+
+  // The two files phase 13a rewrote are done, and a regression in them would
+  // otherwise hide under the ratchet's slack.
+  for (const done of ["src/components/channels/ChannelsShell.tsx", "src/components/channels/ChannelView.tsx"]) {
+    assert.equal((await readCode(done)).match(/\btext-(?:xs|sm|base|lg|xl)\b/g), null, `${done} is on the Monolith ramps`);
+  }
 });
 
 test("a link in a message is legible, not the shadcn surface accent", async () => {
