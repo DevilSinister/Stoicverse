@@ -34,8 +34,8 @@ function NoChannels() {
   return (
     <div className="flex flex-1 items-center justify-center p-8 text-center">
       <div className="max-w-sm">
-        <h1 className="text-base font-semibold text-on-surface">Nothing here yet</h1>
-        <p className="mt-2 text-sm text-fog-muted">
+        <h1 className="text-title-sm font-medium text-text-strong">Nothing here yet</h1>
+        <p className="mt-2 text-content-sm text-text-muted">
           There are no channels you can open. If you have just joined, the creator may still be setting the community
           up.
         </p>

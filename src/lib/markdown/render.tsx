@@ -28,7 +28,7 @@ const EMPTY: MentionResolvers = {
 };
 
 const mentionChip =
-  "rounded px-1 py-0.5 text-[0.95em] font-medium text-primary-container bg-primary-container/10 hover:bg-primary-container/20 transition-colors";
+  "rounded-md px-1 py-0.5 text-[0.95em] font-medium text-primary bg-accent-soft hover:bg-primary/20 transition-colors";
 
 function Spoiler({ children }: { children: ReactNode }) {
   const [revealed, setRevealed] = useState(false);
@@ -42,8 +42,8 @@ function Spoiler({ children }: { children: ReactNode }) {
       aria-label={revealed ? undefined : "Reveal spoiler"}
       className={
         revealed
-          ? "rounded bg-surface-container-high px-1"
-          : "focus-ring cursor-pointer select-none rounded bg-surface-container-high px-1 text-transparent"
+          ? "rounded-md bg-surface-raised px-1"
+          : "focus-ring cursor-pointer select-none rounded-md bg-surface-raised px-1 text-transparent"
       }
     >
       <span aria-hidden={revealed ? undefined : true}>{children}</span>
@@ -79,7 +79,7 @@ function renderTokens(tokens: Token[], resolvers: MentionResolvers, keyPrefix = 
 
       case "code":
         return (
-          <code key={key} className="rounded bg-surface-container-high px-1 py-0.5 font-mono text-[0.9em]">
+          <code key={key} className="rounded-md bg-surface-raised px-1 py-0.5 font-mono text-[0.9em]">
             {token.value}
           </code>
         );
@@ -90,7 +90,7 @@ function renderTokens(tokens: Token[], resolvers: MentionResolvers, keyPrefix = 
             key={key}
             // Wide code scrolls inside its own box; the message column never
             // scrolls sideways.
-            className="my-1 overflow-x-auto rounded-lg border border-surgical-steel bg-surface-container-lowest p-3"
+            className="my-1 overflow-x-auto rounded-lg border border-border-hairline bg-surface-sunken p-3"
           >
             <code className="font-mono text-[0.85em] leading-6">{token.value}</code>
           </pre>
@@ -98,15 +98,17 @@ function renderTokens(tokens: Token[], resolvers: MentionResolvers, keyPrefix = 
 
       case "quote":
         return (
-          <blockquote key={key} className="my-1 border-l-2 border-surgical-steel pl-3 text-on-surface-variant">
+          <blockquote key={key} className="my-1 border-l-2 border-border-hairline pl-3 text-text-muted">
             {renderTokens(token.children, resolvers, `${key}.`)}
           </blockquote>
         );
 
       case "heading": {
-        const size = token.level === 1 ? "text-lg" : token.level === 2 ? "text-base" : "text-sm";
+        // The content ramp, not Tailwind's: a heading inside a message is
+        // reading text one step up, not a page title.
+        const size = token.level === 1 ? "text-content-lg" : token.level === 2 ? "text-content-base" : "text-content-sm";
         return (
-          <strong key={key} className={`mt-1 block font-semibold ${size} text-on-surface`}>
+          <strong key={key} className={`mt-1 block font-medium ${size} text-text-strong`}>
             {renderTokens(token.children, resolvers, `${key}.`)}
           </strong>
         );
@@ -118,7 +120,7 @@ function renderTokens(tokens: Token[], resolvers: MentionResolvers, keyPrefix = 
           // in older messages, and showing them as live pings would claim a
           // notification went out that never did.
           return (
-            <span key={key} className="rounded px-1 text-fog-muted" title="This mention is no longer delivered">
+            <span key={key} className="rounded-md px-1 text-text-muted" title="This mention is no longer delivered">
               {token.label}
             </span>
           );
@@ -164,7 +166,7 @@ function renderTokens(tokens: Token[], resolvers: MentionResolvers, keyPrefix = 
           // No custom emoji exist until phase 6, so the readable fallback is
           // the name rather than a broken image.
           return (
-            <span key={key} className="text-fog-muted">
+            <span key={key} className="text-text-muted">
               {`:${token.name}:`}
             </span>
           );
@@ -186,7 +188,7 @@ function renderTokens(tokens: Token[], resolvers: MentionResolvers, keyPrefix = 
             // noreferrer as well as noopener: a member's link should not leak
             // which channel it was posted in.
             rel="noopener noreferrer nofollow ugc"
-            className="text-primary-container underline underline-offset-2 hover:brightness-110"
+            className="text-primary underline underline-offset-2 hover:brightness-110"
           >
             {token.label}
           </a>

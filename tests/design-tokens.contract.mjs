@@ -417,12 +417,18 @@ test("a class naming a token that does not exist only ever decreases", async () 
     turned this ratchet red over its own prose on the first run. Code only.
   */
   const { total, where } = await countAcross(/\bsurface-container-highest\b/g, { strip: true });
-  // 2 after phase 12b took the AutoMod kind menu's hover fill. That one was the
-  // worst of the three: the menu it dressed had no Escape and no outside-press
-  // either, so the only state that could have told you the thing was hoverable
-  // was the state that emitted no CSS. The two survivors are the course detail
-  // panel and `TerminalDashboard`, which phase 13b owns.
-  assert.ok(total <= 2, `a class naming an undefined token was added; found ${total} in: ${where.join(", ")}`);
+  /*
+    2 after phase 12b took the AutoMod kind menu's hover fill - the worst of the
+    three, because that menu had no Escape and no outside-press either, so the
+    only state that could have told you the thing was hoverable was the state
+    that emitted no CSS.
+
+    **0 after phase 13d**, which swept the files no phase ever owned; the course
+    detail panel's progress track was the last one. This stops being a ratchet
+    and becomes an absolute - a number that may only fall says nothing once the
+    population is empty, and the correct next value is the one it has. Lesson 92.
+  */
+  assert.equal(total, 0, `a class naming an undefined token came back: ${total} in ${where.join(", ")}`);
 });
 
 test("pure white fills only ever decrease", async () => {

@@ -239,10 +239,11 @@ test("the channel surface only ever loses Tailwind's own type scale", async () =
 
     39 when phase 13a measured it, over six files. 8 after 13b took the
     composer, the message menu, the thread panel, the header popovers and the
-    voice controls. **3 after 13c** took the member column and the profile card,
-    and all three are in the markdown renderer, which phase 13d owns - so this
-    ratchet reaches zero with the last file of the redesign and stops being a
-    ratchet then. Comments stripped, because a file that removes the class
+    voice controls. 3 after 13c took the member column and the profile card.
+    **0 after 13d** took the markdown renderer, so this is an absolute now
+    rather than a ratchet: there is nothing left to migrate here and a number
+    that may only fall would say nothing. A new `text-sm` fails this, and the
+    message names the file. Comments stripped, because a file that removes the class
     explains why in the docblock that mentions it (lesson 89).
   */
   const files = [
@@ -265,7 +266,7 @@ test("the channel surface only ever loses Tailwind's own type scale", async () =
     total += hits.length;
   }
 
-  assert.ok(total <= 3, `the default type scale grew to ${total}; Monolith's ramps are chrome-* and content-*: ${where.join(", ")}`);
+  assert.equal(total, 0, `the default type scale is back: ${total} sites; Monolith's ramps are chrome-* and content-*: ${where.join(", ")}`);
 
   // The files 13a and 13b rewrote are done, and a regression in any of them
   // would otherwise hide under the ratchet's slack.
@@ -283,12 +284,20 @@ test("the channel surface only ever loses Tailwind's own type scale", async () =
 });
 
 test("a link in a message is legible, not the shadcn surface accent", async () => {
-  // `--color-accent` is redefined further down globals.css as the shadcn dark
-  // surface, so `text-accent` painted links near-black on a near-black page.
-  // The rest of the app uses `text-primary-container` for links; so does this.
+  /*
+    `--color-accent` is redefined further down globals.css as the shadcn dark
+    surface, so `text-accent` painted links near-black on a near-black page.
+
+    Phase 13d retired the alias this used to pin: `text-primary-container` is
+    `text-primary`, the same colour by the name the system actually uses. The
+    ban is narrowed with it - `bg-accent-soft` is the accent at 12% and is
+    correct for a mention chip, so the thing to refuse is the bare `accent`
+    token, not every class that starts with it. Lesson 37: pin the invariant a
+    link is legible, not the spelling that satisfied it in 2026.
+  */
   const render = await readCode("src/lib/markdown/render.tsx");
-  assert.equal(/text-accent|bg-accent/.test(render), false);
-  assert.match(render, /text-primary-container underline/);
+  assert.equal(/(?:text|bg|border)-accent/.test(render), false);
+  assert.match(render, /text-primary underline/);
 });
 
 // --------------------------------------------------------------- phase P2

@@ -120,10 +120,10 @@ export function TableSkeleton({ label }: { label: string }) {
         <Skeleton className="h-11 w-32 rounded-md" />
       </div>
       <section className="terminal-card mt-6 overflow-hidden">
-        <div className="border-b border-surgical-steel p-4">
+        <div className="border-b border-border-hairline p-4">
           <Skeleton className="h-4 w-48" />
         </div>
-        <div className="divide-y divide-surgical-steel">
+        <div className="divide-y divide-border-hairline">
           {Array.from({ length: 8 }, (_, row) => (
             <div key={row} className="flex items-center gap-4 p-4">
               <Skeleton className="size-10 shrink-0 rounded-full" />

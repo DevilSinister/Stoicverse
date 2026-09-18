@@ -404,7 +404,7 @@ branch, it is stale, not a precedent.
 | Deep navy surfaces (`#051424`) with `surgical-steel` `#334155` rules | Achromatic near-black with `--border-hairline` `#242427` |
 | Emerald `#10B981` as the accent, also used decoratively | Electric lime `#C6F24E`, state and primary action only |
 | `.emerald-glow` is the primary-action shadow | No coloured glows. Elevation is hairline plus a near-black shadow |
-| `.terminal-card` — a 135° gradient panel | `ui/card.tsx`. Gradients are banned |
+| `.terminal-card` — a 135° gradient panel | Retargeted, not retired: it is now a hairline, 4px corners and `--surface-panel`, and the phase-12 settings screens use it. `.terminal-label` is mono 11px muted. Gradients are still banned |
 | Inter for display, body, navigation and forms | Geist. JetBrains Mono unchanged, for data and measurement |
 | Radii derived from one `--radius` via `calc()` | Flat, explicit, integer values |
 | `--color-primary` defined in two places, the later silently winning | One semantic system; `--color-primary` resolves once |

@@ -26,11 +26,11 @@ export function EnrollButton({ courseId }: { courseId: string }) {
       <button
         disabled={pending}
         onClick={handleEnroll}
-        className="rounded-lg bg-primary-container px-5 py-2 text-xs font-semibold uppercase text-on-primary-fixed hover:brightness-105 active:scale-95 transition disabled:opacity-60"
+        className="rounded-lg bg-primary px-5 py-2 text-chrome-base font-medium uppercase text-primary-foreground transition-colors hover:bg-primary/85 disabled:opacity-60"
       >
         {pending ? "Enrolling..." : "Enroll Now"}
       </button>
-      {error && <span className="text-[10px] text-red-400">{error}</span>}
+      {error && <span className="text-chrome-sm text-status-danger">{error}</span>}
     </div>
   );
 }
