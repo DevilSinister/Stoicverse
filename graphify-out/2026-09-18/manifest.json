@@ -205,8 +205,8 @@
     "semantic_hash": "b0517ee048d45b5cd5463430230eb52f"
   },
   "DESIGN.md": {
-    "mtime": 1789279130.090718,
-    "ast_hash": "ebe2ebb55417a84e5dc2e027f1bbd9c1",
+    "mtime": 1789735336.6860974,
+    "ast_hash": "f56d185d6ce133cd8cbf4622585d838c",
     "semantic_hash": ""
   },
   "PRODUCT.md": {
@@ -1470,8 +1470,8 @@
     "semantic_hash": ""
   },
   "tests/community-settings.contract.mjs": {
-    "mtime": 1789275078.5790315,
-    "ast_hash": "30137e3276d6f00ae497e4c89b1b7afd",
+    "mtime": 1789734032.5255368,
+    "ast_hash": "c8fccddd75e9f9c4bad3898643426d99",
     "semantic_hash": ""
   },
   "tests/community-settings.test.mjs": {
@@ -2000,13 +2000,13 @@
     "semantic_hash": ""
   },
   "src/components/channels/ChannelView.tsx": {
-    "mtime": 1789362207.050969,
-    "ast_hash": "9deeac4fc4a5ce371985d78b900fc52e",
+    "mtime": 1789734918.0315478,
+    "ast_hash": "b59e3452f4e12faefb260020246ad9b4",
     "semantic_hash": ""
   },
   "src/components/channels/ChannelsShell.tsx": {
-    "mtime": 1789327914.9018612,
-    "ast_hash": "2b851171738b4321ffc8556028092004",
+    "mtime": 1789734968.948462,
+    "ast_hash": "4baa5f0f2824804dc176019aa1816ce5",
     "semantic_hash": ""
   },
   "src/components/channels/CommunityProvider.tsx": {
@@ -2055,13 +2055,13 @@
     "semantic_hash": ""
   },
   "tests/channels.contract.mjs": {
-    "mtime": 1789325966.5176997,
-    "ast_hash": "efb61f840fe42990cb0914e3fe3cc199",
+    "mtime": 1789734202.675025,
+    "ast_hash": "2298ffe6a7a4d33cd09d79f1bb82047b",
     "semantic_hash": ""
   },
   "src/components/channels/ChannelHeaderPopovers.tsx": {
-    "mtime": 1789320996.5619793,
-    "ast_hash": "565bdb59a8d894c429286a6f1d12b1d5",
+    "mtime": 1789734943.6781256,
+    "ast_hash": "88fbf70d2c019c886788901a3e51296f",
     "semantic_hash": ""
   },
   "src/components/channels/MessageMenu.tsx": {
@@ -2295,8 +2295,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/RulesGateNotice.tsx": {
-    "mtime": 1789275078.3869917,
-    "ast_hash": "e05383d8365d72ed8aa424c132114837",
+    "mtime": 1789733969.7475817,
+    "ast_hash": "370f1effd4349871cc5b2341b999abf5",
     "semantic_hash": ""
   },
   "src/components/community/settings/SafetySection.tsx": {

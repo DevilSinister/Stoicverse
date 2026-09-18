@@ -205,8 +205,8 @@
     "semantic_hash": "b0517ee048d45b5cd5463430230eb52f"
   },
   "DESIGN.md": {
-    "mtime": 1789735336.6860974,
-    "ast_hash": "f56d185d6ce133cd8cbf4622585d838c",
+    "mtime": 1789736628.0008926,
+    "ast_hash": "a70fbb7fe804acc564192a5693ab2c7f",
     "semantic_hash": ""
   },
   "PRODUCT.md": {
@@ -2015,8 +2015,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/Composer.tsx": {
-    "mtime": 1789665005.142625,
-    "ast_hash": "c0c0e3e2f513a57d947ad45eb2ce3724",
+    "mtime": 1789735649.4352813,
+    "ast_hash": "b9b34afa21e7ff1fd2328dba598d2a16",
     "semantic_hash": ""
   },
   "src/lib/channels/grouping.ts": {
@@ -2055,23 +2055,23 @@
     "semantic_hash": ""
   },
   "tests/channels.contract.mjs": {
-    "mtime": 1789734202.675025,
-    "ast_hash": "2298ffe6a7a4d33cd09d79f1bb82047b",
+    "mtime": 1789735991.607503,
+    "ast_hash": "c0535e64eb31438ed08b2b60f37d471a",
     "semantic_hash": ""
   },
   "src/components/channels/ChannelHeaderPopovers.tsx": {
-    "mtime": 1789734943.6781256,
-    "ast_hash": "88fbf70d2c019c886788901a3e51296f",
+    "mtime": 1789735938.5017223,
+    "ast_hash": "afebf3cdc91462284ee6cd9dc96a3d4e",
     "semantic_hash": ""
   },
   "src/components/channels/MessageMenu.tsx": {
-    "mtime": 1789665014.674642,
-    "ast_hash": "ce8c3b6e7ced9413d9c92bdc7977eb3b",
+    "mtime": 1789735825.1589978,
+    "ast_hash": "13a2429766b278da73518bd60b07725a",
     "semantic_hash": ""
   },
   "src/components/channels/ThreadPanel.tsx": {
-    "mtime": 1789320996.5739238,
-    "ast_hash": "930bb9726b3d5b594ab5d5ad96842b71",
+    "mtime": 1789736329.3724148,
+    "ast_hash": "7bcf8d185ddb5dc06608d6f9d2a95388",
     "semantic_hash": ""
   },
   "src/lib/channels/message-actions.ts": {
@@ -2250,8 +2250,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/VoiceRecorder.tsx": {
-    "mtime": 1789320996.5749235,
-    "ast_hash": "72cbf7baf92e01013aa5bb3423ec7578",
+    "mtime": 1789735706.8798063,
+    "ast_hash": "698bcb0b7195e3750d163a7142b1c377",
     "semantic_hash": ""
   },
   "supabase/migrations/20260912150000_voice_notes.sql": {
@@ -2270,13 +2270,13 @@
     "semantic_hash": ""
   },
   "src/components/channels/VoicePlayer.tsx": {
-    "mtime": 1789362207.0566726,
-    "ast_hash": "d1f8a84cb49fefbf95f1acbad5051ff8",
+    "mtime": 1789735706.8798063,
+    "ast_hash": "439afcf7699acfe54967c127da70c4e8",
     "semantic_hash": ""
   },
   "src/components/channels/Waveform.tsx": {
-    "mtime": 1789275078.3916428,
-    "ast_hash": "3d035c980d13f0e7f9968f5c5727fb4a",
+    "mtime": 1789735706.8798063,
+    "ast_hash": "654e5512a19344c4cac89c5ae8d49ef1",
     "semantic_hash": ""
   },
   "src/lib/channels/waveform.ts": {
