@@ -148,16 +148,3 @@ test("the sitemap lists only what a signed-out visitor can read", async () => {
   }
   assert.doesNotMatch(sitemap, /\$\{baseUrl\}\/checkout/, "checkout is signed-in and not a sitemap URL");
 });
-
-test("the phase 5 screens carry no pre-Monolith alias", async () => {
-  // The alias block in globals.css is deleted when the last screen stops using
-  // it; a screen this phase touched putting one back is how that date recedes.
-  const aliases = /\b(?:bg|text|border|divide|ring)-(?:surgical-steel|fog-muted|monolith-surface|on-surface|on-surface-variant|primary-container|on-primary-fixed|surface-container-(?:low|high|lowest))\b|\bemerald-glow\b/;
-  for (const file of [
-    "src/components/checkout/CheckoutScreen.tsx",
-    "src/components/checkout/CheckoutSuccessScreen.tsx",
-    "src/components/settings/DeletionPendingScreen.tsx",
-  ]) {
-    assert.doesNotMatch(await read(file), aliases, `${file} still speaks the pre-Monolith names`);
-  }
-});

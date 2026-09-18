@@ -92,27 +92,74 @@ test("the Monolith semantic roles are defined once, in the dark block", async ()
   assert.equal(primaryDeclarations.length, 1, "--color-primary is declared exactly once");
 });
 
-test("every deprecated alias still resolves, so nothing loses its colour mid-migration", async () => {
+test("the deprecated vocabulary is gone, and nothing speaks it", async () => {
+  /*
+    The inverse of the assertion that stood here for the whole migration.
+
+    That one said every alias must still resolve, because ~2,600 call sites
+    depended on them and a missing alias is not a build error - it is a border
+    that silently stops being drawn. Phase 14 deleted the block, so the promise
+    flips: these names must now resolve to nothing, and nothing may name them.
+
+    Both halves matter and the second is the one that bites. With the block
+    gone, `bg-surgical-steel` is not an error and not a wrong colour - it is no
+    CSS at all, on a near-black page, which is lesson 47's exact failure. The
+    stylesheet half alone would pass while a screen quietly painted nothing.
+
+    This also supersedes `checkout.contract.mjs`'s "the phase 5 screens carry no
+    pre-Monolith alias", which banned the same names across three files while
+    the migration was still running. Two assertions for one invariant is two
+    rules that can disagree; the narrow one was deleted here rather than left to
+    drift.
+  */
   const css = await read("src/app/globals.css");
-  // ~2,600 call sites resolve through these. A missing alias is not a build
-  // error - it is a border that silently stops being drawn.
-  for (const alias of [
-    "--color-surface",
-    "--color-surface-container-lowest",
-    "--color-surface-container-low",
-    "--color-surface-container-high",
-    "--color-surface-variant",
-    "--color-monolith-surface",
-    "--color-surgical-steel",
-    "--color-fog-muted",
-    "--color-on-surface",
-    "--color-on-surface-variant",
-    "--color-primary-container",
-    "--color-on-primary-fixed",
-    "--color-error",
-  ]) {
-    assert.match(css, new RegExp(`${alias}: var\\(--`), `${alias} points at a semantic role`);
+  const retired = [
+    "surface-container-lowest",
+    "surface-container-low",
+    "surface-container-high",
+    "surface-container-highest",
+    "surface-variant",
+    "monolith-surface",
+    "surgical-steel",
+    "fog-muted",
+    "on-surface",
+    "on-surface-variant",
+    "primary-container",
+    "on-primary-fixed",
+    "error",
+    "secondary-container",
+  ];
+
+  const declarations = stripComments(css);
+  for (const name of retired) {
+    assert.doesNotMatch(
+      declarations,
+      new RegExp(`^\\s*--color-${name}\\s*:`, "m"),
+      `--color-${name} is back in globals.css; the alias block was deleted in phase 14`,
+    );
   }
+
+  // `--color-surface` was the alias for the canvas and is retired with the
+  // rest. The semantic names it stood in for - `surface-canvas` and friends -
+  // are asserted by the first test in this file, and the anchored match keeps
+  // the longer names out of this one.
+  assert.doesNotMatch(declarations, /^\s*--color-surface\s*:/m, "--color-surface is the retired alias");
+
+  const prefixes = "bg|text|border|ring|fill|stroke|divide|from|via|to|outline|decoration|accent|caret|placeholder";
+  const pattern = new RegExp(`(?<![a-z-])(?:${prefixes})-(?:${retired.join("|")})(?![a-z0-9-])`, "g");
+  const { total, where } = await countAcross(pattern, { strip: true });
+  assert.equal(total, 0, `a retired alias is named in: ${where.join(", ")}; it now emits no CSS at all`);
+
+  /*
+    Two more of the same family, and one deliberate survivor. The legacy type
+    scale is gone from the stylesheet and the coloured glow with it;
+    `terminal-card` stays, because it was retargeted onto the Monolith tokens
+    rather than deprecated and the settings screens use it. That is why this
+    test names specific classes instead of anything that sounds old.
+  */
+  assert.doesNotMatch(declarations, /^\s*--text-(?:body|headline|label|code-block|display-lg)/m);
+  assert.doesNotMatch(declarations, /\.emerald-glow\s*\{/);
+  assert.match(declarations, /\.terminal-card\s*\{/, "terminal-card is current, not legacy");
 
   // shadcn's --accent is a hover fill. Pointing it at the brand accent paints
   // every menu hover lime with near-white text on it, about 1.2:1.

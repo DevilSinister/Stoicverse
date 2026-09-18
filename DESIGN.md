@@ -10,6 +10,13 @@ code is the source of truth and this document is the bug. Exact token values liv
 > *reversed* — pill-shaped buttons, `text-white` headings, emerald as accent, gradient panels —
 > are listed under "Reversed rules" so nobody re-introduces them from memory or an older branch.
 
+> **The migration is finished (phase 14, 2026-09-18).** The deprecated alias block is deleted from
+> `globals.css`, along with the legacy type scale and `.emerald-glow`. The pre-Monolith names —
+> `surgical-steel`, `fog-muted`, `monolith-surface`, `on-surface`, `primary-container`, the rest —
+> now resolve to **nothing at all**: a class naming one emits no CSS, which on a near-black page is
+> an invisible element rather than a wrong colour. `design-tokens.contract.mjs` asserts both that
+> they are absent from the stylesheet and that no source file names one.
+
 ---
 
 ## Direction

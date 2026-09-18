@@ -28,23 +28,13 @@ import { extendTailwindMerge } from "tailwind-merge"
   reintroduces exactly this bug, and nothing about it is visible in review.
 */
 export const MONOLITH_FONT_SIZES = [
-  "body-lg",
-  "body-md",
-  "body-sm",
   "chrome-base",
   "chrome-sm",
   "chrome-xs",
-  "code-block",
   "content-base",
   "content-lg",
   "content-sm",
   "display",
-  "display-lg",
-  "display-lg-mobile",
-  "headline-md",
-  "headline-sm",
-  "label-md",
-  "label-sm",
   "mono-sm",
   "mono-xs",
   "title-lg",

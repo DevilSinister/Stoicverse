@@ -161,32 +161,14 @@
   --text-mono-sm: 12px;
   --text-mono-sm--line-height: 1.35;
 
-  /* Legacy type scale. Still in use (text-label-sm 13 sites, text-body-sm 5,
-     text-display-lg 3); retained so nothing loses its size mid-migration. */
-  --text-body-md: 16px;
-  --text-body-md--line-height: 1.5;
-  --text-headline-md: 32px;
-  --text-headline-md--line-height: 1.2;
-  --text-headline-md--letter-spacing: -0.01em;
-  --text-body-sm: 14px;
-  --text-body-sm--line-height: 1.4;
-  --text-headline-sm: 24px;
-  --text-headline-sm--line-height: 1.3;
-  --text-label-sm: 12px;
-  --text-label-sm--line-height: 1.2;
-  --text-display-lg-mobile: 36px;
-  --text-display-lg-mobile--line-height: 1.2;
-  --text-display-lg-mobile--letter-spacing: -0.02em;
-  --text-code-block: 14px;
-  --text-code-block--line-height: 1.6;
-  --text-display-lg: 48px;
-  --text-display-lg--line-height: 1.1;
-  --text-display-lg--letter-spacing: -0.02em;
-  --text-label-md: 14px;
-  --text-label-md--line-height: 1.2;
-  --text-label-md--letter-spacing: 0.02em;
-  --text-body-lg: 18px;
-  --text-body-lg--line-height: 1.6;
+  /*
+    The legacy type scale lived here: ten sizes from the system Monolith
+    replaced, kept so nothing lost its size mid-migration. Phase 13d took the
+    last call site and phase 14 removed them, together with the matching entries
+    in `MONOLITH_FONT_SIZES` - the two are one decision, and a size in the
+    stylesheet that cn does not know is the silent text-colour deletion that
+    `design-tokens.contract.mjs` exists to catch.
+  */
 }
 
 /* ---------------------------------------------------------------------------
@@ -219,47 +201,27 @@
   --color-status-ok: var(--status-ok);
   --color-scrim: var(--scrim);
 
-  /* ---- DEPRECATED ALIASES ------------------------------------------------
-     The pre-Monolith names, retargeted onto the semantic roles. Roughly 2,600
-     call sites resolve through these, so retargeting them re-skins the product
-     without editing a single .tsx file. Each screen phase renames the surface it
-     touches; this block is deleted when the last one lands.
+  /* ---- THE ALIASES ARE GONE (phase 14, 2026-09-18) ----------------------
+     Thirteen colour names and thirteen font names used to live here: the
+     pre-Monolith vocabulary, retargeted onto the semantic roles so ~2,600 call
+     sites could be re-skinned without editing a single .tsx file. Each screen
+     phase retired the ones on the surface it touched; 13d swept the files no
+     phase owned, and this block outlived its last call site.
 
-     Relative depth is preserved exactly - sunken < canvas < panel < raised - so
-     nothing that was recessed becomes flush. That ordering is the load-bearing
-     part; get it wrong and the rail disappears into the page.
+     Deleted after an audit rather than by eye: every `--color-*` declared in
+     this file was checked against every class prefix that can name one, plus
+     `var(--color-*)` in source. Twenty-seven were named by nothing. Thirteen of
+     those were this block and are gone; `secondary-container` went with them.
+     The shadcn leftovers - `sidebar-*`, `chart-2` to `chart-5`, `card`,
+     `card-foreground` - are *also* named by nothing but are not this migration's
+     to delete: they are that kit's namespace, and a primitive added tomorrow
+     expects them.
+
+     `design-tokens.contract.mjs` now asserts the absence that this comment
+     describes, so the names cannot come back quietly. A class naming one emits
+     no CSS at all - which is exactly the failure lesson 47 was written about,
+     and the reason the assertion exists rather than a note.
      ---------------------------------------------------------------------- */
-  --color-surface: var(--surface-canvas);
-  --color-surface-container-lowest: var(--surface-sunken);
-  --color-surface-container-low: var(--surface-panel);
-  --color-surface-container-high: var(--surface-raised);
-  --color-surface-variant: var(--surface-raised);
-  --color-monolith-surface: var(--surface-panel);
-  --color-surgical-steel: var(--border-hairline);
-  --color-fog-muted: var(--text-muted);
-  --color-on-surface: var(--text-default);
-  --color-on-surface-variant: var(--text-default);
-  --color-primary-container: var(--accent);
-  --color-on-primary-fixed: var(--accent-contrast);
-  --color-error: var(--status-danger);
-  --color-secondary: var(--text-default);
-  --color-secondary-container: var(--surface-raised);
-
-  /* Legacy font aliases, all resolving to the two real families. */
-  --font-body: var(--font-sans);
-  --font-body-sm: var(--font-sans);
-  --font-body-md: var(--font-sans);
-  --font-body-lg: var(--font-sans);
-  --font-headline: var(--font-sans);
-  --font-headline-sm: var(--font-sans);
-  --font-headline-md: var(--font-sans);
-  --font-display: var(--font-sans);
-  --font-display-lg: var(--font-sans);
-  --font-display-lg-mobile: var(--font-sans);
-  --font-label: var(--font-mono);
-  --font-label-sm: var(--font-mono);
-  --font-label-md: var(--font-mono);
-  --font-code-block: var(--font-mono);
 
   /* shadcn namespace. --color-primary is defined here and only here; it used to
      be declared twice, with the later declaration silently winning, so
@@ -291,6 +253,16 @@
   --color-accent: var(--surface-raised);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
+  /*
+    `--color-secondary` was declared in the deprecated alias block and nowhere
+    else, as `var(--text-default)` - a *text* colour used as a fill. So
+    `ui/badge`'s secondary variant painted #C9C9CE on #C9C9CE: the same grey for
+    the chip and its label, about 1:1. Deleting the block is what surfaced it,
+    because the class then resolved to nothing at all and the audit asked who
+    still named it. It belongs in this namespace, on the raised surface the
+    `.dark` block has been carrying for it all along.
+  */
+  --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
@@ -393,12 +365,14 @@
   .focus-ring:focus-visible {
     outline-color: var(--accent);
   }
-  /* DEPRECATED. Was a coloured halo; Monolith has no coloured glows, so this is
-     now the ordinary raised shadow. The name survives only because 16 sites still
-     reference it - they are removed as their screens are redesigned. */
-  .emerald-glow {
-    box-shadow: var(--shadow-md), var(--inset-shadow-hairline);
-  }
+  /*
+    `.emerald-glow` was here: the previous system's primary-action shadow, a
+    coloured halo. Monolith has none, so it had already been redefined as the
+    ordinary raised shadow - which is why removing a call site changed nothing
+    visible and why the last sixteen took until phase 12 to find. Zero call
+    sites since, and the utility is gone with the aliases it belonged to.
+  */
+
 }
 
 @layer base {
