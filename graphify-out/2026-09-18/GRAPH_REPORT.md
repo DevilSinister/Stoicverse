@@ -1,7 +1,7 @@
-# Graph Report - StoicWealthSociety  (2026-09-18)
+# Graph Report - StoicWealthSociety  (2026-09-17)
 
 ## Corpus Check
-- 492 files · ~436,741 words
+- 492 files · ~434,740 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f9f7ae12`
+- Built from commit: `051aa62b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -144,7 +144,7 @@
 - design-tokens.contract.mjs
 - requireInfluencerWorkspace
 - overview/route.ts
-- ChannelView.tsx
+- ChannelView
 - VoiceRecorder.tsx
 - react-dom
 - @dnd-kit/utilities
@@ -162,7 +162,7 @@
 - channels.contract.mjs
 - MessageMenu.tsx
 - presence.ts
-- CommunityProvider.tsx
+- ChannelView.tsx
 - toggle-group.tsx
 - auth/actions.ts
 - lucide-react
@@ -226,8 +226,8 @@ Cohesion: 0.08
 Nodes (40): GET(), runtime, ActionResult, addCourseVideo(), addLesson(), createCourse(), deleteCourse(), deleteCourseVideo() (+32 more)
 
 ### Community 4 - "tokenize.ts"
-Cohesion: 0.19
-Nodes (13): collectMentions(), Cursor, ENTITY_PATTERNS, INLINE_DELIMITERS, isWordChar(), JUMBO_EMOJI_LIMIT, MAX_DEPTH, MentionKind (+5 more)
+Cohesion: 0.14
+Nodes (18): EMPTY, MarkdownBody(), MentionResolvers, renderTokens(), collectMentions(), Cursor, ENTITY_PATTERNS, INLINE_DELIMITERS (+10 more)
 
 ### Community 5 - "EventsView.tsx"
 Cohesion: 0.22
@@ -478,8 +478,8 @@ Cohesion: 0.09
 Nodes (32): access(), creatorSupabase(), deleteChannelOverride(), deleteCommunityStructure(), reorderCommunityStructure(), Result, saveCategory(), saveChannel() (+24 more)
 
 ### Community 95 - "ChannelsShell.tsx"
-Cohesion: 0.14
-Nodes (16): setChannelNotificationLevel(), CHANNEL_ICONS, ChannelLink(), ChannelNav(), ChannelsShell(), LEVEL_LABEL, ShellSkeleton(), useCommunity() (+8 more)
+Cohesion: 0.16
+Nodes (13): setChannelNotificationLevel(), CHANNEL_ICONS, ChannelLink(), ChannelsShell(), LEVEL_LABEL, ShellSkeleton(), MobilePaneDrawer(), isTypingTarget() (+5 more)
 
 ### Community 96 - "SetPasswordForm.tsx"
 Cohesion: 0.19
@@ -593,9 +593,9 @@ Nodes (13): CheckoutSuccessPage(), CreatorWorkspaceLayout(), CreatorMembersPage(
 Cohesion: 0.67
 Nodes (3): dynamic, GET(), PERIODS
 
-### Community 157 - "ChannelView.tsx"
+### Community 157 - "ChannelView"
 Cohesion: 0.11
-Nodes (23): ChannelPage(), dynamic, ChannelView(), dayOf(), MessageRow(), timeOf(), ATTACHMENT_URL_TTL_SECONDS, attachmentPathsOf() (+15 more)
+Nodes (19): ChannelView(), dayOf(), continuesGroup(), firstUnreadIndex(), GROUP_WINDOW_MS, GroupableMessage, startsNewDay(), activeMentionQuery() (+11 more)
 
 ### Community 158 - "VoiceRecorder.tsx"
 Cohesion: 0.17
@@ -637,9 +637,9 @@ Nodes (38): ForwardDialog(), CONTEXT_PARTS, DROPDOWN_PARTS, Pending, ACCOUNT_LAB
 Cohesion: 0.26
 Nodes (10): TypingPayload, useCommunityLive(), activeTypists(), groupMembers(), MemberLike, MemberSection, onlineIdsFrom(), TYPING_TTL_MS (+2 more)
 
-### Community 186 - "CommunityProvider.tsx"
-Cohesion: 0.19
-Nodes (16): ChannelRow, CommunityContext, CommunityProvider(), CommunityValue, mergeMessage(), MobilePane, useChannelLive(), useThreadLive() (+8 more)
+### Community 186 - "ChannelView.tsx"
+Cohesion: 0.16
+Nodes (22): Pinned, PinsPopover(), Thread, ThreadListPopover(), useLazyRows(), ChannelNav(), MessageRow(), timeOf() (+14 more)
 
 ### Community 188 - "toggle-group.tsx"
 Cohesion: 0.27
@@ -650,8 +650,8 @@ Cohesion: 0.18
 Nodes (17): POST(), runtime, POST(), GET(), PATCH(), GET(), appOrigin(), AuthActionState (+9 more)
 
 ### Community 193 - "Composer.tsx"
-Cohesion: 0.14
-Nodes (17): Pinned, PinsPopover(), Thread, ThreadListPopover(), useLazyRows(), Composer(), PendingAttachment, Popover() (+9 more)
+Cohesion: 0.20
+Nodes (13): ChannelPage(), dynamic, Composer(), PendingAttachment, Popover(), PopoverContent(), PopoverTrigger(), ATTACHMENT_URL_TTL_SECONDS (+5 more)
 
 ### Community 196 - "combobox.tsx"
 Cohesion: 0.09
@@ -681,5 +681,5 @@ _Questions this graph is uniquely positioned to answer:_
   _Cohesion score 0.07769423558897243 - nodes in this community are weakly interconnected._
 - **Should `CreatorCourseManagerV2.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.08333333333333333 - nodes in this community are weakly interconnected._
-- **Should `AccountSettingsWorkspace.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.059676044330775786 - nodes in this community are weakly interconnected._
+- **Should `tokenize.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.13768115942028986 - nodes in this community are weakly interconnected._

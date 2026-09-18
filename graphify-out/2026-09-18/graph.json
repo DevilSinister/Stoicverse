@@ -2234,8 +2234,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_channels_channelid_page",
-      "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community": 193,
+      "community_name": "Composer.tsx",
       "norm_label": "[channelid]/page.tsx"
     },
     {
@@ -2245,8 +2245,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_channels_channelid_page_dynamic",
-      "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community": 193,
+      "community_name": "Composer.tsx",
       "norm_label": "dynamic"
     },
     {
@@ -2256,8 +2256,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_app_channels_channelid_page_channelpage",
-      "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community": 193,
+      "community_name": "Composer.tsx",
       "norm_label": "channelpage()"
     },
     {
@@ -6194,8 +6194,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_channels_channelheaderpopovers",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 186,
+      "community_name": "ChannelView.tsx",
       "norm_label": "channelheaderpopovers.tsx"
     },
     {
@@ -6205,8 +6205,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_channels_channelheaderpopovers_pinned",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 186,
+      "community_name": "ChannelView.tsx",
       "norm_label": "pinned"
     },
     {
@@ -6216,8 +6216,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_channels_channelheaderpopovers_thread",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 186,
+      "community_name": "ChannelView.tsx",
       "norm_label": "thread"
     },
     {
@@ -6227,8 +6227,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_components_channels_channelheaderpopovers_uselazyrows",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 186,
+      "community_name": "ChannelView.tsx",
       "norm_label": "uselazyrows()"
     },
     {
@@ -6238,19 +6238,19 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "src_components_channels_channelheaderpopovers_pinspopover",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 186,
+      "community_name": "ChannelView.tsx",
       "norm_label": "pinspopover()"
     },
     {
       "label": "ThreadListPopover()",
       "file_type": "code",
       "source_file": "src/components/channels/ChannelHeaderPopovers.tsx",
-      "source_location": "L181",
+      "source_location": "L175",
       "_origin": "ast",
       "id": "src_components_channels_channelheaderpopovers_threadlistpopover",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 186,
+      "community_name": "ChannelView.tsx",
       "norm_label": "threadlistpopover()"
     },
     {
@@ -6260,7 +6260,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_channels_channelview",
-      "community": 157,
+      "community": 186,
       "community_name": "ChannelView.tsx",
       "norm_label": "channelview.tsx"
     },
@@ -6271,7 +6271,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "src_components_channels_channelview_timeof",
-      "community": 157,
+      "community": 186,
       "community_name": "ChannelView.tsx",
       "norm_label": "timeof()"
     },
@@ -6283,7 +6283,7 @@
       "_origin": "ast",
       "id": "src_components_channels_channelview_dayof",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "dayof()"
     },
     {
@@ -6293,7 +6293,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "src_components_channels_channelview_attachments",
-      "community": 157,
+      "community": 186,
       "community_name": "ChannelView.tsx",
       "norm_label": "attachments()"
     },
@@ -6312,7 +6312,7 @@
       "label": "InlineEditor()",
       "file_type": "code",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L160",
+      "source_location": "L157",
       "_origin": "ast",
       "id": "src_components_channels_channelview_inlineeditor",
       "community": 72,
@@ -6323,10 +6323,10 @@
       "label": "ForwardedCard()",
       "file_type": "code",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L241",
+      "source_location": "L231",
       "_origin": "ast",
       "id": "src_components_channels_channelview_forwardedcard",
-      "community": 157,
+      "community": 186,
       "community_name": "ChannelView.tsx",
       "norm_label": "forwardedcard()"
     },
@@ -6334,10 +6334,10 @@
       "label": "MessageRow()",
       "file_type": "code",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L284",
+      "source_location": "L274",
       "_origin": "ast",
       "id": "src_components_channels_channelview_messagerow",
-      "community": 157,
+      "community": 186,
       "community_name": "ChannelView.tsx",
       "norm_label": "messagerow()"
     },
@@ -6345,11 +6345,11 @@
       "label": "ChannelView()",
       "file_type": "code",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L486",
+      "source_location": "L463",
       "_origin": "ast",
       "id": "src_components_channels_channelview_channelview",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "channelview()"
     },
     {
@@ -6400,18 +6400,18 @@
       "label": "ChannelNav()",
       "file_type": "code",
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L173",
+      "source_location": "L156",
       "_origin": "ast",
       "id": "src_components_channels_channelsshell_channelnav",
-      "community": 95,
-      "community_name": "ChannelsShell.tsx",
+      "community": 186,
+      "community_name": "ChannelView.tsx",
       "norm_label": "channelnav()"
     },
     {
       "label": "ChannelsShell()",
       "file_type": "code",
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L268",
+      "source_location": "L245",
       "_origin": "ast",
       "id": "src_components_channels_channelsshell_channelsshell",
       "community": 95,
@@ -6422,7 +6422,7 @@
       "label": "ShellSkeleton()",
       "file_type": "code",
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L438",
+      "source_location": "L402",
       "_origin": "ast",
       "id": "src_components_channels_channelsshell_shellskeleton",
       "community": 95,
@@ -6437,7 +6437,7 @@
       "_origin": "ast",
       "id": "src_components_channels_communityprovider",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "communityprovider.tsx"
     },
     {
@@ -6448,7 +6448,7 @@
       "_origin": "ast",
       "id": "src_components_channels_communityprovider_channelrow",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "channelrow"
     },
     {
@@ -6459,7 +6459,7 @@
       "_origin": "ast",
       "id": "src_components_channels_communityprovider_communityvalue",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "communityvalue"
     },
     {
@@ -6470,7 +6470,7 @@
       "_origin": "ast",
       "id": "src_components_channels_communityprovider_mobilepane",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "mobilepane"
     },
     {
@@ -6481,7 +6481,7 @@
       "_origin": "ast",
       "id": "src_components_channels_communityprovider_communitycontext",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "communitycontext"
     },
     {
@@ -6491,8 +6491,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "src_components_channels_communityprovider_usecommunity",
-      "community": 95,
-      "community_name": "ChannelsShell.tsx",
+      "community": 186,
+      "community_name": "ChannelView.tsx",
       "norm_label": "usecommunity()"
     },
     {
@@ -6503,7 +6503,7 @@
       "_origin": "ast",
       "id": "src_components_channels_communityprovider_communityprovider",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "communityprovider()"
     },
     {
@@ -6514,7 +6514,7 @@
       "_origin": "ast",
       "id": "src_components_channels_communityprovider_usechannellive",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "usechannellive()"
     },
     {
@@ -6525,7 +6525,7 @@
       "_origin": "ast",
       "id": "src_components_channels_communityprovider_usethreadlive",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "usethreadlive()"
     },
     {
@@ -6536,7 +6536,7 @@
       "_origin": "ast",
       "id": "src_components_channels_communityprovider_mergemessage",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "mergemessage()"
     },
     {
@@ -6920,8 +6920,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_channels_rulesgatenotice",
-      "community": 95,
-      "community_name": "ChannelsShell.tsx",
+      "community": 186,
+      "community_name": "ChannelView.tsx",
       "norm_label": "rulesgatenotice.tsx"
     },
     {
@@ -6931,8 +6931,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_channels_rulesgatenotice_rulesgatenotice",
-      "community": 95,
-      "community_name": "ChannelsShell.tsx",
+      "community": 186,
+      "community_name": "ChannelView.tsx",
       "norm_label": "rulesgatenotice()"
     },
     {
@@ -7031,7 +7031,7 @@
       "_origin": "ast",
       "id": "src_components_channels_threadpanel",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "threadpanel.tsx"
     },
     {
@@ -7042,7 +7042,7 @@
       "_origin": "ast",
       "id": "src_components_channels_threadpanel_threadpanel",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "threadpanel()"
     },
     {
@@ -7251,7 +7251,7 @@
       "_origin": "ast",
       "id": "src_components_channels_useunread",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "useunread.ts"
     },
     {
@@ -7262,7 +7262,7 @@
       "_origin": "ast",
       "id": "src_components_channels_useunread_useunread",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "useunread()"
     },
     {
@@ -15027,8 +15027,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_channels_attachment_urls",
-      "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community": 193,
+      "community_name": "Composer.tsx",
       "norm_label": "attachment-urls.ts"
     },
     {
@@ -15038,8 +15038,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_lib_channels_attachment_urls_attachment_url_ttl_seconds",
-      "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community": 193,
+      "community_name": "Composer.tsx",
       "norm_label": "attachment_url_ttl_seconds"
     },
     {
@@ -15049,8 +15049,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_lib_channels_attachment_urls_signattachmenturls",
-      "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community": 193,
+      "community_name": "Composer.tsx",
       "norm_label": "signattachmenturls()"
     },
     {
@@ -15060,8 +15060,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_lib_channels_attachment_urls_attachmentpathsof",
-      "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community": 193,
+      "community_name": "Composer.tsx",
       "norm_label": "attachmentpathsof()"
     },
     {
@@ -15105,7 +15105,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_grouping",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "grouping.ts"
     },
     {
@@ -15116,7 +15116,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_grouping_group_window_ms",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "group_window_ms"
     },
     {
@@ -15127,7 +15127,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_grouping_groupablemessage",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "groupablemessage"
     },
     {
@@ -15138,7 +15138,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_grouping_continuesgroup",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "continuesgroup()"
     },
     {
@@ -15149,7 +15149,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_grouping_startsnewday",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "startsnewday()"
     },
     {
@@ -15160,7 +15160,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_grouping_firstunreadindex",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "firstunreadindex()"
     },
     {
@@ -15170,8 +15170,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_channels_mentions",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 157,
+      "community_name": "ChannelView",
       "norm_label": "mentions.ts"
     },
     {
@@ -15181,8 +15181,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_lib_channels_mentions_mentiontarget",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 157,
+      "community_name": "ChannelView",
       "norm_label": "mentiontarget"
     },
     {
@@ -15192,8 +15192,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_lib_channels_mentions_mentiondictionary",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 157,
+      "community_name": "ChannelView",
       "norm_label": "mentiondictionary"
     },
     {
@@ -15203,8 +15203,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_lib_channels_mentions_empty",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 157,
+      "community_name": "ChannelView",
       "norm_label": "empty"
     },
     {
@@ -15225,8 +15225,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_lib_channels_mentions_decodementions",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 157,
+      "community_name": "ChannelView",
       "norm_label": "decodementions()"
     },
     {
@@ -15236,8 +15236,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "src_lib_channels_mentions_activementionquery",
-      "community": 193,
-      "community_name": "Composer.tsx",
+      "community": 157,
+      "community_name": "ChannelView",
       "norm_label": "activementionquery()"
     },
     {
@@ -15336,7 +15336,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_permissions",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "channels/permissions.ts"
     },
     {
@@ -15347,7 +15347,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_permissions_composerstate",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "composerstate"
     },
     {
@@ -15358,7 +15358,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_permissions_affordances",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "affordances"
     },
     {
@@ -15369,7 +15369,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_permissions_affordanceinput",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "affordanceinput"
     },
     {
@@ -15380,7 +15380,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_permissions_has",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "has()"
     },
     {
@@ -15391,7 +15391,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_permissions_deriveaffordances",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "deriveaffordances()"
     },
     {
@@ -15402,7 +15402,7 @@
       "_origin": "ast",
       "id": "src_lib_channels_permissions_composer_notice",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "composer_notice"
     },
     {
@@ -18404,8 +18404,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "src_lib_community_messages_loadchannelmessages",
-      "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community": 193,
+      "community_name": "Composer.tsx",
       "norm_label": "loadchannelmessages()"
     },
     {
@@ -18657,8 +18657,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_markdown_render",
-      "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community": 4,
+      "community_name": "tokenize.ts",
       "norm_label": "render.tsx"
     },
     {
@@ -18668,8 +18668,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_lib_markdown_render_mentionresolvers",
-      "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community": 4,
+      "community_name": "tokenize.ts",
       "norm_label": "mentionresolvers"
     },
     {
@@ -18679,8 +18679,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_lib_markdown_render_empty",
-      "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community": 4,
+      "community_name": "tokenize.ts",
       "norm_label": "empty"
     },
     {
@@ -18690,8 +18690,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_lib_markdown_render_spoiler",
-      "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community": 4,
+      "community_name": "tokenize.ts",
       "norm_label": "spoiler()"
     },
     {
@@ -18701,8 +18701,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "src_lib_markdown_render_rendertokens",
-      "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community": 4,
+      "community_name": "tokenize.ts",
       "norm_label": "rendertokens()"
     },
     {
@@ -18712,8 +18712,8 @@
       "source_location": "L201",
       "_origin": "ast",
       "id": "src_lib_markdown_render_markdownbody",
-      "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community": 4,
+      "community_name": "tokenize.ts",
       "norm_label": "markdownbody()"
     },
     {
@@ -18767,8 +18767,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_lib_markdown_tokenize_token",
-      "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community": 4,
+      "community_name": "tokenize.ts",
       "norm_label": "token"
     },
     {
@@ -18877,7 +18877,7 @@
       "source_location": "L350",
       "_origin": "ast",
       "id": "src_lib_markdown_tokenize_isjumboemoji",
-      "community": 157,
+      "community": 186,
       "community_name": "ChannelView.tsx",
       "norm_label": "isjumboemoji()"
     },
@@ -20000,7 +20000,7 @@
       "_origin": "ast",
       "id": "src_lib_supabase_client",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "client.ts"
     },
     {
@@ -20011,7 +20011,7 @@
       "_origin": "ast",
       "id": "src_lib_supabase_client_createclient",
       "community": 186,
-      "community_name": "CommunityProvider.tsx",
+      "community_name": "ChannelView.tsx",
       "norm_label": "createclient()"
     },
     {
@@ -20473,7 +20473,7 @@
       "_origin": "ast",
       "id": "tests_channels_helpers_test",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "channels-helpers.test.mjs"
     },
     {
@@ -20484,7 +20484,7 @@
       "_origin": "ast",
       "id": "tests_channels_helpers_test_at",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "at()"
     },
     {
@@ -20495,7 +20495,7 @@
       "_origin": "ast",
       "id": "tests_channels_helpers_test_perms",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "perms()"
     },
     {
@@ -20506,7 +20506,7 @@
       "_origin": "ast",
       "id": "tests_channels_helpers_test_dictionary",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "dictionary"
     },
     {
@@ -20517,7 +20517,7 @@
       "_origin": "ast",
       "id": "tests_channels_helpers_test_msg",
       "community": 157,
-      "community_name": "ChannelView.tsx",
+      "community_name": "ChannelView",
       "norm_label": "msg()"
     },
     {
@@ -33325,7 +33325,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L722",
+      "source_location": "L699",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -33793,7 +33793,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L628",
+      "source_location": "L605",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -33852,7 +33852,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L163",
+      "source_location": "L146",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelsshell_channellink",
@@ -47122,7 +47122,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelHeaderPopovers.tsx",
-      "source_location": "L181",
+      "source_location": "L175",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelheaderpopovers",
@@ -47265,7 +47265,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelHeaderPopovers.tsx",
-      "source_location": "L197",
+      "source_location": "L191",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelheaderpopovers_threadlistpopover",
@@ -47314,7 +47314,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelHeaderPopovers.tsx",
-      "source_location": "L191",
+      "source_location": "L185",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelheaderpopovers_threadlistpopover",
@@ -47347,7 +47347,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L486",
+      "source_location": "L463",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview",
@@ -47369,7 +47369,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L241",
+      "source_location": "L231",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview",
@@ -47380,7 +47380,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L160",
+      "source_location": "L157",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview",
@@ -47391,7 +47391,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L284",
+      "source_location": "L274",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview",
@@ -47989,7 +47989,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L384",
+      "source_location": "L372",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_messagerow",
@@ -48001,7 +48001,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L743",
+      "source_location": "L720",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48013,7 +48013,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L169",
+      "source_location": "L166",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_inlineeditor",
@@ -48025,7 +48025,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L318",
+      "source_location": "L308",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_messagerow",
@@ -48037,7 +48037,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L320",
+      "source_location": "L310",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_messagerow",
@@ -48050,7 +48050,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L942",
+      "source_location": "L902",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48062,7 +48062,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L594",
+      "source_location": "L571",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48074,7 +48074,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L498",
+      "source_location": "L475",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48086,7 +48086,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L529",
+      "source_location": "L506",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48098,7 +48098,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L565",
+      "source_location": "L542",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48110,7 +48110,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L567",
+      "source_location": "L544",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48122,7 +48122,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L742",
+      "source_location": "L719",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48134,7 +48134,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L732",
+      "source_location": "L709",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48146,7 +48146,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L736",
+      "source_location": "L713",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48158,7 +48158,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L918",
+      "source_location": "L878",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48170,7 +48170,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L586",
+      "source_location": "L563",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48182,7 +48182,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L567",
+      "source_location": "L544",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48194,7 +48194,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/components/channels/ChannelView.tsx",
-      "source_location": "L736",
+      "source_location": "L713",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelview_channelview",
@@ -48226,7 +48226,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L173",
+      "source_location": "L156",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelsshell",
@@ -48237,7 +48237,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L268",
+      "source_location": "L245",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelsshell",
@@ -48259,7 +48259,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L438",
+      "source_location": "L402",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelsshell",
@@ -48523,7 +48523,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L174",
+      "source_location": "L157",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelsshell_channelnav",
@@ -48536,7 +48536,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L269",
+      "source_location": "L246",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelsshell_channelsshell",
@@ -48548,7 +48548,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L290",
+      "source_location": "L267",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelsshell_channelsshell",
@@ -48560,7 +48560,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/channels/ChannelsShell.tsx",
-      "source_location": "L284",
+      "source_location": "L261",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_channels_channelsshell_channelsshell",
@@ -88651,5 +88651,5 @@
       "source_file": "stitch_screens/ask_stoic___trading_education_platform.html"
     }
   ],
-  "built_at_commit": "f9f7ae12b7009630473133c85f217bb4dd60915f"
+  "built_at_commit": "051aa62b84c1ada787deae8ca56635f3feb4dd21"
 }
