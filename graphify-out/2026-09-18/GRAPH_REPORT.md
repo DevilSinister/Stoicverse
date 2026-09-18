@@ -1,7 +1,7 @@
 # Graph Report - StoicWealthSociety  (2026-09-18)
 
 ## Corpus Check
-- 492 files · ~436,741 words
+- 492 files · ~437,412 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f9f7ae12`
+- Built from commit: `eea60d92`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
