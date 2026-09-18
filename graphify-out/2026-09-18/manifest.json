@@ -205,8 +205,8 @@
     "semantic_hash": "b0517ee048d45b5cd5463430230eb52f"
   },
   "DESIGN.md": {
-    "mtime": 1789736628.0008926,
-    "ast_hash": "a70fbb7fe804acc564192a5693ab2c7f",
+    "mtime": 1789737234.8930752,
+    "ast_hash": "964ce4bc3706c14df4585491a8eb35c2",
     "semantic_hash": ""
   },
   "PRODUCT.md": {
@@ -2055,8 +2055,8 @@
     "semantic_hash": ""
   },
   "tests/channels.contract.mjs": {
-    "mtime": 1789735991.607503,
-    "ast_hash": "c0535e64eb31438ed08b2b60f37d471a",
+    "mtime": 1789737125.8224087,
+    "ast_hash": "27aa3c6dd3ea23d07c0900a661fb2f68",
     "semantic_hash": ""
   },
   "src/components/channels/ChannelHeaderPopovers.tsx": {
@@ -2125,8 +2125,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/MemberList.tsx": {
-    "mtime": 1789322109.040282,
-    "ast_hash": "ff4adcad0de2e8d0b868e54dd85214c9",
+    "mtime": 1789737025.6082275,
+    "ast_hash": "1b2ce358f8eec657e4644cdc752c223f",
     "semantic_hash": ""
   },
   "src/components/channels/useCommunityLive.ts": {
@@ -2160,8 +2160,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/ForwardDialog.tsx": {
-    "mtime": 1789325952.308269,
-    "ast_hash": "6d8dd8bdfe288bd24cce6f23aa35c634",
+    "mtime": 1789737070.65972,
+    "ast_hash": "c478636639e1c22bba2a783286c025f7",
     "semantic_hash": ""
   },
   "src/components/channels/MemberMenuItems.tsx": {
@@ -2170,8 +2170,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/MemberProfileDialog.tsx": {
-    "mtime": 1789325473.6493263,
-    "ast_hash": "12ebdb45e1aee4c964b07df46b7b9407",
+    "mtime": 1789737390.4193087,
+    "ast_hash": "7a080e57832968021239122a6b497d22",
     "semantic_hash": ""
   },
   "src/components/channels/MobilePane.tsx": {
@@ -2350,8 +2350,8 @@
     "semantic_hash": ""
   },
   "src/components/channels/SearchOverlay.tsx": {
-    "mtime": 1789325741.8891344,
-    "ast_hash": "0b47d7bed9e1bd6b810188617aa9952f",
+    "mtime": 1789737070.661828,
+    "ast_hash": "ef81275ae4139902ba50e738f611b8a8",
     "semantic_hash": ""
   },
   "src/lib/channels/search-index.ts": {
