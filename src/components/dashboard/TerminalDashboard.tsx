@@ -4,43 +4,264 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, CheckCircle2, Clock3, Play, Sparkles, TrendingUp } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { buttonVariants } from "@/components/ui/button";
 import { withRouteBase } from "@/lib/navigation/paths";
 import type { DashboardData } from "./DashboardView";
 
-const eventDate = (value: string) => new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
+/**
+ * The member dashboard. Monolith, phase 7.
+ *
+ * Two of the things this phase changed were not style choices.
+ *
+ * **`bg-surface-container-highest` does not exist.** The scale stops at
+ * `-high`, so the class emitted no CSS at all and two surfaces — the course
+ * preview panel and a progress track — were simply painting nothing. It is
+ * invisible in review, the build is green, and the typechecker cannot see
+ * inside a string. Both are `surface-sunken` now, which is what a recessed
+ * groove under content is supposed to be.
+ *
+ * **The mentorship call to action was `bg-white`.** Monolith deleted 371 uses
+ * of `text-white` because pure white on near-black is 20.4:1 and reads as
+ * glare; a pure white *fill* is the same mistake from the other side, and it
+ * was the only one of its kind in the product. It is the accent now, like every
+ * other primary action.
+ *
+ * The file also stops being written as single-line JSX. It was six sections on
+ * six lines, which is why the two defects above survived every reading of it.
+ */
+
+const eventDate = (value: string) =>
+  new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
 
 export function TerminalDashboard({ data, routeBase = "" }: { data: DashboardData; routeBase?: string }) {
   const courseHref = (courseId?: string) => withRouteBase(routeBase, courseId ? `/courses/${courseId}` : "/courses");
 
-  return <AppShell active="Dashboard" title="Member overview" terminalHeader isMaster={data.isMaster} memberName={data.memberName} platformRole={data.platformRole} currentTier={data.currentTier} notifications={data.notifications} routeBase={routeBase}>
-    <main className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
-      <header className="mb-8"><p className="terminal-label">Member home</p><h1 className="mt-2 font-headline text-3xl font-semibold tracking-tight text-white sm:text-4xl">Welcome back, {data.memberName}</h1><p className="mt-3 max-w-2xl text-sm leading-relaxed text-on-surface-variant sm:text-base">Your complete Stoic curriculum is open. Continue a course or choose any released lesson that fits today’s practice.</p></header>
+  return (
+    <AppShell
+      active="Dashboard"
+      title="Member overview"
+      terminalHeader
+      isMaster={data.isMaster}
+      memberName={data.memberName}
+      platformRole={data.platformRole}
+      currentTier={data.currentTier}
+      notifications={data.notifications}
+      routeBase={routeBase}
+    >
+      <main className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+        <header className="mb-8">
+          <p className="terminal-label text-text-faint">Member home</p>
+          <h1 className="mt-3 text-title-lg font-medium text-text-strong">Welcome back, {data.memberName}</h1>
+          <p className="mt-3 max-w-2xl text-content-base text-text-default">
+            Your complete Stoic curriculum is open. Continue a course or choose any released lesson that fits today&rsquo;s
+            practice.
+          </p>
+        </header>
 
-      <div className="grid gap-6 lg:grid-cols-12">
-        <section aria-label="Member turnover" className="lg:col-span-8">
-          <div className="grid gap-4 sm:grid-cols-2 lg:gap-6">
-            <TurnoverMetricCard label="Turnover this week" value={currency.format(data.turnoverThisWeek)} detail="Current weekly figure" />
-            <TurnoverMetricCard label="All-time turnover" value={currency.format(data.allTimeTurnover)} detail={data.turnoverUpdatedAt ? `Updated ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(data.turnoverUpdatedAt))}` : "Lifetime reported figure"} />
-          </div>
-        </section>
-        <section className="terminal-card border-t-2 border-t-primary-container p-6 lg:col-span-4"><p className="terminal-label text-primary-container">No learning gates</p><h2 className="mt-3 font-headline text-lg font-semibold text-white">Study in your own order</h2><p className="mt-2 text-sm leading-relaxed text-on-surface-variant">Course tiers and prerequisites no longer restrict what you can watch. Scheduled lessons appear when their release time arrives.</p></section>
+        <div className="grid gap-4 lg:grid-cols-12">
+          <section aria-label="Member turnover" className="lg:col-span-8">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TurnoverMetricCard
+                label="Turnover this week"
+                value={currency.format(data.turnoverThisWeek)}
+                detail="Current weekly figure"
+              />
+              <TurnoverMetricCard
+                label="All-time turnover"
+                value={currency.format(data.allTimeTurnover)}
+                detail={
+                  data.turnoverUpdatedAt
+                    ? `Updated ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(data.turnoverUpdatedAt))}`
+                    : "Lifetime reported figure"
+                }
+              />
+            </div>
+          </section>
 
-        <section className="terminal-card overflow-hidden lg:col-span-8 lg:grid lg:min-h-[315px] lg:grid-cols-2"><div className="flex flex-col justify-center p-7 sm:p-8"><p className="terminal-label">Continue learning</p><h2 className="mt-3 font-headline text-2xl font-semibold leading-tight text-white">{data.activeLesson?.title ?? "Choose your next course"}</h2><p className="mt-4 text-sm leading-relaxed text-on-surface-variant">{data.activeLesson?.description ?? "Browse the full library and begin with the subject most useful to your current practice."}</p>{data.activeLesson && <p className="mt-4 text-xs font-semibold text-primary-container">{data.activeLesson.completedVideos} / {data.activeLesson.totalVideos} lessons complete · {data.activeLesson.remainingMinutes} min remaining</p>}<Link href={courseHref(data.activeLesson?.id)} className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-primary-container px-6 py-3 text-xs font-bold uppercase tracking-wider text-on-primary-fixed"><Play size={14} fill="currentColor" />{data.activeLesson ? "Resume course" : "Browse courses"}</Link></div><CoursePreview progress={data.activeLesson?.progress ?? 0} title={data.activeLesson?.title ?? "Open curriculum"} /></section>
+          {/* The accent as a 2px rule, which is the rail's idiom for state. */}
+          <section className="terminal-card border-t-2 border-t-primary p-6 lg:col-span-4">
+            <p className="terminal-label text-primary">No learning gates</p>
+            <h2 className="mt-3 text-title-sm font-medium text-text-strong">Study in your own order</h2>
+            <p className="mt-2 text-content-sm text-text-muted">
+              Course tiers and prerequisites no longer restrict what you can watch. Scheduled lessons appear when their
+              release time arrives.
+            </p>
+          </section>
 
-        <section className="terminal-card flex flex-col p-7 lg:col-span-4"><div className="flex items-center justify-between gap-3"><p className="terminal-label">Upcoming live</p><span className="text-xs text-primary-container">{data.upcomingEvent?.status ?? "Calendar"}</span></div>{data.upcomingEvent ? <><div className="mt-7 flex-1"><h2 className="font-headline text-xl font-semibold text-white">{data.upcomingEvent.title}</h2><p className="mt-3 text-sm leading-relaxed text-on-surface-variant">{data.upcomingEvent.description || "A live session for Stoicverse members."}</p><p className="mt-5 flex items-center gap-2 text-xs text-primary-container"><Clock3 size={14} />{eventDate(data.upcomingEvent.starts_at)}</p></div><Link href={withRouteBase(routeBase, "/events")} className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-surgical-steel text-xs font-semibold uppercase tracking-wider text-on-surface hover:border-primary-container"><CalendarDays size={15} />View event</Link></> : <><div className="mt-7 flex-1"><h2 className="font-headline text-xl font-semibold text-white">No session scheduled</h2><p className="mt-3 text-sm leading-relaxed text-on-surface-variant">Visit the events directory as new live sessions are published.</p></div><Link href={withRouteBase(routeBase, "/events")} className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-surgical-steel text-xs font-semibold uppercase tracking-wider text-on-surface">Browse calendar <ArrowRight size={14} /></Link></>}</section>
+          <section className="terminal-card overflow-hidden lg:col-span-8 lg:grid lg:min-h-[315px] lg:grid-cols-2">
+            <div className="flex flex-col justify-center p-7 sm:p-8">
+              <p className="terminal-label text-text-faint">Continue learning</p>
+              <h2 className="mt-3 text-title-md font-medium text-text-strong">
+                {data.activeLesson?.title ?? "Choose your next course"}
+              </h2>
+              <p className="mt-4 text-content-sm text-text-default">
+                {data.activeLesson?.description ??
+                  "Browse the full library and begin with the subject most useful to your current practice."}
+              </p>
+              {data.activeLesson && (
+                <p className="mt-4 font-mono text-mono-xs text-primary">
+                  {data.activeLesson.completedVideos} / {data.activeLesson.totalVideos} lessons complete ·{" "}
+                  {data.activeLesson.remainingMinutes} min remaining
+                </p>
+              )}
+              <Link href={courseHref(data.activeLesson?.id)} className={buttonVariants({ className: "mt-7 w-fit" })}>
+                <Play size={14} fill="currentColor" />
+                {data.activeLesson ? "Resume course" : "Browse courses"}
+              </Link>
+            </div>
+            <CoursePreview
+              progress={data.activeLesson?.progress ?? 0}
+              title={data.activeLesson?.title ?? "Open curriculum"}
+            />
+          </section>
 
-        <section className="terminal-card overflow-hidden lg:col-span-7"><div className="flex flex-wrap items-end justify-between gap-4 px-6 py-5"><div><h2 className="font-headline text-xl font-semibold text-white">Your courses</h2><p className="mt-1 text-sm text-fog-muted">Enrolled courses and saved progress.</p></div><Link href={courseHref()} className="inline-flex min-h-11 items-center rounded-full border border-surgical-steel px-4 text-xs font-semibold uppercase tracking-wider text-on-surface hover:border-primary-container">All courses <ArrowRight size={14} className="ml-2" /></Link></div><div className="divide-y divide-surgical-steel border-t border-surgical-steel">{data.enrolledCourses.slice(0, 3).map((course) => <RecordedCourse key={course.id} course={course} href={courseHref(course.id)} />)}{!data.enrolledCourses.length && <p className="px-6 py-10 text-center text-sm text-on-surface-variant">Enroll from the course library to keep a course on your dashboard.</p>}</div></section>
-        <section className="terminal-card relative flex min-h-[260px] flex-col items-center justify-center overflow-hidden p-7 text-center lg:col-span-5"><div className="absolute inset-0 bg-primary-container/[0.04]" /><div className="relative grid size-16 place-items-center rounded-full border border-primary-container/30 bg-primary-container/10 text-primary-container"><Sparkles size={28} /></div><h2 className="relative mt-6 font-headline text-xl font-semibold text-white">Elite mentorship</h2><p className="relative mt-3 max-w-sm text-sm leading-relaxed text-on-surface-variant">Accelerate your practice with personalised guidance and direct access to a Stoic mentor.</p><Link href={withRouteBase(routeBase, "/mentorship")} className="relative mt-6 rounded-full bg-white px-6 py-3 text-xs font-bold uppercase tracking-wider text-surface hover:bg-primary-container">Explore mentorship</Link></section>
-      </div>
-    </main>
-  </AppShell>;
+          <section className="terminal-card flex flex-col p-7 lg:col-span-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="terminal-label text-text-faint">Upcoming live</p>
+              <span className="font-mono text-mono-xs text-primary">{data.upcomingEvent?.status ?? "Calendar"}</span>
+            </div>
+            {data.upcomingEvent ? (
+              <>
+                <div className="mt-7 flex-1">
+                  <h2 className="text-title-sm font-medium text-text-strong">{data.upcomingEvent.title}</h2>
+                  <p className="mt-3 text-content-sm text-text-default">
+                    {data.upcomingEvent.description || "A live session for Stoicverse members."}
+                  </p>
+                  <p className="mt-5 flex items-center gap-2 font-mono text-mono-xs text-text-muted">
+                    <Clock3 size={14} />
+                    {eventDate(data.upcomingEvent.starts_at)}
+                  </p>
+                </div>
+                <Link
+                  href={withRouteBase(routeBase, "/events")}
+                  className={buttonVariants({ variant: "outline", className: "mt-7" })}
+                >
+                  <CalendarDays size={15} />
+                  View event
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="mt-7 flex-1">
+                  <h2 className="text-title-sm font-medium text-text-strong">No session scheduled</h2>
+                  <p className="mt-3 text-content-sm text-text-default">
+                    Visit the events directory as new live sessions are published.
+                  </p>
+                </div>
+                <Link
+                  href={withRouteBase(routeBase, "/events")}
+                  className={buttonVariants({ variant: "outline", className: "mt-7" })}
+                >
+                  Browse calendar
+                  <ArrowRight size={14} />
+                </Link>
+              </>
+            )}
+          </section>
+
+          <section className="terminal-card overflow-hidden lg:col-span-7">
+            <div className="flex flex-wrap items-end justify-between gap-4 px-6 py-5">
+              <div>
+                <h2 className="text-title-sm font-medium text-text-strong">Your courses</h2>
+                <p className="mt-1 text-content-sm text-text-muted">Enrolled courses and saved progress.</p>
+              </div>
+              <Link href={courseHref()} className={buttonVariants({ variant: "outline" })}>
+                All courses
+                <ArrowRight size={14} />
+              </Link>
+            </div>
+            <div className="divide-y divide-border-hairline border-t border-border-hairline">
+              {data.enrolledCourses.slice(0, 3).map((course) => (
+                <RecordedCourse key={course.id} course={course} href={courseHref(course.id)} />
+              ))}
+              {!data.enrolledCourses.length && (
+                <p className="px-6 py-10 text-center text-content-sm text-text-muted">
+                  Enroll from the course library to keep a course on your dashboard.
+                </p>
+              )}
+            </div>
+          </section>
+
+          <section className="terminal-card relative flex min-h-[260px] flex-col items-center justify-center overflow-hidden p-7 text-center lg:col-span-5">
+            <div aria-hidden className="absolute inset-0 bg-accent-soft opacity-40" />
+            <div className="relative grid size-16 place-items-center rounded-lg border border-primary/30 bg-accent-soft text-primary">
+              <Sparkles size={28} />
+            </div>
+            <h2 className="relative mt-6 text-title-sm font-medium text-text-strong">Elite mentorship</h2>
+            <p className="relative mt-3 max-w-sm text-content-sm text-text-default">
+              Accelerate your practice with personalised guidance and direct access to a Stoic mentor.
+            </p>
+            <Link
+              href={withRouteBase(routeBase, "/mentorship")}
+              className={buttonVariants({ className: "relative mt-6" })}
+            >
+              Explore mentorship
+            </Link>
+          </section>
+        </div>
+      </main>
+    </AppShell>
+  );
 }
 
 function TurnoverMetricCard({ label, value, detail }: { label: string; value: string; detail: string }) {
-  return <div className="terminal-card flex min-h-[10.5rem] flex-col justify-between p-6"><div className="flex items-start justify-between gap-4"><p className="terminal-label">{label}</p><TrendingUp size={20} className="shrink-0 text-primary-container" /></div><div><h2 className="font-label text-[clamp(1.65rem,4vw,2.35rem)] font-semibold tracking-[-0.03em] text-white tabular-nums">{value}</h2><p className="mt-2 text-xs text-fog-muted">{detail}</p></div></div>;
+  return (
+    <div className="terminal-card flex min-h-[10.5rem] flex-col justify-between p-6">
+      <div className="flex items-start justify-between gap-4">
+        <p className="terminal-label text-text-faint">{label}</p>
+        <TrendingUp size={18} className="shrink-0 text-text-muted" />
+      </div>
+      <div>
+        {/* Money is measurement: mono, tabular, so digits do not shift width. */}
+        <p className="font-mono text-[clamp(1.5rem,4vw,2.1rem)] leading-none font-medium tracking-[-0.02em] text-text-strong tabular-nums">
+          {value}
+        </p>
+        <p className="mt-3 text-content-sm text-text-muted">{detail}</p>
+      </div>
+    </div>
+  );
 }
 
-function CoursePreview({ progress, title }: { progress: number; title: string }) { return <div className="relative min-h-[220px] overflow-hidden border-t border-surgical-steel bg-surface-container-highest lg:min-h-0 lg:border-l lg:border-t-0"><div className="absolute inset-0 bg-primary-container/[0.06]" /><div className="relative flex h-full min-h-[220px] flex-col justify-end p-7"><p className="terminal-label">Active course</p><p className="mt-2 text-sm font-semibold uppercase tracking-wider text-white line-clamp-2">{title}</p><div className="mt-5 h-1.5 overflow-hidden rounded-full bg-surface-container-lowest"><div className="h-full bg-primary-container" style={{ width: `${progress}%` }} /></div><p className="mt-2 text-xs text-primary-container">{progress}% complete</p></div></div>; }
+function CoursePreview({ progress, title }: { progress: number; title: string }) {
+  return (
+    // `surface-sunken`, not `surface-container-highest` — that class is not
+    // defined anywhere and this panel had no background at all.
+    <div className="relative min-h-[220px] overflow-hidden border-t border-border-hairline bg-surface-sunken lg:min-h-0 lg:border-t-0 lg:border-l">
+      <div className="relative flex h-full min-h-[220px] flex-col justify-end p-7">
+        <p className="terminal-label text-text-faint">Active course</p>
+        <p className="mt-2 line-clamp-2 text-content-base font-medium text-text-strong">{title}</p>
+        <div className="mt-5 h-1.5 overflow-hidden rounded-sm bg-surface-raised">
+          <div className="h-full bg-primary" style={{ width: `${progress}%` }} />
+        </div>
+        <p className="mt-2 font-mono text-mono-xs text-primary tabular-nums">{progress}% complete</p>
+      </div>
+    </div>
+  );
+}
 
-function RecordedCourse({ course, href }: { course: DashboardData["enrolledCourses"][number]; href: string }) { return <Link href={href} className="group grid gap-3 px-6 py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center hover:bg-surface-container-high/40"><div><h3 className="font-semibold text-white group-hover:text-primary-container">{course.title}</h3><p className="mt-1 text-xs text-fog-muted">{course.isCompleted ? "Completed · ready to revisit" : `${course.completedVideos} of ${course.totalVideos} lessons complete · ${course.remainingMinutes} min remaining`}</p><div className="mt-3 h-1.5 max-w-lg overflow-hidden rounded-full bg-surface-container-highest"><div className="h-full rounded-full bg-primary-container" style={{ width: `${course.progress}%` }} /></div></div><span className="inline-flex items-center gap-2 text-xs font-semibold text-primary-container">{course.isCompleted && <CheckCircle2 size={15} />}{course.isCompleted ? "Review" : `${course.progress}%`}<ArrowRight size={14} /></span></Link>; }
+function RecordedCourse({ course, href }: { course: DashboardData["enrolledCourses"][number]; href: string }) {
+  return (
+    <Link
+      href={href}
+      className="focus-ring group grid gap-3 px-6 py-5 transition-colors hover:bg-surface-raised/40 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+    >
+      <div>
+        <h3 className="text-content-base font-medium text-text-strong">{course.title}</h3>
+        <p className="mt-1 text-content-sm text-text-muted">
+          {course.isCompleted
+            ? "Completed · ready to revisit"
+            : `${course.completedVideos} of ${course.totalVideos} lessons complete · ${course.remainingMinutes} min remaining`}
+        </p>
+        <div className="mt-3 h-1.5 max-w-lg overflow-hidden rounded-sm bg-surface-sunken">
+          <div className="h-full bg-primary" style={{ width: `${course.progress}%` }} />
+        </div>
+      </div>
+      <span className="inline-flex items-center gap-2 font-mono text-mono-sm text-primary tabular-nums">
+        {course.isCompleted && <CheckCircle2 size={15} />}
+        {course.isCompleted ? "Review" : `${course.progress}%`}
+        <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+      </span>
+    </Link>
+  );
+}

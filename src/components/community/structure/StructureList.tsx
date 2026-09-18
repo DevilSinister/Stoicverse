@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, FolderPlus, Plus } from "lucide-react";
 
 import { channelMeta } from "@/components/community/channel-meta";
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
+import { Button } from "@/components/ui/button";
 import { canMove, type MoveDirection } from "@/lib/community-settings/order";
 
 /** What the structure editor is currently showing in its detail pane. */
@@ -44,13 +45,13 @@ export function StructureList({
                 type="button"
                 onClick={() => onSelect({ kind: "category", id: category.id })}
                 aria-current={isCurrent ? "true" : undefined}
-                className={`focus-ring flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] transition ${
-                  isCurrent ? "bg-surface-container-high text-white" : "text-fog-muted hover:text-on-surface-variant"
+                className={`focus-ring terminal-label flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left transition ${
+                  isCurrent ? "bg-surface-raised text-text-strong" : "hover:text-text-default"
                 }`}
               >
                 <span className="truncate">{category.name}</span>
                 {category.isArchived && (
-                  <span className="ml-auto shrink-0 font-label text-[10px] normal-case tracking-normal">archived</span>
+                  <span className="ml-auto shrink-0 text-mono-xs normal-case tracking-normal">archived</span>
                 )}
               </button>
               {onMoveCategory && !category.isArchived && (
@@ -75,12 +76,12 @@ export function StructureList({
                       aria-current={isActive ? "true" : undefined}
                       className={`focus-ring flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left transition ${
                         isActive
-                          ? "bg-surface-container-high font-semibold text-white"
-                          : "text-on-surface-variant hover:bg-surface-container-high/50"
+                          ? "bg-surface-raised font-medium text-text-strong"
+                          : "text-text-default hover:bg-surface-raised/50"
                       } ${channel.isArchived ? "opacity-60" : ""}`}
                     >
-                      <Icon size={14} aria-hidden="true" className="shrink-0 text-fog-muted" />
-                      <span className="truncate text-sm">{channel.name}</span>
+                      <Icon size={14} aria-hidden="true" className="shrink-0 text-text-muted" />
+                      <span className="truncate text-content-sm">{channel.name}</span>
                     </button>
                     {onMoveChannel && !channel.isArchived && (
                       <MoveGroup
@@ -97,7 +98,7 @@ export function StructureList({
                 <button
                   type="button"
                   onClick={() => onSelect({ kind: "new-channel", categoryId: category.id })}
-                  className="focus-ring flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-fog-muted transition hover:text-primary-container"
+                  className="focus-ring flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-left text-content-sm text-text-muted transition hover:text-primary"
                 >
                   <Plus size={14} aria-hidden="true" className="shrink-0" />
                   Add channel
@@ -111,7 +112,7 @@ export function StructureList({
       <button
         type="button"
         onClick={() => onSelect({ kind: "new-category" })}
-        className="focus-ring mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-surgical-steel text-sm font-semibold text-fog-muted transition hover:border-primary-container hover:text-primary-container"
+        className="focus-ring mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border-hairline text-content-sm font-medium text-text-muted transition hover:border-primary hover:text-primary"
       >
         <FolderPlus size={15} aria-hidden="true" />
         New category
@@ -126,6 +127,13 @@ export function StructureList({
  * No drag-and-drop library: the content security policy forbids CDNs, and the
  * keyboard requirement is met more directly this way. Pointer dragging can be
  * layered on later without changing this contract.
+ *
+ * Monolith, phase 12c: `ui/button`, which is where the size of a control is
+ * decided. These were already 44px, unlike the role arrows phase 12b found at
+ * 24px — but they were 44px because this one file happened to say so, and the
+ * next hand-written pair is whatever its author types. The focus handoff stays:
+ * a button that has just become disabled cannot keep focus, so the sibling
+ * takes it rather than letting the browser drop the creator back to `<body>`.
  */
 function MoveGroup({
   label,
@@ -143,8 +151,6 @@ function MoveGroup({
 
   const press = (direction: MoveDirection) => {
     onMove(direction);
-    // A button that just became disabled cannot keep focus: the browser drops
-    // it to <body> and the creator silently loses their place in the list.
     requestAnimationFrame(() => {
       const pressed = direction === "up" ? upRef.current : downRef.current;
       const sibling = direction === "up" ? downRef.current : upRef.current;
@@ -152,31 +158,32 @@ function MoveGroup({
     });
   };
 
-  const buttonClass =
-    "focus-ring grid size-11 shrink-0 place-items-center rounded-lg text-fog-muted transition hover:bg-surface-container-high hover:text-white disabled:pointer-events-none disabled:opacity-30";
-
   return (
     <div role="group" aria-label={`Reorder ${label}`} className="flex shrink-0">
-      <button
+      <Button
         ref={upRef}
         type="button"
+        variant="ghost"
+        size="icon"
         disabled={!canUp}
         onClick={() => press("up")}
         aria-label={`Move ${label} up`}
-        className={buttonClass}
+        className="disabled:opacity-30"
       >
         <ChevronUp size={15} aria-hidden="true" />
-      </button>
-      <button
+      </Button>
+      <Button
         ref={downRef}
         type="button"
+        variant="ghost"
+        size="icon"
         disabled={!canDown}
         onClick={() => press("down")}
         aria-label={`Move ${label} down`}
-        className={buttonClass}
+        className="disabled:opacity-30"
       >
         <ChevronDown size={15} aria-hidden="true" />
-      </button>
+      </Button>
     </div>
   );
 }

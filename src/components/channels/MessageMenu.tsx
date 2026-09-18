@@ -4,7 +4,6 @@ import { useState, type ComponentType, type ReactNode } from "react";
 import {
   CornerUpLeft,
   Forward,
-  Loader2,
   MessagesSquare,
   MoreHorizontal,
   Pin,
@@ -38,6 +37,7 @@ import { deriveMessageActions, messagePermalink, type MessageAbilities } from "@
 import { THREAD_NAME_LIMITS } from "@/lib/community/constants";
 import { REPORT_REASONS, REPORT_REASON_LABELS } from "@/lib/community-settings/model";
 import type { ChannelMessage } from "@/lib/community/messages";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 /**
  * The hover bar and the menu behind it.
@@ -49,6 +49,16 @@ import type { ChannelMessage } from "@/lib/community/messages";
  * Destructive items ask first. Deleting your own message is a confirmation;
  * deleting somebody else's writes a moderation case, so it asks for the reason
  * that case will carry.
+ *
+ * **The bar's buttons do not carry `hit-target`, and that is the considered
+ * answer rather than an oversight.** They are 26px icons two pixels apart, so
+ * a 44px box around each one overlapped its neighbours by 16px and a click
+ * near an edge went to whichever button paints later - a hit area wider than
+ * the pitch makes a pointer *less* accurate, not more. Nothing is lost on
+ * touch, because this bar never appears there: it is revealed by hover, and
+ * every action on it is also on the context menu, which Base UI opens on a
+ * 500ms long press. The bar is a pointer convenience over a menu that is the
+ * real route. Measured in phase 13b.
  */
 
 type Dialog = null | "delete" | "report" | "thread" | "forward";
@@ -245,8 +255,14 @@ export function MessageMenu({
         loses its bounding box. The positioner then has nothing to anchor to
         and puts the menu in the top-left corner of the screen.
       */}
+      {/*
+        `surface-raised`, because a hovered row is now `surface-panel` and this
+        bar was the same colour as the thing it floats over - it was told apart
+        by its hairline alone. One step up, plus the small shadow, is what a
+        floating strip is in this system.
+      */}
       <div
-        className={`absolute right-4 top-1 items-center gap-0.5 rounded-lg border border-surgical-steel bg-surface-container-low p-0.5 ${
+        className={`absolute right-4 top-1 items-center gap-0.5 rounded-lg border border-border-hairline bg-surface-raised p-0.5 shadow-sm ${
           menuOpen || emojiOpen ? "flex" : "hidden group-focus-within:flex group-hover:flex"
         }`}
       >
@@ -254,7 +270,7 @@ export function MessageMenu({
           <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
             <PopoverTrigger
               aria-label="Add a reaction"
-              className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+              className="focus-ring relative rounded-md p-1.5 text-text-muted transition-colors hover:text-text-strong"
             >
               <SmilePlus size={14} aria-hidden="true" />
             </PopoverTrigger>
@@ -273,7 +289,6 @@ export function MessageMenu({
                     );
                   });
                 }}
-                onClose={() => setEmojiOpen(false)}
               />
             </PopoverContent>
           </Popover>
@@ -284,7 +299,7 @@ export function MessageMenu({
             type="button"
             onClick={onReply}
             aria-label={`Reply to ${message.authorName}`}
-            className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring relative rounded-md p-1.5 text-text-muted transition-colors hover:text-text-strong"
           >
             <CornerUpLeft size={14} aria-hidden="true" />
           </button>
@@ -295,7 +310,7 @@ export function MessageMenu({
             type="button"
             onClick={() => message.threadId && onOpenThread(message.threadId, message.threadName)}
             aria-label="Open thread"
-            className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring relative rounded-md p-1.5 text-text-muted transition-colors hover:text-text-strong"
           >
             <MessagesSquare size={14} aria-hidden="true" />
           </button>
@@ -306,7 +321,7 @@ export function MessageMenu({
             type="button"
             onClick={() => setDialog("forward")}
             aria-label={`Forward the message from ${message.authorName}`}
-            className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring relative rounded-md p-1.5 text-text-muted transition-colors hover:text-text-strong"
           >
             <Forward size={14} aria-hidden="true" />
           </button>
@@ -315,7 +330,7 @@ export function MessageMenu({
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenuTrigger
             aria-label={`More actions for the message from ${message.authorName}`}
-            className="focus-ring rounded p-1.5 text-fog-muted hover:text-on-surface"
+            className="focus-ring relative rounded-md p-1.5 text-text-muted transition-colors hover:text-text-strong"
           >
             <MoreHorizontal size={14} aria-hidden="true" />
           </DropdownMenuTrigger>
@@ -328,7 +343,7 @@ export function MessageMenu({
       {copied ? (
         <span
           role="status"
-          className="absolute right-4 top-9 rounded bg-surface-container-high px-2 py-0.5 text-[11px] text-on-surface-variant"
+          className="absolute right-4 top-9 rounded-md bg-surface-raised px-2 py-0.5 text-chrome-xs text-text-default"
         >
           {copied === "text" ? "Text copied" : "Link copied"}
         </span>
@@ -372,7 +387,7 @@ export function MessageMenu({
         >
           {dialog === "delete" ? (
             actions.removeNeedsReason ? (
-              <label className="block text-xs text-on-surface-variant">
+              <label className="block text-chrome-sm text-text-muted">
                 Reason — recorded in the moderation log and kept with the case.
                 <textarea
                   value={reason}
@@ -380,20 +395,20 @@ export function MessageMenu({
                   rows={3}
                   maxLength={500}
                   autoFocus
-                  className="mt-1 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-2 text-sm text-on-surface outline-none"
+                  className="focus-ring mt-1 w-full rounded-lg border border-border-hairline bg-surface-sunken p-2 text-content-sm text-text-default"
                 />
               </label>
             ) : (
-              <p className="text-xs text-on-surface-variant">This cannot be undone.</p>
+              <p className="text-chrome-sm text-text-muted">This cannot be undone.</p>
             )
           ) : null}
 
           {dialog === "report" ? (
             <>
               <fieldset className="space-y-1">
-                <legend className="text-xs text-on-surface-variant">What is wrong with it?</legend>
+                <legend className="text-chrome-sm text-text-muted">What is wrong with it?</legend>
                 {REPORT_REASONS.map((kind) => (
-                  <label key={kind} className="flex items-center gap-2 text-sm text-on-surface">
+                  <label key={kind} className="flex min-h-11 items-center gap-2 text-content-sm text-text-default">
                     <input
                       type="radio"
                       name="report-reason"
@@ -405,28 +420,28 @@ export function MessageMenu({
                   </label>
                 ))}
               </fieldset>
-              <label className="block text-xs text-on-surface-variant">
+              <label className="block text-chrome-sm text-text-muted">
                 Anything else the moderators should know (optional)
                 <textarea
                   value={reason}
                   onChange={(event) => setReason(event.target.value)}
                   rows={3}
                   maxLength={500}
-                  className="mt-1 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-2 text-sm text-on-surface outline-none"
+                  className="focus-ring mt-1 w-full rounded-lg border border-border-hairline bg-surface-sunken p-2 text-content-sm text-text-default"
                 />
               </label>
             </>
           ) : null}
 
           {dialog === "thread" ? (
-            <label className="block text-xs text-on-surface-variant">
+            <label className="block text-chrome-sm text-text-muted">
               Name this thread
               <input
                 value={threadName}
                 onChange={(event) => setThreadName(event.target.value)}
                 maxLength={THREAD_NAME_LIMITS.max}
                 autoFocus
-                className="mt-1 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-2 text-sm text-on-surface outline-none"
+                className="focus-ring mt-1 w-full rounded-lg border border-border-hairline bg-surface-sunken p-2 text-content-sm text-text-default"
               />
             </label>
           ) : null}
@@ -460,40 +475,30 @@ function ActionDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  /*
+    Deliberately still a local component with the same props: every call site in
+    this file keeps working, and the whole difference is in what backs it. This
+    was a `fixed inset-0` that closed on Escape and nothing else — an outside
+    click could not dismiss it, but neither was focus trapped, so Tab left the
+    dialog while it still covered the screen.
+
+    `ConfirmDialog` is an alert dialog, which is the right kind here: these
+    actions delete a message or file a report, and an outside click must not be
+    able to discard a decision half-made.
+  */
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-      onKeyDown={(event) => {
-        if (event.key === "Escape") onCancel();
+    <ConfirmDialog
+      open
+      onOpenChange={(next) => {
+        if (!next) onCancel();
       }}
+      title={title}
+      confirmLabel={confirmLabel}
+      tone={destructive ? "danger" : "default"}
+      busy={busy}
+      onConfirm={onConfirm}
     >
-      <div className="w-full max-w-sm rounded-xl border border-surgical-steel bg-surface-container-low p-4">
-        <h2 className="text-sm font-semibold text-on-surface">{title}</h2>
-        <div className="mt-3 space-y-3">{children}</div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="focus-ring rounded-lg border border-surgical-steel px-3 py-1.5 text-xs text-on-surface-variant"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={busy}
-            className={`focus-ring inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-50 ${
-              destructive ? "bg-error text-monolith-surface" : "bg-primary-container text-monolith-surface"
-            }`}
-          >
-            {busy ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : null}
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
+      <div className="space-y-3">{children}</div>
+    </ConfirmDialog>
   );
 }

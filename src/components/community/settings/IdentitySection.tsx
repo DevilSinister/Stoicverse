@@ -6,6 +6,11 @@ import { Loader2, Upload } from "lucide-react";
 import { saveCommunityIdentity } from "@/app/creator/settings/actions";
 import { AccentField } from "@/components/community/settings/AccentField";
 import { IdentityPreview } from "@/components/community/settings/IdentityPreview";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
 import {
   contrastRatio,
   IDENTITY_LIMITS,
@@ -15,9 +20,33 @@ import {
 } from "@/lib/community-settings/model";
 import { createClient } from "@/lib/supabase/client";
 
-const field =
-  "focus-ring mt-2 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none placeholder:text-fog-muted";
-const label = "block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted";
+/**
+ * Community identity. Monolith, phase 12a.
+ *
+ * **The two class-name constants are gone.** `field` and `label` were a
+ * hand-rolled input and a hand-rolled label kept as strings at the top of the
+ * file - the same pair phase 10 removed from account settings, and the reason
+ * both screens drifted off the system independently. They are `ui/input`,
+ * `ui/textarea` and the `terminal-label` utility now.
+ *
+ * **The save and upload outcomes moved out of the layout.** They were a
+ * paragraph rendered between the last field and the Save button, so a failed
+ * save pushed the button down at the moment somebody was reaching for it -
+ * lesson 70, and the reason `ui/toast` exists. What stays in place is the
+ * `canSave` line beside the button: that describes the state of the form
+ * rather than the outcome of an action, and it is only meaningful where it is.
+ *
+ * **The checkbox is `ui/checkbox` and deliberately carries no `value`.** The
+ * server reads `data.get("showWelcome") !== null`, so what matters is that an
+ * unchecked box submits *nothing*. Base UI renders a real
+ * `<input type="checkbox" name>` and adds a hidden companion only when
+ * `uncheckedValue` is given - omitting it is what keeps the absent-means-false
+ * contract intact. Read out of `CheckboxRoot.js` rather than assumed, because
+ * a checkbox that submits `""` when unchecked would make this preference
+ * impossible to turn off, with nothing to see and nothing to log.
+ */
+
+const labelClass = "terminal-label block";
 
 export function IdentitySection({
   identity,
@@ -28,9 +57,9 @@ export function IdentitySection({
   logoUrl: string | null;
   canSave: boolean;
 }) {
+  const notice = useToast();
   const [values, setValues] = useState(identity);
   const [logoUrl, setLogoUrl] = useState(initialLogoUrl);
-  const [feedback, setFeedback] = useState<{ tone: "error" | "success"; message: string } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
   // State, not a ref: `dirty` is read during render, and a ref read there is not
@@ -49,20 +78,20 @@ export function IdentitySection({
       const result = await saveCommunityIdentity(data);
       if (result.error) {
         // The form is never reset on failure: what the creator typed stays.
-        setFeedback({ tone: "error", message: result.error });
+        notice(result.error, "error");
         return;
       }
       setBaseline(JSON.stringify(values));
-      setFeedback({ tone: "success", message: "Saved. Members see this on their next page load." });
+      notice("Saved. Members see this on their next page load.", "success");
     });
 
   const upload = async (file: File) => {
     if (file.size > IDENTITY_LIMITS.logoBytes) {
-      setFeedback({ tone: "error", message: "That logo is over 2MB. Pick a smaller file." });
+      notice("That logo is over 2MB. Pick a smaller file.", "error");
       return;
     }
     if (!IDENTITY_LIMITS.logoTypes.includes(file.type as (typeof IDENTITY_LIMITS.logoTypes)[number])) {
-      setFeedback({ tone: "error", message: "Logos must be JPEG, PNG, WebP or SVG." });
+      notice("Logos must be JPEG, PNG, WebP or SVG.", "error");
       return;
     }
 
@@ -74,12 +103,11 @@ export function IdentitySection({
     setUploading(false);
 
     if (error) {
-      setFeedback({ tone: "error", message: "That logo could not be uploaded." });
+      notice("That logo could not be uploaded.", "error");
       return;
     }
     set("logoPath", path);
     setLogoUrl(supabase.storage.from("community-branding").getPublicUrl(path).data.publicUrl);
-    setFeedback(null);
   };
 
   return (
@@ -89,10 +117,10 @@ export function IdentitySection({
         <input type="hidden" name="accentColor" value={values.accentColor} />
 
         <div>
-          <label htmlFor="identity-name" className={label}>
+          <label htmlFor="identity-name" className={labelClass}>
             Community name
           </label>
-          <input
+          <Input
             id="identity-name"
             name="name"
             required
@@ -100,32 +128,38 @@ export function IdentitySection({
             maxLength={IDENTITY_LIMITS.name.max}
             value={values.name}
             onChange={(event) => set("name", event.target.value)}
-            className={`${field} h-11`}
+            className="mt-2"
           />
         </div>
 
         <div>
-          <label htmlFor="identity-tagline" className={label}>
+          <label htmlFor="identity-tagline" className={labelClass}>
             Tagline <span className="font-normal normal-case tracking-normal">· optional</span>
           </label>
-          <input
+          <Input
             id="identity-tagline"
             name="tagline"
             maxLength={IDENTITY_LIMITS.tagline.max}
             value={values.tagline}
             onChange={(event) => set("tagline", event.target.value)}
             placeholder="One line on what this community practises."
-            className={`${field} h-11`}
+            className="mt-2"
           />
-          <p className="mt-1 text-xs text-fog-muted">
+          <p className="mt-1 font-mono text-chrome-xs text-text-muted">
             {values.tagline.length} / {IDENTITY_LIMITS.tagline.max}
           </p>
         </div>
 
         <fieldset>
-          <legend className={label}>Logo</legend>
+          <legend className={labelClass}>Logo</legend>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <label className="focus-ring inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-white transition hover:border-primary-container has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary-container">
+            <label
+              className={buttonVariants({
+                variant: "outline",
+                className:
+                  "cursor-pointer has-[:focus-visible]:border-ring has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/50",
+              })}
+            >
               {uploading ? (
                 <Loader2 size={15} aria-hidden="true" className="animate-spin" />
               ) : (
@@ -145,19 +179,19 @@ export function IdentitySection({
               />
             </label>
             {values.logoPath && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => {
                   set("logoPath", null);
                   setLogoUrl(null);
                 }}
-                className="focus-ring min-h-11 rounded-lg px-3 text-sm font-semibold text-fog-muted transition hover:text-white"
               >
                 Remove
-              </button>
+              </Button>
             )}
           </div>
-          <p className="mt-2 text-xs leading-5 text-fog-muted">
+          <p className="mt-2 text-chrome-base text-text-muted">
             JPEG, PNG, WebP or SVG, up to 2MB. Shown beside the community name.
           </p>
         </fieldset>
@@ -165,68 +199,53 @@ export function IdentitySection({
         <AccentField value={values.accentColor} onChange={(hex) => set("accentColor", hex)} />
 
         <div>
-          <label htmlFor="identity-welcome" className={label}>
+          <label htmlFor="identity-welcome" className={labelClass}>
             Welcome message
           </label>
-          <textarea
+          <Textarea
             id="identity-welcome"
             name="welcomeMessage"
             rows={4}
             maxLength={IDENTITY_LIMITS.welcomeMessage.max}
             value={values.welcomeMessage}
             onChange={(event) => set("welcomeMessage", event.target.value)}
-            className={`${field} py-2 leading-6`}
+            className="mt-2"
           />
-          <label className="mt-3 inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm text-on-surface-variant has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary-container">
-            <input
-              type="checkbox"
+          <label className="group/field-label mt-3 flex min-h-11 cursor-pointer items-center gap-2 text-content-sm text-text-muted">
+            <Checkbox
               name="showWelcome"
               checked={values.showWelcome}
-              onChange={(event) => set("showWelcome", event.target.checked)}
-              className="size-4 accent-[#10B981]"
+              onCheckedChange={(checked) => set("showWelcome", checked)}
             />
             Show this to members who have just joined
           </label>
         </div>
 
         <div>
-          <label htmlFor="identity-rules" className={label}>
+          <label htmlFor="identity-rules" className={labelClass}>
             Rules
           </label>
-          <textarea
+          <Textarea
             id="identity-rules"
             name="rules"
             rows={8}
             maxLength={IDENTITY_LIMITS.rules.max}
             value={values.rules}
             onChange={(event) => set("rules", event.target.value)}
-            className={`${field} py-2 leading-6`}
+            className="mt-2"
           />
-          <p className="mt-1 text-xs leading-5 text-fog-muted">
+          <p className="mt-1 text-chrome-base text-text-muted">
             Plain text. Line breaks are kept; markdown is not rendered and would show as literal syntax.
           </p>
         </div>
 
-        {feedback && (
-          <p
-            role={feedback.tone === "error" ? "alert" : "status"}
-            className={`text-sm leading-6 ${feedback.tone === "error" ? "text-error" : "text-primary-container"}`}
-          >
-            {feedback.message}
-          </p>
-        )}
-
-        <div className="flex flex-wrap items-center gap-3 border-t border-surgical-steel pt-4">
-          <button
-            type="submit"
-            disabled={!canSave || !dirty || pending || uploading || !accentUsable}
-            className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary-container px-5 text-sm font-semibold text-on-primary-fixed transition hover:brightness-110 disabled:opacity-40"
-          >
+        <div className="flex flex-wrap items-center gap-3 border-t border-border-hairline pt-4">
+          <Button type="submit" disabled={!canSave || !dirty || pending || uploading || !accentUsable}>
             {pending && <Loader2 size={15} aria-hidden="true" className="animate-spin" />}
             Save identity
-          </button>
+          </Button>
           {!canSave && (
-            <span className="text-xs leading-5 text-error">
+            <span className="text-chrome-base text-status-danger">
               Saving is unavailable until the settings table is in place.
             </span>
           )}

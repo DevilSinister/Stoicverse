@@ -173,7 +173,7 @@ export function VoicePlayer({
   const progress = total ? Math.min(1, elapsed / total) : 0;
 
   return (
-    <div className="flex max-w-md items-center gap-2 rounded-lg border border-surgical-steel bg-surface-container-lowest px-2 py-1.5">
+    <div className="flex max-w-md items-center gap-2 rounded-lg border border-border-hairline bg-surface-sunken px-2 py-1.5">
       {/*
         `preload="none"`: the element itself fetches nothing until somebody
         presses play. The one request a note costs on open is the measurement
@@ -185,7 +185,7 @@ export function VoicePlayer({
         type="button"
         onClick={toggle}
         aria-label={playing ? `Pause ${label}` : `Play ${label}`}
-        className="focus-ring flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-container text-monolith-surface"
+        className="focus-ring hit-target relative flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground"
       >
         {playing ? <Pause size={13} aria-hidden="true" /> : <Play size={13} aria-hidden="true" />}
       </button>
@@ -214,7 +214,7 @@ export function VoicePlayer({
         </label>
       </div>
 
-      <span className="shrink-0 text-[11px] tabular-nums text-fog-muted">
+      <span className="shrink-0 font-mono text-mono-xs text-text-muted">
         {total ? `${clock(elapsed)} / ${clock(total)}` : clock(elapsed)}
       </span>
 
@@ -222,7 +222,7 @@ export function VoicePlayer({
         type="button"
         onClick={cycleSpeed}
         aria-label={`Playback speed, currently ${speed} times. Change it.`}
-        className="focus-ring shrink-0 rounded border border-surgical-steel px-1.5 py-0.5 text-[11px] tabular-nums text-on-surface-variant hover:text-on-surface"
+        className="focus-ring hit-target relative shrink-0 rounded-md border border-border-hairline px-1.5 py-0.5 font-mono text-mono-xs text-text-default hover:text-text-strong"
       >
         {`${speed}×`}
       </button>

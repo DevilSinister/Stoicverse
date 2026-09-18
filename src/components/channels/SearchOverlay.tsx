@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Folder, Hash, Loader2, MessageSquareText, Search, User, X } from "lucide-react";
+import { Folder, Hash, Loader2, MessageSquareText, Search, User } from "lucide-react";
 
 import { useCommunity } from "@/components/channels/CommunityProvider";
+import { Overlay, OverlayBody, OverlayContent, OverlayTitle } from "@/components/ui/overlay";
 import { describeFilters, parseSearchQuery } from "@/lib/channels/search-query";
 import { localCandidates, rankLocal, type RankedResult, type SearchKind } from "@/lib/channels/search-index";
 import { SEARCH_QUERY_LIMITS } from "@/lib/community/constants";
@@ -13,10 +14,13 @@ import { createClient } from "@/lib/supabase/client";
 /**
  * One search over everything: channels, categories, members and messages.
  *
- * It is a modal rather than a dropdown because of where it now lives. In the
- * channel header there is no room beneath it to hang a panel, and on a phone
- * there is no room beside it either — so it takes the screen, which is also
- * what it deserves when somebody is looking for something.
+ * **It is also the quick switcher.** Ctrl+K used to mean two different things —
+ * a channel-name switcher inside /channels and global search everywhere else —
+ * one key with two meanings depending on which half of the product you happened
+ * to be looking at. The switcher was a strict subset of this: channels are
+ * already ranked here, instantly and locally. So this opens on the channel list,
+ * which is what the switcher showed, and typing widens the question rather than
+ * changing tool. `QuickSwitcher.tsx` is deleted rather than restyled.
  *
  * **Three of the four kinds never leave the browser.** Channels, categories
  * and members are already in the provider, so they are ranked on the keystroke
@@ -39,19 +43,27 @@ type Hit = {
 /** Long enough that typing a word is one request, short enough to feel immediate. */
 const DEBOUNCE_MS = 220;
 
+/** What the switcher showed on an empty box, and what this shows now. */
+const DEFAULT_CHANNELS = 20;
+
 const KIND_LABEL: Record<SearchKind, string> = {
   channel: "Channels",
   category: "Categories",
   member: "Members",
 };
 
+const KIND_ORDER = ["channel", "category", "member"] as const;
+
+/** One navigable row, whichever half of the results it came from. */
+type Row = { kind: "local"; result: RankedResult } | { kind: "hit"; hit: Hit };
+
 function KindIcon({ kind }: { kind: SearchKind }) {
-  if (kind === "channel") return <Hash size={14} aria-hidden="true" className="shrink-0 text-fog-muted" />;
-  if (kind === "category") return <Folder size={14} aria-hidden="true" className="shrink-0 text-fog-muted" />;
-  return <User size={14} aria-hidden="true" className="shrink-0 text-fog-muted" />;
+  if (kind === "channel") return <Hash size={14} aria-hidden="true" className="shrink-0 text-text-faint" />;
+  if (kind === "category") return <Folder size={14} aria-hidden="true" className="shrink-0 text-text-faint" />;
+  return <User size={14} aria-hidden="true" className="shrink-0 text-text-faint" />;
 }
 
-export function SearchOverlay({ onClose }: { onClose: () => void }) {
+export function SearchOverlay({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { channels, members, dictionary, openProfile } = useCommunity();
   const router = useRouter();
 
@@ -61,17 +73,36 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
   const [chips, setChips] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [cursor, setCursor] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
   // Only the newest search may write results: a slow first request must not
   // land on top of a fast second one and answer the previous question.
   const runRef = useRef(0);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+  /*
+    Locked channels are not destinations.
 
-  const candidates = useMemo(() => localCandidates(channels, members), [channels, members]);
-  const local = useMemo(() => rankLocal(candidates, raw), [candidates, raw]);
+    The switcher left them out and this did not, so one Ctrl+K offered a door
+    that does not open and the other did not, depending on where it was pressed.
+    They go on being *shown* in the sidebar — "there is more here at a higher
+    tier" is the point — but a search result is a place to go. Dropping them
+    here also drops any category left with nothing in it, which is what
+    `localCandidates` already says is right: a category whose every channel is
+    invisible is a category this person cannot open.
+  */
+  const reachable = useMemo(() => channels.filter((channel) => !channel.isLocked), [channels]);
+  const candidates = useMemo(() => localCandidates(reachable, members), [reachable, members]);
+  const ranked = useMemo(() => rankLocal(candidates, raw), [candidates, raw]);
+
+  // An empty box is the switcher: the channels this person can open, in the
+  // order the creator arranged them.
+  const local = useMemo<RankedResult[]>(() => {
+    if (raw.trim() !== "") return ranked;
+    return candidates
+      .filter((candidate) => candidate.kind === "channel")
+      .slice(0, DEFAULT_CHANNELS)
+      .map((candidate) => ({ ...candidate, score: 0 }));
+  }, [raw, ranked, candidates]);
 
   const grouped = useMemo(() => {
     const byKind = new Map<SearchKind, RankedResult[]>();
@@ -82,6 +113,23 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
     }
     return byKind;
   }, [local]);
+
+  // One flat sequence in the order the eye reads it, so the arrow keys cross a
+  // section boundary rather than stopping at it.
+  const rows = useMemo<Row[]>(() => {
+    const ordered: Row[] = [];
+    for (const kind of KIND_ORDER) {
+      for (const result of grouped.get(kind) ?? []) ordered.push({ kind: "local", result });
+    }
+    if (problems.length === 0) {
+      for (const hit of hits ?? []) ordered.push({ kind: "hit", hit });
+    }
+    return ordered;
+  }, [grouped, hits, problems]);
+
+  // Clamped at read time rather than reset in an effect: message results arrive
+  // asynchronously and a shorter list must not leave the cursor past its end.
+  const selectedIndex = cursor < rows.length ? cursor : 0;
 
   const runMessages = useCallback(
     async (text: string) => {
@@ -133,28 +181,48 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
   // not of a render — doing it here would be a setState inside an effect, and
   // a cascading render on every character.
   useEffect(() => {
-    if (raw.trim() === "") return;
+    if (!open || raw.trim() === "") return;
     const timer = window.setTimeout(() => void runMessages(raw), DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
-  }, [raw, runMessages]);
+  }, [open, raw, runMessages]);
+
+  /*
+    Keep the highlighted row on screen.
+
+    The switcher never needed it — twenty rows in a 288px box, and arrowing past
+    the fold simply lost the highlight. Written against the DOM rather than a ref
+    per row because the rows come from two separately rendered lists.
+  */
+  useEffect(() => {
+    listRef.current?.querySelector('[data-selected="true"]')?.scrollIntoView({ block: "nearest" });
+  }, [selectedIndex, rows]);
 
   /** Forget the message half, and make any request still in flight irrelevant. */
-  const clearMessages = () => {
+  const clearMessages = useCallback(() => {
     runRef.current += 1;
     setHits(null);
     setProblems([]);
     setChips([]);
     setBusy(false);
-  };
+  }, []);
+
+  function setOpen(next: boolean) {
+    if (!next) {
+      setRaw("");
+      setCursor(0);
+      clearMessages();
+    }
+    onOpenChange(next);
+  }
 
   const go = (href: string) => {
-    onClose();
+    setOpen(false);
     router.push(href);
   };
 
-  const open = (result: RankedResult) => {
+  const openLocal = (result: RankedResult) => {
     if (result.kind === "member") {
-      onClose();
+      setOpen(false);
       openProfile(result.id);
       return;
     }
@@ -164,88 +232,111 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
     }
     // A category is not a page. Opening its first channel is what somebody
     // means by choosing one, and it is what clicking it in the sidebar does.
-    const first = channels.find((channel) => channel.categoryId === result.id);
+    const first = reachable.find((channel) => channel.categoryId === result.id);
     if (first) go(`/channels/${first.id}`);
   };
 
-  const nothingYet = raw.trim() === "";
+  const activate = (row: Row) => {
+    if (row.kind === "local") {
+      openLocal(row.result);
+      return;
+    }
+    // The channel view honours `?jump=` once, scrolling to the message and
+    // flashing it.
+    go(`/channels/${row.hit.channel_id}?jump=${row.hit.id}`);
+  };
+
+  function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (rows.length === 0) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setCursor((index) => (index + 1) % rows.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setCursor((index) => (index - 1 + rows.length) % rows.length);
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      const target = rows[selectedIndex];
+      if (target) activate(target);
+    }
+  }
+
+  const indexOfLocal = (result: RankedResult) =>
+    rows.findIndex((row) => row.kind === "local" && row.result.kind === result.kind && row.result.id === result.id);
+  const indexOfHit = (hit: Hit) => rows.findIndex((row) => row.kind === "hit" && row.hit.id === hit.id);
+  const isSelected = (index: number) => index >= 0 && index === selectedIndex;
+
+  const searching = raw.trim() !== "";
   const emptyHanded =
-    !nothingYet && problems.length === 0 && local.length === 0 && hits !== null && hits.length === 0 && !busy;
+    searching && problems.length === 0 && local.length === 0 && hits !== null && hits.length === 0 && !busy;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Search the community"
-      className="fixed inset-0 z-70 flex items-start justify-center bg-black/60 p-0 sm:p-6"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") onClose();
-      }}
-    >
-      {/*
-        Full height on a phone and a panel below the top on anything larger: a
-        sheet that covers the screen is the only shape that leaves room for
-        results on a small one, and a full-screen dialog on a desktop would be
-        a lot of black for one line of typing.
-      */}
-      <div className="flex h-full w-full flex-col overflow-hidden border-surgical-steel bg-surface-container-low sm:mt-12 sm:h-auto sm:max-h-[70vh] sm:max-w-xl sm:rounded-xl sm:border sm:shadow-2xl">
-        <div className="flex shrink-0 items-center gap-2 border-b border-surgical-steel px-3 py-3">
-          <Search size={16} aria-hidden="true" className="shrink-0 text-fog-muted" />
+    <Overlay open={open} onOpenChange={setOpen}>
+      <OverlayContent placement="responsive" size="md" density="chrome" showCloseButton={false}>
+        <OverlayTitle className="sr-only">Search the community</OverlayTitle>
+
+        <div className="flex h-11 shrink-0 items-center gap-2.5 border-b border-border-hairline px-chrome-x">
+          <Search size={16} aria-hidden="true" className="shrink-0 text-text-faint" />
           <input
-            ref={inputRef}
+            autoFocus
             value={raw}
             onChange={(event) => {
               const next = event.target.value;
               setRaw(next);
+              setCursor(0);
               if (next.trim() === "") clearMessages();
             }}
-            placeholder="Search channels, people and messages"
+            onKeyDown={onKeyDown}
+            placeholder="Go to a channel, or search people and messages"
             aria-label="Search channels, categories, members and messages. Filters: from: in: has: before: after:"
-            className="min-w-0 flex-1 bg-transparent text-sm text-on-surface outline-none placeholder:text-fog-muted"
+            // `self-stretch`, not a taller row: the row is already 44px and the
+            // input was 24px of it, so the top and bottom 10px of the field did
+            // nothing when tapped. Filling the row makes the target the row.
+            className="min-w-0 flex-1 self-stretch bg-transparent text-content-base text-text-strong outline-none placeholder:text-text-faint"
           />
-          {busy ? <Loader2 size={14} className="shrink-0 animate-spin text-fog-muted" aria-hidden="true" /> : null}
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close search"
-            className="focus-ring shrink-0 rounded-lg p-1 text-fog-muted hover:text-on-surface"
-          >
-            <X size={16} aria-hidden="true" />
-          </button>
+          {busy ? <Loader2 size={14} aria-hidden="true" className="shrink-0 animate-spin text-text-faint" /> : null}
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          {nothingYet ? (
-            <p className="px-3 py-8 text-center text-xs text-fog-muted">
-              Channels, categories and people answer as you type. Messages follow a moment behind.
-            </p>
-          ) : null}
-
-          {(["channel", "category", "member"] as const).map((kind) => {
-            const rows = grouped.get(kind);
-            if (!rows || rows.length === 0) return null;
+        <OverlayBody ref={listRef} className="px-0 py-1.5">
+          {KIND_ORDER.map((kind) => {
+            const results = grouped.get(kind);
+            if (!results || results.length === 0) return null;
             return (
               <section key={kind} aria-label={KIND_LABEL[kind]}>
-                <h2 className="px-3 pt-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-fog-muted">
+                <h2 className="px-chrome-x pt-2.5 pb-1.5 font-mono text-mono-xs tracking-widest text-text-faint uppercase">
                   {KIND_LABEL[kind]}
                 </h2>
-                {rows.map((result) => (
-                  <button
-                    key={`${result.kind}-${result.id}`}
-                    type="button"
-                    onClick={() => open(result)}
-                    className="focus-ring flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-surface-container-lowest"
-                  >
-                    <KindIcon kind={result.kind} />
-                    <span className="truncate text-sm text-on-surface">{result.name}</span>
-                    {result.detail ? (
-                      <span className="ml-auto shrink-0 truncate text-[11px] text-fog-muted">{result.detail}</span>
-                    ) : null}
-                  </button>
-                ))}
+                {results.map((result) => {
+                  const index = indexOfLocal(result);
+                  const selected = isSelected(index);
+                  return (
+                    <button
+                      key={`${result.kind}-${result.id}`}
+                      type="button"
+                      data-selected={selected || undefined}
+                      aria-current={selected ? true : undefined}
+                      onClick={() => openLocal(result)}
+                      onPointerMove={() => setCursor(index)}
+                      className={`focus-ring relative flex min-h-11 w-full items-center gap-2.5 px-chrome-x text-left transition-colors sm:min-h-[34px] ${
+                        selected ? "bg-surface-raised text-text-strong" : "text-text-default hover:bg-surface-raised"
+                      }`}
+                    >
+                      {selected ? (
+                        <span
+                          aria-hidden="true"
+                          className="absolute top-1/2 left-0 h-[18px] w-0.5 -translate-y-1/2 bg-primary"
+                        />
+                      ) : null}
+                      <KindIcon kind={result.kind} />
+                      <span className="truncate text-content-sm">{result.name}</span>
+                      {result.detail ? (
+                        <span className="ml-auto shrink-0 truncate text-chrome-sm text-text-faint">
+                          {result.detail}
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
               </section>
             );
           })}
@@ -256,15 +347,15 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
             one letter put "search for at least 2 characters" in red above a
             list of channels and people that had already answered.
           */}
-          {problems.length > 0 && !nothingYet ? (
+          {problems.length > 0 && searching ? (
             <section aria-label="Messages">
-              <h2 className="flex items-center gap-2 px-3 pt-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-fog-muted">
+              <h2 className="flex items-center gap-2 px-chrome-x pt-2.5 pb-1.5 font-mono text-mono-xs tracking-widest text-text-faint uppercase">
                 <MessageSquareText size={12} aria-hidden="true" />
                 Messages
               </h2>
-              <ul role="status" className="space-y-0.5 px-3 py-1.5">
+              <ul role="status" className="space-y-0.5 px-chrome-x py-1.5">
                 {problems.map((problem) => (
-                  <li key={problem} className="text-[11px] text-on-surface-variant">
+                  <li key={problem} className="text-chrome-sm text-text-muted">
                     {problem}
                   </li>
                 ))}
@@ -274,50 +365,87 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
 
           {hits !== null && problems.length === 0 ? (
             <section aria-label="Messages">
-              <h2 className="flex items-center gap-2 px-3 pt-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-fog-muted">
+              <h2 className="flex items-center gap-2 px-chrome-x pt-2.5 pb-1.5 font-mono text-mono-xs tracking-widest text-text-faint uppercase">
                 <MessageSquareText size={12} aria-hidden="true" />
                 {failed ?? `Messages — ${hits.length}${hits.length === SEARCH_QUERY_LIMITS.pageSize ? "+" : ""}`}
                 {chips.map((chip) => (
-                  <span key={chip} className="rounded border border-surgical-steel px-1 text-[10px] normal-case">
+                  <span key={chip} className="rounded-sm border border-border-hairline px-1 text-chrome-xs normal-case">
                     {chip}
                   </span>
                 ))}
               </h2>
 
-              {hits.map((hit) => (
-                <button
-                  key={hit.id}
-                  type="button"
-                  // The channel view honours `?jump=` once, scrolling to the
-                  // message and flashing it.
-                  onClick={() => go(`/channels/${hit.channel_id}?jump=${hit.id}`)}
-                  className="focus-ring block w-full px-3 py-2 text-left hover:bg-surface-container-lowest"
-                >
-                  <span className="flex items-baseline gap-1.5">
-                    <span className="truncate text-xs font-medium text-on-surface">
-                      {hit.author_name ?? "Former member"}
+              {hits.map((hit) => {
+                const index = indexOfHit(hit);
+                const selected = isSelected(index);
+                return (
+                  <button
+                    key={hit.id}
+                    type="button"
+                    data-selected={selected || undefined}
+                    aria-current={selected ? true : undefined}
+                    onClick={() => go(`/channels/${hit.channel_id}?jump=${hit.id}`)}
+                    onPointerMove={() => setCursor(index)}
+                    className={`focus-ring relative block min-h-11 w-full px-chrome-x py-2 text-left transition-colors ${
+                      selected ? "bg-surface-raised" : "hover:bg-surface-raised"
+                    }`}
+                  >
+                    {selected ? (
+                      <span
+                        aria-hidden="true"
+                        className="absolute top-1/2 left-0 h-[18px] w-0.5 -translate-y-1/2 bg-primary"
+                      />
+                    ) : null}
+                    <span className="flex items-baseline gap-1.5">
+                      <span className="truncate text-chrome-base font-medium text-text-strong">
+                        {hit.author_name ?? "Former member"}
+                      </span>
+                      <span className="shrink-0 text-chrome-sm text-text-faint">{`#${hit.channel_name}`}</span>
+                      <time dateTime={hit.created_at} className="ml-auto shrink-0 text-chrome-sm text-text-faint">
+                        {new Date(hit.created_at).toLocaleDateString()}
+                      </time>
                     </span>
-                    <span className="shrink-0 text-[10px] text-fog-muted">{`#${hit.channel_name}`}</span>
-                    <time dateTime={hit.created_at} className="ml-auto shrink-0 text-[10px] text-fog-muted">
-                      {new Date(hit.created_at).toLocaleDateString()}
-                    </time>
-                  </span>
-                  {/*
-                    Plain text, not markdown: a result is a pointer to a
-                    message, and rendering a spoiler inside a search result
-                    would hide the very words that matched.
-                  */}
-                  <span className="mt-0.5 line-clamp-2 block text-xs text-on-surface-variant">
-                    {hit.body ?? "(no text)"}
-                  </span>
-                </button>
-              ))}
+                    {/*
+                      Plain text, not markdown: a result is a pointer to a
+                      message, and rendering a spoiler inside a search result
+                      would hide the very words that matched.
+                    */}
+                    <span className="mt-0.5 line-clamp-2 block text-chrome-base text-text-default">
+                      {hit.body ?? "(no text)"}
+                    </span>
+                  </button>
+                );
+              })}
             </section>
           ) : null}
 
-          {emptyHanded ? <p className="px-3 py-8 text-center text-xs text-fog-muted">Nothing matched.</p> : null}
+          {emptyHanded ? <p className="py-8 text-center text-chrome-base text-text-muted">Nothing matched.</p> : null}
+
+          {!searching && local.length === 0 ? (
+            <p className="py-8 text-center text-chrome-base text-text-muted">There is no channel here you can open.</p>
+          ) : null}
+        </OverlayBody>
+
+        <div className="hidden h-chrome-row shrink-0 items-center gap-4 border-t border-border-hairline px-chrome-x font-mono text-mono-xs text-text-faint sm:flex">
+          <span>
+            <Key>↑</Key>
+            <Key>↓</Key> move
+          </span>
+          <span>
+            <Key>↵</Key> open
+          </span>
+          <span>
+            <Key>esc</Key> close
+          </span>
+          <span className="ml-auto">from: in: has: before: after:</span>
         </div>
-      </div>
-    </div>
+      </OverlayContent>
+    </Overlay>
+  );
+}
+
+function Key({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="mr-1 inline-block rounded-sm border border-border-hairline px-1 text-text-muted">{children}</kbd>
   );
 }

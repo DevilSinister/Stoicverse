@@ -1,23 +1,54 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+
+import { LegalPage, type LegalSection } from "@/components/legal/LegalPage";
+
+export const metadata: Metadata = {
+  title: "Privacy policy",
+  description: "What Stoicverse collects, why, and who processes it.",
+};
+
+/*
+  The wording is unchanged from what this page has said since 11 July 2026.
+  Phase 4 restyled the page; it did not amend the policy, and the date below
+  says when the policy last changed rather than when the file was last touched.
+
+  Two sections is thin for a privacy policy - there is nothing here about
+  retention, processors, or a subject's rights - but filling those in is a
+  decision about what the business commits to, not a design task.
+*/
+const SECTIONS: LegalSection[] = [
+  {
+    heading: "Information we collect",
+    body: (
+      <p>
+        We collect your name, email, and authentication credentials during registration to secure your account. Payment
+        details are processed directly and securely through Stripe.
+      </p>
+    ),
+  },
+  {
+    heading: "How we use it",
+    body: (
+      <p>
+        Your information is solely used to maintain your access to our tiered lessons, events, and community platforms.
+        We do not sell or share your information with third parties.
+      </p>
+    ),
+  },
+];
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)] p-6 md:p-12 lg:p-24 flex justify-center">
-      <div className="max-w-3xl w-full border border-[var(--color-surgical-steel)] bg-[var(--color-monolith-surface)] p-8 md:p-12">
-        <Link href="/" className="font-headline-sm text-headline-sm text-[var(--color-primary-container)]">Stoicverse</Link>
-        <h1 className="mt-8 font-display-lg-mobile md:font-display-lg text-[var(--color-on-surface)]">Privacy Policy</h1>
-        <p className="mt-6 text-[var(--color-on-surface-variant)] leading-7">
-          At Stoicverse, we value your privacy. We process minimal personal data required to manage your account, facilitate community interactions, and process payments securely.
+    <LegalPage
+      title="Privacy policy"
+      updated="11 July 2026"
+      intro={
+        <p>
+          At Stoicverse, we value your privacy. We process minimal personal data required to manage your account,
+          facilitate community interactions, and process payments securely.
         </p>
-        <h2 className="mt-8 font-headline-sm text-headline-sm text-[var(--color-on-surface)]">1. Information We Collect</h2>
-        <p className="mt-4 text-[var(--color-on-surface-variant)] leading-7">
-          We collect your name, email, and authentication credentials during registration to secure your account. Payment details are processed directly and securely through Stripe.
-        </p>
-        <h2 className="mt-8 font-headline-sm text-headline-sm text-[var(--color-on-surface)]">2. How We Use It</h2>
-        <p className="mt-4 text-[var(--color-on-surface-variant)] leading-7">
-          Your information is solely used to maintain your access to our tiered lessons, events, and community platforms. We do not sell or share your information with third parties.
-        </p>
-      </div>
-    </main>
+      }
+      sections={SECTIONS}
+    />
   );
 }

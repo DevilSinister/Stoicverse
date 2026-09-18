@@ -1,22 +1,17 @@
-import MentorshipView from "@/components/mentorship/MentorshipView";
-import { requireInfluencerWorkspace } from "@/lib/supabase/access";
-import { profileRow } from "@/lib/supabase/viewer";
+import { renderMentorshipPage } from "@/app/mentorship/page";
 
-export default async function CreatorMentorshipPage() {
-  const { supabase, user } = await requireInfluencerWorkspace("/creator/mentorship");
-  const [profileResult, tierResult, notificationsResult, mentorshipResult] = await Promise.all([
-    profileRow(),
-    supabase.from("member_tiers").select("current_tier, is_master").eq("user_id", user.id).maybeSingle(),
-    supabase.from("notifications").select("id, type, title, body, action_url, is_read, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
-    supabase.from("mentorships").select("status, booking_url, mentor:assigned_mentor_id(full_name), starts_at, ends_at").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle(),
-  ]);
-
-  if ([profileResult, tierResult, notificationsResult, mentorshipResult].some((result) => result.error)) {
-    throw new Error("Unable to load creator mentorship details.");
-  }
-
-  const mentor = mentorshipResult.data?.mentor as unknown as { full_name?: string } | { full_name?: string }[] | null | undefined;
-  const mentorName = (Array.isArray(mentor) ? mentor[0]?.full_name : mentor?.full_name) ?? "Marcus Aurelius";
-
-  return <MentorshipView isMaster={tierResult.data?.is_master ?? false} memberName={profileResult.data?.full_name?.trim() || "Practitioner"} platformRole={profileResult.data?.platform_role ?? "influencer"} currentTier={tierResult.data?.current_tier ?? 1} notifications={notificationsResult.data ?? []} hasMentorship={!!mentorshipResult.data} bookingUrl={mentorshipResult.data?.booking_url ?? null} mentorName={mentorName} startsAt={mentorshipResult.data?.starts_at ?? null} endsAt={mentorshipResult.data?.ends_at ?? null} routeBase="/creator" />;
+/**
+ * The creator's own mentorship page.
+ *
+ * It used to be a second copy of the member page's four queries, its mentor-name
+ * unwrapping and its whole prop list — which is how it came to be the only one
+ * of the two that could not show a price. `renderMentorshipPage` already takes
+ * the workspace guard as an option, so there is one implementation now.
+ */
+export default function CreatorMentorshipPage() {
+  return renderMentorshipPage({
+    nextPath: "/creator/mentorship",
+    routeBase: "/creator",
+    creatorWorkspace: true,
+  });
 }

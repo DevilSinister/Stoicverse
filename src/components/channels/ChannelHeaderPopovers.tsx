@@ -114,26 +114,32 @@ export function PinsPopover({
         onOpenChange(next);
       }}
     >
+      {/*
+        36px painted, which with the header's 8px gap is a 44px pitch - exactly
+        the box `hit-target` draws. At 28px the four header controls' hit areas
+        overlapped by 8px each and a tap near a midpoint went to the wrong one.
+        Phase 13a, measured on a phone viewport; the rest of this file is 13b.
+      */}
       <PopoverTrigger
         aria-label="Pinned messages"
-        className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+        className="focus-ring hit-target relative rounded-lg p-2.5 text-text-muted hover:text-text-strong"
       >
         <Pin size={16} aria-hidden="true" />
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
-        <p className="border-b border-surgical-steel px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fog-muted">
+        <p className="border-b border-border-hairline px-chrome-x py-chrome-y text-chrome-xs font-medium uppercase tracking-wide text-text-muted">
           Pinned
         </p>
         <div className="max-h-80 overflow-y-auto">
-          {failed ? <p className="px-3 py-4 text-xs text-red-300">Pinned messages could not be read.</p> : null}
-          {!failed && rows === null ? <p className="px-3 py-4 text-xs text-fog-muted">Loading…</p> : null}
+          {failed ? <p className="px-chrome-x py-4 text-chrome-sm text-status-danger">Pinned messages could not be read.</p> : null}
+          {!failed && rows === null ? <p className="px-chrome-x py-4 text-chrome-sm text-text-muted">Loading…</p> : null}
           {rows !== null && rows.length === 0 ? (
-            <p className="px-3 py-4 text-xs text-fog-muted">Nothing is pinned in this channel yet.</p>
+            <p className="px-chrome-x py-4 text-chrome-sm text-text-muted">Nothing is pinned in this channel yet.</p>
           ) : null}
           {(rows ?? []).map((pin) => (
             <div
               key={pin.id}
-              className="flex items-start gap-1 border-b border-surgical-steel/40 last:border-0 hover:bg-surface-container-low"
+              className="flex items-start gap-1 border-b border-border-hairline/40 last:border-0 hover:bg-surface-raised"
             >
               <button
                 type="button"
@@ -143,13 +149,13 @@ export function PinsPopover({
                 }}
                 className="focus-ring min-w-0 flex-1 px-3 py-2 text-left"
               >
-                <span className="block text-xs font-medium text-on-surface">{pin.author_name ?? "Former member"}</span>
+                <span className="block text-chrome-sm font-medium text-text-strong">{pin.author_name ?? "Former member"}</span>
                 {/*
                   Plain text, not markdown: this is a reference to a message, and
                   rendering a spoiler or a jumbo emoji inside a 320px list makes
                   the list harder to scan than the message is to find.
                 */}
-                <span className="mt-0.5 line-clamp-2 block text-xs text-on-surface-variant">
+                <span className="mt-0.5 line-clamp-2 block text-chrome-sm text-text-default">
                   {pin.body ?? "(no text)"}
                 </span>
               </button>
@@ -159,9 +165,9 @@ export function PinsPopover({
                   onClick={() => void unpin(pin.id)}
                   disabled={unpinning === pin.id}
                   aria-label={`Unpin the message from ${pin.author_name ?? "a former member"}`}
-                  className="focus-ring mr-1 mt-2 shrink-0 rounded p-1 text-fog-muted hover:text-on-surface disabled:opacity-50"
+                  className="focus-ring hit-target relative mt-1 mr-1 shrink-0 rounded-md p-2.5 text-text-muted hover:text-text-strong disabled:opacity-50"
                 >
-                  <PinOff size={12} aria-hidden="true" />
+                  <PinOff size={16} aria-hidden="true" />
                 </button>
               ) : null}
             </div>
@@ -198,22 +204,22 @@ export function ThreadListPopover({
         onOpenChange(next);
       }}
     >
-      <PopoverTrigger aria-label="Threads" className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface">
+      <PopoverTrigger aria-label="Threads" className="focus-ring hit-target relative rounded-lg p-2.5 text-text-muted hover:text-text-strong">
         <MessagesSquare size={16} aria-hidden="true" />
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
-        <p className="border-b border-surgical-steel px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fog-muted">
+        <p className="border-b border-border-hairline px-chrome-x py-chrome-y text-chrome-xs font-medium uppercase tracking-wide text-text-muted">
           Threads
         </p>
         <div className="max-h-80 overflow-y-auto">
           {failed ? (
-            <p className="px-3 py-4 text-xs text-red-300">
+            <p className="px-chrome-x py-4 text-chrome-sm text-status-danger">
               Threads could not be read. They need migration 20260912090000.
             </p>
           ) : null}
-          {!failed && rows === null ? <p className="px-3 py-4 text-xs text-fog-muted">Loading…</p> : null}
+          {!failed && rows === null ? <p className="px-chrome-x py-4 text-chrome-sm text-text-muted">Loading…</p> : null}
           {rows !== null && rows.length === 0 ? (
-            <p className="px-3 py-4 text-xs text-fog-muted">No threads in this channel yet.</p>
+            <p className="px-chrome-x py-4 text-chrome-sm text-text-muted">No threads in this channel yet.</p>
           ) : null}
           {(rows ?? []).map((thread) => (
             <button
@@ -223,22 +229,22 @@ export function ThreadListPopover({
                 setOpen(false);
                 onOpenThread(thread.id, thread.name);
               }}
-              className="focus-ring block w-full border-b border-surgical-steel/40 px-3 py-2 text-left last:border-0 hover:bg-surface-container-low"
+              className="focus-ring min-h-11 block w-full border-b border-border-hairline/40 px-chrome-x py-chrome-y text-left last:border-0 hover:bg-surface-raised"
             >
               <span className="flex items-center gap-2">
-                <span className="truncate text-xs font-medium text-on-surface">{thread.name}</span>
+                <span className="truncate text-chrome-sm font-medium text-text-strong">{thread.name}</span>
                 {thread.archived ? (
-                  <span className="shrink-0 rounded border border-surgical-steel px-1 text-[10px] text-fog-muted">
+                  <span className="shrink-0 rounded-md border border-border-hairline px-1 text-chrome-xs text-text-muted">
                     Archived
                   </span>
                 ) : null}
                 {thread.locked ? (
-                  <span className="shrink-0 rounded border border-surgical-steel px-1 text-[10px] text-fog-muted">
+                  <span className="shrink-0 rounded-md border border-border-hairline px-1 text-chrome-xs text-text-muted">
                     Locked
                   </span>
                 ) : null}
               </span>
-              <span className="mt-0.5 block text-[11px] text-fog-muted">
+              <span className="mt-0.5 block font-mono text-mono-xs text-text-muted">
                 {`${thread.message_count} ${thread.message_count === 1 ? "reply" : "replies"}`}
               </span>
             </button>

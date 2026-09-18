@@ -32,8 +32,8 @@ test("creator course controls keep achievements but remove access tiers and prer
   assert.match(actions, /min_tier: 1/);
   assert.doesNotMatch(actions, /formData\.getAll\("prerequisiteIds"\)/);
   assert.doesNotMatch(manager, /Min Access Tier|Required Prerequisites/);
-  assert.match(manager, /Completion Achievement/);
-  assert.match(manager, /Open to All Members/);
+  assert.match(manager, /Completion achievement/i);
+  assert.match(manager, /Open to all members/i);
 });
 
 test("cosmetic roles are creator-managed, member-readable, and display-only", async () => {

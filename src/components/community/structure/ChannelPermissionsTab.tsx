@@ -5,6 +5,8 @@ import { useId, useMemo, useState, useTransition } from "react";
 
 import { setChannelOverrides, setChannelPermissionSync, setChannelSlowMode } from "@/app/creator/channels/actions";
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
+import { Button } from "@/components/ui/button";
+import { nativeSelectClass } from "@/components/ui/select";
 import { formatSlowMode, SLOW_MODE_STOPS } from "@/lib/community-settings/model";
 import {
   CHANNEL_PERMISSION_KEYS,
@@ -16,6 +18,8 @@ import {
 } from "@/lib/community-settings/permissions";
 import type { CommunityRole } from "@/lib/community-settings/role-model";
 import type { ChannelOverride } from "@/lib/community-settings/structure";
+import type { Notify } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 
 type Grid = Record<string, OverrideState>;
 
@@ -40,6 +44,14 @@ function isNeutral(grid: Grid): boolean {
  * allows — is computed by the same `resolveChannelPermissions` the database
  * mirrors. Only the 17 channel-scoped keys appear: `ban_members` in one channel
  * and not another is not something anyone should be able to express.
+ *
+ * Monolith, phase 12c. Beyond the palette, the three selects here were three
+ * more hand-written copies of what `nativeSelectClass` already carries — and
+ * all three were 48px where the shared one is 44px, so this screen's controls
+ * stood taller than the same control on every other settings screen. The
+ * tri-state stays a radiogroup of sr-only radios: arrow keys moving between
+ * Deny, Neutral and Allow is that element's native behaviour, and a row of
+ * buttons would have to rebuild it.
  */
 export function ChannelPermissionsTab({
   target,
@@ -56,7 +68,7 @@ export function ChannelPermissionsTab({
   roles: CommunityRole[];
   overrides: ChannelOverride[];
   canSave: boolean;
-  onNotice: (value: string) => void;
+  onNotice: Notify;
 }) {
   const targetId = target === "channel" ? channel?.id : category?.id;
   const synced = target === "channel" ? (channel?.permissionsSynced ?? true) : false;
@@ -108,17 +120,20 @@ export function ChannelPermissionsTab({
         targetId,
         rows.map((row) => ({ roleId: row.roleId, grid: row.grid as Record<string, string> })),
       );
-      onNotice(result.error ?? "Channel permissions saved.");
+      if (result.error) onNotice(result.error, "error");
+      else onNotice("Channel permissions saved.", "success");
     });
 
   const toggleSync = (next: boolean) =>
     startTransition(async () => {
       if (!channel) return;
       const result = await setChannelPermissionSync(channel.id, next);
-      onNotice(
-        result.error ??
-          (next ? "This channel follows its category again." : "This channel now has its own permissions."),
-      );
+      if (result.error) onNotice(result.error, "error");
+      else
+        onNotice(
+          next ? "This channel follows its category again." : "This channel now has its own permissions.",
+          "success",
+        );
     });
 
   return (
@@ -128,7 +143,7 @@ export function ChannelPermissionsTab({
       )}
 
       {rows.length === 0 && (
-        <p className="rounded-lg border border-surgical-steel bg-surface-container-low p-4 text-sm leading-6 text-on-surface-variant">
+        <p className="rounded-lg border border-border-hairline bg-surface-panel p-4 text-content-sm text-text-default">
           {synced
             ? "This channel follows its category, and the category sets no overrides. Everyone here can do what their roles already allow."
             : `No role has an override here yet. Add one to allow or deny a permission for just this ${target === "channel" ? "channel" : "category"}.`}
@@ -142,9 +157,9 @@ export function ChannelPermissionsTab({
           <fieldset
             key={row.roleId}
             disabled={readOnly || pending}
-            className="rounded-xl border border-surgical-steel p-4"
+            className="rounded-xl border border-border-hairline p-4"
           >
-            <legend className="flex items-center gap-2 px-2 text-sm font-semibold" style={{ color: role.color }}>
+            <legend className="flex items-center gap-2 px-2 text-content-sm font-medium" style={{ color: role.color }}>
               <span aria-hidden="true" className="size-2.5 rounded-full" style={{ background: role.color }} />
               {role.name}
             </legend>
@@ -154,7 +169,7 @@ export function ChannelPermissionsTab({
               if (!keys.length) return null;
               return (
                 <div key={group.id} className="mt-4 first:mt-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">{group.label}</h4>
+                  <h4 className="terminal-label">{group.label}</h4>
                   <div className="mt-2 space-y-1">
                     {keys.map((key) => (
                       <TriStateControl
@@ -171,7 +186,7 @@ export function ChannelPermissionsTab({
             })}
 
             {isNeutral(row.grid) && !readOnly && (
-              <p className="mt-3 text-xs leading-5 text-fog-muted">
+              <p className="mt-3 text-chrome-base text-text-muted">
                 Every control is Neutral, so saving removes this role&apos;s override entirely.
               </p>
             )}
@@ -181,7 +196,7 @@ export function ChannelPermissionsTab({
 
       {!readOnly && unused.length > 0 && (
         <div>
-          <label htmlFor={addId} className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">
+          <label htmlFor={addId} className="terminal-label block">
             Add a role
           </label>
           <select
@@ -192,7 +207,7 @@ export function ChannelPermissionsTab({
               if (!roleId) return;
               setRows((current) => [...current, { roleId, grid: gridFrom(undefined) }]);
             }}
-            className="focus-ring mt-2 h-12 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none sm:text-sm"
+            className={cn(nativeSelectClass, "mt-2 max-w-xs")}
           >
             <option value="">Choose a role…</option>
             {unused.map((role) => (
@@ -213,16 +228,11 @@ export function ChannelPermissionsTab({
       />
 
       {!readOnly && (
-        <div className="flex flex-wrap items-center gap-3 border-t border-surgical-steel pt-4">
-          <button
-            type="button"
-            onClick={save}
-            disabled={pending || !canSave}
-            className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary-container px-5 text-sm font-semibold text-on-primary-fixed transition hover:brightness-110 disabled:opacity-40"
-          >
+        <div className="flex flex-wrap items-center gap-3 border-t border-border-hairline pt-4">
+          <Button type="button" onClick={save} disabled={pending || !canSave}>
             {pending && <Loader2 size={15} aria-hidden="true" className="animate-spin" />}
             Save permissions
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -250,16 +260,16 @@ function TriStateControl({
   const name = `${roleName}-${permissionKey}`;
 
   const options: { value: OverrideState; label: string; tone: string; description: string }[] = [
-    { value: "deny", label: "✕", tone: "text-error", description: "Deny" },
-    { value: "neutral", label: "/", tone: "text-fog-muted", description: "Neutral — inherit" },
-    { value: "allow", label: "✓", tone: "text-primary-container", description: "Allow" },
+    { value: "deny", label: "✕", tone: "text-status-danger", description: "Deny" },
+    { value: "neutral", label: "/", tone: "text-text-muted", description: "Neutral — inherit" },
+    { value: "allow", label: "✓", tone: "text-primary", description: "Allow" },
   ];
 
   return (
-    <div className="flex items-start justify-between gap-3 rounded-lg px-2 py-1.5 transition hover:bg-surface-container-high/40">
+    <div className="flex items-start justify-between gap-3 rounded-lg px-2 py-1.5 transition hover:bg-surface-raised/40">
       <span className="min-w-0">
-        <span className="block text-sm text-white">{meta.label}</span>
-        <span className="mt-0.5 block text-xs leading-5 text-fog-muted">{meta.detail}</span>
+        <span className="block text-content-sm text-text-strong">{meta.label}</span>
+        <span className="mt-0.5 block text-chrome-base text-text-muted">{meta.detail}</span>
       </span>
 
       <span role="radiogroup" aria-label={`${meta.label} for ${roleName}`} className="flex shrink-0 gap-1">
@@ -268,10 +278,10 @@ function TriStateControl({
           return (
             <label
               key={option.value}
-              className={`inline-flex size-11 cursor-pointer items-center justify-center rounded-lg border text-sm font-bold transition focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary-container ${
+              className={`inline-flex size-11 cursor-pointer items-center justify-center rounded-lg border text-content-sm font-semibold transition focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary ${
                 selected
                   ? `border-current ${option.tone}`
-                  : "border-surgical-steel text-fog-muted/50 hover:text-fog-muted"
+                  : "border-border-hairline text-text-faint hover:text-text-muted"
               }`}
             >
               <input
@@ -302,12 +312,12 @@ function SyncWithCategoryField({
   onToggle: (next: boolean) => void;
 }) {
   return (
-    <div className="rounded-xl border border-surgical-steel bg-surface-container-low p-4">
-      <p className="flex items-start gap-2 text-sm leading-6 text-on-surface">
+    <div className="rounded-xl border border-border-hairline bg-surface-panel p-4">
+      <p className="flex items-start gap-2 text-content-sm text-text-default">
         {synced ? (
-          <Link2 size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-primary-container" />
+          <Link2 size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-primary" />
         ) : (
-          <Link2Off size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-fog-muted" />
+          <Link2Off size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-text-muted" />
         )}
         <span>
           {synced
@@ -315,16 +325,11 @@ function SyncWithCategoryField({
             : "This channel has its own permissions. Its category's are ignored."}
         </span>
       </p>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => onToggle(!synced)}
-        className="focus-ring mt-3 inline-flex min-h-11 items-center rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-high/50 disabled:opacity-40"
-      >
+      <Button type="button" variant="outline" disabled={disabled} onClick={() => onToggle(!synced)} className="mt-3">
         {synced ? "Give this channel its own permissions" : "Follow the category again"}
-      </button>
+      </Button>
       {!synced && (
-        <p className="mt-2 flex items-start gap-2 text-xs leading-5 text-fog-muted">
+        <p className="mt-2 flex items-start gap-2 text-chrome-base text-text-muted">
           <Info size={13} aria-hidden="true" className="mt-0.5 shrink-0" />
           Going back to the category discards every override set here.
         </p>
@@ -374,11 +379,8 @@ function ViewAsRolePreview({
   }, [selected, everyone, rows, channelType]);
 
   return (
-    <div className="rounded-xl border border-surgical-steel p-4">
-      <label
-        htmlFor={selectId}
-        className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted"
-      >
+    <div className="rounded-xl border border-border-hairline p-4">
+      <label htmlFor={selectId} className="terminal-label flex items-center gap-2">
         <ShieldQuestion size={14} aria-hidden="true" />
         View as role
       </label>
@@ -386,7 +388,7 @@ function ViewAsRolePreview({
         id={selectId}
         value={selectedRoleId ?? ""}
         onChange={(event) => onSelect(event.target.value || null)}
-        className="focus-ring mt-2 h-12 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none sm:text-sm"
+        className={cn(nativeSelectClass, "mt-2 max-w-xs")}
       >
         <option value="">Choose a role…</option>
         {roles
@@ -401,7 +403,7 @@ function ViewAsRolePreview({
       {resolved && (
         <div className="mt-3">
           {resolved.length === 0 ? (
-            <p className="text-sm leading-6 text-error">
+            <p className="text-content-sm text-status-danger">
               Someone whose highest role is {selected?.name} cannot open this channel at all.
             </p>
           ) : (
@@ -413,14 +415,14 @@ function ViewAsRolePreview({
                 .map((key) => (
                   <li
                     key={key}
-                    className="rounded-full border border-surgical-steel px-2.5 py-0.5 text-[11px] text-on-surface-variant"
+                    className="rounded-md border border-border-hairline px-2.5 py-0.5 text-chrome-xs text-text-default"
                   >
                     {PERMISSION_CATALOG[key].label}
                   </li>
                 ))}
             </ul>
           )}
-          <p className="mt-2 text-xs leading-5 text-fog-muted">
+          <p className="mt-2 text-chrome-base text-text-muted">
             Unsaved changes included. This is @everyone plus {selected?.name}, with the overrides above applied in order.
           </p>
         </div>
@@ -439,7 +441,7 @@ export function SlowModeField({
   channelId: string;
   seconds: number;
   disabled: boolean;
-  onNotice: (value: string) => void;
+  onNotice: Notify;
 }) {
   const [value, setValue] = useState(seconds);
   const [pending, startTransition] = useTransition();
@@ -449,13 +451,14 @@ export function SlowModeField({
     setValue(next);
     startTransition(async () => {
       const result = await setChannelSlowMode(channelId, next);
-      onNotice(result.error ?? `Slow mode set to ${formatSlowMode(next)}.`);
+      if (result.error) onNotice(result.error, "error");
+      else onNotice(`Slow mode set to ${formatSlowMode(next)}.`, "success");
     });
   };
 
   return (
     <div>
-      <label htmlFor={fieldId} className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">
+      <label htmlFor={fieldId} className="terminal-label block">
         Slow mode
       </label>
       <div className="mt-2 flex flex-wrap items-center gap-3">
@@ -464,7 +467,7 @@ export function SlowModeField({
           value={value}
           disabled={disabled || pending}
           onChange={(event) => commit(Number(event.target.value))}
-          className="focus-ring h-12 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none disabled:opacity-40 sm:text-sm"
+          className={cn(nativeSelectClass, "w-auto")}
         >
           {SLOW_MODE_STOPS.map((stop) => (
             <option key={stop} value={stop}>
@@ -472,9 +475,9 @@ export function SlowModeField({
             </option>
           ))}
         </select>
-        {pending && <Loader2 size={15} aria-hidden="true" className="animate-spin text-fog-muted" />}
+        {pending && <Loader2 size={15} aria-hidden="true" className="animate-spin text-text-muted" />}
       </div>
-      <p className="mt-1 text-xs leading-5 text-fog-muted">
+      <p className="mt-1 text-chrome-base text-text-muted">
         How long a member waits between messages here. Anyone with Bypass slow mode is exempt; nobody else is, including
         moderators.
       </p>

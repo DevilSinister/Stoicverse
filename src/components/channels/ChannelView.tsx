@@ -25,7 +25,6 @@ import { MemberList } from "@/components/channels/MemberList";
 import { MessageMenu } from "@/components/channels/MessageMenu";
 import { MobilePaneDrawer } from "@/components/channels/MobilePane";
 import { RulesGateNotice } from "@/components/channels/RulesGateNotice";
-import { SearchOverlay } from "@/components/channels/SearchOverlay";
 import { VoicePlayer } from "@/components/channels/VoicePlayer";
 import { ThreadPanel } from "@/components/channels/ThreadPanel";
 import { useToast } from "@/components/ui/toast";
@@ -92,7 +91,7 @@ function Attachments({ attachments, urls }: { attachments: ChannelMessage["attac
                 <img
                   src={href}
                   alt=""
-                  className="max-h-72 max-w-full rounded-lg border border-surgical-steel object-cover"
+                  className="max-h-72 max-w-full rounded-lg border border-border-hairline object-cover"
                 />
               </a>
             ) : (
@@ -100,7 +99,7 @@ function Attachments({ attachments, urls }: { attachments: ChannelMessage["attac
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="focus-ring flex items-center gap-2 rounded-lg border border-surgical-steel px-3 py-2 text-xs text-on-surface-variant hover:bg-surface-container-low"
+                className="focus-ring flex items-center gap-2 rounded-lg border border-border-hairline px-3 py-2 text-chrome-sm text-text-default hover:bg-surface-raised"
               >
                 <FileText size={14} aria-hidden="true" />
                 {attachment.path.split("/").pop()}
@@ -126,7 +125,7 @@ function Reactions({
   if (message.reactions.length === 0) return null;
 
   return (
-    <ul className="mt-1 flex flex-wrap gap-1">
+    <ul className="mt-1 flex flex-wrap gap-1.5">
       {message.reactions.map((reaction) => (
         <li key={reaction.emoji}>
           <button
@@ -139,14 +138,17 @@ function Reactions({
               onChanged();
             }}
             aria-pressed={reaction.mine}
-            className={`focus-ring flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors disabled:opacity-50 ${
+            // `accent-soft` is the accent at 12%, which is the token for a
+            // selected state; the hand-mixed `/15` beside a full-strength
+            // accent border was a second opinion about the same thing.
+            className={`focus-ring flex min-h-7 items-center gap-1 rounded-lg border px-2 py-0.5 text-chrome-sm transition-colors disabled:opacity-50 ${
               reaction.mine
-                ? "border-primary-container bg-primary-container/15 text-on-surface"
-                : "border-surgical-steel text-fog-muted hover:bg-surface-container-low"
+                ? "border-primary bg-accent-soft text-text-strong"
+                : "border-border-hairline text-text-muted hover:bg-surface-raised hover:text-text-default"
             }`}
           >
             <span aria-hidden="true">{reaction.emoji}</span>
-            <span>{reaction.count}</span>
+            <span className="font-mono text-mono-xs">{reaction.count}</span>
           </button>
         </li>
       ))}
@@ -196,18 +198,25 @@ function InlineEditor({
         rows={2}
         autoFocus
         aria-label="Edit your message"
-        className="w-full resize-none rounded-lg border border-surgical-steel bg-surface-container-lowest p-2 text-sm text-on-surface outline-none"
+        /*
+          `focus-ring`, and no `outline-none`. This box carried the second
+          without the first, so the one control on the page that is focused the
+          instant it appears had no focus indicator at all - and it is inside a
+          scrolling list, where "where am I" is the only question a keyboard
+          user has. The ring is the shared 2px accent at 2px offset.
+        */
+        className="focus-ring w-full resize-none rounded-lg border border-border-hairline bg-surface-sunken p-2 text-content-sm text-text-default"
       />
-      <p className="mt-1 flex items-center gap-3 text-[11px] text-fog-muted">
+      <p className="mt-1 flex items-center gap-3 text-chrome-xs text-text-muted">
         <button
           type="button"
           onClick={() => void save()}
           disabled={busy}
-          className="focus-ring rounded text-primary-container disabled:opacity-50"
+          className="focus-ring rounded-md text-primary disabled:opacity-50"
         >
           {busy ? "Saving…" : "Save"}
         </button>
-        <button type="button" onClick={onCancel} className="focus-ring rounded hover:text-on-surface">
+        <button type="button" onClick={onCancel} className="focus-ring rounded-md hover:text-text-strong">
           Cancel
         </button>
         <span>Enter to save, Escape to cancel</span>
@@ -237,8 +246,8 @@ function ForwardedCard({
   resolvers: MentionResolvers;
 }) {
   return (
-    <div className="mt-1 border-l-2 border-surgical-steel pl-3">
-      <p className="flex items-center gap-1 text-[11px] text-fog-muted">
+    <div className="mt-1 border-l-2 border-border-hairline pl-3">
+      <p className="flex items-center gap-1 text-chrome-xs text-text-muted">
         <Forward size={11} aria-hidden="true" className="shrink-0" />
         <span>
           {`Forwarded from ${forwarded.authorName}`}
@@ -247,21 +256,21 @@ function ForwardedCard({
       </p>
 
       {forwarded.deleted ? (
-        <p className="mt-0.5 text-sm italic text-fog-muted">This message was deleted.</p>
+        <p className="mt-0.5 text-content-sm italic text-text-muted">This message was deleted.</p>
       ) : (
         <>
-          <div className="mt-0.5 text-sm leading-6 text-on-surface-variant">
+          <div className="mt-0.5 text-content-sm text-text-default">
             <MarkdownBody body={forwarded.body} resolvers={resolvers} />
           </div>
           {forwarded.attachmentCount > 0 ? (
-            <p className="text-[11px] text-fog-muted">
+            <p className="text-chrome-xs text-text-muted">
               {`${forwarded.attachmentCount} ${forwarded.attachmentCount === 1 ? "attachment" : "attachments"} — open the original to see ${forwarded.attachmentCount === 1 ? "it" : "them"}`}
             </p>
           ) : null}
           {forwarded.channelVisible && forwarded.channelId ? (
             <Link
               href={`/channels/${forwarded.channelId}?jump=${forwarded.postId}`}
-              className="focus-ring rounded text-[11px] text-primary-container hover:underline"
+              className="focus-ring rounded-md text-chrome-xs text-primary hover:underline"
             >
               Go to the original
             </Link>
@@ -312,7 +321,7 @@ function MessageRow({
 
   if (message.postType === "system") {
     return (
-      <li ref={(node) => registerNode(message.id, node)} className="px-4 py-1 text-xs italic text-fog-muted">
+      <li ref={(node) => registerNode(message.id, node)} className="px-4 py-1 text-chrome-sm italic text-text-muted">
         <MarkdownBody body={message.body} resolvers={resolvers} />
       </li>
     );
@@ -324,7 +333,7 @@ function MessageRow({
         <button
           type="button"
           onClick={() => message.replyToPostId && onJump(message.replyToPostId)}
-          className="focus-ring mb-0.5 flex w-full items-center gap-1 rounded pl-12 text-left text-xs text-fog-muted hover:text-on-surface-variant"
+          className="focus-ring mb-0.5 flex w-full items-center gap-1 rounded-md pl-12 text-left text-chrome-sm text-text-muted hover:text-text-default"
         >
           <CornerUpLeft size={12} aria-hidden="true" className="shrink-0" />
           <span className="font-medium">{message.replyAuthorName ?? "someone"}</span>
@@ -349,7 +358,7 @@ function MessageRow({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={message.authorAvatar} alt="" className="size-9 rounded-full object-cover" />
               ) : (
-                <span className="flex size-9 items-center justify-center rounded-full bg-surface-container-high text-sm font-semibold text-on-surface-variant">
+                <span className="flex size-9 items-center justify-center rounded-full bg-surface-raised text-chrome-base font-medium text-text-strong">
                   {message.authorName.slice(0, 1).toUpperCase()}
                 </span>
               )}
@@ -364,16 +373,18 @@ function MessageRow({
                 type="button"
                 onClick={() => message.authorId && openProfile(message.authorId)}
                 disabled={message.authorId === null}
-                className="focus-ring rounded text-sm font-semibold text-on-surface hover:underline disabled:cursor-default disabled:no-underline"
+                className="focus-ring rounded-md text-chrome-base font-medium text-text-strong hover:underline disabled:cursor-default disabled:no-underline"
                 style={message.authorColor ? { color: message.authorColor } : undefined}
               >
                 {message.authorName}
               </button>
-              <time dateTime={message.createdAt} className="text-[11px] text-fog-muted">
+              {/* A timestamp is measurement, so it is mono, like every other
+                  figure in the product. */}
+              <time dateTime={message.createdAt} className="font-mono text-mono-xs text-text-muted">
                 {timeOf(message.createdAt)}
               </time>
               {message.isPinned ? (
-                <span className="flex items-center gap-0.5 text-[10px] text-fog-muted">
+                <span className="flex items-center gap-0.5 text-chrome-xs text-text-muted">
                   <Pin size={10} aria-hidden="true" />
                   Pinned
                 </span>
@@ -388,9 +399,12 @@ function MessageRow({
               onSaved={(body) => onSaveEdit(message.id, body)}
             />
           ) : (
-            <div className="text-sm leading-6 text-on-surface-variant">
+            // A message body is reading text, so it names the content ramp -
+            // 14px at 1.6 - while everything around it stays on the chrome one.
+            // This is the mixed surface DESIGN.md describes, said in tokens.
+            <div className="text-content-sm text-text-default">
               <MarkdownBody body={message.body} resolvers={resolvers} jumbo={jumbo} />
-              {message.editedAt ? <span className="ml-1 text-[10px] text-fog-muted">(edited)</span> : null}
+              {message.editedAt ? <span className="ml-1 text-chrome-xs text-text-muted">(edited)</span> : null}
             </div>
           )}
 
@@ -405,7 +419,7 @@ function MessageRow({
             <button
               type="button"
               onClick={() => message.threadId && onOpenThread(message.threadId, message.threadName)}
-              className="focus-ring mt-1 flex items-center gap-1 rounded text-xs text-primary-container hover:underline"
+              className="focus-ring mt-1 flex items-center gap-1 rounded-md text-chrome-sm text-primary hover:underline"
             >
               <MessagesSquare size={12} aria-hidden="true" />
               {`${message.threadName ?? "Thread"} — ${message.threadMessageCount ?? 0} ${
@@ -425,8 +439,16 @@ function MessageRow({
       // The id on the element, not only in a ref: a jump, a test and P5's
       // keyboard navigation all need to find a row from outside this component.
       data-message-id={message.id}
+      /*
+        Hover lifts. It used to darken - `surface-container-lowest/60`, the
+        sunken well - which was the right instinct on a page that was panel
+        coloured and the wrong one now the conversation is the canvas: a row
+        that recedes under the pointer reads as disabled. `surface-panel` is
+        the one step up from canvas, and it is the fill the rail already uses
+        for the same gesture.
+      */
       className={`group relative px-4 transition-colors duration-700 ${grouped ? "py-0.5" : "pb-0.5 pt-3"} ${
-        flashed ? "bg-primary-container/20" : "hover:bg-surface-container-lowest/60"
+        flashed ? "bg-accent-soft" : "hover:bg-surface-panel"
       }`}
     >
       {/*
@@ -472,7 +494,8 @@ export function ChannelView({
   initialCursor: { createdAt: string; id: string } | null;
   initialUrls: Record<string, string>;
 }) {
-  const { affordances, viewer, setActiveChannel, refreshUnread, typistsIn, channels, pane, setPane } = useCommunity();
+  const { affordances, viewer, setActiveChannel, refreshUnread, typistsIn, channels, pane, setPane, setSearchOpen } =
+    useCommunity();
 
   /**
    * Is there anywhere at all to forward to?
@@ -504,7 +527,6 @@ export function ChannelView({
   const [openThreadName, setOpenThreadName] = useState<string | null>(null);
 
   const notify = useToast();
-  const [searchOpen, setSearchOpen] = useState(false);
 
   // The RPC returns newest first; the list reads oldest at the top.
   const [messages, setMessages] = useState<ChannelMessage[]>(() => [...initialMessages].reverse());
@@ -729,7 +751,20 @@ export function ChannelView({
   return (
     <div className="flex min-h-0 flex-1">
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-2 border-b border-surgical-steel px-4 py-3">
+        {/*
+          On a phone this header is the top of the app — /channels mounts no
+          chrome above it — so it is what has to clear the notch. `safe-t` on
+          its own would replace py-3's top padding rather than add to it, hence
+          the calc: the inset is additive to the padding the bar already has.
+        */}
+        {/*
+          48px of bar, plus the notch. `h-chrome-bar` is what every other
+          header in the product measures, and what the channel column beside
+          this one measures - the two rules meet now instead of missing each
+          other by 4px. The inset is added to the height rather than replacing
+          the padding, so the bar is 48px of content wherever it is drawn.
+        */}
+        <header className="flex h-[calc(var(--spacing-chrome-bar)+env(safe-area-inset-top))] shrink-0 items-center gap-chrome-gap border-b border-border-hairline px-4 pt-[env(safe-area-inset-top)]">
           {/*
             The way back to the channel list on a phone. Above `md` the list
             is always on screen, so the button would be a second door to a
@@ -739,21 +774,37 @@ export function ChannelView({
             type="button"
             onClick={() => setPane("sidebar")}
             aria-label="Show channels"
-            className="focus-ring -ml-1 rounded-lg p-1 text-fog-muted hover:text-on-surface md:hidden"
+            className="focus-ring hit-target relative -ml-1 rounded-lg p-1 text-text-muted hover:text-text-strong md:hidden"
           >
             <Menu size={18} aria-hidden="true" />
           </button>
-          <Hash size={16} aria-hidden="true" className="shrink-0 text-fog-muted" />
-          <h1 className="truncate text-sm font-semibold text-on-surface">{channel.name}</h1>
+          <Hash size={16} aria-hidden="true" className="shrink-0 text-text-muted" />
+          <h1 className="truncate text-chrome-base font-medium text-text-strong">{channel.name}</h1>
           {channel.description ? (
-            <p className="hidden truncate border-l border-surgical-steel pl-2 text-xs text-fog-muted sm:block">
+            <p className="hidden truncate border-l border-border-hairline pl-2 text-chrome-sm text-text-muted sm:block">
               {channel.description}
             </p>
           ) : null}
 
-          <div className="ml-auto flex shrink-0 items-center gap-1">
+          {/*
+            36px controls at an 8px gap, which is a 44px pitch - and `hit-target`
+            draws exactly 44, so the four boxes abut and none of them overlaps.
+
+            They were 28px at the same gap, a 36px pitch under a 44px hit area,
+            so **every neighbouring pair overlapped by 8px** and a tap within 4px
+            of a midpoint went to whichever sibling paints later. The comment
+            this replaces said the gap had been widened to fix precisely that,
+            and it had been widened to a number that does not: the overlap is
+            decided by the pitch against the hit box, and 8px of gap cannot
+            carry a 44px target around a 28px icon however it is arranged.
+            Measured on a 375px viewport, then re-measured after.
+          */}
+          <div className="ml-auto flex shrink-0 items-center gap-chrome-gap">
             {connected ? null : (
-              <span className="flex items-center gap-1 text-xs text-amber-300" role="status">
+              // `status-warn`, not Tailwind's amber-300. This was one of the
+              // last three off-system colours in the product and the only one
+              // on a surface a member sees every day.
+              <span className="flex items-center gap-1 text-chrome-sm text-status-warn" role="status">
                 <WifiOff size={12} aria-hidden="true" />
                 Reconnecting
               </span>
@@ -767,7 +818,7 @@ export function ChannelView({
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Search the community"
-              className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface"
+              className="focus-ring hit-target relative rounded-lg p-2.5 text-text-muted hover:text-text-strong"
             >
               <Search size={16} aria-hidden="true" />
             </button>
@@ -785,7 +836,7 @@ export function ChannelView({
               type="button"
               onClick={() => setPane("members")}
               aria-label="Show members"
-              className="focus-ring rounded-lg p-1.5 text-fog-muted hover:text-on-surface xl:hidden"
+              className="focus-ring hit-target relative rounded-lg p-2.5 text-text-muted hover:text-text-strong xl:hidden"
             >
               <Users size={16} aria-hidden="true" />
             </button>
@@ -807,7 +858,7 @@ export function ChannelView({
                 type="button"
                 onClick={() => void loadOlder()}
                 disabled={loadingOlder}
-                className="focus-ring inline-flex items-center gap-2 rounded-lg border border-surgical-steel px-3 py-1 text-xs text-fog-muted"
+                className="focus-ring inline-flex items-center gap-2 rounded-lg border border-border-hairline px-3 py-1 text-chrome-sm text-text-muted hover:bg-surface-panel hover:text-text-default"
               >
                 {loadingOlder ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : null}
                 Load earlier messages
@@ -816,7 +867,7 @@ export function ChannelView({
           ) : null}
 
           {rendered.length === 0 ? (
-            <li className="px-4 py-12 text-center text-sm text-fog-muted">
+            <li className="px-4 py-12 text-center text-content-sm text-text-muted">
               {`Nothing in #${channel.name} yet. Say the first thing.`}
             </li>
           ) : null}
@@ -825,16 +876,16 @@ export function ChannelView({
             <div key={message.id}>
               {isNew ? (
                 <li className="flex items-center gap-3 px-4 py-1.5" aria-label="New messages below">
-                  <span className="h-px flex-1 bg-error/60" />
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-error">New</span>
-                  <span className="h-px flex-1 bg-error/60" />
+                  <span className="h-px flex-1 bg-status-danger/60" />
+                  <span className="text-chrome-xs font-medium uppercase tracking-wider text-status-danger">New</span>
+                  <span className="h-px flex-1 bg-status-danger/60" />
                 </li>
               ) : null}
               {day ? (
                 <li className="flex items-center gap-3 px-4 py-3">
-                  <span className="h-px flex-1 bg-surgical-steel" />
-                  <span className="text-[11px] font-medium uppercase tracking-wide text-fog-muted">{day}</span>
-                  <span className="h-px flex-1 bg-surgical-steel" />
+                  <span className="h-px flex-1 bg-border-hairline" />
+                  <span className="text-chrome-xs font-medium uppercase tracking-wide text-text-muted">{day}</span>
+                  <span className="h-px flex-1 bg-border-hairline" />
                 </li>
               ) : null}
               <MessageRow
@@ -863,7 +914,7 @@ export function ChannelView({
           and a line that appears and disappears inside it moves the very thing
           they are aiming at.
         */}
-        <p aria-live="polite" className="h-4 px-4 text-[11px] text-fog-muted">
+        <p aria-live="polite" className="h-4 px-4 text-chrome-xs text-text-muted">
           {typingSentence(typistsIn(channel.id)) ?? ""}
         </p>
 
@@ -897,7 +948,7 @@ export function ChannelView({
         ) : permissions.composer === "rulesNotAccepted" ? (
           <RulesGateNotice />
         ) : (
-          <p role="status" className="border-t border-surgical-steel px-4 py-4 text-center text-sm text-fog-muted">
+          <p role="status" className="border-t border-border-hairline px-4 py-4 text-center text-content-sm text-text-muted">
             {COMPOSER_NOTICE[permissions.composer]}
           </p>
         )}
@@ -922,8 +973,6 @@ export function ChannelView({
           />
         </MobilePaneDrawer>
       ) : null}
-
-      {searchOpen ? <SearchOverlay onClose={() => setSearchOpen(false)} /> : null}
 
       {openThreadId ? (
         <ThreadPanel

@@ -61,7 +61,9 @@ test("matching writes nothing, because the block path raises", async () => {
 
 test("the recording half runs after the insert, so an alert can name the post", async () => {
   const migration = await read(MIGRATION);
-  assert.match(migration, /create trigger posts_automod_record\nafter insert on public\.posts/);
+  // \r?\n, not \n: core.autocrlf is true on Windows and there is no .gitattributes,
+  // so migrations check out with CRLF and a bare \n silently never matches.
+  assert.match(migration, /create trigger posts_automod_record\r?\nafter insert on public\.posts/);
   const evaluate = migration.slice(
     migration.indexOf("function private.automod_evaluate"),
     migration.indexOf("function private.assert_post_content_allowed"),

@@ -1,341 +1,334 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { 
-  CalendarDays, 
-  Clock, 
-  Edit3, 
-  Link2, 
-  Plus, 
-  Users, 
-  X, 
-  Video, 
-  VideoOff, 
-  AlertCircle, 
-  Check, 
-  Calendar,
-  ChevronRight,
-  Info
-} from "lucide-react";
+import { AlertCircle, Calendar, ChevronRight, Edit3, Info, Link2, Plus, Video, VideoOff } from "lucide-react";
 
 import { cancelEvent, publishEvent, saveCreatorEvent, updateEventZoomUrl } from "@/app/events/actions";
 import { AppShell } from "@/components/layout/AppShell";
+import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Overlay,
+  OverlayBody,
+  OverlayContent,
+  OverlayFooter,
+  OverlayHeader,
+  OverlayTitle,
+} from "@/components/ui/overlay";
+import { StatusBadge, type StatusTone } from "@/components/ui/status-badge";
+import { Textarea } from "@/components/ui/textarea";
+
+/**
+ * The creator's event workspace. Monolith, phase 11c.
+ *
+ * This one file held **four hand-rolled overlays, two `window.confirm` calls
+ * and six stock colour families** — more off-system colour than the rest of the
+ * product combined. The status chips were slate, emerald, red, blue and rose;
+ * the access chip was amber; the RSVP track was `bg-slate-800` on
+ * `border-slate-700/50`; the cancel button was `bg-rose-600`. None of those
+ * exist in the design system, so the one screen where a creator judges "is this
+ * live, is it cancelled, did anyone sign up" was the screen speaking a
+ * different language from everywhere else.
+ *
+ * **The unsaved-changes guard was `window.confirm`, fired from a backdrop
+ * `onMouseDown`.** A native modal raised from a pointer handler blocks the
+ * event loop mid-gesture; it is `ui/confirm-dialog` now, opened from the
+ * overlay's own dismiss path — which is the case `ui/overlay` was built to
+ * stack, since Base UI portals in mount order.
+ *
+ * **`CancelEventModal` stopped being a modal.** It was a form whose only field
+ * was an optional reason, wrapped in a hand-rolled dialog; it is a
+ * `ConfirmDialog` with `tone="danger"` and the textarea as its children, which
+ * is exactly the shape that component exists for.
+ *
+ * **The rows were `<div onClick>`.** The whole table was unreachable by
+ * keyboard — the same defect phase 9 fixed on the member-facing event cards,
+ * here in the screen the creator uses to run them.
+ *
+ * Also gone: `useDialog` (Escape and focus restore by hand, no trap and no
+ * scroll lock), the last `emerald-glow` in the product,
+ * `hover:text-accent-contrast` on the tabs, and a `bg-black/20` count chip.
+ */
 
 export type CreatorEventRecord = {
-  id: string; 
-  title: string; 
-  description: string | null; 
-  hostName: string; 
-  startsAt: string; 
-  endsAt: string | null; 
+  id: string;
+  title: string;
+  description: string | null;
+  hostName: string;
+  startsAt: string;
+  endsAt: string | null;
   minTier: number;
-  status: "draft" | "upcoming" | "live" | "completed" | "cancelled"; 
-  enrolled: boolean; 
-  publishAt: string | null; 
+  status: "draft" | "upcoming" | "live" | "completed" | "cancelled";
+  enrolled: boolean;
+  publishAt: string | null;
   publishedAt: string | null;
-  cancelledAt: string | null; 
-  cancellationReason: string | null; 
-  enrollmentCount: number; 
-  qualifiedAudienceCount: number; 
+  cancelledAt: string | null;
+  cancellationReason: string | null;
+  enrollmentCount: number;
+  qualifiedAudienceCount: number;
   roomPublished: boolean;
   attendees: { id: string; name: string; enrolledAt: string }[];
 };
 
-const dateTime = new Intl.DateTimeFormat(undefined, { 
-  weekday: "short", 
-  month: "short", 
-  day: "numeric", 
-  hour: "numeric", 
-  minute: "2-digit" 
+type Tab = "all" | "drafts" | "scheduled" | "cancelled";
+
+const dateTime = new Intl.DateTimeFormat(undefined, {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
 });
 
-const localInput = (value: string | null) => 
-  value ? new Date(new Date(value).getTime() - new Date(value).getTimezoneOffset() * 60_000).toISOString().slice(0, 16) : "";
+/** `datetime-local` wants the wall clock, not an instant. */
+const localInput = (value: string | null) =>
+  value
+    ? new Date(new Date(value).getTime() - new Date(value).getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
+    : "";
 
-const accessLabel = (tier: number) => tier === 5 ? "Masters" : `Tier ${tier}+`;
+const accessLabel = (tier: number) => (tier === 5 ? "Masters" : `Tier ${tier}+`);
 
-const duration = (event: CreatorEventRecord) => 
-  event.endsAt ? `${Math.round((new Date(event.endsAt).getTime() - new Date(event.startsAt).getTime()) / 60_000)} min` : "Not set";
+const duration = (event: CreatorEventRecord) =>
+  event.endsAt
+    ? `${Math.round((new Date(event.endsAt).getTime() - new Date(event.startsAt).getTime()) / 60_000)} min`
+    : "Not set";
 
-function useDialog(onClose: () => void) {
-  const close = useRef<HTMLButtonElement>(null);
-  useEffect(() => { 
-    const previous = document.activeElement as HTMLElement | null; 
-    close.current?.focus(); 
-    const key = (event: KeyboardEvent) => event.key === "Escape" && onClose(); 
-    window.addEventListener("keydown", key); 
-    return () => { 
-      window.removeEventListener("keydown", key); 
-      previous?.focus(); 
-    }; 
-  }, [onClose]);
-  return close;
-}
+const STATUS: Record<CreatorEventRecord["status"], { label: string; tone: StatusTone }> = {
+  draft: { label: "Draft", tone: "neutral" },
+  upcoming: { label: "Upcoming", tone: "accent" },
+  live: { label: "Live now", tone: "ok" },
+  completed: { label: "Completed", tone: "neutral" },
+  cancelled: { label: "Cancelled", tone: "danger" },
+};
 
-export function CreatorEventsView({ 
-  events, 
-  enrollmentAvailable, 
-  currentTier, 
-  isMaster, 
-  memberName 
-}: { 
-  events: CreatorEventRecord[]; 
-  enrollmentAvailable: boolean; 
-  currentTier: number; 
-  isMaster: boolean; 
-  memberName?: string; 
+const TABS: { id: Tab; label: string }[] = [
+  { id: "scheduled", label: "Scheduled" },
+  { id: "drafts", label: "Drafts" },
+  { id: "cancelled", label: "Cancelled" },
+  { id: "all", label: "All sessions" },
+];
+
+const matchesTab = (event: CreatorEventRecord, tab: Tab) =>
+  tab === "all"
+    ? true
+    : tab === "drafts"
+      ? event.status === "draft"
+      : tab === "cancelled"
+        ? event.status === "cancelled"
+        : event.status !== "draft" && event.status !== "cancelled";
+
+export function CreatorEventsView({
+  events,
+  enrollmentAvailable,
+  currentTier,
+  isMaster,
+  memberName,
+}: {
+  events: CreatorEventRecord[];
+  enrollmentAvailable: boolean;
+  currentTier: number;
+  isMaster: boolean;
+  memberName?: string;
 }) {
-  const router = useRouter(); 
-  const pathname = usePathname(); 
+  const router = useRouter();
+  const pathname = usePathname();
   const params = useSearchParams();
-  
-  const [creating, setCreating] = useState(params.get("create") === "1"); 
-  const [editing, setEditing] = useState<CreatorEventRecord | null>(null); 
-  const [message, setMessage] = useState<string | null>(null); 
-  const [pending, startTransition] = useTransition();
-  const [activeTab, setActiveTab] = useState<"all" | "drafts" | "scheduled" | "cancelled">("scheduled");
 
-  // Sub-modal states
+  const [creating, setCreating] = useState(params.get("create") === "1");
+  const [editing, setEditing] = useState<CreatorEventRecord | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const [activeTab, setActiveTab] = useState<Tab>("scheduled");
   const [publishingRoom, setPublishingRoom] = useState<CreatorEventRecord | null>(null);
   const [cancellingEvent, setCancellingEvent] = useState<CreatorEventRecord | null>(null);
 
-  const selected = useMemo(() => events.find((event) => event.id === params.get("event")) ?? null, [events, params]);
-  
-  const setSelected = (event: CreatorEventRecord | null) => { 
-    const next = new URLSearchParams(params); 
-    if (event) next.set("event", event.id); 
-    else next.delete("event"); 
-    router.replace(`${pathname}${next.size ? `?${next}` : ""}`, { scroll: false }); 
+  const selected = useMemo(
+    () => events.find((event) => event.id === params.get("event")) ?? null,
+    [events, params],
+  );
+
+  const setSelected = (event: CreatorEventRecord | null) => {
+    const next = new URLSearchParams(params);
+    if (event) next.set("event", event.id);
+    else next.delete("event");
+    router.replace(`${pathname}${next.size ? `?${next}` : ""}`, { scroll: false });
   };
 
-  const submit = (formData: FormData, mode: "draft" | "publish" | "update") => startTransition(async () => {
-    const result = mode === "publish" && editing 
-      ? await publishEvent(editing.id, formData) 
-      : await saveCreatorEvent(formData, editing?.id, mode === "publish" || (mode === "update" && Boolean(editing?.publishedAt)));
-    
-    setMessage(result.error ?? (mode === "draft" ? "Draft saved successfully." : "Event saved and members notified."));
-    if (result.success) { 
-      setCreating(false); 
-      setEditing(null); 
-      if (result.eventId) {
-        setSelected(events.find((event) => event.id === result.eventId) ?? null); 
+  const submit = (formData: FormData, mode: "draft" | "publish" | "update") =>
+    startTransition(async () => {
+      const result =
+        mode === "publish" && editing
+          ? await publishEvent(editing.id, formData)
+          : await saveCreatorEvent(
+              formData,
+              editing?.id,
+              mode === "publish" || (mode === "update" && Boolean(editing?.publishedAt)),
+            );
+
+      setMessage(
+        result.error ?? (mode === "draft" ? "Draft saved successfully." : "Event saved and members notified."),
+      );
+
+      if (result.success) {
+        setCreating(false);
+        setEditing(null);
+        if (result.eventId) setSelected(events.find((event) => event.id === result.eventId) ?? null);
       }
-    }
-  });
-
-  const handleCancelEvent = (event: CreatorEventRecord, reason: string) => startTransition(async () => { 
-    const result = await cancelEvent(event.id, reason); 
-    setMessage(result.error ?? "Event cancelled and members notified."); 
-    if (result.success) {
-      setCancellingEvent(null);
-      setSelected(null); 
-    }
-  });
-
-  const handleUpdateRoom = (event: CreatorEventRecord, url: string) => startTransition(async () => { 
-    const result = await updateEventZoomUrl(event.id, url); 
-    setMessage(result.error ?? "Room link published and members notified."); 
-    if (result.success) {
-      setPublishingRoom(null);
-      // Update selected event locally if it's the one we just updated
-      if (selected && selected.id === event.id) {
-        setSelected({ ...selected, roomPublished: true });
-      }
-    }
-  });
-
-  // Event filtering by tab
-  const filteredEvents = useMemo(() => {
-    return events.filter((event) => {
-      if (activeTab === "all") return true;
-      if (activeTab === "drafts") return event.status === "draft";
-      if (activeTab === "scheduled") return event.status !== "draft" && event.status !== "cancelled";
-      if (activeTab === "cancelled") return event.status === "cancelled";
-      return true;
     });
-  }, [events, activeTab]);
 
-  const draftsCount = useMemo(() => events.filter(e => e.status === "draft").length, [events]);
-  const scheduledCount = useMemo(() => events.filter(e => e.status !== "draft" && e.status !== "cancelled").length, [events]);
-  const cancelledCount = useMemo(() => events.filter(e => e.status === "cancelled").length, [events]);
+  const handleCancelEvent = (event: CreatorEventRecord, reason: string) =>
+    startTransition(async () => {
+      const result = await cancelEvent(event.id, reason);
+      setMessage(result.error ?? "Event cancelled and members notified.");
+      if (result.success) {
+        setCancellingEvent(null);
+        setSelected(null);
+      }
+    });
+
+  const handleUpdateRoom = (event: CreatorEventRecord, url: string) =>
+    startTransition(async () => {
+      const result = await updateEventZoomUrl(event.id, url);
+      setMessage(result.error ?? "Room link published and members notified.");
+      if (result.success) {
+        setPublishingRoom(null);
+        if (selected && selected.id === event.id) setSelected({ ...selected, roomPublished: true });
+      }
+    });
+
+  const filteredEvents = useMemo(() => events.filter((event) => matchesTab(event, activeTab)), [events, activeTab]);
+
+  const counts = useMemo(
+    () => ({
+      all: events.length,
+      drafts: events.filter((event) => event.status === "draft").length,
+      scheduled: events.filter((event) => event.status !== "draft" && event.status !== "cancelled").length,
+      cancelled: events.filter((event) => event.status === "cancelled").length,
+    }),
+    [events],
+  );
+
+  const startCreating = () => {
+    setEditing(null);
+    setCreating(true);
+  };
 
   return (
-    <AppShell 
-      active="Events" 
-      title="Creator Events" 
-      isMaster={isMaster} 
-      currentTier={currentTier} 
-      memberName={memberName} 
+    <AppShell
+      active="Events"
+      title="Creator events"
+      isMaster={isMaster}
+      currentTier={currentTier}
+      memberName={memberName}
       routeBase="/creator"
     >
-      <main className="mx-auto max-w-[1440px] px-4 py-8 md:px-8 space-y-8">
-        {/* Page Header */}
-        <header className="flex flex-col justify-between gap-6 border-b border-surgical-steel pb-6 md:flex-row md:items-end">
+      <main className="mx-auto w-full max-w-[1440px] space-y-8 px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+        <header className="flex flex-col justify-between gap-6 border-b border-border-hairline pb-7 md:flex-row md:items-end">
           <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight text-white">Live Session Calendar</h1>
-            <p className="mt-2 max-w-lg font-body text-sm text-on-surface-variant">
-              Draft, schedule, publish, and moderate Stoicverse live community events in one centralized workspace.
+            <p className="terminal-label text-text-faint">Live sessions</p>
+            <h1 className="mt-3 text-title-lg font-medium text-text-strong">Session calendar</h1>
+            <p className="mt-3 max-w-lg text-content-base text-text-default">
+              Draft, schedule, publish and moderate Stoicverse live community events in one workspace.
             </p>
           </div>
-          <button 
-            type="button" 
-            onClick={() => { setEditing(null); setCreating(true); }} 
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition cursor-pointer"
-          >
-            <Plus size={16} /> 
-            Create Event
-          </button>
+          <Button onClick={startCreating}>
+            <Plus size={15} />
+            Create event
+          </Button>
         </header>
 
-        {/* Notices */}
         {!enrollmentAvailable && (
           <Notice text="Event enrollment is currently locked. Apply the events enrollment database migration to restore access." />
         )}
-        {message && (
-          <Notice text={message} onClose={() => setMessage(null)} />
-        )}
+        {message && <Notice text={message} onClose={() => setMessage(null)} />}
 
-        {/* Navigation Tabs */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-surgical-steel pb-4">
-          {(["scheduled", "drafts", "cancelled", "all"] as const).map((tab) => {
-            const count = tab === "drafts" ? draftsCount : tab === "scheduled" ? scheduledCount : tab === "cancelled" ? cancelledCount : events.length;
-            const label = tab === "scheduled" 
-              ? "Scheduled" 
-              : tab === "drafts" 
-              ? "Drafts" 
-              : tab === "cancelled" 
-              ? "Cancelled" 
-              : "All Sessions";
-
+        <div className="flex flex-wrap items-center gap-1 border-b border-border-hairline">
+          {TABS.map((tab) => {
+            const selectedTab = activeTab === tab.id;
             return (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex items-center gap-2 rounded-full px-4 py-2 font-label text-xs uppercase tracking-wider transition cursor-pointer ${
-                  activeTab === tab 
-                    ? "bg-primary-container text-on-primary-fixed font-bold emerald-glow border border-primary-container" 
-                    : "border border-transparent bg-transparent text-on-surface-variant hover:border-surgical-steel hover:text-white"
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                aria-current={selectedTab ? "page" : undefined}
+                className={`focus-ring relative inline-flex min-h-11 items-center gap-2 px-4 text-content-sm transition-colors ${
+                  selectedTab ? "text-text-strong" : "text-text-muted hover:text-text-strong"
                 }`}
               >
-                <span>{label}</span>
-                <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
-                  activeTab === tab ? "bg-black/20 text-white" : "bg-surface-container-high text-fog-muted"
-                }`}>
-                  {count}
-                </span>
+                {tab.label}
+                <span className="font-mono text-mono-xs text-text-faint tabular-nums">{counts[tab.id]}</span>
+                {selectedTab && <span aria-hidden className="absolute inset-x-2 -bottom-px h-0.5 bg-primary" />}
               </button>
             );
           })}
         </div>
 
-        {/* Events Table List */}
         <section className="space-y-4">
-          {filteredEvents.length > 0 ? (
-            <div className="overflow-hidden rounded border border-surgical-steel bg-surface-container-lowest">
-              {/* Header Row (Desktop Only) */}
-              <div className="hidden md:grid grid-cols-12 gap-4 border-b border-surgical-steel bg-surface-container-high/40 px-6 py-3.5 text-[11px] font-label uppercase tracking-wider text-fog-muted">
-                <div className="col-span-2">Access Limit</div>
-                <div className="col-span-4">Session & Host</div>
-                <div className="col-span-2">Status</div>
-                <div className="col-span-2">RSVP Metrics</div>
-                <div className="col-span-2 text-right">Room Link</div>
+          {filteredEvents.length ? (
+            <div className="overflow-hidden rounded-lg border border-border-hairline bg-surface-sunken">
+              <div className="hidden grid-cols-12 gap-4 border-b border-border-hairline bg-surface-panel px-6 py-3 md:grid">
+                <p className="terminal-label col-span-2 text-text-faint">Access limit</p>
+                <p className="terminal-label col-span-4 text-text-faint">Session &amp; host</p>
+                <p className="terminal-label col-span-2 text-text-faint">Status</p>
+                <p className="terminal-label col-span-2 text-text-faint">RSVP metrics</p>
+                <p className="terminal-label col-span-2 text-right text-text-faint">Room link</p>
               </div>
 
-              {/* Event Rows */}
-              <div className="divide-y divide-surgical-steel">
+              <div className="divide-y divide-border-hairline">
                 {filteredEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    onClick={() => setSelected(event)}
-                    className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center px-6 py-4 bg-monolith-surface/30 hover:bg-monolith-surface/75 hover:border-primary-container/20 border-l-2 border-l-transparent hover:border-l-primary-container transition cursor-pointer"
-                  >
-                    {/* Access Tier */}
-                    <div className="md:col-span-2 flex items-center">
-                      <AccessTierBadge tier={event.minTier} />
-                    </div>
-
-                    {/* Title and Date */}
-                    <div className="md:col-span-4 space-y-1">
-                      <h3 className="font-headline text-base font-bold text-white leading-tight">
-                        {event.title}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-body text-xs text-on-surface-variant">
-                        <span className="text-white font-medium">
-                          {dateTime.format(new Date(event.startsAt))}
-                        </span>
-                        <span className="text-fog-muted font-label">·</span>
-                        <span className="text-fog-muted font-label">{duration(event)}</span>
-                        <span className="text-fog-muted font-label">·</span>
-                        <span className="text-fog-muted">By {event.hostName}</span>
-                      </div>
-                    </div>
-
-                    {/* Status Badge */}
-                    <div className="md:col-span-2 flex items-center">
-                      <StatusBadge status={event.status} />
-                    </div>
-
-                    {/* RSVP Metrics */}
-                    <div className="md:col-span-2 flex items-center">
-                      <RsvpProgress enrolled={event.enrollmentCount} qualified={event.qualifiedAudienceCount} />
-                    </div>
-
-                    {/* Room Indicator & Trailing Arrow */}
-                    <div className="md:col-span-2 flex items-center justify-between gap-4 md:justify-end">
-                      <ZoomRoomStatus published={event.roomPublished} />
-                      <ChevronRight size={16} className="text-fog-muted hidden md:block" />
-                    </div>
-                  </div>
+                  <EventRow key={event.id} event={event} onOpen={() => setSelected(event)} />
                 ))}
               </div>
             </div>
           ) : (
-            <div className="rounded border border-dashed border-surgical-steel bg-surface-container-low/10 py-16 text-center">
-              <Calendar size={48} className="mx-auto mb-4 text-fog-muted opacity-60" />
-              <p className="font-headline text-lg font-semibold text-white">No sessions found</p>
-              <p className="mt-1 font-body text-sm text-on-surface-variant max-w-sm mx-auto">
-                {activeTab === "all" 
-                  ? "Get started by creating your first community event." 
+            <div className="rounded-lg border border-dashed border-border-hairline py-16 text-center">
+              <Calendar size={40} className="mx-auto mb-4 text-text-faint" />
+              <p className="text-title-sm font-medium text-text-strong">No sessions found</p>
+              <p className="mx-auto mt-2 max-w-sm text-content-sm text-text-muted">
+                {activeTab === "all"
+                  ? "Get started by creating your first community event."
                   : `There are no sessions currently in the ${activeTab} category.`}
               </p>
-              {(activeTab === "all" || activeTab === "drafts" || activeTab === "scheduled") && (
-                <button
-                  onClick={() => { setEditing(null); setCreating(true); }}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-surgical-steel px-4 py-2 font-label text-xs uppercase tracking-wider text-white hover:border-primary-container transition cursor-pointer"
-                >
-                  <Plus size={14} /> Create Event
-                </button>
+              {activeTab !== "cancelled" && (
+                <Button variant="outline" className="mt-4" onClick={startCreating}>
+                  <Plus size={14} />
+                  Create event
+                </Button>
               )}
             </div>
           )}
         </section>
       </main>
 
-      {/* Create / Edit Modal */}
       {(creating || editing) && (
-        <EventEditor 
-          event={editing} 
-          pending={pending} 
+        <EventEditor
+          event={editing}
+          pending={pending}
           error={message}
-          onClose={() => { setCreating(false); setEditing(null); setMessage(null); }} 
-          onSubmit={submit} 
+          onClose={() => {
+            setCreating(false);
+            setEditing(null);
+            setMessage(null);
+          }}
+          onSubmit={submit}
         />
       )}
 
-      {/* Details Modal */}
       {selected && (
-        <EventDetails 
-          event={selected} 
-          pending={pending} 
-          onClose={() => setSelected(null)} 
-          onEdit={() => { setEditing(selected); setSelected(null); }} 
+        <EventDetails
+          event={selected}
+          onClose={() => setSelected(null)}
+          onEdit={() => {
+            setEditing(selected);
+            setSelected(null);
+          }}
           onPublishRoom={() => setPublishingRoom(selected)}
           onCancelEvent={() => setCancellingEvent(selected)}
         />
       )}
 
-      {/* Sub-modal: Publish Zoom URL */}
       {publishingRoom && (
         <PublishRoomModal
           event={publishingRoom}
@@ -345,9 +338,8 @@ export function CreatorEventsView({
         />
       )}
 
-      {/* Sub-modal: Cancellation Reason */}
       {cancellingEvent && (
-        <CancelEventModal
+        <CancelEventDialog
           event={cancellingEvent}
           pending={pending}
           onClose={() => setCancellingEvent(null)}
@@ -358,530 +350,443 @@ export function CreatorEventsView({
   );
 }
 
-/* ----------------- Sub-Components ----------------- */
-
-function StatusBadge({ status }: { status: CreatorEventRecord["status"] }) {
-  const styles = {
-    draft: "bg-slate-500/10 text-slate-400 border border-slate-500/20",
-    upcoming: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-    live: "bg-red-500/10 text-red-400 border border-red-500/20 animate-pulse",
-    completed: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
-    cancelled: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
-  };
-  const labels = {
-    draft: "Draft",
-    upcoming: "Upcoming",
-    live: "Live Now",
-    completed: "Completed",
-    cancelled: "Cancelled",
-  };
+function EventRow({ event, onOpen }: { event: CreatorEventRecord; onOpen: () => void }) {
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold font-label ${styles[status]}`}>
-      {labels[status]}
-    </span>
-  );
-}
+    <div className="relative grid grid-cols-1 items-center gap-4 px-6 py-4 transition-colors hover:bg-surface-raised md:grid-cols-12">
+      <div className="flex items-center md:col-span-2">
+        <StatusBadge tone={event.minTier === 5 ? "warn" : "accent"}>{accessLabel(event.minTier)}</StatusBadge>
+      </div>
 
-function AccessTierBadge({ tier }: { tier: number }) {
-  const label = tier === 5 ? "Masters" : `Tier ${tier}+`;
-  const styles = tier === 5 
-    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-    : "bg-primary-container/10 text-primary-container border border-primary-container/20";
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold font-label uppercase tracking-wider ${styles}`}>
-      {label}
-    </span>
+      <div className="space-y-1 md:col-span-4">
+        <h3 className="text-title-sm font-medium text-text-strong">
+          {/* Stretched over the row: the whole row stays clickable and the
+              keyboard reaches what the mouse always could. */}
+          <button type="button" onClick={onOpen} className="focus-ring text-left after:absolute after:inset-0">
+            {event.title}
+          </button>
+        </h3>
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-content-sm text-text-muted">
+          <span className="font-mono text-text-default tabular-nums">{dateTime.format(new Date(event.startsAt))}</span>
+          <span aria-hidden>·</span>
+          <span>{duration(event)}</span>
+          <span aria-hidden>·</span>
+          <span>By {event.hostName}</span>
+        </p>
+      </div>
+
+      <div className="flex items-center md:col-span-2">
+        <StatusBadge tone={STATUS[event.status].tone}>{STATUS[event.status].label}</StatusBadge>
+      </div>
+
+      <div className="flex items-center md:col-span-2">
+        <RsvpProgress enrolled={event.enrollmentCount} qualified={event.qualifiedAudienceCount} />
+      </div>
+
+      <div className="flex items-center justify-between gap-4 md:col-span-2 md:justify-end">
+        <ZoomRoomStatus published={event.roomPublished} />
+        <ChevronRight size={16} className="hidden text-text-faint md:block" />
+      </div>
+    </div>
   );
 }
 
 function RsvpProgress({ enrolled, qualified }: { enrolled: number; qualified: number }) {
   const rate = qualified ? Math.round((enrolled / qualified) * 100) : 0;
   return (
-    <div className="space-y-1 w-full max-w-[130px]">
-      <div className="flex justify-between text-[11px] font-label text-fog-muted">
-        <span>{enrolled} / {qualified} Enrolled</span>
-        <span className="text-white font-medium">{rate}%</span>
+    <div className="w-full max-w-[130px] space-y-1">
+      <div className="flex justify-between font-mono text-mono-xs text-text-muted tabular-nums">
+        <span>
+          {enrolled} / {qualified}
+        </span>
+        <span className="text-text-default">{rate}%</span>
       </div>
-      <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700/50">
-        <div 
-          className="h-full bg-primary-container rounded-full" 
-          style={{ width: `${Math.min(rate, 100)}%` }} 
-        />
+      <div className="h-1 w-full overflow-hidden rounded-sm bg-surface-raised">
+        <div className="h-full bg-primary" style={{ width: `${Math.min(rate, 100)}%` }} />
       </div>
     </div>
   );
 }
 
 function ZoomRoomStatus({ published }: { published: boolean }) {
-  if (published) {
-    return (
-      <div className="flex items-center gap-1.5 text-xs text-primary-container font-label">
-        <Video size={14} className="stroke-[2.5]" />
-        <span>Room Ready</span>
-      </div>
-    );
-  }
-  return (
-    <div className="flex items-center gap-1.5 text-xs text-fog-muted font-label">
+  return published ? (
+    <span className="inline-flex items-center gap-1.5 text-content-sm text-primary">
+      <Video size={14} />
+      Room ready
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1.5 text-content-sm text-text-muted">
       <VideoOff size={14} />
-      <span>Missing URL</span>
+      Missing URL
+    </span>
+  );
+}
+
+function Notice({ text, onClose }: { text: string; onClose?: () => void }) {
+  return (
+    <div
+      role="status"
+      className="flex items-start justify-between gap-4 rounded-lg border border-primary/30 bg-accent-soft px-4 py-3 text-content-sm text-text-default"
+    >
+      <span className="flex items-start gap-2">
+        <Info size={16} className="mt-0.5 shrink-0 text-primary" />
+        {text}
+      </span>
+      {onClose && (
+        <Button variant="ghost" size="chrome" onClick={onClose}>
+          Dismiss
+        </Button>
+      )}
     </div>
   );
 }
 
-function Notice({ text, onClose }: { text: string; onClose?: () => void }) { 
+function FieldLabel({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
   return (
-    <div role="status" className="flex items-start justify-between gap-4 border border-primary-container/30 bg-primary-container/5 px-4 py-3 rounded font-body text-sm text-on-surface">
-      <div className="flex items-center gap-2">
-        <Info size={16} className="text-primary-container shrink-0 mt-0.5" />
-        <span>{text}</span>
-      </div>
-      {onClose && (
-        <button 
-          onClick={onClose}
-          className="font-label text-xs uppercase tracking-wider text-primary-container hover:text-white transition cursor-pointer"
-        >
-          Dismiss
-        </button>
-      )}
-    </div>
-  ); 
+    <label htmlFor={htmlFor} className="terminal-label mb-1.5 block text-text-faint">
+      {children}
+    </label>
+  );
 }
 
-/* ----------------- Event Editor Modal ----------------- */
+function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-4">
+      <h3 className="terminal-label border-b border-border-hairline pb-1 text-text-faint">{title}</h3>
+      {children}
+    </div>
+  );
+}
 
-function EventEditor({ 
-  event, 
-  pending, 
+function EventEditor({
+  event,
+  pending,
   error,
-  onClose, 
-  onSubmit 
-}: { 
-  event: CreatorEventRecord | null; 
-  pending: boolean; 
+  onClose,
+  onSubmit,
+}: {
+  event: CreatorEventRecord | null;
+  pending: boolean;
   error?: string | null;
-  onClose: () => void; 
-  onSubmit: (data: FormData, mode: "draft" | "publish" | "update") => void 
-}) { 
-  const [dirty, setDirty] = useState(false); 
-  const close = useDialog(() => { 
-    if (!dirty || window.confirm("Discard unsaved event changes?")) onClose(); 
-  }); 
+  onClose: () => void;
+  onSubmit: (data: FormData, mode: "draft" | "publish" | "update") => void;
+}) {
+  const [dirty, setDirty] = useState(false);
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false);
 
-  const inputClass = "h-10 w-full rounded border border-surgical-steel bg-surface-container-low/60 px-3 font-body text-sm text-white outline-none focus:border-primary-container transition placeholder:text-fog-muted"; 
-  const labelClass = "block font-label text-xs uppercase tracking-wider text-fog-muted mb-1.5";
+  /* The unsaved-changes guard. It used to be `window.confirm` raised from the
+     backdrop's own mousedown handler, which blocks the event loop in the middle
+     of a gesture. Base UI portals in mount order, so this dialog paints above
+     the editor that opened it. */
+  const requestClose = () => {
+    if (dirty) setConfirmingDiscard(true);
+    else onClose();
+  };
 
   return (
-    <div 
-      role="dialog" 
-      aria-modal="true" 
-      aria-labelledby="event-editor-title" 
-      className="fixed inset-0 z-50 grid place-items-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto" 
-      onMouseDown={() => { if (!dirty || window.confirm("Discard unsaved event changes?")) onClose(); }}
-    >
-      <form 
-        onSubmit={(e) => { 
-          e.preventDefault(); 
-          const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
-          const intent = (submitter?.value as "draft" | "publish" | "update") || (event?.publishedAt ? "update" : "draft");
-          onSubmit(new FormData(e.currentTarget), intent); 
-        }} 
-        onChange={() => setDirty(true)} 
-        onMouseDown={(e) => e.stopPropagation()} 
-        className="my-8 w-full max-w-2xl rounded-lg border border-surgical-steel bg-surface-container-lowest shadow-2xl overflow-hidden animate-fade-in-up"
+    <>
+      <Overlay
+        open
+        onOpenChange={(next) => {
+          if (!next) requestClose();
+        }}
       >
-        {/* Modal Header */}
-        <div className="flex justify-between items-center border-b border-surgical-steel bg-surface-container-high/40 px-6 py-4">
-          <div>
-            <p className="font-label text-xs uppercase tracking-wider text-primary-container font-semibold">Event Control</p>
-            <h2 id="event-editor-title" className="mt-1 font-display text-xl font-bold text-white">
-              {event ? "Modify Event Details" : "Schedule New Event"}
-            </h2>
-          </div>
-          <button 
-            ref={close} 
-            type="button" 
-            onClick={onClose} 
-            className="text-fog-muted hover:text-white transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
+        <OverlayContent size="full" showCloseButton={false} className="sm:max-h-[88svh]">
+          <form
+            className="flex min-h-0 flex-1 flex-col"
+            onSubmit={(submitEvent) => {
+              submitEvent.preventDefault();
+              const submitter = (submitEvent.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+              const intent =
+                (submitter?.value as "draft" | "publish" | "update") || (event?.publishedAt ? "update" : "draft");
+              onSubmit(new FormData(submitEvent.currentTarget), intent);
+            }}
+            onChange={() => setDirty(true)}
           >
-            <X size={20} />
-          </button>
-        </div>
+            <OverlayHeader>
+              <p className="terminal-label text-text-faint">Event control</p>
+              <OverlayTitle className="text-title-md">
+                {event ? "Modify event details" : "Schedule new event"}
+              </OverlayTitle>
+            </OverlayHeader>
 
-        {error && (
-          <div className="px-6 pt-6 pb-2">
-            <Notice text={error} onClose={onClose} />
-          </div>
-        )}
+            <OverlayBody className="space-y-6">
+              {error && <Notice text={error} />}
 
-        {/* Modal Body */}
-        <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-          {/* Section 1: Basic Info */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-label uppercase tracking-widest text-primary-container/80 font-bold border-b border-surgical-steel/40 pb-1">
-              General Information
-            </h3>
-            
-            <div>
-              <label htmlFor="title" className={labelClass}>Event Title</label>
-              <input 
-                id="title"
-                className={inputClass} 
-                name="title" 
-                defaultValue={event?.title} 
-                placeholder="e.g. Morning Meditation & Journaling"
-                maxLength={160} 
-                required 
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="description" className={labelClass}>Description</label>
-              <textarea 
-                id="description"
-                className={`${inputClass} h-24 py-2 resize-none`} 
-                name="description" 
-                defaultValue={event?.description ?? ""} 
-                placeholder="Detail the session's Stoic reading, exercises, and schedule..."
-                rows={3} 
-              />
-            </div>
-          </div>
+              <FormSection title="General information">
+                <div>
+                  <FieldLabel htmlFor="title">Event title</FieldLabel>
+                  <Input
+                    id="title"
+                    name="title"
+                    defaultValue={event?.title}
+                    placeholder="e.g. Morning meditation and journaling"
+                    maxLength={160}
+                    required
+                  />
+                </div>
+                <div>
+                  <FieldLabel htmlFor="description">Description</FieldLabel>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    defaultValue={event?.description ?? ""}
+                    placeholder="Detail the session's Stoic reading, exercises, and schedule…"
+                    rows={3}
+                  />
+                </div>
+              </FormSection>
 
-          {/* Section 2: Host & Access */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-label uppercase tracking-widest text-primary-container/80 font-bold border-b border-surgical-steel/40 pb-1">
-              Host & Access Level
-            </h3>
+              <FormSection title="Host and access level">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <FieldLabel htmlFor="hostName">Host name</FieldLabel>
+                    <Input
+                      id="hostName"
+                      name="hostName"
+                      defaultValue={event?.hostName ?? "Stoicverse Team"}
+                      placeholder="e.g. Marcus Aurelius"
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel htmlFor="minTier">Minimum required tier</FieldLabel>
+                    <select
+                      id="minTier"
+                      name="minTier"
+                      defaultValue={event?.minTier ?? 1}
+                      className="focus-ring h-11 w-full rounded-lg border border-border-hairline bg-surface-sunken px-3 text-content-sm text-text-default"
+                    >
+                      {[1, 2, 3, 4, 5].map((tier) => (
+                        <option key={tier} value={tier}>
+                          {accessLabel(tier)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </FormSection>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="hostName" className={labelClass}>Host Name</label>
-                <input 
-                  id="hostName"
-                  className={inputClass} 
-                  name="hostName" 
-                  defaultValue={event?.hostName ?? "Stoicverse Team"} 
-                  placeholder="e.g. Marcus Aurelius"
-                />
+              <FormSection title="Schedule timeline">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <FieldLabel htmlFor="startsAt">Starts at</FieldLabel>
+                    <Input
+                      id="startsAt"
+                      type="datetime-local"
+                      name="startsAt"
+                      defaultValue={localInput(event?.startsAt ?? null)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel htmlFor="endsAt">Ends at</FieldLabel>
+                    <Input
+                      id="endsAt"
+                      type="datetime-local"
+                      name="endsAt"
+                      defaultValue={localInput(event?.endsAt ?? null)}
+                      required
+                    />
+                  </div>
+                </div>
+              </FormSection>
+
+              <FormSection title="Delivery settings (optional)">
+                <div>
+                  <FieldLabel htmlFor="publishAt">Intended publish time — a manual reminder only</FieldLabel>
+                  <Input
+                    id="publishAt"
+                    type="datetime-local"
+                    name="publishAt"
+                    defaultValue={localInput(event?.publishAt ?? null)}
+                  />
+                </div>
+                <div>
+                  <FieldLabel htmlFor="zoomUrl">Zoom meeting URL</FieldLabel>
+                  <Input id="zoomUrl" type="url" name="zoomUrl" placeholder="https://zoom.us/j/…" />
+                </div>
+              </FormSection>
+            </OverlayBody>
+
+            <OverlayFooter className="sm:justify-between">
+              <Button type="button" variant="ghost" onClick={requestClose}>
+                Cancel
+              </Button>
+              <div className="flex gap-3">
+                {!event?.publishedAt && (
+                  <Button type="submit" name="intent" value="draft" variant="outline" disabled={pending}>
+                    Save draft
+                  </Button>
+                )}
+                <Button type="submit" name="intent" value={event?.publishedAt ? "update" : "publish"} disabled={pending}>
+                  {pending ? "Saving…" : event?.publishedAt ? "Save changes" : "Publish event"}
+                </Button>
               </div>
+            </OverlayFooter>
+          </form>
+        </OverlayContent>
+      </Overlay>
 
-              <div>
-                <label htmlFor="minTier" className={labelClass}>Minimum Required Tier</label>
-                <select 
-                  id="minTier"
-                  className={`${inputClass} cursor-pointer`} 
-                  name="minTier" 
-                  defaultValue={event?.minTier ?? 1}
-                >
-                  {[1, 2, 3, 4, 5].map((tier) => (
-                    <option key={tier} value={tier} className="bg-surface-container-lowest">
-                      {accessLabel(tier)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 3: Timeline */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-label uppercase tracking-widest text-primary-container/80 font-bold border-b border-surgical-steel/40 pb-1">
-              Schedule Timeline
-            </h3>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="startsAt" className={labelClass}>Starts At</label>
-                <input 
-                  id="startsAt"
-                  className={`${inputClass} cursor-pointer`}
-                  type="datetime-local" 
-                  name="startsAt" 
-                  defaultValue={localInput(event?.startsAt ?? null)} 
-                  required 
-                />
-              </div>
-
-              <div>
-                <label htmlFor="endsAt" className={labelClass}>Ends At</label>
-                <input 
-                  id="endsAt"
-                  className={`${inputClass} cursor-pointer`}
-                  type="datetime-local" 
-                  name="endsAt" 
-                  defaultValue={localInput(event?.endsAt ?? null)} 
-                  required 
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 4: Settings (Optional) */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-label uppercase tracking-widest text-primary-container/80 font-bold border-b border-surgical-steel/40 pb-1">
-              Delivery Settings (Optional)
-            </h3>
-
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="publishAt" className={labelClass}>
-                  Intended Publish Time <span className="text-fog-muted font-normal lowercase italic">(manual reminder only)</span>
-                </label>
-                <input 
-                  id="publishAt"
-                  className={`${inputClass} cursor-pointer`}
-                  type="datetime-local" 
-                  name="publishAt" 
-                  defaultValue={localInput(event?.publishAt ?? null)} 
-                />
-              </div>
-
-              <div>
-                <label htmlFor="zoomUrl" className={labelClass}>Zoom Meeting URL</label>
-                <input 
-                  id="zoomUrl"
-                  className={inputClass} 
-                  type="url" 
-                  name="zoomUrl" 
-                  placeholder="https://zoom.us/j/..." 
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Modal Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-surgical-steel px-6 py-4 bg-surface-container-high/20">
-          <button 
-            type="button" 
-            onClick={onClose} 
-            className="min-h-10 px-4 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-white transition cursor-pointer"
-          >
-            Cancel
-          </button>
-          
-          <div className="flex gap-3">
-            {/* Save Draft Option (Only for non-published events) */}
-            {!event?.publishedAt && (
-              <button 
-                type="submit" 
-                name="intent"
-                value="draft"
-                disabled={pending} 
-                className="min-h-10 px-5 font-label text-xs uppercase tracking-wider text-primary-container border border-primary-container/30 hover:border-primary-container rounded hover:bg-primary-container/5 transition disabled:opacity-60 cursor-pointer"
-              >
-                Save Draft
-              </button>
-            )}
-            
-            <button 
-              type="submit" 
-              name="intent"
-              value={event?.publishedAt ? "update" : "publish"}
-              disabled={pending} 
-              className="min-h-10 rounded-full bg-primary-container px-6 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition disabled:opacity-60 cursor-pointer"
-            >
-              {pending ? "Saving…" : event?.publishedAt ? "Save Changes" : "Publish Event"}
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-  ); 
+      <ConfirmDialog
+        open={confirmingDiscard}
+        onOpenChange={setConfirmingDiscard}
+        title="Discard unsaved event changes?"
+        description="The edits made since this event was opened will be lost."
+        confirmLabel="Discard changes"
+        cancelLabel="Keep editing"
+        tone="danger"
+        onConfirm={() => {
+          setConfirmingDiscard(false);
+          onClose();
+        }}
+      />
+    </>
+  );
 }
 
-/* ----------------- Event Details Modal ----------------- */
-
-function EventDetails({ 
-  event, 
-  pending, 
-  onClose, 
-  onEdit, 
+function EventDetails({
+  event,
+  onClose,
+  onEdit,
   onPublishRoom,
-  onCancelEvent
-}: { 
-  event: CreatorEventRecord; 
-  pending: boolean; 
-  onClose: () => void; 
-  onEdit: () => void; 
+  onCancelEvent,
+}: {
+  event: CreatorEventRecord;
+  onClose: () => void;
+  onEdit: () => void;
   onPublishRoom: () => void;
   onCancelEvent: () => void;
-}) { 
-  const close = useDialog(onClose); 
-  const rate = event.qualifiedAudienceCount 
-    ? Math.round(event.enrollmentCount / event.qualifiedAudienceCount * 100) 
-    : 0; 
-  
+}) {
+  const rate = event.qualifiedAudienceCount
+    ? Math.round((event.enrollmentCount / event.qualifiedAudienceCount) * 100)
+    : 0;
+
+  const schedule: [string, string][] = [
+    ["When", dateTime.format(new Date(event.startsAt))],
+    ["Duration", duration(event)],
+    ["Access level", accessLabel(event.minTier)],
+    ["Zoom room", event.roomPublished ? "Published and active" : "Missing meeting URL"],
+  ];
+
   return (
-    <div 
-      role="dialog" 
-      aria-modal="true" 
-      aria-labelledby="event-details-title" 
-      className="fixed inset-0 z-50 grid place-items-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto" 
-      onMouseDown={onClose}
+    <Overlay
+      open
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
     >
-      <div 
-        onMouseDown={(e) => e.stopPropagation()} 
-        className="w-full max-w-4xl rounded-lg border border-surgical-steel bg-surface-container-lowest shadow-2xl overflow-hidden animate-fade-in-up my-8"
-      >
-        {/* Header */}
-        <div className="flex justify-between items-center border-b border-surgical-steel bg-surface-container-high/40 px-6 py-4">
-          <div>
-            <p className="font-label text-xs uppercase tracking-wider text-primary-container font-semibold">Event Details</p>
-            <h2 id="event-details-title" className="mt-1 font-display text-xl font-bold text-white">
-              {event.title}
-            </h2>
-          </div>
-          <button 
-            ref={close} 
-            onClick={onClose} 
-            className="text-fog-muted hover:text-white transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
-          >
-            <X size={20} />
-          </button>
-        </div>
+      <OverlayContent size="full" className="sm:max-h-[88svh]">
+        <OverlayHeader>
+          <p className="terminal-label text-text-faint">Event details</p>
+          <OverlayTitle className="text-title-md">{event.title}</OverlayTitle>
+        </OverlayHeader>
 
-        {/* Content Body */}
-        <div className="grid gap-8 p-6 md:grid-cols-5 max-h-[65vh] overflow-y-auto">
-          {/* Main Info */}
-          <div className="md:col-span-3 space-y-6">
-            <div>
-              <h3 className="text-xs font-label uppercase tracking-widest text-primary-container/85 font-bold mb-2">Description</h3>
-              <p className="font-body text-sm text-on-surface-variant leading-relaxed whitespace-pre-line">
-                {event.description || "No description provided."}
-              </p>
-            </div>
-
-            <div className="border-t border-surgical-steel/50 pt-6">
-              <h3 className="text-xs font-label uppercase tracking-widest text-primary-container/85 font-bold mb-3">Schedule Info</h3>
-              <dl className="grid grid-cols-2 gap-4 text-sm font-body">
-                <div>
-                  <dt className="text-fog-muted font-label text-xs uppercase tracking-wider mb-0.5">When</dt>
-                  <dd className="text-white font-medium">{dateTime.format(new Date(event.startsAt))}</dd>
-                </div>
-                <div>
-                  <dt className="text-fog-muted font-label text-xs uppercase tracking-wider mb-0.5">Duration</dt>
-                  <dd className="text-white font-medium">{duration(event)}</dd>
-                </div>
-                <div>
-                  <dt className="text-fog-muted font-label text-xs uppercase tracking-wider mb-0.5">Access Level</dt>
-                  <dd className="text-white font-medium">{accessLabel(event.minTier)}</dd>
-                </div>
-                <div>
-                  <dt className="text-fog-muted font-label text-xs uppercase tracking-wider mb-0.5">Zoom Room</dt>
-                  <dd className="text-white font-medium">
-                    {event.roomPublished ? "Published & Active" : "Missing Meeting URL"}
-                  </dd>
-                </div>
-                {event.cancellationReason && (
-                  <div className="col-span-2 bg-rose-500/5 border border-rose-500/20 rounded p-3 mt-2">
-                    <dt className="text-rose-400 font-label text-xs uppercase tracking-wider mb-1">Cancellation Reason</dt>
-                    <dd className="text-rose-200 text-xs italic">&ldquo;{event.cancellationReason}&rdquo;</dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-          </div>
-
-          {/* Metrics & Attendees */}
-          <div className="md:col-span-2 border-t border-surgical-steel/60 pt-6 md:border-t-0 md:border-l md:border-surgical-steel/60 md:pt-0 md:pl-6 space-y-6">
-            <div>
-              <h3 className="text-xs font-label uppercase tracking-widest text-primary-container/85 font-bold mb-3">RSVP Performance</h3>
-              <div className="grid grid-cols-3 gap-2">
-                <Metric value={String(event.enrollmentCount)} label="Enrolled" />
-                <Metric value={String(event.qualifiedAudienceCount)} label="Qualified" />
-                <Metric value={`${rate}%`} label="RSVP Rate" />
+        <OverlayBody>
+          <div className="grid gap-8 md:grid-cols-5">
+            <div className="space-y-6 md:col-span-3">
+              <div>
+                <h3 className="terminal-label mb-2 text-text-faint">Description</h3>
+                <p className="text-content-sm whitespace-pre-line text-text-default">
+                  {event.description || "No description provided."}
+                </p>
               </div>
-            </div>
 
-            <div>
-              <h3 className="text-xs font-label uppercase tracking-widest text-primary-container/85 font-bold mb-2">Members Registered</h3>
-              <div className="rounded border border-surgical-steel bg-surface-container-high/20 overflow-hidden">
-                <ul className="divide-y divide-surgical-steel/40 max-h-48 overflow-y-auto text-xs font-body">
-                  {event.attendees.length ? (
-                    event.attendees.map((attendee) => (
-                      <li key={attendee.id} className="flex justify-between items-center p-3 hover:bg-surface-container-high/40">
-                        <span className="text-white font-medium">{attendee.name}</span>
-                        <span className="text-fog-muted font-label text-[10px]">
-                          {dateTime.format(new Date(attendee.enrolledAt))}
-                        </span>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="text-fog-muted p-4 text-center">No enrollments recorded yet.</li>
+              <div className="border-t border-border-hairline pt-6">
+                <h3 className="terminal-label mb-3 text-text-faint">Schedule info</h3>
+                <dl className="grid grid-cols-2 gap-4">
+                  {schedule.map(([label, value]) => (
+                    <div key={label}>
+                      <dt className="terminal-label mb-0.5 text-text-faint">{label}</dt>
+                      <dd className="text-content-sm text-text-default">{value}</dd>
+                    </div>
+                  ))}
+                  {event.cancellationReason && (
+                    <div className="col-span-2 rounded-lg border border-status-danger/40 bg-status-danger/10 p-3">
+                      <dt className="terminal-label mb-1 text-status-danger">Cancellation reason</dt>
+                      <dd className="text-content-sm text-text-default">&ldquo;{event.cancellationReason}&rdquo;</dd>
+                    </div>
                   )}
-                </ul>
+                </dl>
+              </div>
+            </div>
+
+            <div className="space-y-6 border-t border-border-hairline pt-6 md:col-span-2 md:border-t-0 md:border-l md:pt-0 md:pl-6">
+              <div>
+                <h3 className="terminal-label mb-3 text-text-faint">RSVP performance</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <Metric value={String(event.enrollmentCount)} label="Enrolled" />
+                  <Metric value={String(event.qualifiedAudienceCount)} label="Qualified" />
+                  <Metric value={`${rate}%`} label="RSVP rate" />
+                </div>
+              </div>
+
+              <div>
+                <h3 className="terminal-label mb-2 text-text-faint">Members registered</h3>
+                <div className="overflow-hidden rounded-lg border border-border-hairline">
+                  <ul className="max-h-48 divide-y divide-border-hairline overflow-y-auto">
+                    {event.attendees.length ? (
+                      event.attendees.map((attendee) => (
+                        <li key={attendee.id} className="flex items-center justify-between gap-3 p-3">
+                          <span className="text-content-sm text-text-strong">{attendee.name}</span>
+                          <span className="font-mono text-mono-xs text-text-muted tabular-nums">
+                            {dateTime.format(new Date(attendee.enrolledAt))}
+                          </span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="p-4 text-center text-content-sm text-text-muted">No enrollments recorded yet.</li>
+                    )}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </OverlayBody>
 
-        {/* Modal Footer: The 3 redesigned buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-surgical-steel px-6 py-4 bg-surface-container-high/20">
-          <button 
-            onClick={onClose} 
-            className="min-h-10 px-4 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-white transition cursor-pointer"
-          >
+        <OverlayFooter className="sm:justify-between">
+          <Button variant="ghost" onClick={onClose}>
             Close
-          </button>
-          
+          </Button>
+
           {event.status !== "cancelled" ? (
-            <div className="flex flex-wrap gap-2.5">
-              {/* Button 3: Cancel Event */}
-              <button 
-                onClick={onCancelEvent} 
-                className="inline-flex min-h-10 items-center justify-center gap-1.5 border border-rose-500/30 hover:border-rose-500 hover:bg-rose-500/5 text-rose-400 hover:text-rose-300 font-label text-xs uppercase tracking-wider rounded-md px-4 transition cursor-pointer"
-              >
-                Cancel Event
-              </button>
-
-              {/* Button 2: Publish Room URL */}
-              <button 
-                onClick={onPublishRoom} 
-                className="inline-flex min-h-10 items-center justify-center gap-1.5 border border-primary-container/30 hover:border-primary-container hover:bg-primary-container/5 text-primary-container font-label text-xs uppercase tracking-wider rounded-md px-4 transition cursor-pointer"
-              >
+            <div className="flex flex-wrap gap-2">
+              <Button variant="destructive" onClick={onCancelEvent}>
+                Cancel event
+              </Button>
+              <Button variant="outline" onClick={onPublishRoom}>
                 <Link2 size={14} />
-                Publish Link
-              </button>
-
-              {/* Button 1: Edit Event */}
-              <button 
-                onClick={onEdit} 
-                className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-primary-container px-5 font-label text-xs font-semibold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition cursor-pointer"
-              >
+                Publish link
+              </Button>
+              <Button onClick={onEdit}>
                 <Edit3 size={14} />
-                Edit Event
-              </button>
+                Edit event
+              </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-rose-400 font-label text-xs uppercase tracking-wider">
+            <p className="flex items-center gap-2 text-content-sm text-status-danger">
               <AlertCircle size={15} />
-              <span>Event is Cancelled</span>
-            </div>
+              This event is cancelled
+            </p>
           )}
-        </div>
-      </div>
-    </div>
-  ); 
+        </OverlayFooter>
+      </OverlayContent>
+    </Overlay>
+  );
 }
 
-function Metric({ value, label }: { value: string; label: string }) { 
+function Metric({ value, label }: { value: string; label: string }) {
   return (
-    <div className="border border-surgical-steel bg-surface-container-high/15 p-3 text-center rounded">
-      <p className="font-display text-lg font-bold text-white">{value}</p>
-      <p className="font-label text-[9px] uppercase tracking-wider text-fog-muted mt-1 leading-none">{label}</p>
+    <div className="rounded-lg border border-border-hairline p-3 text-center">
+      <p className="font-mono text-title-sm text-text-strong tabular-nums">{value}</p>
+      <p className="terminal-label mt-1 text-text-faint">{label}</p>
     </div>
-  ); 
+  );
 }
-
-/* ----------------- Sub-modal: Publish Room URL ----------------- */
 
 function PublishRoomModal({
   event,
   pending,
   onClose,
-  onPublish
+  onPublish,
 }: {
   event: CreatorEventRecord;
   pending: boolean;
@@ -889,95 +794,65 @@ function PublishRoomModal({
   onPublish: (url: string) => void;
 }) {
   const [url, setUrl] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
 
   return (
-    <div 
-      className="fixed inset-0 z-[60] grid place-items-center bg-black/85 backdrop-blur-sm p-4"
-      onMouseDown={onClose}
+    <Overlay
+      open
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
     >
-      <div 
-        onMouseDown={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-lg border border-surgical-steel bg-surface-container-lowest shadow-2xl overflow-hidden animate-fade-in-up"
-      >
-        <div className="flex justify-between items-center border-b border-surgical-steel bg-surface-container-high/40 px-5 py-3.5">
-          <div>
-            <p className="font-label text-[10px] uppercase tracking-wider text-primary-container font-semibold">Delivery Access</p>
-            <h3 className="font-headline text-base font-bold text-white">Publish Room Link</h3>
-          </div>
-          <button 
-            onClick={onClose} 
-            className="text-fog-muted hover:text-white transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        <form 
-          onSubmit={(e) => {
-            e.preventDefault();
+      <OverlayContent size="sm" showCloseButton={false}>
+        <form
+          onSubmit={(submitEvent) => {
+            submitEvent.preventDefault();
             onPublish(url);
           }}
-          className="p-5 space-y-4"
         >
-          <div className="space-y-1">
-            <p className="text-xs text-on-surface-variant font-body leading-relaxed">
-              Enter the live meeting link for <strong className="text-white">&ldquo;{event.title}&rdquo;</strong>. Members will be notified and can join directly when the session opens.
-            </p>
-          </div>
+          <OverlayHeader>
+            <p className="terminal-label text-text-faint">Delivery access</p>
+            <OverlayTitle>Publish room link</OverlayTitle>
+          </OverlayHeader>
 
-          <div>
-            <label htmlFor="roomUrl" className="block font-label text-xs uppercase tracking-wider text-fog-muted mb-1.5">
-              Zoom Meeting URL
-            </label>
-            <input
-              id="roomUrl"
-              ref={inputRef}
-              className="h-10 w-full rounded border border-surgical-steel bg-surface-container-low/60 px-3 font-body text-sm text-white outline-none focus:border-primary-container transition placeholder:text-fog-muted"
-              type="url"
-              placeholder="https://zoom.us/j/..."
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              required
-            />
-            <p className="text-[10px] font-label text-fog-muted mt-1">
-              Note: Link must use a secure HTTPS Zoom domain.
+          <OverlayBody className="space-y-4">
+            <p className="text-content-sm text-text-default">
+              Enter the live meeting link for <strong className="font-medium text-text-strong">{event.title}</strong>.
+              Members are notified and can join directly when the session opens.
             </p>
-          </div>
+            <div>
+              <FieldLabel htmlFor="roomUrl">Zoom meeting URL</FieldLabel>
+              <Input
+                id="roomUrl"
+                autoFocus
+                type="url"
+                placeholder="https://zoom.us/j/…"
+                value={url}
+                onChange={(changeEvent) => setUrl(changeEvent.target.value)}
+                required
+              />
+              <p className="mt-1 text-content-sm text-text-muted">The link must use a secure HTTPS Zoom domain.</p>
+            </div>
+          </OverlayBody>
 
-          <div className="flex items-center justify-end gap-3 pt-2 border-t border-surgical-steel/40">
-            <button
-              type="button"
-              onClick={onClose}
-              className="min-h-9 px-3 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-white transition cursor-pointer"
-            >
+          <OverlayFooter>
+            <Button type="button" variant="ghost" onClick={onClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={pending}
-              className="min-h-9 rounded bg-primary-container px-4 font-label text-xs font-bold uppercase tracking-wider text-on-primary-fixed hover:brightness-110 transition disabled:opacity-60 cursor-pointer"
-            >
-              {pending ? "Publishing..." : "Publish Link"}
-            </button>
-          </div>
+            </Button>
+            <Button type="submit" disabled={pending}>
+              {pending ? "Publishing…" : "Publish link"}
+            </Button>
+          </OverlayFooter>
         </form>
-      </div>
-    </div>
+      </OverlayContent>
+    </Overlay>
   );
 }
 
-/* ----------------- Sub-modal: Cancellation Reason ----------------- */
-
-function CancelEventModal({
+function CancelEventDialog({
   event,
   pending,
   onClose,
-  onConfirm
+  onConfirm,
 }: {
   event: CreatorEventRecord;
   pending: boolean;
@@ -985,80 +860,41 @@ function CancelEventModal({
   onConfirm: (reason: string) => void;
 }) {
   const [reason, setReason] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
-
+  /* This was a hand-rolled modal whose only field was an optional reason.
+     `ui/confirm-dialog` is that shape: a question, a destructive answer, and
+     room for one field. */
   return (
-    <div 
-      className="fixed inset-0 z-[60] grid place-items-center bg-black/85 backdrop-blur-sm p-4"
-      onMouseDown={onClose}
+    <ConfirmDialog
+      open
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+      title="Cancel this event?"
+      description={
+        <>
+          Registered members are notified immediately that{" "}
+          <strong className="font-medium text-text-strong">{event.title}</strong> will not take place. This cannot be
+          reversed.
+        </>
+      }
+      confirmLabel={pending ? "Cancelling…" : "Confirm cancellation"}
+      cancelLabel="Keep event"
+      tone="danger"
+      busy={pending}
+      onConfirm={() => onConfirm(reason)}
     >
-      <div 
-        onMouseDown={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-lg border border-surgical-steel bg-surface-container-lowest shadow-2xl overflow-hidden animate-fade-in-up"
-      >
-        <div className="flex justify-between items-center border-b border-surgical-steel bg-surface-container-high/40 px-5 py-3.5">
-          <div>
-            <p className="font-label text-[10px] uppercase tracking-wider text-rose-400 font-semibold">Moderation</p>
-            <h3 className="font-headline text-base font-bold text-white">Cancel Event</h3>
-          </div>
-          <button 
-            onClick={onClose} 
-            className="text-fog-muted hover:text-white transition cursor-pointer p-1 rounded hover:bg-surface-container-high"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        <form 
-          onSubmit={(e) => {
-            e.preventDefault();
-            onConfirm(reason);
-          }}
-          className="p-5 space-y-4"
-        >
-          <div className="space-y-1">
-            <p className="text-xs text-on-surface-variant font-body leading-relaxed">
-              Are you sure you want to cancel <strong className="text-white">&ldquo;{event.title}&rdquo;</strong>?
-              Registered members will be notified immediately. This action cannot be reversed.
-            </p>
-          </div>
-
-          <div>
-            <label htmlFor="cancelReason" className="block font-label text-xs uppercase tracking-wider text-fog-muted mb-1.5">
-              Cancellation Reason <span className="text-[10px] font-normal italic lowercase">(Optional)</span>
-            </label>
-            <textarea
-              id="cancelReason"
-              ref={textareaRef}
-              className="w-full h-24 rounded border border-surgical-steel bg-surface-container-low/60 p-3 font-body text-sm text-white outline-none focus:border-primary-container transition placeholder:text-fog-muted resize-none"
-              placeholder="Provide a cancellation message for the registered members..."
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-            />
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-2 border-t border-surgical-steel/40">
-            <button
-              type="button"
-              onClick={onClose}
-              className="min-h-9 px-3 font-label text-xs uppercase tracking-wider text-fog-muted hover:text-white transition cursor-pointer"
-            >
-              Keep Event
-            </button>
-            <button
-              type="submit"
-              disabled={pending}
-              className="min-h-9 rounded bg-rose-600 px-4 font-label text-xs font-bold uppercase tracking-wider text-white hover:bg-rose-500 transition disabled:opacity-60 cursor-pointer"
-            >
-              {pending ? "Cancelling..." : "Confirm Cancellation"}
-            </button>
-          </div>
-        </form>
+      <div>
+        <FieldLabel htmlFor="cancelReason">Cancellation reason — optional</FieldLabel>
+        <Textarea
+          id="cancelReason"
+          autoFocus
+          rows={3}
+          placeholder="Provide a cancellation message for the registered members…"
+          value={reason}
+          onChange={(changeEvent) => setReason(changeEvent.target.value)}
+        />
       </div>
-    </div>
+    </ConfirmDialog>
   );
 }

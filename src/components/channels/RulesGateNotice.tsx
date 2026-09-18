@@ -39,24 +39,32 @@ export function RulesGateNotice() {
     });
 
   return (
-    <div className="border-t border-surgical-steel px-4 py-4 text-center">
-      <p role="status" className="text-sm text-fog-muted">
+    <div className="border-t border-border-hairline px-4 py-4 text-center">
+      <p role="status" className="text-content-sm text-text-muted">
         Read and accept the community rules before posting.
       </p>
       <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
         {rulesChannel ? (
           <Link
             href={`/channels/${rulesChannel.id}`}
-            className="focus-ring rounded-lg border border-surgical-steel px-3 py-1.5 text-xs text-on-surface-variant hover:text-on-surface"
+            className="focus-ring rounded-lg border border-border-hairline px-3 py-1.5 text-chrome-sm text-text-default hover:bg-surface-panel hover:text-text-strong"
           >
             {`Read them in #${rulesChannel.name}`}
           </Link>
         ) : null}
+        {/*
+          `text-primary-foreground` is the near-black that belongs on the lime.
+          This said `text-monolith-surface`, which the alias block points at the
+          panel grey - #141416 on #C6F24E, a label the colour of a card sitting
+          on the brand accent. It is the accent-token confusion the design note
+          records, arriving from a fourth direction: only `--primary-foreground`
+          is "text on the lime".
+        */}
         <button
           type="button"
           onClick={accept}
           disabled={pending}
-          className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary-container px-3 py-1.5 text-xs font-semibold text-monolith-surface disabled:opacity-50"
+          className="focus-ring inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-chrome-sm font-medium text-primary-foreground disabled:opacity-50"
         >
           {pending ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : null}
           I accept the rules

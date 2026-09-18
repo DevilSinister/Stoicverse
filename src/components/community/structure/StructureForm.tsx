@@ -13,10 +13,38 @@ import { CHANNEL_TYPES, channelMeta, channelSlug } from "@/components/community/
 import { AccessFields } from "@/components/community/structure/AccessFields";
 import { ChannelPermissionsTab, SlowModeField } from "@/components/community/structure/ChannelPermissionsTab";
 import type { CommunityCategory, CommunityChannel } from "@/components/community/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CommunityRole } from "@/lib/community-settings/role-model";
 import type { ChannelOverride } from "@/lib/community-settings/structure";
+import type { Notify } from "@/components/ui/toast";
 
-/** Create or edit one category or channel. Every write goes through the creator channel actions. */
+/**
+ * Create or edit one category or channel. Every write goes through the creator
+ * channel actions.
+ *
+ * Monolith, phase 12c. Two things beyond the palette.
+ *
+ * **The tabs were a `role="tablist"` no assistive technology could follow.**
+ * Two buttons carried `role="tab"` and `aria-selected`, and nothing else: no
+ * `aria-controls`, no element with `role="tabpanel"` for them to point at, and
+ * no arrow-key movement — the pattern's whole keyboard contract is that Left
+ * and Right move between tabs, and here they did nothing. The "permissions"
+ * branch also returned early, so the panel the tabs claimed to switch between
+ * was a separate subtree with its own duplicate header. It is `ui/tabs` now:
+ * the roles, the `aria-controls` wiring, the roving focus and the panel come
+ * from Base UI, and this file only says which panel holds what. That primitive
+ * had no call site in the product, and this is a deliberate first one — the
+ * hand-rolled version was not a working control moved for tidiness, it was an
+ * ARIA promise that was never kept.
+ *
+ * **Delete has no confirmation, and that is the server's doing rather than an
+ * omission.** `deleteCommunityStructure` refuses a category that still holds
+ * channels and a channel that still holds posts, so this button can only ever
+ * destroy something already empty, and it returns a sentence saying so when it
+ * refuses. A dialog here would be asking about a loss that cannot happen.
+ */
 export function StructureForm({
   kind,
   category,
@@ -36,7 +64,7 @@ export function StructureForm({
   /** Empty until the phase-3 migration is applied, which hides the tab entirely. */
   roles?: CommunityRole[];
   overrides?: ChannelOverride[];
-  onNotice: (value: string) => void;
+  onNotice: Notify;
   onDeleted?: () => void;
 }) {
   const subject = kind === "category" ? category : channel;
@@ -50,68 +78,40 @@ export function StructureForm({
 
   // Permissions belong to a row that exists. Offering the tab while creating
   // one would be a grid with nothing to attach to.
-  const [tab, setTab] = useState<"overview" | "permissions">("overview");
+  const [tab, setTab] = useState("overview");
   const showPermissions = !isNew && roles.length > 0;
 
   const submit = (data: FormData) =>
     startTransition(async () => {
       const result = kind === "category" ? await saveCategory(data) : await saveChannel(data);
       if (result.error) {
-        onNotice(result.error);
+        onNotice(result.error, "error");
         return;
       }
-      onNotice(`${kind === "category" ? "Category" : "Channel"} saved.`);
+      onNotice(`${kind === "category" ? "Category" : "Channel"} saved.`, "success");
       if (isNew) setName("");
     });
 
   const setArchived = (archived: boolean) =>
     startTransition(async () => {
       const result = await setCommunityStructureArchived(kind, subject!.id, archived);
-      onNotice(result.error ?? `${kind === "category" ? "Category" : "Channel"} ${archived ? "archived" : "restored"}.`);
+      if (result.error) onNotice(result.error, "error");
+      else onNotice(`${kind === "category" ? "Category" : "Channel"} ${archived ? "archived" : "restored"}.`, "success");
     });
 
   const destroy = () =>
     startTransition(async () => {
       const result = await deleteCommunityStructure(kind, subject!.id);
       if (result.error) {
-        onNotice(result.error);
+        onNotice(result.error, "error");
         return;
       }
-      onNotice(`${kind === "category" ? "Category" : "Channel"} deleted.`);
+      onNotice(`${kind === "category" ? "Category" : "Channel"} deleted.`, "success");
       onDeleted?.();
     });
 
-  if (showPermissions && tab === "permissions") {
-    return (
-      <div className="space-y-6">
-        <FormHeader isNew={isNew} kind={kind} hint={kind === "category" ? CATEGORY_HINT : meta.hint} />
-        <StructureTabs tab={tab} onChange={setTab} />
-        <ChannelPermissionsTab
-          target={kind}
-          channel={channel}
-          category={category}
-          roles={roles}
-          overrides={overrides}
-          canSave
-          onNotice={onNotice}
-        />
-      </div>
-    );
-  }
-
-  return (
+  const overview = (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-sm font-semibold text-white">{isNew ? `New ${kind}` : `Edit ${kind}`}</h3>
-        <p className="mt-1 text-xs leading-5 text-fog-muted">
-          {kind === "category"
-            ? "A category groups channels in the sidebar and sets the default access for channels added to it."
-            : meta.hint}
-        </p>
-      </div>
-
-      {showPermissions && <StructureTabs tab={tab} onChange={setTab} />}
-
       <form action={submit} className="space-y-5">
         {kind === "category" ? (
           <input type="hidden" name="categoryId" value={category?.id ?? ""} />
@@ -124,7 +124,7 @@ export function StructureForm({
 
         {kind === "channel" && (
           <fieldset>
-            <legend className="text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">Type</legend>
+            <legend className="terminal-label">Type</legend>
             <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
               {CHANNEL_TYPES.map((option) => {
                 const optionMeta = channelMeta(option);
@@ -132,10 +132,10 @@ export function StructureForm({
                 return (
                   <label
                     key={option}
-                    className={`flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary-container ${
+                    className={`flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-lg border text-content-sm font-medium transition has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary ${
                       type === option
-                        ? "border-primary-container bg-primary-container/10 text-primary-container"
-                        : "border-surgical-steel text-on-surface-variant hover:border-fog-muted"
+                        ? "border-primary bg-accent-soft text-primary"
+                        : "border-border-hairline text-text-default hover:border-text-muted"
                     }`}
                   >
                     <input
@@ -156,13 +156,10 @@ export function StructureForm({
         )}
 
         <div>
-          <label
-            htmlFor="structure-name"
-            className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted"
-          >
+          <label htmlFor="structure-name" className="terminal-label block">
             Name
           </label>
-          <input
+          <Input
             id="structure-name"
             name="name"
             required
@@ -170,14 +167,14 @@ export function StructureForm({
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder={kind === "category" ? "Foundations" : meta.namePlaceholder}
-            className="focus-ring mt-2 h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none placeholder:text-fog-muted"
+            className="mt-2"
           />
           {kind === "channel" && (
-            <p className="mt-2 min-h-5 text-xs leading-5 text-fog-muted">
+            <p className="mt-2 min-h-5 text-chrome-base text-text-muted">
               {slug ? (
                 <>
                   Members will see{" "}
-                  <span className="font-label text-primary-container">
+                  <span className="font-mono text-primary">
                     {meta.prefix}
                     {slug}
                   </span>
@@ -190,18 +187,15 @@ export function StructureForm({
         </div>
 
         <div>
-          <label
-            htmlFor="structure-description"
-            className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted"
-          >
+          <label htmlFor="structure-description" className="terminal-label block">
             Description <span className="font-normal normal-case tracking-normal">· optional</span>
           </label>
-          <input
+          <Input
             id="structure-description"
             name="description"
             defaultValue={subject?.description ?? ""}
             placeholder={kind === "category" ? "What this group of channels covers." : meta.descriptionPlaceholder}
-            className="focus-ring mt-2 h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none placeholder:text-fog-muted"
+            className="mt-2"
           />
         </div>
 
@@ -216,58 +210,83 @@ export function StructureForm({
           />
         )}
 
-        <div className="flex items-center justify-end border-t border-surgical-steel pt-4">
-          <button
-            type="submit"
-            disabled={pending || !name.trim()}
-            className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary-container px-5 text-sm font-semibold text-on-primary-fixed transition hover:brightness-110 disabled:opacity-40"
-          >
+        <div className="flex items-center justify-end border-t border-border-hairline pt-4">
+          <Button type="submit" disabled={pending || !name.trim()}>
             {pending && <Loader2 size={15} aria-hidden="true" className="animate-spin" />}
             {isNew ? `Create ${kind}` : "Save changes"}
-          </button>
+          </Button>
         </div>
       </form>
 
       {subject && (
-        <div className="space-y-3 border-t border-surgical-steel pt-5">
-          <h4 className="text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">Availability</h4>
-          <p className="text-xs leading-5 text-fog-muted">
+        <div className="space-y-3 border-t border-border-hairline pt-5">
+          <h4 className="terminal-label">Availability</h4>
+          <p className="text-chrome-base text-text-muted">
             {subject.isArchived
               ? "Archived. Members cannot see it, and its history is kept."
               : "Live. Archiving hides it from members without deleting anything."}
           </p>
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => setArchived(!subject.isArchived)}
-              className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-white transition hover:border-primary-container disabled:opacity-40"
-            >
+            <Button type="button" variant="outline" disabled={pending} onClick={() => setArchived(!subject.isArchived)}>
               <Settings2 size={15} aria-hidden="true" />
               {subject.isArchived ? "Restore" : "Archive"}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="destructive"
               disabled={pending || (kind === "category" && channelCount > 0)}
               onClick={destroy}
-              className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-lg border border-error/40 px-4 text-sm font-semibold text-error transition hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Trash2 size={15} aria-hidden="true" />
               Delete permanently
-            </button>
+            </Button>
           </div>
           {kind === "category" && channelCount > 0 && (
-            <p className="text-xs leading-5 text-fog-muted">
+            <p className="text-chrome-base text-text-muted">
               This category still holds {channelCount} {channelCount === 1 ? "channel" : "channels"}. Archive or delete
               them first.
             </p>
           )}
           {kind === "channel" && (
-            <p className="text-xs leading-5 text-fog-muted">
+            <p className="text-chrome-base text-text-muted">
               A channel that already has messages can only be archived.
             </p>
           )}
         </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <FormHeader isNew={isNew} kind={kind} hint={kind === "category" ? CATEGORY_HINT : meta.hint} />
+
+      {showPermissions ? (
+        <Tabs value={tab} onValueChange={(value) => setTab(String(value))}>
+          <TabsList
+            variant="line"
+            className="w-full justify-start rounded-none border-b border-border-hairline p-0"
+          >
+            <StructureTab value="overview">Overview</StructureTab>
+            <StructureTab value="permissions">Permissions</StructureTab>
+          </TabsList>
+          <TabsContent value="overview" className="pt-2">
+            {overview}
+          </TabsContent>
+          <TabsContent value="permissions" className="pt-2">
+            <ChannelPermissionsTab
+              target={kind}
+              channel={channel}
+              category={category}
+              roles={roles}
+              overrides={overrides}
+              canSave
+              onNotice={onNotice}
+            />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        overview
       )}
     </div>
   );
@@ -279,37 +298,35 @@ const CATEGORY_HINT =
 function FormHeader({ isNew, kind, hint }: { isNew: boolean; kind: string; hint: string }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-white">{isNew ? `New ${kind}` : `Edit ${kind}`}</h3>
-      <p className="mt-1 text-xs leading-5 text-fog-muted">{hint}</p>
+      <h3 className="text-title-sm font-medium text-text-strong">{isNew ? `New ${kind}` : `Edit ${kind}`}</h3>
+      <p className="mt-1 text-chrome-base text-text-muted">{hint}</p>
     </div>
   );
 }
 
-function StructureTabs({
-  tab,
-  onChange,
-}: {
-  tab: "overview" | "permissions";
-  onChange: (next: "overview" | "permissions") => void;
-}) {
+/**
+ * Two corrections to the primitive, both measured rather than assumed.
+ *
+ * **The underline is the accent, not `--foreground`.** `ui/tabs` carries
+ * shadcn's `after:bg-foreground`, which on Monolith is the body grey — a
+ * selected tab marked in the same colour as the text beside it. The accent is
+ * what means state in this system, and a selected tab is state.
+ *
+ * **The height belongs on the trigger.** `TabsList` sets its height through
+ * `group-data-horizontal/tabs:h-8`, and an `h-11` passed to the list does not
+ * beat it: twMerge reads a variant-prefixed class and a bare one as different
+ * groups, keeps both, and the compiled stylesheet order decides — the tabs
+ * measured 30px. Setting it here instead is a plain `h-*` against the trigger's
+ * own `h-[calc(100%-1px)]`, which twMerge does resolve. Same family as
+ * `00 - Shared/Cross-Project Lessons.md` lessons 85, 96 and 98.
+ */
+function StructureTab({ value, children }: { value: string; children: React.ReactNode }) {
   return (
-    <div role="tablist" aria-label="Channel settings" className="flex gap-1 border-b border-surgical-steel">
-      {(["overview", "permissions"] as const).map((entry) => (
-        <button
-          key={entry}
-          type="button"
-          role="tab"
-          aria-selected={tab === entry}
-          onClick={() => onChange(entry)}
-          className={`focus-ring -mb-px min-h-11 rounded-t-lg px-4 text-sm font-semibold capitalize transition ${
-            tab === entry
-              ? "border-b-2 border-primary-container text-white"
-              : "text-on-surface-variant hover:text-white"
-          }`}
-        >
-          {entry}
-        </button>
-      ))}
-    </div>
+    <TabsTrigger
+      value={value}
+      className="h-11 flex-none px-4 text-content-sm data-active:text-text-strong data-active:after:bg-primary"
+    >
+      {children}
+    </TabsTrigger>
   );
 }

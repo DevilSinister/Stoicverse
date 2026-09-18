@@ -1,10 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import { ChevronDown, ChevronUp, Loader2, Lock, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
 
 import { deleteRole, reorderRoles, saveRole } from "@/app/creator/settings/actions";
 import { RoleEditor } from "@/components/community/settings/roles/RoleEditor";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 import { canMove, describeMove, moveWithin } from "@/lib/community-settings/order";
 import { canManageRole, type PermissionKey, type ViewerForGrants } from "@/lib/community-settings/permissions";
 import { isTierRole, ROLE_LIMITS, type CommunityRole } from "@/lib/community-settings/role-model";
@@ -18,6 +23,20 @@ const COMMIT_DELAY_MS = 600;
  * Highest first, @everyone pinned to the bottom where it belongs: it is the
  * floor every other role stacks on top of, and showing it in the middle of the
  * list would suggest it could be reordered.
+ *
+ * Monolith, phase 12b. Two things beyond the palette.
+ *
+ * **The reorder arrows were 24px.** They are the *only* way to move a role -
+ * there is no drag here - so the whole hierarchy was operated through two
+ * targets barely half the size the rest of the product uses. `size="icon-sm"`
+ * paints 28px and carries `hit-target`, which gives them the 44px area without
+ * making the row taller.
+ *
+ * **The order status stays in place, and the save outcomes do not.** The line
+ * that says "Saving order…" or that the order snapped back describes the state
+ * of the list beside it, and only means anything there. Creating and deleting a
+ * role are outcomes of an action, so those are toasts - which also stops a
+ * failed create from pushing the role list down while somebody is reading it.
  */
 export function RolesSection({
   data,
@@ -42,10 +61,11 @@ export function RolesSection({
 
   if (!data.roles.length) {
     return (
-      <div className="rounded-xl border border-surgical-steel p-6">
-        <p className="text-sm leading-6 text-on-surface-variant">
-          Roles could not be read, so there is nothing to edit here yet.
-        </p>
+      <div className="rounded-xl border border-border-hairline">
+        <EmptyState
+          title="Roles could not be read"
+          description="There is nothing to edit here yet. If this persists, the roles migration may not be applied."
+        />
       </div>
     );
   }
@@ -57,7 +77,7 @@ export function RolesSection({
       <div className="md:grid md:grid-cols-[17rem_minmax(0,1fr)] md:gap-6">
         <div className="mb-6 md:mb-0">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">Roles</h2>
+            <h2 className="terminal-label block">Roles</h2>
             <CreateRoleButton disabled={!canSave} onCreated={setSelectedId} />
           </div>
 
@@ -94,11 +114,11 @@ export function RolesSection({
             {announcement}
           </p>
           {status === "failed" && (
-            <p role="alert" className="mt-2 text-xs leading-5 text-error">
+            <p role="alert" className="mt-2 text-chrome-base text-status-danger">
               The new order could not be saved, so the list has gone back to the saved one.
             </p>
           )}
-          {status === "saving" && <p className="mt-2 text-xs leading-5 text-fog-muted">Saving order…</p>}
+          {status === "saving" && <p className="mt-2 text-chrome-base text-text-muted">Saving order…</p>}
         </div>
 
         {selected && (
@@ -124,12 +144,12 @@ export function RolesSection({
 /** The most important copy on the page. */
 function Preamble() {
   return (
-    <div className="rounded-xl border border-surgical-steel bg-surface-container-low p-4">
-      <p className="text-sm leading-6 text-on-surface">
+    <div className="rounded-xl border border-border-hairline bg-surface-panel p-4">
+      <p className="text-content-sm text-text-default">
         Roles stack. A member holds every role given to them and can do the union of what those roles allow — the
         highest one that carries a colour sets the colour of their name.
       </p>
-      <p className="mt-2 text-xs leading-5 text-fog-muted">
+      <p className="mt-2 text-chrome-base text-text-muted">
         You can only edit, reorder and assign roles below your own highest role, and you cannot grant a permission you
         do not hold yourself. The tier roles and Moderator are assigned automatically and cannot be handed out here.
       </p>
@@ -235,56 +255,64 @@ function RoleRow({
   const automatic = role.systemKey !== null && role.systemKey !== "everyone";
 
   return (
-    <li className={pinned ? "mt-2 border-t border-surgical-steel pt-2" : undefined}>
+    <li className={pinned ? "mt-2 border-t border-border-hairline pt-2" : undefined}>
       <div className="flex items-center gap-1">
         <button
           type="button"
           onClick={onSelect}
           aria-current={current ? "true" : undefined}
-          className={`focus-ring flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left text-sm transition ${
-            current
-              ? "bg-surface-container-high text-white"
-              : "text-on-surface-variant hover:bg-surface-container-high/50"
+          className={`focus-ring flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left text-content-sm transition-colors ${
+            current ? "bg-surface-raised text-text-strong" : "text-text-muted hover:bg-surface-raised/50"
           }`}
         >
           {role.iconEmoji ? (
-            <span aria-hidden="true" className="shrink-0 text-sm">
+            <span aria-hidden="true" className="shrink-0">
               {role.iconEmoji}
             </span>
           ) : iconUrl ? (
-            <img src={iconUrl} alt="" aria-hidden="true" className="size-4 shrink-0 rounded object-contain" />
+            <Image
+              src={iconUrl}
+              alt=""
+              width={16}
+              height={16}
+              unoptimized
+              aria-hidden="true"
+              className="size-4 shrink-0 rounded-md object-contain"
+            />
           ) : (
             <span
               aria-hidden="true"
-              className="size-3 shrink-0 rounded-full border border-surgical-steel"
+              className="size-3 shrink-0 rounded-full border border-border-hairline"
               style={{ background: role.color }}
             />
           )}
-          <span className="min-w-0 flex-1 truncate font-semibold">{role.name}</span>
-          {automatic && <Lock size={12} aria-hidden="true" className="shrink-0 text-fog-muted" />}
-          <span className="shrink-0 text-xs text-fog-muted">{role.memberCount}</span>
+          <span className="min-w-0 flex-1 truncate font-medium">{role.name}</span>
+          {automatic && <Lock size={12} aria-hidden="true" className="shrink-0 text-text-faint" />}
+          <span className="shrink-0 font-mono text-chrome-xs text-text-muted">{role.memberCount}</span>
         </button>
 
         {!pinned && (
           <span className="flex shrink-0 flex-col">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => onMove(role.id, "up")}
               disabled={!manageable || !canMoveUp}
               aria-label={`Move ${role.name} up`}
-              className="focus-ring inline-flex size-6 items-center justify-center rounded text-fog-muted transition hover:text-white disabled:opacity-30"
             >
               <ChevronUp size={14} aria-hidden="true" />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => onMove(role.id, "down")}
               disabled={!manageable || !canMoveDown}
               aria-label={`Move ${role.name} down`}
-              className="focus-ring inline-flex size-6 items-center justify-center rounded text-fog-muted transition hover:text-white disabled:opacity-30"
             >
               <ChevronDown size={14} aria-hidden="true" />
-            </button>
+            </Button>
           </span>
         )}
       </div>
@@ -293,8 +321,8 @@ function RoleRow({
 }
 
 function CreateRoleButton({ disabled, onCreated }: { disabled: boolean; onCreated: (roleId: string) => void }) {
+  const notify = useToast();
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const nameId = useId();
 
@@ -302,66 +330,47 @@ function CreateRoleButton({ disabled, onCreated }: { disabled: boolean; onCreate
     startTransition(async () => {
       const result = await saveRole(data);
       if (result.error) {
-        setError(result.error);
+        notify(result.error, "error");
         return;
       }
-      setError(null);
       setOpen(false);
+      notify("Role created. It starts with no permissions at all.", "success");
       if (result.roleId) onCreated(result.roleId);
     });
 
   if (!open) {
     return (
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setOpen(true)}
-        className="focus-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-primary-container transition hover:bg-primary-container/10 disabled:opacity-40"
-      >
+      <Button type="button" variant="ghost" size="chrome" disabled={disabled} onClick={() => setOpen(true)}>
         <Plus size={14} aria-hidden="true" />
         New role
-      </button>
+      </Button>
     );
   }
 
   return (
-    <form action={submit} className="w-full space-y-2 rounded-lg border border-surgical-steel p-3">
+    <form action={submit} className="w-full space-y-2 rounded-lg border border-border-hairline p-chrome-x">
       {/* A new role starts with no grants at all: it is created, then opened,
           and every permission on it is a deliberate second step. */}
       <input type="hidden" name="color" value="#94A3B8" />
-      <label htmlFor={nameId} className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">
+      <label htmlFor={nameId} className="terminal-label block">
         New role name
       </label>
-      <input
+      <Input
         id={nameId}
         name="name"
         required
         autoFocus
         minLength={ROLE_LIMITS.name.min}
         maxLength={ROLE_LIMITS.name.max}
-        className="focus-ring h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none sm:text-sm"
       />
-      {error && (
-        <p role="alert" className="text-xs leading-5 text-error">
-          {error}
-        </p>
-      )}
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="focus-ring inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-primary-container px-3 text-sm font-semibold text-on-primary-fixed disabled:opacity-40"
-        >
+        <Button type="submit" disabled={pending} className="flex-1">
           {pending && <Loader2 size={14} aria-hidden="true" className="animate-spin" />}
           Create
-        </button>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="focus-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm text-fog-muted transition hover:text-white"
-        >
+        </Button>
+        <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -380,8 +389,8 @@ function DeleteRoleCard({
   disabled: boolean;
   onDeleted: () => void;
 }) {
+  const notify = useToast();
   const [confirmation, setConfirmation] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const confirmId = useId();
 
@@ -392,16 +401,17 @@ function DeleteRoleCard({
     startTransition(async () => {
       const result = await deleteRole(role.id);
       if (result.error) {
-        setError(result.error);
+        notify(result.error, "error");
         return;
       }
+      notify(`Deleted ${role.name}.`, "success");
       onDeleted();
     });
 
   return (
-    <div className="rounded-xl border border-error/40 p-4">
-      <h3 className="text-sm font-semibold text-error">Delete {role.name}</h3>
-      <p className="mt-1 text-xs leading-5 text-fog-muted">
+    <div className="rounded-xl border border-status-danger/40 p-4">
+      <h3 className="text-title-sm font-medium text-status-danger">Delete {role.name}</h3>
+      <p className="mt-1 text-chrome-base text-text-muted">
         {needsTyping
           ? `${role.memberCount} ${role.memberCount === 1 ? "member holds" : "members hold"} this role and will lose everything it grants. Type ${role.name} to confirm.`
           : "Nobody holds this role, so nothing changes for any member."}
@@ -412,27 +422,22 @@ function DeleteRoleCard({
           <label htmlFor={confirmId} className="sr-only">
             Type the role name to confirm deletion
           </label>
-          <input
+          <Input
             id={confirmId}
             value={confirmation}
             onChange={(event) => setConfirmation(event.target.value)}
             autoComplete="off"
-            className="focus-ring mt-3 h-11 w-full max-w-xs rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none"
+            className="mt-3 max-w-xs"
           />
         </>
       )}
 
-      {error && (
-        <p role="alert" className="mt-2 text-sm leading-6 text-error">
-          {error}
-        </p>
-      )}
-
-      <button
+      <Button
         type="button"
+        variant="destructive"
         onClick={remove}
         disabled={disabled || !confirmed || pending}
-        className="focus-ring mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg border border-error/40 px-4 text-sm font-semibold text-error transition hover:bg-error/10 disabled:opacity-40"
+        className="mt-3"
       >
         {pending ? (
           <Loader2 size={14} aria-hidden="true" className="animate-spin" />
@@ -440,7 +445,7 @@ function DeleteRoleCard({
           <Trash2 size={14} aria-hidden="true" />
         )}
         Delete role
-      </button>
+      </Button>
     </div>
   );
 }

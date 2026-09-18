@@ -27,7 +27,7 @@ export type ShortcutEvent = {
 };
 
 export type ShortcutAction =
-  | "quickSwitcher"
+  | "search"
   | "previousChannel"
   | "nextChannel"
   | "closeTopmost"
@@ -40,15 +40,21 @@ export function resolveShortcut(event: ShortcutEvent): ShortcutAction {
   // Ctrl/Cmd+K, from anywhere including the composer. No text field binds it,
   // and somebody halfway through a message who wants another channel should
   // not have to leave the box first.
-  if (command && !event.altKey && event.key.toLowerCase() === "k") return "quickSwitcher";
+  //
+  // It opens the search palette, which is also the channel switcher. The two
+  // used to be different components on the same key - the switcher here and
+  // global search in the workspace - so what Ctrl+K did depended on which half
+  // of the product you were in. One meaning now: find something, from here.
+  if (command && !event.altKey && event.key.toLowerCase() === "k") return "search";
 
   // Alt+arrow walks the channel list. Alt rather than Ctrl because Ctrl+arrow
   // is word-wise caret movement in every text field on every platform.
   if (event.altKey && !command && event.key === "ArrowUp") return "previousChannel";
   if (event.altKey && !command && event.key === "ArrowDown") return "nextChannel";
 
-  // Escape closes whatever is on top — a pane, the switcher — and is left
-  // alone inside a text field, where it already cancels a reply or an edit.
+  // Escape closes whatever is on top — a pane, a drawer — and is left alone
+  // inside a text field, where it already cancels a reply or an edit. The
+  // palette is not in that list: it is a Base UI dialog and dismisses itself.
   if (event.key === "Escape" && !event.typing) return "closeTopmost";
 
   // Up arrow on an empty composer edits your last message, the way it does in
@@ -62,6 +68,19 @@ export function resolveShortcut(event: ShortcutEvent): ShortcutAction {
 }
 
 /** Whether the event's target is somewhere a keystroke means text, not a command. */
+/*
+  Deliberately duplicated from lib/ui/is-typing-target.ts, and gated by a contract
+  test that asserts the two bodies stay identical.
+
+  This module is imported as raw TypeScript by tests/channels-shortcuts.test.mjs
+  under `node --test`, where the "@/" path alias does not resolve - the same reason
+  rail.ts is written zero-import. Re-exporting the shared copy from here makes the
+  whole test file fail to load, taking seven other tests with it.
+
+  So: lib/ui/is-typing-target.ts is the canonical copy for everything that is not
+  reached by a node test, this stays self-contained, and the contract test is what
+  stops them drifting.
+*/
 export function isTypingTarget(target: EventTarget | null): boolean {
   if (!target || !(target instanceof HTMLElement)) return false;
   if (target.isContentEditable) return true;

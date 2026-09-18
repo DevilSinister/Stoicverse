@@ -1,133 +1,1209 @@
 "use client";
 
-import Link from 'next/link';
-import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
-import { ArrowDownToLine, ArrowRight, BarChart3, BookOpen, CalendarDays, Check, ChevronLeft, ChevronRight, CircleHelp, RefreshCw, Search, SlidersHorizontal, Users } from 'lucide-react';
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { AppShell } from '@/components/layout/AppShell';
-import { csvText, defaultFilters, parseFilters, type AnalyticsFilters, type AnalyticsReport } from '@/lib/analytics/model';
+import Link from "next/link";
+import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import {
+  ArrowDownToLine,
+  ArrowRight,
+  BarChart3,
+  BookOpen,
+  CalendarDays,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  CircleHelp,
+  RefreshCw,
+  Search,
+  SlidersHorizontal,
+  Users,
+} from "lucide-react";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const tabs = ['overview', 'trading', 'courses', 'events', 'referrals'] as const;
-type Tab = typeof tabs[number];
-const money = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n);
-const number = (n: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n);
-const date = (s: string) => s ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(s)) : '—';
-const delta = (n: number, p: number) => p === 0 ? n === 0 ? 'No change' : 'New this period' : `${n >= p ? '+' : ''}${number((n - p) / p * 100)}% vs previous period`;
-const input = 'focus-ring min-h-11 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-sm text-on-surface';
-const button = 'focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-surgical-steel px-4 text-sm font-semibold text-on-surface transition hover:border-primary-container disabled:opacity-40';
+import { AppShell } from "@/components/layout/AppShell";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { nativeSelectClass } from "@/components/ui/select";
+import { csvText, defaultFilters, parseFilters, type AnalyticsFilters, type AnalyticsReport } from "@/lib/analytics/model";
+import { cn } from "@/lib/utils";
 
-function Field({ label, children }: { label: string; children: ReactNode }) { return <label className="grid min-w-0 gap-2 text-xs font-medium text-fog-muted">{label}{children}</label>; }
-function Note({ children }: { children: ReactNode }) { return <div className="flex items-start gap-3 rounded-xl bg-surface-container-low px-4 py-3 text-sm leading-6 text-on-surface-variant"><CircleHelp size={17} className="mt-1 shrink-0 text-primary-container" /><div>{children}</div></div>; }
-function Metric({ label, value, detail }: { label: string; value: string; detail: string }) { return <div className="min-w-0 py-5 sm:px-5"><p className="text-sm text-on-surface-variant">{label}</p><p className="mt-2 break-words font-mono text-2xl font-semibold tabular-nums tracking-tight text-white xl:text-3xl">{value}</p><p className="mt-2 text-xs leading-5 text-fog-muted">{detail}</p></div>; }
-function Section({ title, description, children, action }: { title: string; description?: string; children: ReactNode; action?: ReactNode }) { return <section className="min-w-0"><div className="mb-5 flex flex-wrap items-start justify-between gap-4"><div><h2 className="font-headline text-lg font-semibold text-white">{title}</h2>{description && <p className="mt-1 max-w-[70ch] text-sm leading-6 text-fog-muted">{description}</p>}</div>{action}</div>{children}</section>; }
+/**
+ * Community analytics. Monolith, phase 11a.
+ *
+ * 74 deprecated-alias call sites, two hand-written control styles, and a whole
+ * screen written one component per line — the `Trend` chart, its tooltip, its
+ * gradient and its fallback table were a single 1,900-character line. The token
+ * work and the rewrite are the same change here: the aliases were only hard to
+ * find because nothing in the file could be read.
+ *
+ * Type is on the Monolith scale now rather than Tailwind's defaults, so the
+ * numbers in a metric tile and the numbers in a table are the same size as each
+ * other and as the rest of the product.
+ *
+ * **The filters stay native `<select>` elements.** `ui/select` exists but has
+ * no call site anywhere in the product, and these twelve controls are driven by
+ * `onChange` into a URL round trip. Converting them is a behaviour change on an
+ * unexercised primitive, which is a different piece of work from a repaint.
+ */
+
+const TABS = ["overview", "trading", "courses", "events", "referrals"] as const;
+type Tab = (typeof TABS)[number];
+
+const money = (value: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(value);
+
+const number = (value: number) => new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(value);
+
+const date = (value: string) =>
+  value
+    ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(
+        new Date(value),
+      )
+    : "—";
+
+const delta = (current: number, previous: number) =>
+  previous === 0
+    ? current === 0
+      ? "No change"
+      : "New this period"
+    : `${current >= previous ? "+" : ""}${number(((current - previous) / previous) * 100)}% vs previous period`;
+
+/** The one control the system has no primitive for. Tokens, not aliases. */
+const ROWS_PER_PAGE = 10;
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="grid min-w-0 gap-2">
+      <span className="terminal-label text-text-faint">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function Note({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 rounded-lg bg-surface-panel px-4 py-3 text-content-sm text-text-default">
+      <CircleHelp size={16} className="mt-0.5 shrink-0 text-primary" />
+      <div>{children}</div>
+    </div>
+  );
+}
+
+function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
+  return (
+    <div className="min-w-0 py-5 sm:px-5">
+      <p className="terminal-label text-text-faint">{label}</p>
+      <p className="mt-2 break-words font-mono text-title-md text-text-strong tabular-nums xl:text-title-lg">{value}</p>
+      <p className="mt-2 text-content-sm text-text-muted">{detail}</p>
+    </div>
+  );
+}
+
+function Section({
+  title,
+  description,
+  action,
+  children,
+}: {
+  title: string;
+  description?: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="min-w-0">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="text-title-sm font-medium text-text-strong">{title}</h2>
+          {description && <p className="mt-1 max-w-[70ch] text-content-sm text-text-muted">{description}</p>}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
 
 type Cell = string | number | null;
 type TableRow = { id: string; cells: Cell[]; detail?: ReactNode };
-function ReportTable({ title, headers, rows, numeric = [], filename }: { title: string; headers: string[]; rows: TableRow[]; numeric?: number[]; filename: string }) {
+
+function ReportTable({
+  title,
+  headers,
+  rows,
+  numeric = [],
+  filename,
+}: {
+  title: string;
+  headers: string[];
+  rows: TableRow[];
+  numeric?: number[];
+  filename: string;
+}) {
   const [sort, setSort] = useState<{ index: number; ascending: boolean } | null>(null);
   const [page, setPage] = useState(0);
-  const sorted = useMemo(() => sort ? [...rows].sort((a, b) => {
-    const av = a.cells[sort.index], bv = b.cells[sort.index];
-    if (av === null) return bv === null ? 0 : 1;
-    if (bv === null) return -1;
-    const comparison = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv));
-    return (sort.ascending ? comparison : -comparison) || a.id.localeCompare(b.id);
-  }) : rows, [rows, sort]);
-  const pages = Math.max(1, Math.ceil(rows.length / 10)), current = Math.min(page, pages - 1);
+
+  const sorted = useMemo(() => {
+    if (!sort) return rows;
+    return [...rows].sort((a, b) => {
+      const left = a.cells[sort.index];
+      const right = b.cells[sort.index];
+      if (left === null) return right === null ? 0 : 1;
+      if (right === null) return -1;
+      const comparison =
+        typeof left === "number" && typeof right === "number"
+          ? left - right
+          : String(left).localeCompare(String(right));
+      return (sort.ascending ? comparison : -comparison) || a.id.localeCompare(b.id);
+    });
+  }, [rows, sort]);
+
+  const pages = Math.max(1, Math.ceil(rows.length / ROWS_PER_PAGE));
+  const current = Math.min(page, pages - 1);
+
   const exportRows = () => {
-    const url = URL.createObjectURL(new Blob([csvText(headers, sorted.map(r => r.cells))], { type: 'text/csv;charset=utf-8;' }));
-    const a = document.createElement('a'); a.href = url; a.download = `${filename}.csv`; a.click(); URL.revokeObjectURL(url);
+    const blob = new Blob([csvText(headers, sorted.map((row) => row.cells))], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${filename}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
   };
-  return <div className="overflow-hidden rounded-xl border border-surgical-steel">
-    <div className="flex items-center justify-between gap-3 border-b border-surgical-steel bg-surface-container-low px-4 py-3"><p aria-live="polite" className="text-xs text-fog-muted">{number(rows.length)} {rows.length === 1 ? 'result' : 'results'} · click a column to sort</p><button className={button} onClick={exportRows} disabled={!rows.length} aria-label={`Export ${title} as CSV`}><ArrowDownToLine size={15} /><span>Export CSV</span></button></div>
-    {rows.length ? <div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><caption className="sr-only">{title}</caption><thead className="bg-surface-container-lowest"><tr>{headers.map((h, i) => <th key={h} scope="col" aria-sort={sort?.index === i ? sort.ascending ? 'ascending' : 'descending' : 'none'} className={`px-4 py-2 text-xs font-medium text-fog-muted ${numeric.includes(i) ? 'text-right' : ''}`}><button className="focus-ring min-h-11 rounded px-1 text-left" onClick={() => { setSort({ index: i, ascending: sort?.index === i ? !sort.ascending : !numeric.includes(i) }); setPage(0); }}>{h}{sort?.index === i ? sort.ascending ? ' ↑' : ' ↓' : ''}</button></th>)}</tr></thead><tbody className="divide-y divide-surgical-steel">{sorted.slice(current * 10, current * 10 + 10).map(row => <tr key={row.id} className="transition hover:bg-surface-container-low">{row.cells.map((cell, i) => <td key={i} className={`px-4 py-4 align-top ${numeric.includes(i) ? 'text-right font-mono tabular-nums' : ''} ${i === 0 ? 'font-medium text-white' : 'text-on-surface-variant'}`}>{i === 0 && row.detail ? <details><summary className="focus-ring cursor-pointer rounded leading-6">{cell}</summary><div className="mt-3 max-w-sm text-xs font-normal leading-6 text-fog-muted">{row.detail}</div></details> : typeof cell === 'number' ? number(cell) : cell ?? '—'}</td>)}</tr>)}</tbody></table></div> : <div className="grid min-h-52 place-items-center px-6 text-center"><div><Search className="mx-auto text-fog-muted" size={24} /><p className="mt-3 font-semibold text-white">No matching records</p><p className="mt-2 text-sm text-fog-muted">Try another period or clear your filters.</p></div></div>}
-    <div className="flex items-center justify-between border-t border-surgical-steel px-4 py-3"><span className="text-xs text-fog-muted">Page {current + 1} of {pages}</span><div className="flex gap-2"><button className={button} aria-label={`Previous ${title} page`} disabled={current === 0} onClick={() => setPage(current - 1)}><ChevronLeft size={16} /></button><button className={button} aria-label={`Next ${title} page`} disabled={current + 1 >= pages} onClick={() => setPage(current + 1)}><ChevronRight size={16} /></button></div></div>
-  </div>;
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-border-hairline">
+      <div className="flex items-center justify-between gap-3 border-b border-border-hairline bg-surface-panel px-4 py-3">
+        <p aria-live="polite" className="text-content-sm text-text-muted">
+          {number(rows.length)} {rows.length === 1 ? "result" : "results"} · click a column to sort
+        </p>
+        <Button
+          variant="outline"
+          size="chrome"
+          onClick={exportRows}
+          disabled={!rows.length}
+          aria-label={`Export ${title} as CSV`}
+        >
+          <ArrowDownToLine size={14} />
+          Export CSV
+        </Button>
+      </div>
+
+      {rows.length ? (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[650px] text-left">
+            <caption className="sr-only">{title}</caption>
+            <thead className="bg-surface-sunken">
+              <tr>
+                {headers.map((header, index) => (
+                  <th
+                    key={header}
+                    scope="col"
+                    aria-sort={sort?.index === index ? (sort.ascending ? "ascending" : "descending") : "none"}
+                    className={`px-4 py-2 ${numeric.includes(index) ? "text-right" : ""}`}
+                  >
+                    <button
+                      type="button"
+                      className="focus-ring terminal-label min-h-11 rounded-md px-1 text-left text-text-muted transition-colors hover:text-text-strong"
+                      onClick={() => {
+                        setSort({
+                          index,
+                          ascending: sort?.index === index ? !sort.ascending : !numeric.includes(index),
+                        });
+                        setPage(0);
+                      }}
+                    >
+                      {header}
+                      {sort?.index === index ? (sort.ascending ? " ↑" : " ↓") : ""}
+                    </button>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border-hairline">
+              {sorted.slice(current * ROWS_PER_PAGE, current * ROWS_PER_PAGE + ROWS_PER_PAGE).map((row) => (
+                <tr key={row.id} className="transition-colors hover:bg-surface-raised">
+                  {row.cells.map((cell, index) => (
+                    <td
+                      key={index}
+                      className={`px-4 py-4 align-top text-content-sm ${
+                        numeric.includes(index) ? "text-right font-mono tabular-nums" : ""
+                      } ${index === 0 ? "font-medium text-text-strong" : "text-text-default"}`}
+                    >
+                      {index === 0 && row.detail ? (
+                        <details>
+                          <summary className="focus-ring cursor-pointer rounded-md">{cell}</summary>
+                          <div className="mt-3 max-w-sm space-y-1 text-chrome-base font-normal text-text-muted">
+                            {row.detail}
+                          </div>
+                        </details>
+                      ) : typeof cell === "number" ? (
+                        number(cell)
+                      ) : (
+                        (cell ?? "—")
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="grid min-h-52 place-items-center px-6 text-center">
+          <div>
+            <Search className="mx-auto text-text-faint" size={22} />
+            <p className="mt-3 text-content-base text-text-strong">No matching records</p>
+            <p className="mt-2 text-content-sm text-text-muted">Try another period or clear your filters.</p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between border-t border-border-hairline px-4 py-3">
+        <span className="font-mono text-mono-xs text-text-muted tabular-nums">
+          Page {current + 1} of {pages}
+        </span>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon-chrome"
+            aria-label={`Previous ${title} page`}
+            disabled={current === 0}
+            onClick={() => setPage(current - 1)}
+          >
+            <ChevronLeft size={15} />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon-chrome"
+            aria-label={`Next ${title} page`}
+            disabled={current + 1 >= pages}
+            onClick={() => setPage(current + 1)}
+          >
+            <ChevronRight size={15} />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function Trend({ report }: { report: AnalyticsReport }) {
-  const [metric, setMetric] = useState<'turnover' | 'newMembers' | 'completions' | 'enrollments'>('turnover');
-  const id = useId().replaceAll(':', '');
-  return <Section title="The community, week by week" description="Completed weeks. The same member filters apply to every point." action={<select className={`${input} !w-auto`} aria-label="Trend metric" value={metric} onChange={e => setMetric(e.target.value as typeof metric)}><option value="turnover">Turnover · USD</option><option value="newMembers">New members</option><option value="completions">Course completions</option><option value="enrollments">Event enrolments</option></select>}>
-    <div className="h-64 w-full" role="img" aria-label={`Weekly ${metric} trend. Exact values are in the table below.`}><ResponsiveContainer width="100%" height="100%"><AreaChart data={report.trends} margin={{ top: 12, right: 12, bottom: 0, left: 0 }}><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#10B981" stopOpacity={0.22} /><stop offset="100%" stopColor="#10B981" stopOpacity={0.01} /></linearGradient></defs><CartesianGrid vertical={false} stroke="#334155" strokeDasharray="3 6" /><XAxis dataKey="date" tickFormatter={v => String(v).slice(5)} stroke="#94A3B8" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} /><YAxis stroke="#94A3B8" fontSize={11} tickLine={false} axisLine={false} width={60} tickFormatter={v => new Intl.NumberFormat('en', { notation: 'compact' }).format(v)} /><Tooltip contentStyle={{ background: '#0D1C2D', border: '1px solid #334155', borderRadius: 12, color: '#d4e4fa' }} labelFormatter={v => `Week of ${date(String(v))}`} formatter={v => [metric === 'turnover' ? money(Number(v)) : number(Number(v)), metric === 'turnover' ? 'Turnover' : metric === 'newMembers' ? 'New members' : metric === 'completions' ? 'Completions' : 'Enrolments']} /><Area type="monotone" dataKey={metric} stroke="#10B981" strokeWidth={2} fill={`url(#${id})`} isAnimationActive={false} /></AreaChart></ResponsiveContainer></div>
-    <details className="mt-4 text-xs text-fog-muted"><summary className="focus-ring min-h-11 cursor-pointer rounded py-3">View exact weekly figures</summary><ReportTable title="Weekly figures" headers={['Week starting (UTC)', 'Turnover (USD)', 'New members', 'Completions', 'Enrolments']} numeric={[1, 2, 3, 4]} rows={report.trends.map(t => ({ id: t.date, cells: [t.date, t.turnover, t.newMembers, t.completions, t.enrollments] }))} filename={`analytics-weekly-${report.filters.start}-${report.filters.end}`} /></details>
-  </Section>;
+  const [metric, setMetric] = useState<"turnover" | "newMembers" | "completions" | "enrollments">("turnover");
+  const gradientId = useId().replaceAll(":", "");
+
+  const seriesName =
+    metric === "turnover"
+      ? "Turnover"
+      : metric === "newMembers"
+        ? "New members"
+        : metric === "completions"
+          ? "Completions"
+          : "Enrolments";
+
+  return (
+    <Section
+      title="The community, week by week"
+      description="Completed weeks. The same member filters apply to every point."
+      action={
+        <select
+          className={cn(nativeSelectClass, "w-auto")}
+          aria-label="Trend metric"
+          value={metric}
+          onChange={(event) => setMetric(event.target.value as typeof metric)}
+        >
+          <option value="turnover">Turnover · USD</option>
+          <option value="newMembers">New members</option>
+          <option value="completions">Course completions</option>
+          <option value="enrollments">Event enrolments</option>
+        </select>
+      }
+    >
+      <div className="h-64 w-full" role="img" aria-label={`Weekly ${metric} trend. Exact values are in the table below.`}>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={report.trends} margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--color-chart-1)" stopOpacity={0.22} />
+                <stop offset="100%" stopColor="var(--color-chart-1)" stopOpacity={0.01} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid vertical={false} stroke="var(--color-border-hairline)" strokeDasharray="3 6" />
+            <XAxis
+              dataKey="date"
+              tickFormatter={(value) => String(value).slice(5)}
+              stroke="var(--color-text-muted)"
+              fontSize={11}
+              tickLine={false}
+              axisLine={false}
+              minTickGap={24}
+            />
+            <YAxis
+              stroke="var(--color-text-muted)"
+              fontSize={11}
+              tickLine={false}
+              axisLine={false}
+              width={60}
+              tickFormatter={(value) => new Intl.NumberFormat("en", { notation: "compact" }).format(value)}
+            />
+            <Tooltip
+              // 4px, like every other corner in the system. It was 12.
+              contentStyle={{
+                background: "var(--color-surface-panel)",
+                border: "1px solid var(--color-border-hairline)",
+                borderRadius: 4,
+                color: "var(--color-text-default)",
+              }}
+              labelFormatter={(value) => `Week of ${date(String(value))}`}
+              formatter={(value) => [metric === "turnover" ? money(Number(value)) : number(Number(value)), seriesName]}
+            />
+            <Area
+              type="monotone"
+              dataKey={metric}
+              stroke="var(--color-chart-1)"
+              strokeWidth={2}
+              fill={`url(#${gradientId})`}
+              isAnimationActive={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      <details className="mt-4">
+        <summary className="focus-ring min-h-11 cursor-pointer rounded-md py-3 text-content-sm text-text-muted">
+          View exact weekly figures
+        </summary>
+        <ReportTable
+          title="Weekly figures"
+          headers={["Week starting (UTC)", "Turnover (USD)", "New members", "Completions", "Enrolments"]}
+          numeric={[1, 2, 3, 4]}
+          rows={report.trends.map((week) => ({
+            id: week.date,
+            cells: [week.date, week.turnover, week.newMembers, week.completions, week.enrollments],
+          }))}
+          filename={`analytics-weekly-${report.filters.start}-${report.filters.end}`}
+        />
+      </details>
+    </Section>
+  );
 }
 
-export function CreatorAnalyticsView({ memberName, initialFilters, initialTab }: { memberName: string; initialFilters: AnalyticsFilters; initialTab: string }) {
-  const [tab, setTab] = useState<Tab>(tabs.includes(initialTab as Tab) ? initialTab as Tab : 'overview');
-  const [draft, setDraft] = useState(initialFilters), [applied, setApplied] = useState(initialFilters);
-  const [report, setReport] = useState<AnalyticsReport | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState(''), [validation, setValidation] = useState('');
-  const [refresh, setRefresh] = useState(0), [expanded, setExpanded] = useState(false);
+export function CreatorAnalyticsView({
+  memberName,
+  initialFilters,
+  initialTab,
+}: {
+  memberName: string;
+  initialFilters: AnalyticsFilters;
+  initialTab: string;
+}) {
+  const [tab, setTab] = useState<Tab>(TABS.includes(initialTab as Tab) ? (initialTab as Tab) : "overview");
+  const [draft, setDraft] = useState(initialFilters);
+  const [applied, setApplied] = useState(initialFilters);
+  const [report, setReport] = useState<AnalyticsReport | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [validation, setValidation] = useState("");
+  const [refresh, setRefresh] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`/api/creator/analytics?${new URLSearchParams(applied)}`, { signal: controller.signal, cache: 'no-store' }).then(async response => {
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Unable to load analytics.');
-      if (!controller.signal.aborted) setReport(data);
-    }).catch(err => { if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Unable to load analytics.'); }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+
+    fetch(`/api/creator/analytics?${new URLSearchParams(applied)}`, { signal: controller.signal, cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Unable to load analytics.");
+        if (!controller.signal.aborted) setReport(data);
+      })
+      .catch((cause) => {
+        if (!controller.signal.aborted) {
+          setError(cause instanceof Error ? cause.message : "Unable to load analytics.");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
     return () => controller.abort();
   }, [applied, refresh]);
-  useEffect(() => { const url = new URL(window.location.href); url.search = new URLSearchParams({ ...applied, tab }).toString(); window.history.replaceState(null, '', url); }, [applied, tab]);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.search = new URLSearchParams({ ...applied, tab }).toString();
+    window.history.replaceState(null, "", url);
+  }, [applied, tab]);
+
   const apply = (filters: AnalyticsFilters) => {
-    try { const parsed = parseFilters(new URLSearchParams(filters)); setDraft(parsed); setApplied(parsed); setLoading(true); setError(''); setValidation(''); } catch (err) { setValidation(err instanceof Error ? err.message : 'Invalid filters'); }
+    try {
+      const parsed = parseFilters(new URLSearchParams(filters));
+      setDraft(parsed);
+      setApplied(parsed);
+      setLoading(true);
+      setError("");
+      setValidation("");
+    } catch (cause) {
+      setValidation(cause instanceof Error ? cause.message : "Invalid filters");
+    }
   };
-  const retry = () => { setLoading(true); setError(''); setRefresh(n => n + 1); };
+
+  const retry = () => {
+    setLoading(true);
+    setError("");
+    setRefresh((count) => count + 1);
+  };
+
   const changed = JSON.stringify(draft) !== JSON.stringify(applied);
-  return <AppShell active="Analytics" title="Community analytics" memberName={memberName} platformRole="influencer" routeBase="/creator">
-    <div className="mx-auto w-full max-w-7xl px-4 py-7 md:px-8 md:py-10">
-      <header className="flex flex-wrap items-end justify-between gap-5"><div><p className="text-sm font-medium text-primary-container">Community intelligence</p><h1 className="mt-2 font-headline text-3xl font-semibold tracking-[-0.025em] text-white sm:text-4xl">See what moves your community.</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-on-surface-variant">Follow your traders, understand your learners, and find the events people enrol in.</p></div><Link href="/creator/revenue" className={button}>Revenue <ArrowRight size={16} /></Link></header>
-      <form onSubmit={e => { e.preventDefault(); apply(draft); }} className="mt-8 rounded-xl border border-surgical-steel bg-surface-container-low p-4 sm:p-5">
-        <div className="flex flex-wrap items-end gap-3"><div className="min-w-44 flex-1"><Field label="Reporting period"><select className={input} aria-label="Period preset" value="" onChange={e => { if (e.target.value) setDraft({ ...draft, ...(({ start, end }) => ({ start, end }))(defaultFilters(new Date(), Number(e.target.value))) }); }}><option value="">Choose completed weeks</option><option value="4">Last 4 completed weeks</option><option value="12">Last 12 completed weeks</option><option value="26">Last 26 completed weeks</option><option value="52">Last 52 completed weeks</option></select></Field></div><Field label="From · Monday"><input className={input} type="date" value={draft.start} onChange={e => setDraft({ ...draft, start: e.target.value })} required /></Field><Field label="To · Sunday"><input className={input} type="date" value={draft.end} onChange={e => setDraft({ ...draft, end: e.target.value })} required /></Field><button type="button" className={button} aria-expanded={expanded} aria-controls="analytics-member-filters" onClick={() => setExpanded(!expanded)}><SlidersHorizontal size={16} />Member filters{[draft.tier, draft.status, draft.source, draft.q].filter(Boolean).length ? ` (${[draft.tier, draft.status, draft.source, draft.q].filter(Boolean).length})` : ''}</button><button type="submit" disabled={loading} className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-full bg-primary-container px-5 text-sm font-semibold text-on-primary-fixed disabled:opacity-50"><Check size={16} />Apply</button></div>
-        {expanded && <div id="analytics-member-filters" className="mt-5 grid gap-4 border-t border-surgical-steel pt-5 sm:grid-cols-2 xl:grid-cols-4"><Field label="Member name or exact ID"><input className={input} type="search" maxLength={100} value={draft.q} placeholder="Search members" onChange={e => setDraft({ ...draft, q: e.target.value })} /></Field><Field label="Current tier"><select className={input} value={draft.tier} onChange={e => setDraft({ ...draft, tier: e.target.value })}><option value="">All tiers</option>{[1, 2, 3, 4, 5].map(t => <option key={t} value={t}>{t === 5 ? 'Master' : `Tier ${t}`}</option>)}</select></Field><Field label="Current membership status"><select className={input} value={draft.status} onChange={e => setDraft({ ...draft, status: e.target.value })}><option value="">All statuses</option>{['active', 'expired', 'pending', 'suspended', 'cancelled', 'refunded'].map(s => <option key={s} value={s}>{s[0].toUpperCase() + s.slice(1)}</option>)}</select></Field><Field label="Access source"><select className={input} value={draft.source} onChange={e => setDraft({ ...draft, source: e.target.value })}><option value="">Paid and gifted</option><option value="stripe">Paid</option><option value="gifted">Gifted</option></select></Field></div>}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs leading-5 text-fog-muted"><p>UTC · Monday–Sunday · {changed ? 'Unapplied changes' : 'Compared with the preceding equal-length period'}</p><button type="button" className="focus-ring min-h-11 rounded px-2 text-on-surface-variant underline underline-offset-4" onClick={() => apply(defaultFilters())}>Reset filters</button></div>
-        {validation && <p role="alert" className="mt-2 text-sm text-error">{validation}</p>}
-      </form>
-      <nav aria-label="Analytics sections" className="mt-7 flex gap-5 overflow-x-auto border-b border-surgical-steel">{tabs.map(t => <button key={t} aria-current={tab === t ? 'page' : undefined} onClick={() => setTab(t)} className={`focus-ring min-h-12 shrink-0 border-b-2 px-1 pb-3 pt-2 text-sm font-semibold capitalize transition ${tab === t ? 'border-primary-container text-primary-container' : 'border-transparent text-fog-muted hover:text-white'}`}>{t}</button>)}</nav>
-      {loading ? <div role="status" aria-label="Loading analytics" className="py-10"><div className="flex items-center gap-3 text-sm text-fog-muted"><RefreshCw size={17} className="motion-safe:animate-spin" />Loading your report…</div><div className="mt-6 grid grid-cols-2 gap-5 lg:grid-cols-4">{[0, 1, 2, 3].map(i => <div key={i} className="h-28 rounded-xl bg-surface-container-low motion-safe:animate-pulse" />)}</div><div className="mt-8 h-64 rounded-xl bg-surface-container-low motion-safe:animate-pulse" /></div> : error ? <div role="alert" className="my-8 rounded-xl border border-surgical-steel p-8"><h2 className="text-lg font-semibold text-white">This report couldn’t load</h2><p className="mt-2 text-sm text-on-surface-variant">{error}</p><button className={`${button} mt-5`} onClick={retry}><RefreshCw size={16} />Try again</button></div> : report && <div className="py-7">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-xs text-fog-muted"><p>{date(report.filters.start)} – {date(report.filters.end)} <span className="mx-2">/</span> Comparing {date(report.previous.start)} – {date(report.previous.end)}{applied.q && ` · Member: ${applied.q}`}{applied.tier && ` · Tier ${applied.tier}`}{applied.status && ` · ${applied.status}`}{applied.source && ` · ${applied.source === 'stripe' ? 'Paid' : 'Gifted'}`}</p><button className="focus-ring flex min-h-11 items-center gap-2 rounded px-2" onClick={retry}><RefreshCw size={13} />Updated {new Date(report.generatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} UTC</button></div>
-        {tab === 'overview' && <Overview report={report} navigate={setTab} />}
-        <div hidden={tab !== 'trading'}><Trading key={JSON.stringify(applied)} report={report} /></div>
-        <div hidden={tab !== 'courses'}><Courses key={JSON.stringify(applied)} report={report} /></div>
-        <div hidden={tab !== 'events'}><Events key={JSON.stringify(applied)} report={report} /></div>
-        {tab === 'referrals' && <Referrals />}
-      </div>}
+  const memberFilterCount = [draft.tier, draft.status, draft.source, draft.q].filter(Boolean).length;
+
+  return (
+    <AppShell
+      active="Analytics"
+      title="Community analytics"
+      memberName={memberName}
+      platformRole="influencer"
+      routeBase="/creator"
+    >
+      <main className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+        <header className="flex flex-wrap items-end justify-between gap-5 border-b border-border-hairline pb-7">
+          <div>
+            <p className="terminal-label text-text-faint">Community intelligence</p>
+            <h1 className="mt-3 text-title-lg font-medium text-text-strong">See what moves your community.</h1>
+            <p className="mt-3 max-w-2xl text-content-base text-text-default">
+              Follow your traders, understand your learners, and find the events people enrol in.
+            </p>
+          </div>
+          <Link href="/creator/revenue" className={buttonVariants({ variant: "outline" })}>
+            Revenue
+            <ArrowRight size={15} />
+          </Link>
+        </header>
+
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            apply(draft);
+          }}
+          className="mt-8 rounded-lg border border-border-hairline bg-surface-panel p-4 sm:p-5"
+        >
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="min-w-44 flex-1">
+              <Field label="Reporting period">
+                <select
+                  className={nativeSelectClass}
+                  aria-label="Period preset"
+                  value=""
+                  onChange={(event) => {
+                    if (!event.target.value) return;
+                    const { start, end } = defaultFilters(new Date(), Number(event.target.value));
+                    setDraft({ ...draft, start, end });
+                  }}
+                >
+                  <option value="">Choose completed weeks</option>
+                  <option value="4">Last 4 completed weeks</option>
+                  <option value="12">Last 12 completed weeks</option>
+                  <option value="26">Last 26 completed weeks</option>
+                  <option value="52">Last 52 completed weeks</option>
+                </select>
+              </Field>
+            </div>
+
+            <Field label="From · Monday">
+              <input
+                className={nativeSelectClass}
+                type="date"
+                value={draft.start}
+                onChange={(event) => setDraft({ ...draft, start: event.target.value })}
+                required
+              />
+            </Field>
+
+            <Field label="To · Sunday">
+              <input
+                className={nativeSelectClass}
+                type="date"
+                value={draft.end}
+                onChange={(event) => setDraft({ ...draft, end: event.target.value })}
+                required
+              />
+            </Field>
+
+            <Button
+              type="button"
+              variant="outline"
+              aria-expanded={expanded}
+              aria-controls="analytics-member-filters"
+              onClick={() => setExpanded(!expanded)}
+            >
+              <SlidersHorizontal size={15} />
+              Member filters{memberFilterCount ? ` (${memberFilterCount})` : ""}
+            </Button>
+
+            <Button type="submit" disabled={loading}>
+              <Check size={15} />
+              Apply
+            </Button>
+          </div>
+
+          {expanded && (
+            <div
+              id="analytics-member-filters"
+              className="mt-5 grid gap-4 border-t border-border-hairline pt-5 sm:grid-cols-2 xl:grid-cols-4"
+            >
+              <Field label="Member name or exact ID">
+                <input
+                  className={nativeSelectClass}
+                  type="search"
+                  maxLength={100}
+                  value={draft.q}
+                  placeholder="Search members"
+                  onChange={(event) => setDraft({ ...draft, q: event.target.value })}
+                />
+              </Field>
+
+              <Field label="Current tier">
+                <select
+                  className={nativeSelectClass}
+                  value={draft.tier}
+                  onChange={(event) => setDraft({ ...draft, tier: event.target.value })}
+                >
+                  <option value="">All tiers</option>
+                  {[1, 2, 3, 4, 5].map((tier) => (
+                    <option key={tier} value={tier}>
+                      {tier === 5 ? "Master" : `Tier ${tier}`}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Current membership status">
+                <select
+                  className={nativeSelectClass}
+                  value={draft.status}
+                  onChange={(event) => setDraft({ ...draft, status: event.target.value })}
+                >
+                  <option value="">All statuses</option>
+                  {["active", "expired", "pending", "suspended", "cancelled", "refunded"].map((status) => (
+                    <option key={status} value={status}>
+                      {status[0].toUpperCase() + status.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Access source">
+                <select
+                  className={nativeSelectClass}
+                  value={draft.source}
+                  onChange={(event) => setDraft({ ...draft, source: event.target.value })}
+                >
+                  <option value="">Paid and gifted</option>
+                  <option value="stripe">Paid</option>
+                  <option value="gifted">Gifted</option>
+                </select>
+              </Field>
+            </div>
+          )}
+
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-content-sm text-text-muted">
+              UTC · Monday–Sunday · {changed ? "Unapplied changes" : "Compared with the preceding equal-length period"}
+            </p>
+            <Button type="button" variant="link" size="chrome" onClick={() => apply(defaultFilters())}>
+              Reset filters
+            </Button>
+          </div>
+
+          {validation && (
+            <p role="alert" className="mt-2 text-content-sm text-status-danger">
+              {validation}
+            </p>
+          )}
+        </form>
+
+        <nav aria-label="Analytics sections" className="mt-7 flex gap-1 overflow-x-auto border-b border-border-hairline">
+          {TABS.map((item) => {
+            const selected = tab === item;
+            return (
+              <button
+                key={item}
+                type="button"
+                aria-current={selected ? "page" : undefined}
+                onClick={() => setTab(item)}
+                className={`focus-ring relative inline-flex min-h-11 shrink-0 items-center px-4 text-content-sm capitalize transition-colors ${
+                  selected ? "text-text-strong" : "text-text-muted hover:text-text-strong"
+                }`}
+              >
+                {item}
+                {selected && <span aria-hidden className="absolute inset-x-2 -bottom-px h-0.5 bg-primary" />}
+              </button>
+            );
+          })}
+        </nav>
+
+        {loading ? (
+          <div role="status" aria-label="Loading analytics" className="py-10">
+            <p className="flex items-center gap-3 text-content-sm text-text-muted">
+              <RefreshCw size={16} className="motion-safe:animate-spin" />
+              Loading your report…
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+              {[0, 1, 2, 3].map((index) => (
+                <div key={index} className="h-28 rounded-lg bg-surface-panel motion-safe:animate-pulse" />
+              ))}
+            </div>
+            <div className="mt-8 h-64 rounded-lg bg-surface-panel motion-safe:animate-pulse" />
+          </div>
+        ) : error ? (
+          <div role="alert" className="my-8 rounded-lg border border-border-hairline p-8">
+            <h2 className="text-title-sm font-medium text-text-strong">This report couldn&rsquo;t load</h2>
+            <p className="mt-2 text-content-sm text-text-default">{error}</p>
+            <Button variant="outline" className="mt-5" onClick={retry}>
+              <RefreshCw size={15} />
+              Try again
+            </Button>
+          </div>
+        ) : (
+          report && (
+            <div className="py-7">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-content-sm text-text-muted">
+                <p>
+                  {date(report.filters.start)} – {date(report.filters.end)}
+                  <span className="mx-2 text-text-faint">/</span>
+                  Comparing {date(report.previous.start)} – {date(report.previous.end)}
+                  {applied.q && ` · Member: ${applied.q}`}
+                  {applied.tier && ` · Tier ${applied.tier}`}
+                  {applied.status && ` · ${applied.status}`}
+                  {applied.source && ` · ${applied.source === "stripe" ? "Paid" : "Gifted"}`}
+                </p>
+                <Button variant="ghost" size="chrome" onClick={retry}>
+                  <RefreshCw size={13} />
+                  Updated{" "}
+                  {new Date(report.generatedAt).toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    timeZone: "UTC",
+                  })}{" "}
+                  UTC
+                </Button>
+              </div>
+
+              {tab === "overview" && <Overview report={report} navigate={setTab} />}
+              {/* `hidden` rather than unmounted: each panel owns filter state a
+                  reader expects to find where they left it. */}
+              <div hidden={tab !== "trading"}>
+                <Trading key={JSON.stringify(applied)} report={report} />
+              </div>
+              <div hidden={tab !== "courses"}>
+                <Courses key={JSON.stringify(applied)} report={report} />
+              </div>
+              <div hidden={tab !== "events"}>
+                <Events key={JSON.stringify(applied)} report={report} />
+              </div>
+              {tab === "referrals" && <Referrals />}
+            </div>
+          )
+        )}
+      </main>
+    </AppShell>
+  );
+}
+
+function Overview({ report, navigate }: { report: AnalyticsReport; navigate: (tab: Tab) => void }) {
+  const metrics = report.metrics;
+
+  const leaders = [
+    {
+      tab: "trading" as const,
+      icon: BarChart3,
+      title: "Highest turnover",
+      name: report.trading.find((row) => row.recordedWeeks)?.name ?? "No recorded turnover",
+      detail: report.trading.find((row) => row.recordedWeeks)
+        ? money(report.trading.find((row) => row.recordedWeeks)!.amount)
+        : "Selected weeks",
+    },
+    {
+      tab: "courses" as const,
+      icon: BookOpen,
+      title: "Most watched course",
+      name: report.courses.find((course) => course.viewers)?.title ?? "No course viewing yet",
+      detail: `${number(report.courses[0]?.viewers ?? 0)} unique viewers · lifetime`,
+    },
+    {
+      tab: "events" as const,
+      icon: CalendarDays,
+      title: "Most enrolled event",
+      name: report.events.find((event) => event.enrollments)?.title ?? "No enrolments this period",
+      detail: `${number(report.events[0]?.enrollments ?? 0)} enrolments · selected period`,
+    },
+  ];
+
+  return (
+    <div className="space-y-9">
+      <div className="grid grid-cols-2 gap-x-4 border-y border-border-hairline sm:divide-x sm:divide-border-hairline lg:grid-cols-4">
+        <Metric
+          label="Recorded turnover"
+          value={money(metrics.turnover)}
+          detail={delta(metrics.turnover, metrics.previousTurnover)}
+        />
+        <Metric
+          label="New members"
+          value={number(metrics.newMembers)}
+          detail={delta(metrics.newMembers, metrics.previousNewMembers)}
+        />
+        <Metric
+          label="First course completions"
+          value={number(metrics.completions)}
+          detail={delta(metrics.completions, metrics.previousCompletions)}
+        />
+        <Metric
+          label="Event enrolments"
+          value={number(metrics.eventEnrollments)}
+          detail={delta(metrics.eventEnrollments, metrics.previousEventEnrollments)}
+        />
+      </div>
+
+      <div className="grid gap-9 xl:grid-cols-[minmax(0,2fr)_minmax(240px,1fr)]">
+        <Trend report={report} />
+
+        <Section
+          title="Where members are now"
+          description={`${number(metrics.members)} matching members · ${number(metrics.activeMemberships)} active memberships`}
+        >
+          <div className="space-y-5">
+            {report.tiers.map((tier) => (
+              <div key={tier.tier}>
+                <div className="mb-2 flex justify-between text-content-sm">
+                  <span className="text-text-default">{tier.tier === 5 ? "Master" : `Tier ${tier.tier}`}</span>
+                  <span className="font-mono text-text-strong tabular-nums">{number(tier.count)}</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-sm bg-surface-sunken">
+                  <div
+                    className="h-full bg-primary"
+                    style={{ width: `${metrics.members ? (tier.count / metrics.members) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-6 text-content-sm text-text-muted">
+            Current membership and tier snapshots. They do not represent historical activity or retention.
+          </p>
+        </Section>
+      </div>
+
+      <Section
+        title="Explore the leaders"
+        description="Different measures of contribution. Open a report to compare everyone."
+      >
+        <div className="divide-y divide-border-hairline border-y border-border-hairline">
+          {leaders.map((leader) => (
+            <button
+              key={leader.tab}
+              type="button"
+              onClick={() => navigate(leader.tab)}
+              className="focus-ring flex min-h-24 w-full items-center gap-4 py-4 text-left transition-colors hover:bg-surface-raised sm:px-4"
+            >
+              <leader.icon size={19} className="shrink-0 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="terminal-label text-text-faint">{leader.title}</p>
+                <p className="mt-1 truncate text-content-base font-medium text-text-strong">{leader.name}</p>
+                <p className="mt-1 text-content-sm text-text-muted sm:hidden">{leader.detail}</p>
+              </div>
+              <p className="hidden text-content-sm text-text-default sm:block">{leader.detail}</p>
+              <ArrowRight size={16} className="shrink-0 text-text-faint" />
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Note>
+        Retention, active learning days, and historical watch-time trends need dated activity tracking. Current progress
+        is available in Courses; unavailable metrics are never counted as zero.
+      </Note>
     </div>
-  </AppShell>;
+  );
 }
 
-function Overview({ report: r, navigate }: { report: AnalyticsReport; navigate: (tab: Tab) => void }) {
-  const m = r.metrics;
-  return <div className="space-y-9"><div className="grid grid-cols-2 gap-x-4 border-y border-surgical-steel sm:divide-x sm:divide-surgical-steel lg:grid-cols-4"><Metric label="Recorded turnover" value={money(m.turnover)} detail={delta(m.turnover, m.previousTurnover)} /><Metric label="New members" value={number(m.newMembers)} detail={delta(m.newMembers, m.previousNewMembers)} /><Metric label="First course completions" value={number(m.completions)} detail={delta(m.completions, m.previousCompletions)} /><Metric label="Event enrolments" value={number(m.eventEnrollments)} detail={delta(m.eventEnrollments, m.previousEventEnrollments)} /></div>
-    <div className="grid gap-9 xl:grid-cols-[minmax(0,2fr)_minmax(240px,1fr)]"><Trend report={r} /><Section title="Where members are now" description={`${number(m.members)} matching members · ${number(m.activeMemberships)} active memberships`}><div className="space-y-5">{r.tiers.map(t => <div key={t.tier}><div className="mb-2 flex justify-between text-sm"><span className="text-on-surface-variant">{t.tier === 5 ? 'Master' : `Tier ${t.tier}`}</span><span className="font-mono text-white">{number(t.count)}</span></div><div className="h-2 overflow-hidden rounded-full bg-surgical-steel"><div className="h-full rounded-full bg-primary-container" style={{ width: `${m.members ? t.count / m.members * 100 : 0}%` }} /></div></div>)}</div><p className="mt-6 text-xs leading-5 text-fog-muted">Current membership and tier snapshots. They do not represent historical activity or retention.</p></Section></div>
-    <Section title="Explore the leaders" description="Different measures of contribution. Open a report to compare everyone."><div className="divide-y divide-surgical-steel border-y border-surgical-steel">{[
-      { tab: 'trading' as const, icon: BarChart3, title: 'Highest turnover', name: r.trading.find(t => t.recordedWeeks)?.name ?? 'No recorded turnover', detail: r.trading.find(t => t.recordedWeeks) ? money(r.trading.find(t => t.recordedWeeks)!.amount) : 'Selected weeks' },
-      { tab: 'courses' as const, icon: BookOpen, title: 'Most watched course', name: r.courses.find(c => c.viewers)?.title ?? 'No course viewing yet', detail: `${number(r.courses[0]?.viewers ?? 0)} unique viewers · lifetime` },
-      { tab: 'events' as const, icon: CalendarDays, title: 'Most enrolled event', name: r.events.find(e => e.enrollments)?.title ?? 'No enrolments this period', detail: `${number(r.events[0]?.enrollments ?? 0)} enrolments · selected period` },
-    ].map(item => <button key={item.tab} onClick={() => navigate(item.tab)} className="focus-ring flex min-h-24 w-full items-center gap-4 py-4 text-left transition hover:bg-surface-container-low sm:px-4"><item.icon size={20} className="shrink-0 text-primary-container" /><div className="min-w-0 flex-1"><p className="text-xs text-fog-muted">{item.title}</p><p className="mt-1 truncate text-sm font-semibold text-white">{item.name}</p><p className="mt-1 text-xs text-fog-muted sm:hidden">{item.detail}</p></div><p className="hidden text-xs text-on-surface-variant sm:block">{item.detail}</p><ArrowRight size={17} className="shrink-0 text-fog-muted" /></button>)}</div></Section>
-    <Note>Retention, active learning days, and historical watch-time trends need dated activity tracking. Current progress is available in Courses; unavailable metrics are never counted as zero.</Note>
-  </div>;
+function Trading({ report }: { report: AnalyticsReport }) {
+  const [entry, setEntry] = useState("all");
+  const [minimum, setMinimum] = useState("");
+
+  const rows = report.trading.filter((row) => {
+    const coverage = entry === "all" || (entry === "recorded" ? row.recordedWeeks > 0 : row.recordedWeeks === 0);
+    return coverage && (!minimum || row.amount >= Number(minimum));
+  });
+
+  return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-2 gap-4 border-b border-border-hairline lg:grid-cols-4">
+        <Metric
+          label="Selected-period turnover"
+          value={money(report.metrics.turnover)}
+          detail={delta(report.metrics.turnover, report.metrics.previousTurnover)}
+        />
+        <Metric
+          label="Contributing members"
+          value={number(report.metrics.contributors)}
+          detail="Members with positive turnover"
+        />
+        <Metric label="Median contribution" value={money(report.metrics.median)} detail="Among positive contributors" />
+        <Metric
+          label="No entries in period"
+          value={number(report.metrics.missingMembers)}
+          detail="Missing records, not recorded zero"
+        />
+      </div>
+
+      <Section
+        title="Turnover leaderboard"
+        description="Highest selected-period turnover first. Lifetime totals include every saved week."
+        action={
+          <Link href="/creator/members/turnover" className={buttonVariants({ variant: "outline" })}>
+            Open turnover workspace
+            <ArrowRight size={14} />
+          </Link>
+        }
+      >
+        <div className="mb-5 flex flex-wrap gap-4">
+          <Field label="Entry coverage">
+            <select className={cn(nativeSelectClass, "w-auto")} value={entry} onChange={(event) => setEntry(event.target.value)}>
+              <option value="all">All members</option>
+              <option value="recorded">Has recorded entries</option>
+              <option value="missing">No entries in period</option>
+            </select>
+          </Field>
+          <Field label="Minimum period turnover · USD">
+            <input
+              className={nativeSelectClass}
+              type="number"
+              min="0"
+              step="0.01"
+              value={minimum}
+              placeholder="No minimum"
+              onChange={(event) => setMinimum(event.target.value)}
+            />
+          </Field>
+        </div>
+
+        <ReportTable
+          title="Turnover leaderboard"
+          filename={`analytics-trading-${report.filters.start}-${report.filters.end}`}
+          headers={["Member", "Tier", "Period (USD)", "Previous (USD)", "Lifetime (USD)", "Share (%)", "Weeks recorded"]}
+          numeric={[1, 2, 3, 4, 5, 6]}
+          rows={rows.map((row) => ({
+            id: row.id,
+            cells: [
+              row.name,
+              row.tier,
+              row.recordedWeeks ? row.amount : null,
+              row.previous,
+              row.lifetime,
+              row.recordedWeeks ? row.share : null,
+              row.recordedWeeks,
+            ],
+            detail: (
+              <>
+                <p className="break-all">Member ID: {row.id}</p>
+                <p className="capitalize">Membership: {row.status}</p>
+                <p>Last saved: {date(row.updated)}</p>
+                <p>{delta(row.amount, row.previous)}</p>
+              </>
+            ),
+          }))}
+        />
+      </Section>
+
+      <Note>
+        These are manually recorded turnover amounts. Platform breakdowns and withdrawable balances will appear once
+        platform-linked credit records are available. A saved turnover total is not proof of a completed payout.
+      </Note>
+    </div>
+  );
 }
 
-function Trading({ report: r }: { report: AnalyticsReport }) {
-  const [entry, setEntry] = useState('all'), [minimum, setMinimum] = useState('');
-  const rows = r.trading.filter(t => (entry === 'all' || (entry === 'recorded' ? t.recordedWeeks > 0 : t.recordedWeeks === 0)) && (!minimum || t.amount >= Number(minimum)));
-  return <div className="space-y-8"><div className="grid grid-cols-2 gap-4 border-b border-surgical-steel lg:grid-cols-4"><Metric label="Selected-period turnover" value={money(r.metrics.turnover)} detail={delta(r.metrics.turnover, r.metrics.previousTurnover)} /><Metric label="Contributing members" value={number(r.metrics.contributors)} detail="Members with positive turnover" /><Metric label="Median contribution" value={money(r.metrics.median)} detail="Among positive contributors" /><Metric label="No entries in period" value={number(r.metrics.missingMembers)} detail="Missing records, not recorded zero" /></div><Section title="Turnover leaderboard" description="Highest selected-period turnover first. Lifetime totals include every saved week." action={<Link href="/creator/members/turnover" className={button}>Open turnover workspace <ArrowRight size={15} /></Link>}><div className="mb-5 flex flex-wrap gap-4"><Field label="Entry coverage"><select className={`${input} !w-auto`} value={entry} onChange={e => setEntry(e.target.value)}><option value="all">All members</option><option value="recorded">Has recorded entries</option><option value="missing">No entries in period</option></select></Field><Field label="Minimum period turnover · USD"><input className={input} type="number" min="0" step="0.01" value={minimum} placeholder="No minimum" onChange={e => setMinimum(e.target.value)} /></Field></div><ReportTable title="Turnover leaderboard" filename={`analytics-trading-${r.filters.start}-${r.filters.end}`} headers={['Member', 'Tier', 'Period (USD)', 'Previous (USD)', 'Lifetime (USD)', 'Share (%)', 'Weeks recorded']} numeric={[1, 2, 3, 4, 5, 6]} rows={rows.map(t => ({ id: t.id, cells: [t.name, t.tier, t.recordedWeeks ? t.amount : null, t.previous, t.lifetime, t.recordedWeeks ? t.share : null, t.recordedWeeks], detail: <><p className="break-all">Member ID: {t.id}</p><p className="capitalize">Membership: {t.status}</p><p>Last saved: {date(t.updated)}</p><p>{delta(t.amount, t.previous)}</p></> }))} /></Section><Note>These are manually recorded turnover amounts. Platform breakdowns and withdrawable balances will appear once platform-linked credit records are available. A saved turnover total is not proof of a completed payout.</Note></div>;
+function Courses({ report }: { report: AnalyticsReport }) {
+  const [course, setCourse] = useState("");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+
+  const courses = report.courses.filter((row) => (!course || row.id === course) && (!status || row.status === status));
+  const learners = report.learners.filter((row) => row.name.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div className="space-y-8">
+      <Note>
+        <strong className="font-medium text-text-strong">Two time scopes:</strong> unique viewers and recorded progress
+        hours are lifetime snapshots. Enrolments and first completions use the selected dates. Progress hours are
+        accumulated saved progress, not a verified history of playback sessions.
+      </Note>
+
+      <Section
+        title="Course performance"
+        description="Most watched ranks by lifetime unique viewers within your member filters. Expand a course to inspect its lessons."
+      >
+        <div className="mb-5 flex flex-wrap gap-4">
+          <Field label="Course">
+            <select
+              className={cn(nativeSelectClass, "w-auto")}
+              value={course}
+              onChange={(event) => setCourse(event.target.value)}
+            >
+              <option value="">All courses</option>
+              {report.courses.map((row) => (
+                <option key={row.id} value={row.id}>
+                  {row.title}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Course status">
+            <select
+              className={cn(nativeSelectClass, "w-auto")}
+              value={status}
+              onChange={(event) => setStatus(event.target.value)}
+            >
+              <option value="">All statuses</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="archived">Archived</option>
+            </select>
+          </Field>
+        </div>
+
+        <ReportTable
+          title="Course performance"
+          filename={`analytics-courses-${report.filters.start}-${report.filters.end}`}
+          headers={[
+            "Course",
+            "Unique viewers · lifetime",
+            "Progress hours · lifetime",
+            "Enrolments · period",
+            "First completions · period",
+            "Cohort complete (%)",
+          ]}
+          numeric={[1, 2, 3, 4, 5]}
+          rows={courses.map((row) => ({
+            id: row.id,
+            cells: [row.title, row.viewers, row.hours, row.enrollments, row.completions, row.cohortRate],
+            detail: (
+              <>
+                <p className="capitalize">{row.status}</p>
+                <p className="mb-3">
+                  {row.cohortCompleted} of {row.enrollments} members enrolled in this period are currently complete.
+                  Observed through {date(report.generatedAt)}.
+                </p>
+                {row.lessons.length ? (
+                  <ol className="space-y-2">
+                    {row.lessons.map((lesson) => (
+                      <li key={lesson.id}>
+                        <span className="text-text-default">{lesson.title}</span>
+                        <br />
+                        {lesson.viewers} viewers · {lesson.completed} completed · lifetime
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p>No lessons yet.</p>
+                )}
+              </>
+            ),
+          }))}
+        />
+      </Section>
+
+      <Section
+        title="Learner leaderboard"
+        description="First course completions, then lesson completions in the selected period. Lifetime progress hours are a separate measure."
+      >
+        <div className="mb-5 max-w-sm">
+          <Field label="Search learners">
+            <input
+              className={nativeSelectClass}
+              type="search"
+              value={search}
+              placeholder="Learner name"
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </Field>
+        </div>
+
+        <ReportTable
+          title="Learner leaderboard"
+          filename={`analytics-learners-${report.filters.start}-${report.filters.end}`}
+          headers={[
+            "Member",
+            "Tier",
+            "First courses · period",
+            "Lessons completed · period",
+            "Progress hours · lifetime",
+            "Last learning activity · UTC",
+          ]}
+          numeric={[1, 2, 3, 4]}
+          rows={learners.map((row) => ({
+            id: row.id,
+            cells: [
+              row.name,
+              row.tier,
+              row.courses,
+              row.lessons,
+              row.hours,
+              row.lastWatched ? row.lastWatched.slice(0, 10) : null,
+            ],
+            detail: <p className="break-all">Member ID: {row.id}</p>,
+          }))}
+        />
+      </Section>
+    </div>
+  );
 }
 
-function Courses({ report: r }: { report: AnalyticsReport }) {
-  const [course, setCourse] = useState(''), [search, setSearch] = useState(''), [status, setStatus] = useState('');
-  const courses = r.courses.filter(c => (!course || c.id === course) && (!status || c.status === status));
-  const learners = r.learners.filter(l => l.name.toLowerCase().includes(search.toLowerCase()));
-  return <div className="space-y-8"><Note><strong className="font-semibold text-white">Two time scopes:</strong> unique viewers and recorded progress hours are lifetime snapshots. Enrolments and first completions use the selected dates. Progress hours are accumulated saved progress, not a verified history of playback sessions.</Note><Section title="Course performance" description="Most watched ranks by lifetime unique viewers within your member filters. Expand a course to inspect its lessons."><div className="mb-5 flex flex-wrap gap-4"><Field label="Course"><select className={`${input} !w-auto`} value={course} onChange={e => setCourse(e.target.value)}><option value="">All courses</option>{r.courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></Field><Field label="Course status"><select className={`${input} !w-auto`} value={status} onChange={e => setStatus(e.target.value)}><option value="">All statuses</option><option value="published">Published</option><option value="draft">Draft</option><option value="archived">Archived</option></select></Field></div><ReportTable title="Course performance" filename={`analytics-courses-${r.filters.start}-${r.filters.end}`} headers={['Course', 'Unique viewers · lifetime', 'Progress hours · lifetime', 'Enrolments · period', 'First completions · period', 'Cohort complete (%)']} numeric={[1, 2, 3, 4, 5]} rows={courses.map(c => ({ id: c.id, cells: [c.title, c.viewers, c.hours, c.enrollments, c.completions, c.cohortRate], detail: <><p className="capitalize">{c.status}</p><p className="mb-3">{c.cohortCompleted} of {c.enrollments} members enrolled in this period are currently complete. Observed through {date(r.generatedAt)}.</p>{c.lessons.length ? <ol className="space-y-2">{c.lessons.map(l => <li key={l.id}><span className="text-on-surface">{l.title}</span><br />{l.viewers} viewers · {l.completed} completed · lifetime</li>)}</ol> : <p>No lessons yet.</p>}</> }))} /></Section><Section title="Learner leaderboard" description="First course completions, then lesson completions in the selected period. Lifetime progress hours are a separate measure."><div className="mb-5 max-w-sm"><Field label="Search learners"><input className={input} type="search" value={search} placeholder="Learner name" onChange={e => setSearch(e.target.value)} /></Field></div><ReportTable title="Learner leaderboard" filename={`analytics-learners-${r.filters.start}-${r.filters.end}`} headers={['Member', 'Tier', 'First courses · period', 'Lessons completed · period', 'Progress hours · lifetime', 'Last learning activity · UTC']} numeric={[1, 2, 3, 4]} rows={learners.map(l => ({ id: l.id, cells: [l.name, l.tier, l.courses, l.lessons, l.hours, l.lastWatched ? l.lastWatched.slice(0, 10) : null], detail: <p className="break-all">Member ID: {l.id}</p> }))} /></Section></div>;
-}
+function Events({ report }: { report: AnalyticsReport }) {
+  const [host, setHost] = useState("");
+  const [status, setStatus] = useState("");
+  const [search, setSearch] = useState("");
 
-function Events({ report: r }: { report: AnalyticsReport }) {
-  const [host, setHost] = useState(''), [status, setStatus] = useState(''), [search, setSearch] = useState('');
-  const rows = r.events.filter(e => (!host || e.host_name === host) && (!status || e.status === status) && e.title.toLowerCase().includes(search.toLowerCase()));
-  return <div className="space-y-8"><div className="grid gap-4 border-b border-surgical-steel sm:grid-cols-3"><Metric label="Event enrolments" value={number(r.metrics.eventEnrollments)} detail={delta(r.metrics.eventEnrollments, r.metrics.previousEventEnrollments)} /><Metric label="Unique enrollees" value={number(r.metrics.uniqueEnrollees)} detail="Distinct members enrolled this period" /><Metric label="Repeat enrollees" value={number(r.metrics.repeatEnrollees)} detail="Enrolled in two or more events this period" /></div><Section title="Events people enrol in" description="Ranked by enrolments created in the selected period, regardless of the event date."><div className="mb-5 grid gap-4 sm:grid-cols-3"><Field label="Find an event"><input className={input} type="search" placeholder="Event title" value={search} onChange={e => setSearch(e.target.value)} /></Field><Field label="Host"><select className={input} value={host} onChange={e => setHost(e.target.value)}><option value="">All hosts</option>{[...new Set(r.events.map(e => e.host_name))].sort().map(h => <option key={h}>{h}</option>)}</select></Field><Field label="Event status"><select className={input} value={status} onChange={e => setStatus(e.target.value)}><option value="">All published events</option>{['upcoming', 'live', 'completed'].map(s => <option key={s} value={s}>{s}</option>)}</select></Field></div><ReportTable title="Event enrolments" filename={`analytics-events-${r.filters.start}-${r.filters.end}`} headers={['Event', 'Host', 'Event date · UTC', 'Status', 'Enrolments · period', 'Previous period', 'Current total']} numeric={[4, 5, 6]} rows={rows.map(e => ({ id: e.id, cells: [e.title, e.host_name, e.starts_at.slice(0, 10), e.status, e.enrollments, e.previous, e.lifetime], detail: <p>Event ID: {e.id}</p> }))} /></Section><Note>Enrolments measure interest, not attendance. Cancelled and draft events are excluded. Withdrawn enrolments are removed by the existing event flow, so these figures describe retained enrolments; historical cancellations and capacity are not tracked.</Note></div>;
+  const rows = report.events.filter(
+    (event) =>
+      (!host || event.host_name === host) &&
+      (!status || event.status === status) &&
+      event.title.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  return (
+    <div className="space-y-8">
+      <div className="grid gap-4 border-b border-border-hairline sm:grid-cols-3">
+        <Metric
+          label="Event enrolments"
+          value={number(report.metrics.eventEnrollments)}
+          detail={delta(report.metrics.eventEnrollments, report.metrics.previousEventEnrollments)}
+        />
+        <Metric
+          label="Unique enrollees"
+          value={number(report.metrics.uniqueEnrollees)}
+          detail="Distinct members enrolled this period"
+        />
+        <Metric
+          label="Repeat enrollees"
+          value={number(report.metrics.repeatEnrollees)}
+          detail="Enrolled in two or more events this period"
+        />
+      </div>
+
+      <Section
+        title="Events people enrol in"
+        description="Ranked by enrolments created in the selected period, regardless of the event date."
+      >
+        <div className="mb-5 grid gap-4 sm:grid-cols-3">
+          <Field label="Find an event">
+            <input
+              className={nativeSelectClass}
+              type="search"
+              placeholder="Event title"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </Field>
+          <Field label="Host">
+            <select className={nativeSelectClass} value={host} onChange={(event) => setHost(event.target.value)}>
+              <option value="">All hosts</option>
+              {[...new Set(report.events.map((event) => event.host_name))].sort().map((name) => (
+                <option key={name}>{name}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Event status">
+            <select className={nativeSelectClass} value={status} onChange={(event) => setStatus(event.target.value)}>
+              <option value="">All published events</option>
+              {["upcoming", "live", "completed"].map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+
+        <ReportTable
+          title="Event enrolments"
+          filename={`analytics-events-${report.filters.start}-${report.filters.end}`}
+          headers={[
+            "Event",
+            "Host",
+            "Event date · UTC",
+            "Status",
+            "Enrolments · period",
+            "Previous period",
+            "Current total",
+          ]}
+          numeric={[4, 5, 6]}
+          rows={rows.map((event) => ({
+            id: event.id,
+            cells: [
+              event.title,
+              event.host_name,
+              event.starts_at.slice(0, 10),
+              event.status,
+              event.enrollments,
+              event.previous,
+              event.lifetime,
+            ],
+            detail: <p>Event ID: {event.id}</p>,
+          }))}
+        />
+      </Section>
+
+      <Note>
+        Enrolments measure interest, not attendance. Cancelled and draft events are excluded. Withdrawn enrolments are
+        removed by the existing event flow, so these figures describe retained enrolments; historical cancellations and
+        capacity are not tracked.
+      </Note>
+    </div>
+  );
 }
 
 function Referrals() {
-  return <section className="grid gap-9 py-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"><div><Users size={30} className="text-primary-container" /><p className="mt-5 inline-flex rounded-full border border-surgical-steel px-3 py-1 text-xs text-on-surface-variant">Not tracked yet</p><h2 className="mt-4 text-2xl font-semibold tracking-tight text-white">Turn recommendations into measurable growth.</h2><p className="mt-4 max-w-lg text-sm leading-7 text-on-surface-variant">Your referral report will connect signups to first membership payments, so you can see who brings paying members into the community.</p><div className="mt-6 border-y border-surgical-steel py-5 text-sm leading-7 text-fog-muted"><p className="font-semibold text-white">The reward rule</p><p>A referrer earns $5 credit after the referred member’s first successful membership payment. A refund reverses that reward.</p></div></div><div className="self-center"><h3 className="text-sm font-semibold text-white">What you’ll be able to compare</h3><ul className="mt-4 divide-y divide-surgical-steel text-sm text-on-surface-variant">{['Top referrers by qualifying paid members', 'Referred signups and signup-to-paid conversion', 'Rewards earned and reversed', 'Learning and event engagement of referred members'].map(t => <li key={t} className="flex gap-3 py-4"><ArrowRight size={16} className="mt-0.5 shrink-0 text-primary-container" />{t}</li>)}</ul><p className="mt-4 text-xs leading-6 text-fog-muted">Referral attribution and reward records are not connected yet. This section will show real rankings when those records are available.</p></div></section>;
+  const planned = [
+    "Top referrers by qualifying paid members",
+    "Referred signups and signup-to-paid conversion",
+    "Rewards earned and reversed",
+    "Learning and event engagement of referred members",
+  ];
+
+  return (
+    <section className="grid gap-9 py-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+      <div>
+        <Users size={28} className="text-primary" />
+        <p className="mt-5 inline-flex rounded-md border border-border-hairline px-3 py-1 text-content-sm text-text-muted">
+          Not tracked yet
+        </p>
+        <h2 className="mt-4 text-title-lg font-medium text-text-strong">Turn recommendations into measurable growth.</h2>
+        <p className="mt-4 max-w-lg text-content-base text-text-default">
+          Your referral report will connect signups to first membership payments, so you can see who brings paying
+          members into the community.
+        </p>
+        <div className="mt-6 space-y-1 border-y border-border-hairline py-5">
+          <p className="text-content-base font-medium text-text-strong">The reward rule</p>
+          <p className="text-content-sm text-text-muted">
+            A referrer earns $5 credit after the referred member&rsquo;s first successful membership payment. A refund
+            reverses that reward.
+          </p>
+        </div>
+      </div>
+
+      <div className="self-center">
+        <h3 className="text-title-sm font-medium text-text-strong">What you&rsquo;ll be able to compare</h3>
+        <ul className="mt-4 divide-y divide-border-hairline">
+          {planned.map((item) => (
+            <li key={item} className="flex gap-3 py-4 text-content-sm text-text-default">
+              <ArrowRight size={15} className="mt-0.5 shrink-0 text-primary" />
+              {item}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4 text-content-sm text-text-muted">
+          Referral attribution and reward records are not connected yet. This section will show real rankings when those
+          records are available.
+        </p>
+      </div>
+    </section>
+  );
 }

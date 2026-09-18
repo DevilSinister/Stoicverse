@@ -73,7 +73,7 @@ export const ROLE_SWATCHES = [
   { hex: "#F472B6", name: "Rose" },
   { hex: "#A78BFA", name: "Iris" },
   { hex: "#F87171", name: "Coral" },
-  { hex: "#E2E8F0", name: "Bone" },
+  { hex: "#d4e4fa", name: "Bone" },
 ] as const;
 
 export type CommunityRole = {

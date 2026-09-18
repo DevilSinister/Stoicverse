@@ -101,9 +101,13 @@ export function buildRail(viewer: RailViewer = {}): RailItem[] {
   }
 
   items.push(
-    // `/creator/notifications` is a stub with no list; both roles read the one
-    // that works until that is resolved.
-    { id: "notifications", href: "/dashboard/notifications", label: "Notifications", icon: "notifications", group: "utility" },
+    // Per role, not hard-coded to /dashboard. It was the member route for
+    // everybody, on the reasoning that /creator/notifications was an empty
+    // stub - but `proxy.ts` bounces an influencer off every /dashboard route,
+    // so a creator pressing Notifications was redirected to /creator and the
+    // rail's own link went nowhere. The creator route renders the real centre
+    // now; both roles read their own notifications through it.
+    { id: "notifications", href: `${base}/notifications`, label: "Notifications", icon: "notifications", group: "utility" },
     // For a creator this is the community configuration, not an account page —
     // which is exactly why the avatar below it is a separate control.
     { id: "settings", href: creator ? "/creator/settings" : "/dashboard/settings", label: creator ? "Community settings" : "Settings", icon: "settings", group: "utility" },

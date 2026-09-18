@@ -95,7 +95,23 @@ async function seedPersona(persona: DevPersona) {
     .eq("id", userId);
   if (profile.error) throw new Error(`Could not set the ${persona} profile: ${profile.error.message}`);
 
-  if (persona !== "creator") {
+  /*
+    The prospect is the persona that has not paid, and that is its whole point.
+
+    Every other seeded account carries an active membership, which is why the
+    pre-purchase half of the product could not be opened at all: `proxy.ts`
+    redirects anyone holding a membership away from `/checkout`, and
+    `/checkout/success` could only be caught in its already-granted state.
+
+    Any membership row is *removed* rather than merely not written. This account
+    is seeded repeatedly across sessions, and a prospect that silently stops
+    being one is worse than no persona at all - the screen it exists to reach
+    would quietly redirect again, which is the failure it was added to end.
+  */
+  if (persona === "prospect") {
+    const cleared = await admin.from("memberships").delete().eq("user_id", userId);
+    if (cleared.error) throw new Error(`Could not clear the prospect membership: ${cleared.error.message}`);
+  } else if (persona !== "creator") {
     const now = new Date();
     const membership = await admin.from("memberships").upsert(
       {
@@ -107,6 +123,39 @@ async function seedPersona(persona: DevPersona) {
       { onConflict: "user_id" },
     );
     if (membership.error) throw new Error(`Could not activate the ${persona} membership: ${membership.error.message}`);
+  }
+
+  /*
+    The deletion persona arrives with an open request, because that is the only
+    way to see the screen that renders one.
+
+    `requestAccountDeletion` verifies the account password before it writes this
+    row, and a seeded persona's password is a `crypto.randomUUID()` thrown away
+    at creation - so `/account/deletion-pending` could not be opened by signing
+    in as anybody. It was redesigned in phase 5 and never rendered once.
+
+    Two details the table forces, and both are easy to get wrong:
+
+    - `account_deletion_requests_active_user_idx` is unique per user over
+      `pending | processing | failed`, so a second sign-in would collide with
+      the row the first one left. Existing rows are cleared first, which also
+      resets a request the tester cancelled on the screen itself - pressing
+      Cancel is the point of the screen, and the persona has to survive it.
+    - `check (scheduled_at >= created_at + interval '29 days')`. Thirty days is
+      what the real action uses, so the same constant is used here rather than
+      an arbitrary future date that might drift under the check.
+  */
+  if (persona === "deleting") {
+    const cleared = await admin.from("account_deletion_requests").delete().eq("user_id", userId);
+    if (cleared.error) throw new Error(`Could not clear the previous deletion request: ${cleared.error.message}`);
+
+    const requested = await admin.from("account_deletion_requests").insert({
+      user_id: userId,
+      requested_role: platformRole,
+      status: "pending",
+      scheduled_at: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+    });
+    if (requested.error) throw new Error(`Could not schedule the deletion request: ${requested.error.message}`);
   }
 
   return { tokenHash: link.data.properties.hashed_token };
@@ -132,7 +181,18 @@ export async function POST(request: NextRequest) {
     return new NextResponse(message, { status: 500 });
   }
 
-  const destination = new URL(persona === "creator" ? "/creator" : "/channels", request.url);
+  // The prospect cannot open /channels - no membership - and `proxy.ts` would
+  // bounce them to /checkout anyway. Landing there directly says so honestly.
+  const destination = new URL(
+    persona === "creator"
+      ? "/creator"
+      : persona === "prospect"
+        ? "/checkout"
+        : persona === "deleting"
+          ? "/account/deletion-pending"
+          : "/channels",
+    request.url,
+  );
   const response = NextResponse.redirect(destination, 303);
   const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {

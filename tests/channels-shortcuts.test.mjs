@@ -14,16 +14,19 @@ const press = (over = {}) =>
     ...over,
   });
 
-test("Ctrl+K and Cmd+K both open the switcher", () => {
-  assert.equal(press({ key: "k", ctrlKey: true }), "quickSwitcher");
-  assert.equal(press({ key: "k", metaKey: true }), "quickSwitcher");
-  assert.equal(press({ key: "K", metaKey: true }), "quickSwitcher");
+test("Ctrl+K and Cmd+K both open the search palette", () => {
+  // Renamed from "quickSwitcher" when the two meanings of Ctrl+K merged: the
+  // palette opens on the channel list, so it is still the switcher, and typing
+  // widens it to people and messages rather than changing tool.
+  assert.equal(press({ key: "k", ctrlKey: true }), "search");
+  assert.equal(press({ key: "k", metaKey: true }), "search");
+  assert.equal(press({ key: "K", metaKey: true }), "search");
 });
 
-test("the switcher opens from inside the composer too", () => {
+test("the palette opens from inside the composer too", () => {
   // Somebody halfway through a message who wants another channel should not
   // have to leave the box first, and no text field binds Ctrl+K.
-  assert.equal(press({ key: "k", ctrlKey: true, typing: true }), "quickSwitcher");
+  assert.equal(press({ key: "k", ctrlKey: true, typing: true }), "search");
 });
 
 test("a bare k is a letter, not a shortcut", () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { Loader2, MoreVertical } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 
 import { giftMembership, restrictMember, unrestrictMember } from "@/app/community/member-actions";
 import { banMember, timeoutMember, untimeoutMember } from "@/app/community/moderation-actions";
@@ -31,6 +31,7 @@ import {
 import { groupMembers } from "@/lib/channels/presence";
 import { SANCTION_LIMITS } from "@/lib/community-settings/model";
 import type { DirectoryMember } from "@/lib/community/messages";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 /**
  * Who is in the community, and what can be done about them.
@@ -192,24 +193,27 @@ export function MemberList({
     },
   });
 
+  // The drawer is the touch surface; the column is the pointer one.
+  const touch = variant === "drawer";
+
   return (
     <aside
       aria-label={variant === "drawer" ? undefined : "Members"}
       className={
         variant === "drawer"
           ? "flex min-h-0 flex-col"
-          : "hidden min-h-0 w-56 shrink-0 flex-col border-l border-surgical-steel bg-surface-container-lowest xl:flex"
+          : "hidden min-h-0 w-56 shrink-0 flex-col border-l border-border-hairline bg-surface-sunken xl:flex"
       }
     >
       <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
-        {sections.length === 0 ? <p className="px-2 text-xs text-fog-muted">Nobody here yet.</p> : null}
+        {sections.length === 0 ? <p className="px-2 text-chrome-sm text-text-muted">Nobody here yet.</p> : null}
 
         {sections.map((section) => (
           <div key={section.key} className="mb-4">
-            <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.12em]">
+            <p className="px-2 pb-1 text-chrome-xs font-medium uppercase tracking-[0.12em]">
               <span
                 style={section.color ? { color: section.color } : undefined}
-                className={section.color ? "" : "text-fog-muted"}
+                className={section.color ? "" : "text-text-muted"}
               >
                 {`${section.label} — ${section.members.length}`}
               </span>
@@ -222,13 +226,13 @@ export function MemberList({
                 const row = (
                   <>
                     <span className="relative shrink-0">
-                      <span className="flex size-6 items-center justify-center rounded-full bg-surface-container-high text-[11px] font-semibold text-on-surface-variant">
+                      <span className="flex size-6 items-center justify-center rounded-full bg-surface-raised text-chrome-xs font-medium text-text-strong">
                         {member.fullName.slice(0, 1).toUpperCase()}
                       </span>
                       <span
                         aria-hidden="true"
-                        className={`absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-surface-container-lowest ${
-                          online ? "bg-primary-container" : "bg-fog-muted"
+                        className={`absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-surface-sunken ${
+                          online ? "bg-primary" : "bg-text-muted"
                         }`}
                       />
                     </span>
@@ -241,9 +245,23 @@ export function MemberList({
                     <span className="sr-only">{online ? "online" : "offline"}</span>
                   </>
                 );
-                const rowClass = `focus-ring flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1 text-left text-sm hover:bg-surface-container-low ${
-                  online ? "text-on-surface" : "text-fog-muted opacity-60"
-                }`;
+                /*
+                  Two things the column got right and the drawer never did.
+
+                  **The row grows on touch**, as the channel list's does: 28px
+                  of target is what this was on a phone, where the same list is
+                  the primary way to reach anybody. Above the drawer it stays
+                  dense, because a pointer does not need the height and the
+                  column is 224px wide.
+
+                  **Offline is muted, not faded.** `text-fog-muted opacity-60`
+                  put a name that is still information under AA on the sunken
+                  column; the presence dot beside it already carries the state,
+                  so the text does not have to be unreadable to say it.
+                */
+                const rowClass = `focus-ring flex min-w-0 flex-1 items-center gap-chrome-gap rounded-lg text-left text-chrome-base transition-colors hover:bg-surface-panel ${
+                  touch ? "min-h-11 pl-2 pr-11" : "px-2 py-1"
+                } ${online ? "text-text-default hover:text-text-strong" : "text-text-muted"}`;
 
                 return (
                   <li key={member.id}>
@@ -270,7 +288,21 @@ export function MemberList({
                             */}
                             <DropdownMenuTrigger
                               aria-label={`Actions for ${member.fullName}`}
-                              className="focus-ring absolute right-1 rounded p-1 text-fog-muted opacity-0 group-focus-within/member:opacity-100 group-hover/member:opacity-100 data-[popup-open]:opacity-100 hover:text-on-surface"
+                              /*
+                                An `opacity-0` control still takes the tap, and
+                                this one had been taking it on every member row
+                                on every phone: invisible, live, and sitting
+                                over the right 44px of the name. The channel
+                                list fixed exactly this defect and the fix was
+                                never carried across. Off a pointer it is simply
+                                visible; where it does hide it stops receiving
+                                pointer events until it is revealed.
+                              */
+                              className={`focus-ring hit-target absolute right-1 rounded-md p-1 text-text-muted hover:text-text-strong ${
+                                touch
+                                  ? ""
+                                  : "pointer-events-none opacity-0 group-focus-within/member:pointer-events-auto group-focus-within/member:opacity-100 group-hover/member:pointer-events-auto group-hover/member:opacity-100 data-[popup-open]:pointer-events-auto data-[popup-open]:opacity-100"
+                              }`}
                             >
                               <MoreVertical size={13} aria-hidden="true" />
                             </DropdownMenuTrigger>
@@ -309,7 +341,7 @@ export function MemberList({
           onCancel={() => setPending(null)}
           onConfirm={() => void run()}
         >
-          <label className="block text-xs text-on-surface-variant">
+          <label className="block text-chrome-sm text-text-muted">
             {/*
               Required, not optional. `parseModerationReason` refuses an empty
               one for every sanction that is not an undo, so a dialog that let
@@ -323,7 +355,7 @@ export function MemberList({
               minLength={SANCTION_LIMITS.reason.min}
               maxLength={SANCTION_LIMITS.reason.max}
               autoFocus
-              className="mt-1 w-full rounded-lg border border-surgical-steel bg-surface-container-lowest p-2 text-sm text-on-surface outline-none"
+              className="focus-ring mt-1 w-full rounded-lg border border-border-hairline bg-surface-sunken p-2 text-content-sm text-text-default"
             />
           </label>
         </ReasonDialog>
@@ -335,13 +367,13 @@ export function MemberList({
 function MemberHeader({ member }: { member: DirectoryMember }) {
   return (
     <div className="px-2 py-1.5">
-      <p className="truncate text-xs font-semibold text-on-surface">{member.fullName}</p>
+      <p className="truncate text-chrome-sm font-medium text-text-strong">{member.fullName}</p>
       {member.roles.length > 0 ? (
         <p className="mt-1 flex flex-wrap gap-1">
           {member.roles.map((role) => (
             <span
               key={role.id}
-              className="rounded border border-surgical-steel px-1 text-[10px]"
+              className="rounded-md border border-border-hairline px-1 text-chrome-xs"
               style={role.color ? { color: role.color } : undefined}
             >
               {role.name}
@@ -349,7 +381,7 @@ function MemberHeader({ member }: { member: DirectoryMember }) {
           ))}
         </p>
       ) : (
-        <p className="mt-0.5 text-[11px] text-fog-muted">No roles</p>
+        <p className="mt-0.5 text-chrome-xs text-text-muted">No roles</p>
       )}
     </div>
   );
@@ -372,40 +404,22 @@ function ReasonDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  // The twin of MessageMenu's ActionDialog, down to the props. Both are thin
+  // wrappers over the one confirm now, which is why they can stay separate
+  // local components without being a second implementation of anything.
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-      onKeyDown={(event) => {
-        if (event.key === "Escape") onCancel();
+    <ConfirmDialog
+      open
+      onOpenChange={(next) => {
+        if (!next) onCancel();
       }}
+      title={title}
+      confirmLabel={confirmLabel}
+      tone={destructive ? "danger" : "default"}
+      busy={busy}
+      onConfirm={onConfirm}
     >
-      <div className="w-full max-w-sm rounded-xl border border-surgical-steel bg-surface-container-low p-4">
-        <h2 className="text-sm font-semibold text-on-surface">{title}</h2>
-        <div className="mt-3">{children}</div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="focus-ring rounded-lg border border-surgical-steel px-3 py-1.5 text-xs text-on-surface-variant"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={busy}
-            className={`focus-ring inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-50 ${
-              destructive ? "bg-error text-monolith-surface" : "bg-primary-container text-monolith-surface"
-            }`}
-          >
-            {busy ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : null}
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
+      {children}
+    </ConfirmDialog>
   );
 }

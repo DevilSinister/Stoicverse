@@ -26,6 +26,14 @@ import { AlertCircle, Check, X } from "lucide-react";
 
 export type ToastTone = "error" | "success";
 
+/**
+ * The shape every caller passes around. Named because settings sections hand
+ * this down as an `onNotice` prop through three levels of component, and a
+ * prop typed `(message: string) => void` silently drops the tone - which is
+ * how a failure comes to be announced with a green tick.
+ */
+export type Notify = (message: string, tone?: ToastTone) => void;
+
 type Toast = { id: number; message: string; tone: ToastTone };
 
 /** Long enough to read twice; failures get longer, because they need acting on. */
@@ -43,7 +51,7 @@ const ToastContext = createContext<((message: string, tone?: ToastTone) => void)
  * dropping the message — a swallowed error report is worse than a crash in
  * development, and the provider is mounted at the root layout.
  */
-export function useToast(): (message: string, tone?: ToastTone) => void {
+export function useToast(): Notify {
   const notify = useContext(ToastContext);
   if (!notify) throw new Error("useToast requires a <ToastProvider> above it.");
   return notify;
@@ -81,7 +89,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       <div
         aria-live="assertive"
         aria-atomic="false"
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-100 flex flex-col items-center gap-2 p-4 sm:items-end"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-toast flex flex-col items-center gap-2 p-4 sm:items-end"
       >
         {toasts.map((toast) => (
           <ToastRow key={toast.id} toast={toast} onDismiss={dismiss} />
@@ -103,23 +111,23 @@ function ToastRow({ toast, onDismiss }: { toast: Toast; onDismiss: (id: number) 
 
   return (
     <div
-      className={`pointer-events-auto flex w-[min(24rem,100%)] animate-in items-start gap-2 rounded-xl border px-3 py-2.5 text-xs leading-5 shadow-lg shadow-black/40 fade-in-0 slide-in-from-bottom-2 ${
+      className={`pointer-events-auto flex w-[min(24rem,100%)] animate-in items-start gap-2 rounded-md border px-chrome-x py-chrome-y text-chrome-sm leading-5 shadow-lg fade-in-0 slide-in-from-bottom-2 ${
         failed
-          ? "border-error/50 bg-surface-container-low text-error"
-          : "border-surgical-steel bg-surface-container-low text-on-surface-variant"
+          ? "border-status-danger/50 bg-surface-panel text-status-danger"
+          : "border-border-hairline bg-surface-panel text-text-default"
       }`}
     >
       {failed ? (
         <AlertCircle size={14} aria-hidden="true" className="mt-0.5 shrink-0" />
       ) : (
-        <Check size={14} aria-hidden="true" className="mt-0.5 shrink-0 text-primary-container" />
+        <Check size={14} aria-hidden="true" className="mt-0.5 shrink-0 text-status-ok" />
       )}
       <p className="min-w-0 flex-1">{toast.message}</p>
       <button
         type="button"
         onClick={() => onDismiss(toast.id)}
         aria-label="Dismiss this message"
-        className="focus-ring -mr-1 shrink-0 rounded p-0.5 text-fog-muted hover:text-on-surface"
+        className="focus-ring hit-target relative -mr-1 shrink-0 rounded-sm p-0.5 text-text-muted hover:text-text-strong"
       >
         <X size={12} aria-hidden="true" />
       </button>

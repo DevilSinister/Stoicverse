@@ -36,7 +36,21 @@ test("canonical creator pages use creator-only routes and workspace access", () 
 test("member screens are clean while creator screens own the management controls", () => {
   const nav = read("src/lib/navigation/rail.ts");
   const shell = read("src/components/layout/AppShell.tsx");
-  const dashboard = read("src/components/dashboard/DashboardView.tsx");
+  /*
+    The live dashboard, not `DashboardView.tsx`.
+
+    That file used to hold `LegacyDashboardView`, a second complete dashboard
+    with no importer, and this assertion was pinned to a template literal inside
+    it — so it was testing a screen nobody could reach. Phase 7 deleted it;
+    `DashboardView.tsx` is now the type surface plus a re-export.
+
+    What the assertion is actually for is that the member dashboard's course
+    link respects the viewer's route base, so the creator's copy of the screen
+    points at `/creator/courses/...` rather than a member route their own proxy
+    refuses. The live screen does that through `withRouteBase`, which is
+    stronger than the hard-coded path this used to match.
+  */
+  const dashboard = read("src/components/dashboard/TerminalDashboard.tsx");
   const memberLearning = read("src/components/courses/CourseCatalog.tsx");
   const memberEvents = read("src/components/events/EventsView.tsx");
   const creatorLearning = read("src/components/creator/CreatorCourseManagerV2.tsx");
@@ -44,15 +58,16 @@ test("member screens are clean while creator screens own the management controls
 
   assert.match(nav, /routeBase/);
   assert.match(shell, /params\.set\("base", routeBase\)/);
-  assert.match(dashboard, /`\/courses\/\$\{data\.activeLesson\.id\}`/);
+  assert.match(dashboard, /withRouteBase\(routeBase, courseId \? `\/courses\/\$\{courseId\}`/);
+  assert.match(dashboard, /courseHref\(data\.activeLesson\?\.id\)/);
   assert.doesNotMatch(memberLearning, /Add lesson/);
   assert.doesNotMatch(memberEvents, /Create event/);
   assert.doesNotMatch(memberEvents, /Publish Zoom link/);
-  assert.match(creatorLearning, /Create Course/);
-  assert.match(creatorLearning, /Add Video/);
-  assert.match(creatorLearning, /Finish Course/);
-  assert.match(creatorEvents, /Create Event/);
-  assert.match(creatorEvents, /Publish (Room )?Link/);
+  assert.match(creatorLearning, /Create course/i);
+  assert.match(creatorLearning, /Add video/i);
+  assert.match(creatorLearning, /Finish course/i);
+  assert.match(creatorEvents, /Create event/i);
+  assert.match(creatorEvents, /Publish (room )?link/i);
 });
 
 test("member and creator route trees expose separate navigation and guards", () => {
@@ -64,8 +79,26 @@ test("member and creator route trees expose separate navigation and guards", () 
     assert.match(read(`src/app/dashboard/${path}/page.tsx`), /requireActiveMembership|render/);
   }
   assert.match(read("src/app/dashboard/messages/page.tsx"), /permanentRedirect\("\/channels"\)/);
+  /*
+    Follows the delegation rather than requiring the call to be inline.
+
+    Two creator routes - /creator/account and /creator/notifications - are the
+    member page's renderer behind the influencer guard, which is how the
+    duplicate screens phase 9 deleted stay deleted. Matching only on the guard's
+    name in the page file would push those back into being copies; matching on
+    "render" alone would let an unguarded page pass by mentioning the word. So:
+    the guard is either here, or in the module this page imports its renderer
+    from, and that module is read and checked.
+  */
   for (const path of ["members", "analytics", "revenue", "settings", "notifications"]) {
-    assert.match(read(`src/app/creator/${path}/page.tsx`), /requireInfluencerWorkspace/);
+    const page = read(`src/app/creator/${path}/page.tsx`);
+    if (/requireInfluencerWorkspace/.test(page)) continue;
+
+    const delegate = page.match(/import \{ (render\w+) \} from "@\/(app\/[^"]+)"/);
+    assert.ok(delegate, `src/app/creator/${path}/page.tsx must guard itself or delegate to a renderer`);
+    const source = read(`src/${delegate[2]}.tsx`);
+    assert.match(source, /requireInfluencerWorkspace/, `${delegate[2]} guards the creator path`);
+    assert.match(source, new RegExp(`${delegate[1]}`), "and exports the renderer the page imports");
   }
   assert.match(read("src/app/creator/channels/page.tsx"), /permanentRedirect\("\/creator\/settings\?section=channels"\)/);
   // The rail carries these, and "Overview" is now "Dashboard" — one label for

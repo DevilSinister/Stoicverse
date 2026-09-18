@@ -1,47 +1,64 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
-import { X } from "lucide-react";
+import { type ReactNode } from "react";
 
-const FOCUSABLE = "a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex='-1'])";
+import {
+  Overlay,
+  OverlayBody,
+  OverlayContent,
+  OverlayDescription,
+  OverlayHeader,
+  OverlayTitle,
+} from "@/components/ui/overlay";
 
-export function MemberModalShell({ title, description, children, onClose, wide = false }: { title: string; description?: string; children: ReactNode; onClose: () => void; wide?: boolean }) {
-  const panelRef = useRef<HTMLDivElement>(null);
-  const previousFocus = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const panel = panelRef.current;
-    const firstFocus = panel?.querySelector<HTMLElement>("[data-autofocus]");
-    if (firstFocus) firstFocus.focus(); else panel?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-      if (event.key !== "Tab" || !panel) return;
-      const focusable = [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((item) => !item.hidden);
-      if (!focusable.length) return;
-      const first = focusable[0];
-      const last = focusable.at(-1)!;
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
-      previousFocus.current?.focus();
-    };
-  }, [onClose]);
-
+/**
+ * The member modal. Monolith, phase 11b.
+ *
+ * **This was the last hand-rolled focus trap in the product.** Forty lines of
+ * it: a `FOCUSABLE` selector string, a Tab handler that cycled first-to-last by
+ * hand, a `previousFocus` ref restored on unmount, `document.body.style.overflow`
+ * set and unset directly, an Escape listener on `document`, and a
+ * `fixed inset-0 z-[80]` scrim dismissed by `onMouseDown`. Every one of those is
+ * something Base UI's Dialog already owns, and each was a chance to get subtly
+ * wrong — that Tab handler only intervened at the two ends, so focus could
+ * still leave the panel through anything the list did not enumerate.
+ *
+ * It is `ui/overlay` now. The component keeps its name and props because
+ * `MemberDetailModal` is its only caller and that shape is fine; what changed is
+ * that none of the behaviour lives here any more.
+ *
+ * Two deliberate differences: the close control is the overlay's own (top
+ * right, 44px hit area) rather than a hand-placed button carrying
+ * `data-autofocus`, and initial focus goes where Base UI puts it rather than
+ * always onto Close.
+ */
+export function MemberModalShell({
+  title,
+  description,
+  children,
+  onClose,
+  wide = false,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+  onClose: () => void;
+  wide?: boolean;
+}) {
   return (
-    <div className="fixed inset-0 z-[80] flex items-end bg-black/80 sm:items-center sm:justify-center sm:p-5" onMouseDown={onClose}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-labelledby="member-modal-title" aria-describedby={description ? "member-modal-description" : undefined} tabIndex={-1} onMouseDown={(event) => event.stopPropagation()} className={`flex h-[100svh] max-h-[100svh] w-full flex-col overflow-hidden border border-surgical-steel bg-monolith-surface pb-[env(safe-area-inset-bottom)] shadow-[0_28px_80px_-28px_rgba(0,0,0,0.95)] sm:h-auto sm:min-h-0 sm:max-h-[88vh] sm:rounded-xl sm:pb-0 ${wide ? "sm:max-w-4xl" : "sm:max-w-2xl"}`}>
-        <header className="flex shrink-0 items-start justify-between gap-6 border-b border-surgical-steel px-5 py-5 sm:px-7">
-          <div><h2 id="member-modal-title" className="font-headline text-xl font-semibold tracking-[-0.02em] text-white">{title}</h2>{description && <p id="member-modal-description" className="mt-1 max-w-[65ch] text-sm leading-6 text-on-surface-variant">{description}</p>}</div>
-          <button type="button" data-autofocus onClick={onClose} aria-label="Close" className="focus-ring grid size-11 shrink-0 place-items-center rounded-full text-fog-muted transition hover:bg-surface-container-high hover:text-white"><X size={19} /></button>
-        </header>
-        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
-      </div>
-    </div>
+    <Overlay
+      open
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+    >
+      <OverlayContent size={wide ? "full" : "lg"} className="sm:max-h-[88svh]">
+        <OverlayHeader>
+          <OverlayTitle className="text-title-md">{title}</OverlayTitle>
+          {description && <OverlayDescription className="max-w-[65ch]">{description}</OverlayDescription>}
+        </OverlayHeader>
+        <OverlayBody className="p-0">{children}</OverlayBody>
+      </OverlayContent>
+    </Overlay>
   );
 }

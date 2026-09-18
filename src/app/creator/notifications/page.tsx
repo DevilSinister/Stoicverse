@@ -1,7 +1,17 @@
-import { WorkspacePage } from "@/components/workspace/WorkspacePage";
-import { requireInfluencerWorkspace } from "@/lib/supabase/access";
+import { renderNotifications } from "@/app/dashboard/notifications/page";
 
-export default async function CreatorNotificationsPage() {
-  await requireInfluencerWorkspace("/creator/notifications");
-  return <WorkspacePage workspace="/creator" active="Notifications" title="Creator notifications" description="Review activity and operational updates for your community." />;
+/**
+ * The creator's notifications.
+ *
+ * Was a `WorkspacePage` title card with no list, while the rail pointed every
+ * role at `/dashboard/notifications` — which `proxy.ts` refuses an influencer,
+ * so this screen was both empty and the only one they could reach. The same
+ * renderer behind the influencer guard, as `/creator/account` does.
+ */
+export default async function CreatorNotificationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
+  return renderNotifications({ searchParams, creatorWorkspace: true });
 }

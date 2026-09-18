@@ -2,6 +2,9 @@
 
 import { Check } from "lucide-react";
 
+import { buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   ACCENT_SWATCHES,
   contrastRatio,
@@ -13,8 +16,14 @@ import {
 /**
  * The accent is `--color-primary-container`: the focus ring on every page, not
  * decoration. So the measured contrast is shown as text, always, rather than as
- * a pass/fail dot — a creator who wants an off-brand colour deserves to see how
+ * a pass/fail dot - a creator who wants an off-brand colour deserves to see how
  * close it is, and colour alone can never carry the state.
+ *
+ * Monolith, phase 12a. The swatches and the hex field were hand-written
+ * controls; they are `buttonVariants` and `ui/input` now. The selected swatch
+ * keeps its `aria-pressed` - these are a set of toggles over one value, and
+ * `aria-pressed` is what tells a screen reader which one is on, since the
+ * border that shows it visually says nothing.
  */
 export function AccentField({ value, onChange }: { value: string; onChange: (hex: string) => void }) {
   const ratio = contrastRatio(value);
@@ -22,9 +31,9 @@ export function AccentField({ value, onChange }: { value: string; onChange: (hex
 
   return (
     <fieldset>
-      <legend className="block text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">Accent colour</legend>
+      <legend className="terminal-label">Accent colour</legend>
 
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="mt-2 flex flex-wrap gap-chrome-gap">
         {ACCENT_SWATCHES.map((swatch) => {
           const selected = value.toUpperCase() === swatch.hex.toUpperCase();
           return (
@@ -33,11 +42,12 @@ export function AccentField({ value, onChange }: { value: string; onChange: (hex
               type="button"
               onClick={() => onChange(swatch.hex)}
               aria-pressed={selected}
-              className={`focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 text-sm transition ${
-                selected ? "border-primary-container text-white" : "border-surgical-steel text-on-surface-variant"
-              }`}
+              className={buttonVariants({
+                variant: "outline",
+                className: selected ? "border-primary text-text-strong" : undefined,
+              })}
             >
-              <span aria-hidden="true" className="size-4 shrink-0 rounded" style={{ background: swatch.hex }} />
+              <span aria-hidden="true" className="size-4 shrink-0 rounded-md" style={{ background: swatch.hex }} />
               {swatch.name}
               {selected && <Check size={14} aria-hidden="true" />}
             </button>
@@ -46,24 +56,24 @@ export function AccentField({ value, onChange }: { value: string; onChange: (hex
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
-        <label htmlFor="identity-accent-hex" className="text-sm text-on-surface-variant">
+        <Label htmlFor="identity-accent-hex" className="text-content-sm text-text-muted">
           Or a hex value
-        </label>
-        <input
+        </Label>
+        <Input
           id="identity-accent-hex"
           value={value}
           onChange={(event) => onChange(event.target.value)}
           spellCheck={false}
-          className="focus-ring h-11 w-32 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 font-label text-base text-white outline-none"
+          className="w-32 font-mono"
         />
       </div>
 
-      <p className={`mt-2 text-xs leading-5 ${usable ? "text-fog-muted" : "text-error"}`}>
+      <p className={`mt-2 text-chrome-base ${usable ? "text-text-muted" : "text-status-danger"}`}>
         {isHexColor(value) && ratio !== null
           ? `Contrast against the page background: ${formatContrast(ratio)}. ${
               usable
                 ? "Clears the 3:1 floor."
-                : `Below the ${MIN_ACCENT_CONTRAST}:1 floor — this colour is the focus ring on every page, so it would be hard to see.`
+                : `Below the ${MIN_ACCENT_CONTRAST}:1 floor - this colour is the focus ring on every page, so it would be hard to see.`
             }`
           : "Enter a six-digit hex value, such as #10B981."}
       </p>

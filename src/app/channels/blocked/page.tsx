@@ -20,16 +20,16 @@ export default async function BlockedPage() {
   return (
     <div className="flex flex-1 items-center justify-center p-8 text-center">
       <div className="max-w-md">
-        <h1 className="text-base font-semibold text-on-surface">
+        <h1 className="text-title-sm font-medium text-text-strong">
           {state?.state === "banned" ? "You are banned from this community" : "You cannot post right now"}
         </h1>
-        {state?.reason ? <p className="mt-2 text-sm text-on-surface-variant">{state.reason}</p> : null}
-        <p className="mt-3 text-sm text-fog-muted">
+        {state?.reason ? <p className="mt-2 text-content-sm text-text-default">{state.reason}</p> : null}
+        <p className="mt-3 text-content-sm text-text-muted">
           Your courses, events and subscription are unaffected. This applies to the community only.
         </p>
         <Link
           href="/dashboard"
-          className="focus-ring mt-4 inline-flex rounded-lg border border-surgical-steel px-3 py-1.5 text-sm text-on-surface"
+          className="focus-ring mt-4 inline-flex rounded-lg border border-border-hairline px-3 py-1.5 text-content-sm text-text-default hover:bg-surface-panel hover:text-text-strong"
         >
           Go to your dashboard
         </Link>

@@ -19,7 +19,7 @@
  * instead of being read out as a screenful of empty boxes.
  */
 
-const shimmer = "animate-pulse rounded-lg bg-surface-container-high";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Frame({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -39,10 +39,10 @@ function Heading() {
   return (
     <div className="flex flex-wrap items-start justify-between gap-5">
       <div className="max-w-2xl">
-        <div className={`${shimmer} h-8 w-56`} />
-        <div className={`${shimmer} mt-3 h-4 w-[min(32rem,80vw)]`} />
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="mt-3 h-4 w-[min(32rem,80vw)]" />
       </div>
-      <div className={`${shimmer} h-11 w-40 rounded-full`} />
+      <Skeleton className="h-11 w-40 rounded-md" />
     </div>
   );
 }
@@ -50,9 +50,9 @@ function Heading() {
 function Metric() {
   return (
     <section className="terminal-card min-h-36 p-6">
-      <div className={`${shimmer} h-3 w-24`} />
-      <div className={`${shimmer} mt-7 h-8 w-3/5`} />
-      <div className={`${shimmer} mt-3 h-3 w-2/5`} />
+      <Skeleton className="h-3 w-24" />
+      <Skeleton className="mt-7 h-8 w-3/5" />
+      <Skeleton className="mt-3 h-3 w-2/5" />
     </section>
   );
 }
@@ -70,15 +70,15 @@ export function OverviewSkeleton({ label }: { label: string }) {
       </div>
       <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(18rem,0.9fr)]">
         <section className="terminal-card p-6">
-          <div className={`${shimmer} h-4 w-32`} />
-          <div className={`${shimmer} mt-7 h-64 w-full`} />
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="mt-7 h-64 w-full" />
         </section>
         <section className="terminal-card p-6">
-          <div className={`${shimmer} h-4 w-28`} />
+          <Skeleton className="h-4 w-28" />
           <div className="mt-7 space-y-5">
-            <div className={`${shimmer} h-12 w-full`} />
-            <div className={`${shimmer} h-12 w-full`} />
-            <div className={`${shimmer} h-12 w-4/5`} />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-4/5" />
           </div>
         </section>
       </div>
@@ -92,9 +92,9 @@ export function ChartWorkspaceSkeleton({ label }: { label: string }) {
     <Frame label={label}>
       <Heading />
       <div className="mt-7 flex flex-wrap gap-3">
-        <div className={`${shimmer} h-10 w-32 rounded-full`} />
-        <div className={`${shimmer} h-10 w-28 rounded-full`} />
-        <div className={`${shimmer} h-10 w-36 rounded-full`} />
+        <Skeleton className="h-10 w-32 rounded-md" />
+        <Skeleton className="h-10 w-28 rounded-md" />
+        <Skeleton className="h-10 w-36 rounded-md" />
       </div>
       <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <Metric />
@@ -103,8 +103,8 @@ export function ChartWorkspaceSkeleton({ label }: { label: string }) {
         <Metric />
       </div>
       <section className="terminal-card mt-6 p-6">
-        <div className={`${shimmer} h-4 w-40`} />
-        <div className={`${shimmer} mt-7 h-80 w-full`} />
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="mt-7 h-80 w-full" />
       </section>
     </Frame>
   );
@@ -116,23 +116,23 @@ export function TableSkeleton({ label }: { label: string }) {
     <Frame label={label}>
       <Heading />
       <div className="mt-7 flex flex-wrap gap-3">
-        <div className={`${shimmer} h-11 w-[min(22rem,70vw)] rounded-full`} />
-        <div className={`${shimmer} h-11 w-32 rounded-full`} />
+        <Skeleton className="h-11 w-[min(22rem,70vw)] rounded-md" />
+        <Skeleton className="h-11 w-32 rounded-md" />
       </div>
       <section className="terminal-card mt-6 overflow-hidden">
-        <div className="border-b border-surgical-steel p-4">
-          <div className={`${shimmer} h-4 w-48`} />
+        <div className="border-b border-border-hairline p-4">
+          <Skeleton className="h-4 w-48" />
         </div>
-        <div className="divide-y divide-surgical-steel">
+        <div className="divide-y divide-border-hairline">
           {Array.from({ length: 8 }, (_, row) => (
             <div key={row} className="flex items-center gap-4 p-4">
-              <div className={`${shimmer} size-10 shrink-0 rounded-full`} />
+              <Skeleton className="size-10 shrink-0 rounded-full" />
               <div className="min-w-0 flex-1">
-                <div className={`${shimmer} h-4 w-40 max-w-full`} />
-                <div className={`${shimmer} mt-2 h-3 w-56 max-w-full`} />
+                <Skeleton className="h-4 w-40 max-w-full" />
+                <Skeleton className="mt-2 h-3 w-56 max-w-full" />
               </div>
-              <div className={`${shimmer} hidden h-6 w-20 rounded-full sm:block`} />
-              <div className={`${shimmer} hidden h-6 w-24 rounded-full lg:block`} />
+              <Skeleton className="hidden h-6 w-20 rounded-md sm:block" />
+              <Skeleton className="hidden h-6 w-24 rounded-md lg:block" />
             </div>
           ))}
         </div>
@@ -149,13 +149,13 @@ export function CardGridSkeleton({ label }: { label: string }) {
       <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }, (_, card) => (
           <section key={card} className="terminal-card overflow-hidden">
-            <div className={`${shimmer} h-36 w-full rounded-none`} />
+            <Skeleton className="h-36 w-full rounded-none" />
             <div className="p-5">
-              <div className={`${shimmer} h-3 w-20`} />
-              <div className={`${shimmer} mt-4 h-5 w-4/5`} />
-              <div className={`${shimmer} mt-3 h-3 w-full`} />
-              <div className={`${shimmer} mt-2 h-3 w-3/5`} />
-              <div className={`${shimmer} mt-6 h-10 w-32 rounded-full`} />
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="mt-4 h-5 w-4/5" />
+              <Skeleton className="mt-3 h-3 w-full" />
+              <Skeleton className="mt-2 h-3 w-3/5" />
+              <Skeleton className="mt-6 h-10 w-32 rounded-md" />
             </div>
           </section>
         ))}
@@ -172,21 +172,21 @@ export function SettingsSkeleton({ label }: { label: string }) {
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(12rem,15rem)_minmax(0,1fr)]">
         <nav className="space-y-2" aria-hidden="true">
           {Array.from({ length: 6 }, (_, item) => (
-            <div key={item} className={`${shimmer} h-10 w-full`} />
+            <Skeleton key={item} className="h-10 w-full" />
           ))}
         </nav>
         <section className="terminal-card p-6">
-          <div className={`${shimmer} h-5 w-44`} />
-          <div className={`${shimmer} mt-3 h-3 w-[min(28rem,80vw)]`} />
+          <Skeleton className="h-5 w-44" />
+          <Skeleton className="mt-3 h-3 w-[min(28rem,80vw)]" />
           <div className="mt-8 space-y-6">
             {Array.from({ length: 4 }, (_, field) => (
               <div key={field}>
-                <div className={`${shimmer} h-3 w-28`} />
-                <div className={`${shimmer} mt-2 h-11 w-full`} />
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="mt-2 h-11 w-full" />
               </div>
             ))}
           </div>
-          <div className={`${shimmer} mt-8 h-11 w-36 rounded-full`} />
+          <Skeleton className="mt-8 h-11 w-36 rounded-md" />
         </section>
       </div>
     </Frame>
@@ -201,11 +201,11 @@ export function FeedSkeleton({ label }: { label: string }) {
       <div className="mt-8 max-w-3xl space-y-4">
         {Array.from({ length: 7 }, (_, entry) => (
           <section key={entry} className="terminal-card flex gap-4 p-5">
-            <div className={`${shimmer} size-10 shrink-0 rounded-full`} />
+            <Skeleton className="size-10 shrink-0 rounded-full" />
             <div className="min-w-0 flex-1">
-              <div className={`${shimmer} h-4 w-1/3 min-w-32`} />
-              <div className={`${shimmer} mt-3 h-3 w-full`} />
-              <div className={`${shimmer} mt-2 h-3 w-4/5`} />
+              <Skeleton className="h-4 w-1/3 min-w-32" />
+              <Skeleton className="mt-3 h-3 w-full" />
+              <Skeleton className="mt-2 h-3 w-4/5" />
             </div>
           </section>
         ))}

@@ -3,6 +3,11 @@
 import { useMemo, useState } from "react";
 import { Download } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { nativeSelectClass } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import type { AuditEvent } from "@/lib/community-settings/governance";
 
 const ACTIONS = ["edit", "delete", "pin", "unpin", "flag"] as const;
@@ -21,6 +26,10 @@ const ACTION_COPY: Record<string, string> = {
  * The table has been collecting since the audit migration shipped; this is the
  * first thing that displays it. Filtering happens here over the loaded page
  * rather than round-tripping, because a page is 25 rows.
+ *
+ * Monolith, phase 12a. The table is `ui/table` and both empty states are
+ * `ui/empty-state`; the filter stays a native `<select>`, on the reasoning
+ * recorded in phase 11a and now written down once in `ui/select`.
  */
 export function AuditLogSection({ events, degraded }: { events: AuditEvent[]; degraded: string[] }) {
   const [action, setAction] = useState<string>("");
@@ -56,7 +65,10 @@ export function AuditLogSection({ events, degraded }: { events: AuditEvent[]; de
 
   if (degraded.length > 0) {
     return (
-      <p role="alert" className="rounded-lg border border-error/40 bg-error/10 p-3 text-sm leading-6 text-error">
+      <p
+        role="alert"
+        className="rounded-lg border border-status-danger/40 bg-status-danger/10 p-chrome-x text-content-sm text-status-danger"
+      >
         {degraded.join(" ")}
       </p>
     );
@@ -65,14 +77,19 @@ export function AuditLogSection({ events, degraded }: { events: AuditEvent[]; de
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <label htmlFor="audit-action" className="text-xs font-semibold uppercase tracking-[0.12em] text-fog-muted">
+        <label htmlFor="audit-action" className="terminal-label">
           Action
         </label>
         <select
           id="audit-action"
           value={action}
           onChange={(event) => setAction(event.target.value)}
-          className="focus-ring h-11 rounded-lg border border-surgical-steel bg-surface-container-lowest px-3 text-base text-white outline-none"
+          // `cn`, not a template string. `nativeSelectClass` carries `w-full`,
+          // and two width classes in one attribute are resolved by stylesheet
+          // order rather than by the order they are written - `w-full` wins and
+          // the filter stretches across the row. twMerge is what drops the
+          // loser. Lesson 96, in a string one character shorter than the fix.
+          className={cn(nativeSelectClass, "w-auto")}
         >
           <option value="">All</option>
           {ACTIONS.map((entry) => (
@@ -82,78 +99,65 @@ export function AuditLogSection({ events, degraded }: { events: AuditEvent[]; de
           ))}
         </select>
 
-        <button
-          type="button"
-          onClick={download}
-          disabled={filtered.length === 0}
-          className="focus-ring ml-auto inline-flex min-h-11 items-center gap-2 rounded-lg border border-surgical-steel px-4 text-sm font-semibold text-white transition hover:border-primary-container disabled:opacity-40"
-        >
+        <Button type="button" variant="outline" onClick={download} disabled={filtered.length === 0} className="ml-auto">
           <Download size={15} aria-hidden="true" />
           Export CSV
-        </button>
+        </Button>
       </div>
 
       {events.length === 0 ? (
-        <div className="rounded-xl border border-surgical-steel p-6">
-          <p className="text-sm leading-6 text-on-surface-variant">
-            Nothing has been moderated yet. Every edit, deletion, pin and flag will appear here, with the message as it
-            was before the change.
-          </p>
+        <div className="rounded-xl border border-border-hairline">
+          <EmptyState
+            title="Nothing has been moderated yet"
+            description="Every edit, deletion, pin and flag will appear here, with the message as it was before the change."
+          />
         </div>
       ) : filtered.length === 0 ? (
         // Filtered-empty gets its own words. Reusing the empty-state copy here
         // would tell the creator nothing has ever happened, which is false.
-        <div className="rounded-xl border border-surgical-steel p-6">
-          <p className="text-sm leading-6 text-on-surface-variant">
-            No {action} events on this page. Clear the filter to see the rest.
-          </p>
+        <div className="rounded-xl border border-border-hairline">
+          <EmptyState title={`No ${action} events on this page`} description="Clear the filter to see the rest." />
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-surgical-steel">
-          <table className="w-full min-w-[40rem] text-left text-sm">
-            <thead className="border-b border-surgical-steel text-xs uppercase tracking-[0.08em] text-fog-muted">
-              <tr>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  When
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Who
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  What
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Detail
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+        <div className="overflow-hidden rounded-xl border border-border-hairline">
+          <Table className="min-w-[40rem]">
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>When</TableHead>
+                <TableHead>Who</TableHead>
+                <TableHead>What</TableHead>
+                <TableHead>Detail</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filtered.map((event) => (
-                <tr key={event.id} className="border-b border-surgical-steel/60 align-top last:border-0">
-                  <td className="whitespace-nowrap px-4 py-3 text-fog-muted">
+                <TableRow key={event.id} className="align-top">
+                  <TableCell className="px-2 py-3 text-text-muted">
                     {new Date(event.createdAt).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3 text-white">{event.actorName}</td>
-                  <td className="px-4 py-3 text-on-surface-variant">
+                  </TableCell>
+                  <TableCell className="px-2 py-3 text-text-strong">{event.actorName}</TableCell>
+                  <TableCell className="px-2 py-3 text-text-default">
                     {ACTION_COPY[event.action] ?? event.action}
-                    {event.channelName && <span className="text-fog-muted"> in {event.channelName}</span>}
-                  </td>
-                  <td className="px-4 py-3 text-fog-muted">
+                    {event.channelName && <span className="text-text-muted"> in {event.channelName}</span>}
+                  </TableCell>
+                  <TableCell className="whitespace-normal px-2 py-3 text-text-muted">
                     {event.reason && <span className="block">{event.reason}</span>}
                     {event.previousBody && (
                       <details>
-                        <summary className="focus-ring inline-block min-h-9 cursor-pointer py-1 text-xs font-semibold text-on-surface-variant">
+                        <summary className="focus-ring inline-block min-h-9 cursor-pointer py-1 text-chrome-sm font-medium text-text-default">
                           Previous text
                         </summary>
-                        <p className="mt-1 max-w-md whitespace-pre-wrap text-xs leading-5">{event.previousBody}</p>
+                        <p className="mt-1 max-w-md whitespace-pre-wrap text-chrome-sm leading-5">
+                          {event.previousBody}
+                        </p>
                       </details>
                     )}
                     {!event.reason && !event.previousBody && "—"}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

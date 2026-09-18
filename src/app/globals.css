@@ -1,153 +1,233 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Supplies the data-open / data-closed / data-checked custom variants that every
+   src/components/ui primitive's className depends on. Removing this import does not
+   error - it silently kills every open/close animation in the product. */
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+
 :root {
-  /* --font-inter and --font-jetbrains-mono are supplied by next/font in app/layout.tsx.
-     The literals below are fallbacks for the case where those variables are absent. */
-  --font-cormorant: var(--font-inter, Inter), Arial, sans-serif; /* Replaced Cormorant with Inter for systematic style */
-  --font-sans: var(--font-inter, Inter), Arial, sans-serif;
+  /* --font-geist and --font-jetbrains-mono are supplied by next/font in app/layout.tsx.
+     The literals are fallbacks for when those variables are absent. */
+  --font-sans: var(--font-geist, Geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono, "JetBrains Mono"), ui-monospace, monospace;
+
+  /* Legacy alias. Cormorant was replaced by the body sans long ago; kept so any
+     remaining consumer resolves rather than falling back to a serif. */
+  --font-cormorant: var(--font-sans);
+
+  --radius: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   Monolith semantic roles.
+
+   Dark is the only theme (<html class="dark"> in layout.tsx), so these live in
+   .dark rather than being duplicated. The indirection through @theme inline is
+   what would let a light palette be swapped in later - though be honest that the
+   shadow opacities, the scrim, and --surface-sunken being darker than canvas are
+   dark-native choices, so a light theme is a re-derivation, not a value swap.
+
+   Contrast is measured, not estimated. See DESIGN.md for the full table.
+   --------------------------------------------------------------------------- */
+.dark {
+  --surface-sunken: #050506;
+  --surface-canvas: #0A0A0B;
+  --surface-panel: #141416;
+  --surface-raised: #1F1F23;
+
+  --border-hairline: #242427;
+  --border-strong: #35353A;
+
+  --text-strong: #F2F2F3;
+  --text-default: #C9C9CE;
+  --text-muted: #8E8E97;
+  --text-faint: #5A5A62;
+
+  --accent: #C6F24E;
+  --accent-contrast: #0A0A0B;
+  --accent-soft: color-mix(in oklab, #C6F24E 12%, transparent);
+
+  --status-danger: #FF6B6B;
+  --status-warn: #F5A524;
+  --status-ok: #4ADE9B;
+  --scrim: rgb(0 0 0 / 0.72);
+
+  /* shadcn bridge. These names are what src/components/ui speaks; the Monolith
+     roles above are what the product speaks. One value each, defined once. */
+  --background: #0A0A0B;
+  --foreground: #C9C9CE;
+  --card: #141416;
+  --card-foreground: #C9C9CE;
+  --popover: #141416;
+  --popover-foreground: #C9C9CE;
+  --primary: #C6F24E;
+  --primary-foreground: #0A0A0B;
+  --secondary: #1F1F23;
+  --secondary-foreground: #C9C9CE;
+  --muted: #1F1F23;
+  --muted-foreground: #8E8E97;
+  --accent-foreground: #F2F2F3;
+  --destructive: #FF6B6B;
+  --border: #242427;
+  --input: #35353A;
+  --ring: #C6F24E;
+  --chart-1: #C6F24E;
+  --chart-2: #7DD3FC;
+  --chart-3: #F5A524;
+  --chart-4: #FF6B6B;
+  --chart-5: #A78BFA;
+  --sidebar: #050506;
+  --sidebar-foreground: #C9C9CE;
+  --sidebar-primary: #C6F24E;
+  --sidebar-primary-foreground: #0A0A0B;
+  --sidebar-accent: #1F1F23;
+  --sidebar-accent-foreground: #F2F2F3;
+  --sidebar-border: #242427;
+  --sidebar-ring: #C6F24E;
 }
 
 @theme {
-  --color-surface-variant: #273647;
-  --color-on-primary-fixed: #131b2e;
-  --color-error: #ffb4ab;
-  --color-on-surface-variant: #c6c6cd;
-  --color-secondary-container: #3e495d;
-  --color-primary: #bec6e0;
-  --color-secondary: #bcc7de;
-  --color-surface: #051424;
-  --color-surface-container-high: #1c2b3c;
-  --color-monolith-surface: #1E293B;
-  --color-primary-container: #10B981; /* Accent Emerald */
-  --color-surgical-steel: #334155;     /* Surgical Border */
-  --color-surface-container-lowest: #010f1f;
-  --color-surface-container-low: #0D1C2D;  /* Recessed panels, sidebars, footers */
-  --color-fog-muted: #94A3B8;          /* Muted Slate */
-  --color-on-surface: #d4e4fa;
+  /* Spacing - two rhythms. Chrome is dense; content is generous. A component
+     picks a rhythm by naming its token family, which makes the choice testable
+     rather than advisory. See DESIGN.md "Density". */
+  --spacing-chrome-x: 12px;
+  --spacing-chrome-y: 8px;
+  --spacing-chrome-gap: 8px;
+  --spacing-chrome-row: 32px;
+  --spacing-chrome-bar: 48px;
 
-  --spacing-margin-sm: 16px;
-  --spacing-margin-md: 32px;
-  --spacing-margin-lg: 64px;
-  --spacing-gutter: 1px;
+  --spacing-content-x: 24px;
+  --spacing-content-y: 32px;
+  --spacing-content-gap: 20px;
+  --spacing-section: 48px;
+  --spacing-gutter-page: 16px;
+
   --spacing-hairline: 1px;
-  --spacing-unit: 4px;
 
-  --font-body-md: var(--font-inter, Inter), sans-serif;
-  --font-headline-md: var(--font-inter, Inter), sans-serif;
-  --font-body-sm: var(--font-inter, Inter), sans-serif;
-  --font-headline-sm: var(--font-inter, Inter), sans-serif;
-  --font-label-sm: var(--font-jetbrains-mono, 'JetBrains Mono'), monospace;
-  --font-display-lg-mobile: var(--font-inter, Inter), sans-serif;
-  --font-code-block: var(--font-jetbrains-mono, 'JetBrains Mono'), monospace;
-  --font-display-lg: var(--font-inter, Inter), sans-serif;
-  --font-label-md: var(--font-jetbrains-mono, 'JetBrains Mono'), monospace;
-  --font-body-lg: var(--font-inter, Inter), sans-serif;
-  --font-headline: var(--font-inter, Inter), sans-serif;
-  --font-display: var(--font-inter, Inter), sans-serif;
-  --font-body: var(--font-inter, Inter), sans-serif;
-  --font-label: var(--font-jetbrains-mono, 'JetBrains Mono'), monospace;
+  /* Radii are flat, not derived. calc() off a 4px base yields 5.6px and 7.2px
+     corners, which shimmer on non-retina displays. */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --radius-2xl: 6px;
+  --radius-3xl: 8px;
+  --radius-4xl: 8px;
 
-  /* Font sizes mapping from Stitch config */
-  --text-body-md: 16px;
-  --text-body-md--line-height: 1.5;
-  --text-headline-md: 32px;
-  --text-headline-md--line-height: 1.2;
-  --text-headline-md--letter-spacing: -0.01em;
-  --text-body-sm: 14px;
-  --text-body-sm--line-height: 1.4;
-  --text-headline-sm: 24px;
-  --text-headline-sm--line-height: 1.3;
-  --text-label-sm: 12px;
-  --text-label-sm--line-height: 1.2;
-  --text-display-lg-mobile: 36px;
-  --text-display-lg-mobile--line-height: 1.2;
-  --text-display-lg-mobile--letter-spacing: -0.02em;
-  --text-code-block: 14px;
-  --text-code-block--line-height: 1.6;
-  --text-display-lg: 48px;
-  --text-display-lg--line-height: 1.1;
-  --text-display-lg--letter-spacing: -0.02em;
-  --text-label-md: 14px;
-  --text-label-md--line-height: 1.2;
-  --text-label-md--letter-spacing: 0.02em;
-  --text-body-lg: 18px;
-  --text-body-lg--line-height: 1.6;
+  /* Elevation comes from the hairline, not the blur. Overriding Tailwind's own
+     --shadow-* namespace retargets every existing shadow-md / shadow-2xl in the
+     tree without editing a call site. */
+  --shadow-xs: 0 1px 0 0 rgb(0 0 0 / 0.40);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.50);
+  --shadow-md: 0 4px 12px -4px rgb(0 0 0 / 0.65);
+  --shadow-lg: 0 12px 28px -12px rgb(0 0 0 / 0.75);
+  --shadow-xl: 0 20px 48px -20px rgb(0 0 0 / 0.82);
+  --shadow-2xl: 0 28px 72px -28px rgb(0 0 0 / 0.88);
+  --inset-shadow-hairline: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+
+  /* Type - two paired ramps matching the two rhythms. */
+  --text-chrome-xs: 11px;
+  --text-chrome-xs--line-height: 1.3;
+  --text-chrome-sm: 12px;
+  --text-chrome-sm--line-height: 1.35;
+  --text-chrome-base: 13px;
+  --text-chrome-base--line-height: 1.4;
+
+  --text-content-sm: 14px;
+  --text-content-sm--line-height: 1.6;
+  --text-content-base: 15px;
+  --text-content-base--line-height: 1.6;
+  --text-content-lg: 17px;
+  --text-content-lg--line-height: 1.6;
+
+  --text-title-sm: 16px;
+  --text-title-sm--line-height: 1.35;
+  --text-title-sm--letter-spacing: -0.01em;
+  --text-title-md: 20px;
+  --text-title-md--line-height: 1.25;
+  --text-title-md--letter-spacing: -0.015em;
+  --text-title-lg: 28px;
+  --text-title-lg--line-height: 1.2;
+  --text-title-lg--letter-spacing: -0.02em;
+
+  --text-display: clamp(2rem, 1.2rem + 3vw, 3.25rem);
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.025em;
+
+  --text-mono-xs: 11px;
+  --text-mono-xs--line-height: 1.3;
+  --text-mono-sm: 12px;
+  --text-mono-sm--line-height: 1.35;
+
+  /*
+    The legacy type scale lived here: ten sizes from the system Monolith
+    replaced, kept so nothing lost its size mid-migration. Phase 13d took the
+    last call site and phase 14 removed them, together with the matching entries
+    in `MONOLITH_FONT_SIZES` - the two are one decision, and a size in the
+    stylesheet that cn does not know is the silent text-colour deletion that
+    `design-tokens.contract.mjs` exists to catch.
+  */
 }
 
-@layer utilities {
-  .terminal-card {
-    border: 1px solid var(--color-surgical-steel);
-    border-radius: 0.75rem;
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(13, 28, 45, 0.96));
-  }
-  .terminal-card:hover {
-    border-color: rgba(78, 222, 163, 0.42);
-  }
-  .terminal-label {
-    font-family: var(--font-jetbrains-mono), monospace;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    line-height: 1.2;
-    text-transform: uppercase;
-    color: var(--color-fog-muted);
-  }
-  .focus-ring {
-      outline: 2px solid transparent;
-      outline-offset: 2px;
-  }
-  .focus-ring:focus-visible {
-      outline-color: var(--color-primary-container);
-  }
-  /* Light falls from above: a real offset and blur, not a zero-offset halo.
-     The inset hairline reads as the lit top edge of the surface. */
-  .emerald-glow {
-      box-shadow:
-        0 8px 24px -12px rgba(16, 185, 129, 0.85),
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.10);
-  }
-}
+/* ---------------------------------------------------------------------------
+   Tailwind colour namespace.
 
-@layer base {
-  ::-webkit-scrollbar {
-      width: 8px;
-  }
-  ::-webkit-scrollbar-track {
-      background: var(--color-surface-container-lowest);
-      border-left: 1px solid var(--color-surgical-steel);
-  }
-  ::-webkit-scrollbar-thumb {
-      background: var(--color-surface-variant);
-  }
-  ::-webkit-scrollbar-thumb:hover {
-      background: var(--color-primary-container);
-  }
-  html {
-    /* In-page anchors must clear the fixed 4rem header instead of landing under it. */
-    scroll-padding-top: 5rem;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    html {
-      scroll-behavior: smooth;
-    }
-  }
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
-}
-
+   @theme inline emits var() references rather than baking literals, which is
+   what keeps the palette swappable and what makes the alias block below cost
+   nothing at runtime - border-surgical-steel and border-hairline compile to the
+   identical declaration.
+   --------------------------------------------------------------------------- */
 @theme inline {
-  --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-sans);
+
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-canvas: var(--surface-canvas);
+  --color-surface-panel: var(--surface-panel);
+  --color-surface-raised: var(--surface-raised);
+  --color-border-hairline: var(--border-hairline);
+  --color-border-strong: var(--border-strong);
+  --color-text-strong: var(--text-strong);
+  --color-text-default: var(--text-default);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-status-danger: var(--status-danger);
+  --color-status-warn: var(--status-warn);
+  --color-status-ok: var(--status-ok);
+  --color-scrim: var(--scrim);
+
+  /* ---- THE ALIASES ARE GONE (phase 14, 2026-09-18) ----------------------
+     Thirteen colour names and thirteen font names used to live here: the
+     pre-Monolith vocabulary, retargeted onto the semantic roles so ~2,600 call
+     sites could be re-skinned without editing a single .tsx file. Each screen
+     phase retired the ones on the surface it touched; 13d swept the files no
+     phase owned, and this block outlived its last call site.
+
+     Deleted after an audit rather than by eye: every `--color-*` declared in
+     this file was checked against every class prefix that can name one, plus
+     `var(--color-*)` in source. Twenty-seven were named by nothing. Thirteen of
+     those were this block and are gone; `secondary-container` went with them.
+     The shadcn leftovers - `sidebar-*`, `chart-2` to `chart-5`, `card`,
+     `card-foreground` - are *also* named by nothing but are not this migration's
+     to delete: they are that kit's namespace, and a primitive added tomorrow
+     expects them.
+
+     `design-tokens.contract.mjs` now asserts the absence that this comment
+     describes, so the names cannot come back quietly. A class naming one emits
+     no CSS at all - which is exactly the failure lesson 47 was written about,
+     and the reason the assertion exists rather than a note.
+     ---------------------------------------------------------------------- */
+
+  /* shadcn namespace. --color-primary is defined here and only here; it used to
+     be declared twice, with the later declaration silently winning, so
+     text-primary was emerald while the other declaration claimed lavender.
+     Note shadcn's --accent is a hover fill, not the brand colour - the naming
+     collision is inherited from the registry. The brand accent is --primary. */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -166,11 +246,24 @@
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
+  /* shadcn's --accent is a HOVER FILL, not the brand colour - 35 call sites in
+     src/components/ui read it as `focus:bg-accent`. Pointing it at the lime would
+     paint every menu hover lime with near-white text on top, about 1.2:1. The
+     brand accent is --primary / --color-primary-container. */
+  --color-accent: var(--surface-raised);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
+  /*
+    `--color-secondary` was declared in the deprecated alias block and nowhere
+    else, as `var(--text-default)` - a *text* colour used as a fill. So
+    `ui/badge`'s secondary variant painted #C9C9CE on #C9C9CE: the same grey for
+    the chip and its label, about 1:1. Deleting the block is what surfaced it,
+    because the class then resolved to nothing at all and the audit asked who
+    still named it. It belongs in this namespace, on the raised surface the
+    `.dark` block has been carrying for it all along.
+  */
   --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
@@ -179,82 +272,148 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #051424;
-  --card: #ffffff;
-  --card-foreground: #051424;
-  --popover: #ffffff;
-  --popover-foreground: #051424;
-  --primary: #bec6e0;
-  --primary-foreground: #283044;
-  --secondary: #bcc7de;
-  --secondary-foreground: #263143;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #bec6e0;
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #10B981;
-  --chart-1: #3b82f6;
-  --chart-2: #10b981;
-  --chart-3: #f59e0b;
-  --chart-4: #ef4444;
-  --chart-5: #8b5cf6;
-  --radius: 0.5rem;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #051424;
-  --sidebar-primary: #bec6e0;
-  --sidebar-primary-foreground: #283044;
-  --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #bec6e0;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #10B981;
+/* ---------------------------------------------------------------------------
+   Layering.
+
+   Tailwind v4 has no --z-* theme namespace - z-50 is a static utility and cannot
+   be themed - so the scale has to be custom utilities.
+
+   The scale fits in 0-90 only because overlays portal to <body>. The pre-Monolith
+   ladder reached z-[81] and z-100 because createPortal appeared zero times in
+   src/: every overlay rendered in-tree and had to out-rank whatever ancestor it
+   happened to sit inside. If you need a number above 90, something is not
+   portalling.
+   --------------------------------------------------------------------------- */
+@utility z-base { z-index: 0; }
+@utility z-raised { z-index: 10; }
+@utility z-sticky { z-index: 20; }
+@utility z-rail { z-index: 30; }
+@utility z-drawer { z-index: 40; }
+@utility z-scrim { z-index: 50; }
+@utility z-overlay { z-index: 60; }
+@utility z-menu { z-index: 70; }
+@utility z-toast { z-index: 90; }
+
+/* Safe area. These are no-ops unless layout.tsx exports viewportFit: "cover" -
+   without it every env(safe-area-inset-*) resolves to 0px. */
+@utility safe-t { padding-top: max(env(safe-area-inset-top), 0px); }
+@utility safe-b { padding-bottom: max(env(safe-area-inset-bottom), 0px); }
+@utility safe-x {
+  padding-left: max(env(safe-area-inset-left), 0px);
+  padding-right: max(env(safe-area-inset-right), 0px);
 }
 
-.dark {
-  --background: #051424;
-  --foreground: #d4e4fa;
-  --card: #1E293B;
-  --card-foreground: #d4e4fa;
-  --popover: #1E293B;
-  --popover-foreground: #d4e4fa;
-  --primary: #10B981;
-  --primary-foreground: #051424;
-  --secondary: #bcc7de;
-  --secondary-foreground: #263143;
-  --muted: #122131;
-  --muted-foreground: #94A3B8;
-  --accent: #122131;
-  --accent-foreground: #bec6e0;
-  --destructive: #ffb4ab;
-  --border: #334155;
-  --input: #334155;
-  --ring: #10B981;
-  --chart-1: #3b82f6;
-  --chart-2: #10b981;
-  --chart-3: #f59e0b;
-  --chart-4: #ef4444;
-  --chart-5: #8b5cf6;
-  --sidebar: #0D1C2D;
-  --sidebar-foreground: #d4e4fa;
-  --sidebar-primary: #10B981;
-  --sidebar-primary-foreground: #283044;
-  --sidebar-accent: #1E293B;
-  --sidebar-accent-foreground: #d4e4fa;
-  --sidebar-border: #334155;
-  --sidebar-ring: #10B981;
+/* A 44px touch target around a control that is visually smaller. Dense chrome
+   needs 32px buttons and a legal hit area at the same time; this belongs in the
+   component, never in call sites. Requires position: relative on the element. */
+/*
+  An invisible 44px target around a control drawn smaller than that.
+
+  This was `inset: -0.375rem`, a flat 12px of growth, which only reaches 44px if
+  the control is already 32px. Measured in /channels, a 28px control got 40px and
+  the 25x22 playback-speed button got 37x34 - so the utility was quietly failing
+  the rule it exists to enforce, and failing it worst on the smallest controls,
+  which need it most.
+
+  A centred box of at least 44px instead. `max()` so it never shrinks a control
+  that is already larger, and centring so the target grows evenly rather than
+  drifting off one corner.
+
+  The cost, stated: adjacent controls need roughly 8px between them, or their
+  boxes reach into each other's painted pixels and the wrong button fires. That
+  is a real constraint on how tightly icons may be packed, not a free win.
+*/
+@utility hit-target {
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+  }
+}
+
+@layer utilities {
+  /* Was a 135deg gradient panel. Flat now - gradients are banned - and kept as a
+     class because 17 sites still use it. Superseded by ui/card.tsx; screen phases
+     delete the remaining uses. */
+  .terminal-card {
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    background: var(--surface-panel);
+  }
+  .terminal-card:hover {
+    border-color: var(--border-strong);
+  }
+  .terminal-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .focus-ring {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  .focus-ring:focus-visible {
+    outline-color: var(--accent);
+  }
+  /*
+    `.emerald-glow` was here: the previous system's primary-action shadow, a
+    coloured halo. Monolith has none, so it had already been redefined as the
+    ordinary raised shadow - which is why removing a call site changed nothing
+    visible and why the last sixteen took until phase 12 to find. Zero call
+    sites since, and the utility is gone with the aliases it belonged to.
+  */
+
+}
+
+@layer base {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--surface-sunken);
+    border-left: 1px solid var(--border-hairline);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--surface-raised);
+    border-radius: var(--radius-sm);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border-strong);
+  }
+  html {
+    /* In-page anchors must clear the fixed 4rem header instead of landing under it. */
+    scroll-padding-top: 5rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  /* This rule applies for the first time in Monolith. layout.tsx used to set the
+     body background and colour inline, which overrode it silently. */
+  body {
+    @apply bg-background text-foreground;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+  html {
+    @apply font-sans;
+  }
 }
 
 @layer utilities {
@@ -328,4 +487,3 @@
     filter: none;
   }
 }
-

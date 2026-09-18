@@ -18,7 +18,12 @@ test("dashboard search covers published courses and accessible released videos",
   assert.match(route, /\/courses\/\$\{item\.course_id\}\/video\/\$\{item\.id\}/);
   assert.match(shell, /\{ kind: "course", label: "Courses" \}/);
   assert.match(shell, /\{ kind: "video", label: "Videos" \}/);
-  assert.match(shell, /max-h-\[calc\(100svh-1rem\)\]/);
+  // Was: max-h-[calc(100svh-1rem)], the local Modal's own bound. P2a deleted
+  // that modal; the height of a phone sheet belongs to ui/overlay.tsx now and
+  // overlay.contract.mjs pins it. What matters here is that search is that
+  // primitive rather than a second one.
+  assert.match(shell, /from "@\/components\/ui\/overlay"/);
+  assert.match(shell, /placement="responsive"/);
   assert.match(migration, /courses_title_trgm_idx/);
   assert.match(migration, /course_videos_title_trgm_idx/);
 });

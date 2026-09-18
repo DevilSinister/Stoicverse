@@ -243,7 +243,7 @@ test("the keyword matcher agrees with the SQL on both modes", async () => {
   ]);
 
   // Word mode uses [^[:alnum:]_] boundaries in SQL, and the JS mirror rewrites
-  // the POSIX class rather than reaching for , which would treat accented
+  // the POSIX class rather than reaching for \b, which would treat accented
   // letters differently and make the "test a sentence" box disagree with what
   // happens on save.
   assert.match(migration, /\[\^\[:alnum:\]_\]/);
