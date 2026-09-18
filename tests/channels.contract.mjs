@@ -173,6 +173,10 @@ test("every colour token the channel UI uses is actually defined", async () => {
     "src/components/channels/VoiceRecorder.tsx",
     "src/components/channels/VoicePlayer.tsx",
     "src/components/channels/Waveform.tsx",
+    // Added in 13c with the people column.
+    "src/components/channels/MemberProfileDialog.tsx",
+    "src/components/channels/MemberMenuItems.tsx",
+    "src/components/channels/ForwardDialog.tsx",
   ];
 
   /*
@@ -233,11 +237,13 @@ test("the channel surface only ever loses Tailwind's own type scale", async () =
     content ramp is 14/15/17, so a header written in `text-sm` is a header one
     step too large in a language whose whole argument is density.
 
-    39 when phase 13a measured it, over six files. **8 after 13b** took the
+    39 when phase 13a measured it, over six files. 8 after 13b took the
     composer, the message menu, the thread panel, the header popovers and the
-    voice controls: 5 in `MemberList`, which is 13c, and 3 in the markdown
-    renderer, which is 13d. Comments stripped, because a file that removes the
-    class explains why in the docblock that mentions it (lesson 89).
+    voice controls. **3 after 13c** took the member column and the profile card,
+    and all three are in the markdown renderer, which phase 13d owns - so this
+    ratchet reaches zero with the last file of the redesign and stops being a
+    ratchet then. Comments stripped, because a file that removes the class
+    explains why in the docblock that mentions it (lesson 89).
   */
   const files = [
     "src/lib/markdown/render.tsx",
@@ -259,7 +265,7 @@ test("the channel surface only ever loses Tailwind's own type scale", async () =
     total += hits.length;
   }
 
-  assert.ok(total <= 8, `the default type scale grew to ${total}; Monolith's ramps are chrome-* and content-*: ${where.join(", ")}`);
+  assert.ok(total <= 3, `the default type scale grew to ${total}; Monolith's ramps are chrome-* and content-*: ${where.join(", ")}`);
 
   // The files 13a and 13b rewrote are done, and a regression in any of them
   // would otherwise hide under the ratchet's slack.
@@ -270,6 +276,7 @@ test("the channel surface only ever loses Tailwind's own type scale", async () =
     "src/components/channels/MessageMenu.tsx",
     "src/components/channels/ThreadPanel.tsx",
     "src/components/channels/ChannelHeaderPopovers.tsx",
+    "src/components/channels/MemberList.tsx",
   ]) {
     assert.equal((await readCode(done)).match(/\btext-(?:xs|sm|base|lg|xl)\b/g), null, `${done} is on the Monolith ramps`);
   }

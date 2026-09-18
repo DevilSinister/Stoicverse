@@ -369,7 +369,7 @@ export function SearchOverlay({ open, onOpenChange }: { open: boolean; onOpenCha
                 <MessageSquareText size={12} aria-hidden="true" />
                 {failed ?? `Messages — ${hits.length}${hits.length === SEARCH_QUERY_LIMITS.pageSize ? "+" : ""}`}
                 {chips.map((chip) => (
-                  <span key={chip} className="rounded-sm border border-border-hairline px-1 text-[10px] normal-case">
+                  <span key={chip} className="rounded-sm border border-border-hairline px-1 text-chrome-xs normal-case">
                     {chip}
                   </span>
                 ))}

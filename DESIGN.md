@@ -361,6 +361,22 @@ what was intended. A section describing an unshipped intention is worse than no 
 - Timers, durations and counters are `font-mono text-mono-xs`. `tabular-nums` beside a monospace
   face is redundant and has gone.
 
+### The people column (phase 13c)
+
+- A drawer is a touch surface and a column is not, and one list that serves both says so in its
+  row: 44px in the drawer, dense in the column. The channel list already did this; the member list
+  did not, so its rows were 28px targets on the only surface where that drawer is the way to reach
+  anybody.
+- `opacity-0` without `pointer-events-none` is a control nobody can see and anybody can press. Off
+  a pointer, reveal it; where it does hide, make it inert until revealed. Both halves, always.
+- Faded is not quiet: an offline member's name was muted at 60% opacity, under AA. The presence dot
+  carries the state, so the name is muted at full strength.
+- Moderation controls are `buttonVariants({ variant: "outline" | "destructive", size: "sm" })`, not
+  hand-rolled chips. A 26px chip on a card that bans people is a missing hit area, a missing focus
+  ring and a second danger palette in one.
+- Never write `focus-ring` and `outline-none` on the same element. The ring currently survives only
+  because `.focus-ring` is emitted later in the stylesheet.
+
 ---
 
 ## A note on contract tests and copy

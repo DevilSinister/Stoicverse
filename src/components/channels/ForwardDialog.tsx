@@ -234,7 +234,7 @@ export function ForwardDialog({
                   rows={2}
                   maxLength={MESSAGE_MAX_CHARS}
                   disabled={busy}
-                  className="focus-ring mt-1 w-full resize-none rounded-lg border border-border-hairline bg-surface-sunken p-2 text-chrome-base text-text-strong outline-none"
+                  className="focus-ring mt-1 w-full resize-none rounded-lg border border-border-hairline bg-surface-sunken p-2 text-chrome-base text-text-strong"
                 />
               </label>
             </div>

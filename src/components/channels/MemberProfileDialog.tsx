@@ -7,6 +7,7 @@ import { giftMembership } from "@/app/community/member-actions";
 import { banMember, timeoutMember, untimeoutMember } from "@/app/community/moderation-actions";
 import { useCommunity } from "@/components/channels/CommunityProvider";
 import { GIFT_OPTIONS } from "@/components/channels/MemberMenuItems";
+import { buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Overlay, OverlayContent, OverlayTitle } from "@/components/ui/overlay";
 import { useToast } from "@/components/ui/toast";
@@ -189,48 +190,48 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
       <OverlayContent placement="responsive" size="sm">
         <OverlayTitle className="sr-only">{`Profile for ${name}`}</OverlayTitle>
         <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="flex items-start gap-3 border-b border-surgical-steel p-4">
+        <div className="flex items-start gap-3 border-b border-border-hairline p-4">
           <span className="relative shrink-0">
             {profile?.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={profile.avatar_url} alt="" className="size-14 rounded-full object-cover" />
             ) : (
-              <span className="flex size-14 items-center justify-center rounded-full bg-surface-container-high text-lg font-semibold text-on-surface-variant">
+              <span className="flex size-14 items-center justify-center rounded-full bg-surface-raised text-title-sm font-medium text-text-strong">
                 {name.slice(0, 1).toUpperCase()}
               </span>
             )}
             <span
               aria-hidden="true"
-              className={`absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-surface-container-low ${
-                online ? "bg-primary-container" : "bg-fog-muted"
+              className={`absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-surface-panel ${
+                online ? "bg-primary" : "bg-text-muted"
               }`}
             />
           </span>
 
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-base font-semibold" style={topColor ? { color: topColor } : undefined}>
-              <span className={topColor ? "" : "text-on-surface"}>{name}</span>
+            <h2 className="truncate text-title-sm font-medium" style={topColor ? { color: topColor } : undefined}>
+              <span className={topColor ? "" : "text-text-strong"}>{name}</span>
             </h2>
-            <p className="text-[11px] text-fog-muted">
+            <p className="text-chrome-sm text-text-muted">
               {`${ACCOUNT_LABEL[profile?.platform_role ?? "member"] ?? "Member"} · ${online ? "Online" : "Offline"}`}
             </p>
           </div>
         </div>
 
         {missing ? (
-          <p className="p-4 text-xs text-fog-muted">This account is no longer here.</p>
+          <p className="p-4 text-content-sm text-text-muted">This account is no longer here.</p>
         ) : profile === null ? (
-          <p className="p-4 text-xs text-fog-muted">Loading…</p>
+          <p className="p-4 text-content-sm text-text-muted">Loading…</p>
         ) : (
           <div className="space-y-4 p-4">
             <section>
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-fog-muted">Roles</h3>
+              <h3 className="text-chrome-xs font-medium uppercase tracking-[0.12em] text-text-muted">Roles</h3>
               {profile.roles && profile.roles.length > 0 ? (
                 <ul className="mt-1.5 flex flex-wrap gap-1">
                   {profile.roles.map((role) => (
                     <li
                       key={role.id}
-                      className="flex items-center gap-1 rounded border border-surgical-steel px-1.5 py-0.5 text-[11px]"
+                      className="flex items-center gap-1 rounded-md border border-border-hairline px-1.5 py-0.5 text-chrome-xs"
                       style={role.color ? { color: role.color } : undefined}
                     >
                       <span
@@ -238,18 +239,18 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                         className="size-2 rounded-full"
                         style={{ backgroundColor: role.color ?? "currentColor" }}
                       />
-                      <span className={role.color ? "" : "text-on-surface-variant"}>{role.name}</span>
+                      <span className={role.color ? "" : "text-text-default"}>{role.name}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="mt-1 text-xs text-fog-muted">No roles.</p>
+                <p className="mt-1 text-chrome-sm text-text-muted">No roles.</p>
               )}
             </section>
 
             <section>
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-fog-muted">Member since</h3>
-              <p className="mt-1 text-xs text-on-surface-variant">{date(profile.joined_at)}</p>
+              <h3 className="text-chrome-xs font-medium uppercase tracking-[0.12em] text-text-muted">Member since</h3>
+              <p className="mt-1 text-chrome-sm text-text-default">{date(profile.joined_at)}</p>
             </section>
 
             {/*
@@ -258,11 +259,11 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
               else, so a member's browser never holds these values at all.
             */}
             {canSeeDetail && detail ? (
-              <section className="border-t border-surgical-steel pt-3">
-                <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-fog-muted">
+              <section className="border-t border-border-hairline pt-3">
+                <h3 className="text-chrome-xs font-medium uppercase tracking-[0.12em] text-text-muted">
                   Membership
                 </h3>
-                <dl className="mt-1.5 space-y-1 text-xs">
+                <dl className="mt-1.5 space-y-1 text-chrome-sm">
                   <Row label="Status" value={detail.membership_status ?? "none"} />
                   <Row label="Access until" value={date(detail.membership_expires_at)} />
                   <Row
@@ -281,11 +282,19 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
             ) : null}
 
             {moderating || (isOwner && !isSelf) ? (
-              <section className="border-t border-surgical-steel pt-3">
-                <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-fog-muted">
+              <section className="border-t border-border-hairline pt-3">
+                <h3 className="text-chrome-xs font-medium uppercase tracking-[0.12em] text-text-muted">
                   Moderation
                 </h3>
-                <div className="mt-2 flex flex-wrap gap-1.5">
+                {/*
+                  gap-y-4, because these chips carry `hit-target` now. They are
+                  28px painted, so a 44px box needs 16px of vertical pitch
+                  between wrapped rows - at the old 6px the boxes overlapped by
+                  10px and a tap between two rows went to whichever paints
+                  later. Horizontally they are wider than 44 already, so the
+                  x-gap stays tight.
+                */}
+                <div className="mt-2 flex flex-wrap gap-x-2 gap-y-4">
                   {canTimeout && moderating ? (
                     <>
                       {/*
@@ -295,7 +304,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                         read a name.
                       */}
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="focus-ring flex items-center gap-1.5 rounded-lg border border-surgical-steel px-2 py-1 text-[11px] text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface">
+                        <DropdownMenuTrigger className={buttonVariants({ variant: "outline", size: "sm" })}>
                           <Timer size={12} aria-hidden="true" />
                           Time out
                         </DropdownMenuTrigger>
@@ -320,7 +329,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                               : notify(`${name}'s timeout was removed.`, "success"),
                           )
                         }
-                        className="focus-ring flex items-center gap-1.5 rounded-lg border border-surgical-steel px-2 py-1 text-[11px] text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface"
+                        className={buttonVariants({ variant: "outline", size: "sm" })}
                       >
                         <ShieldMinus size={12} aria-hidden="true" />
                         Remove timeout
@@ -332,7 +341,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                     <button
                       type="button"
                       onClick={() => askFor({ kind: "ban" })}
-                      className="focus-ring flex items-center gap-1.5 rounded-lg border border-error/50 px-2 py-1 text-[11px] text-error hover:bg-error/10"
+                      className={buttonVariants({ variant: "destructive", size: "sm" })}
                     >
                       <ShieldBan size={12} aria-hidden="true" />
                       Ban
@@ -346,7 +355,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                   */}
                   {isOwner && !isSelf ? (
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="focus-ring flex items-center gap-1.5 rounded-lg border border-surgical-steel px-2 py-1 text-[11px] text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface">
+                      <DropdownMenuTrigger className={buttonVariants({ variant: "outline", size: "sm" })}>
                         <Gift size={12} aria-hidden="true" />
                         Gift a membership
                       </DropdownMenuTrigger>
@@ -362,7 +371,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                 </div>
 
                 {targetIsOwner && (canTimeout || canBan) ? (
-                  <p className="mt-2 text-[11px] text-fog-muted">
+                  <p className="mt-2 text-chrome-sm text-text-muted">
                     The creator cannot be sanctioned from here.
                   </p>
                 ) : null}
@@ -371,11 +380,11 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
           </div>
         )}
 
-        <div className="flex justify-end border-t border-surgical-steel px-4 py-3">
+        <div className="flex justify-end border-t border-border-hairline px-4 py-3">
           <button
             type="button"
             onClick={onClose}
-            className="focus-ring rounded-lg border border-surgical-steel px-3 py-1.5 text-xs text-on-surface-variant"
+            className={buttonVariants({ variant: "outline" })}
           >
             Close
           </button>
@@ -409,7 +418,7 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
                 minLength={SANCTION_LIMITS.reason.min}
                 maxLength={SANCTION_LIMITS.reason.max}
                 autoFocus
-                className="focus-ring mt-1 w-full rounded-md border border-border-hairline bg-surface-sunken p-2 text-content-sm text-text-strong outline-none"
+                className="focus-ring mt-1 w-full rounded-lg border border-border-hairline bg-surface-sunken p-2 text-content-sm text-text-strong"
               />
             </label>
         </ConfirmDialog>
@@ -422,8 +431,8 @@ export function MemberProfileDialog({ userId, onClose }: { userId: string; onClo
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <dt className="shrink-0 text-fog-muted">{label}</dt>
-      <dd className="truncate text-on-surface-variant">{value}</dd>
+      <dt className="shrink-0 text-text-muted">{label}</dt>
+      <dd className="truncate font-mono text-mono-xs text-text-default">{value}</dd>
     </div>
   );
 }
